@@ -1,3 +1,11 @@
+---
+name: "Nova Issue"
+about: "Use este template para criar uma nova issue"
+title: "[ISSUE] "
+labels: []
+assignees: []
+---
+
 # Qual é o problema?
 
 Descreva o problema ou necessidade que essa issue está abordando.
