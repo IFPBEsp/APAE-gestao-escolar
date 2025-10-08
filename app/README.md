@@ -110,5 +110,4 @@ git commit -m "feat: minha nova funcionalidade"
 # Suba a branch
 git push origin minha-feature
 
-# Abra um Pull Request no GitHub
 
