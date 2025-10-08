@@ -1,11 +1,11 @@
 # O que mudou?
 
-Descreva brevemente o objetivo deste MR e o contexto das mudanças.
+Descreva brevemente o objetivo deste PR e o contexto das mudanças.
 
 ## Tarefas Relacionadas
 
 * Issue: {issue_link}
-* Outras dependências: {mr_link}
+* Outras dependências: {pr_link}
 
 ## Mudanças Realizadas
 
