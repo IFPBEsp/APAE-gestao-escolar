@@ -22,62 +22,35 @@ Este sistema tem como objetivo facilitar a gestão escolar da APAE, permitindo o
 
 ---
 
-## Como iniciar o projeto do zero
-
-Caso você queira iniciar um projeto semelhante do zero, siga os passos abaixo:
+## Como Executar
 
 ```bash
-# Crie uma nova pasta e acesse ela
-mkdir apae-gestao-escolar-app
-cd apae-gestao-escolar-app
+# Entre na pasta `app`
+cd app/
+# Instale as dependências
+npm install
+# Inicie o servidor de desenvolvimento
+npm run dev
 
-# Inicialize o projeto com npm
-npm init -y
+---
 
-# Instale Next.js, React e React DOM
-npm install next react react-dom
+Pré-requisitos
+Antes de executar o projeto, certifique-se de ter instalado:
+Node.js (versão recomendada: 18+)
+npm ou yarn
+Git
 
-# Você também pode usar o comando oficial para criar o projeto com tudo pronto:
-npx create-next-app@latest nome-do-projeto
-OBS: Esse comando já instala o Next.js com React, configura o TypeScript (se você quiser), e cria a estrutura inicial.
-
-# Instale TypeScript e tipos
-npm install --save-dev typescript @types/react @types/node
-
-# Crie os arquivos de configuração
-touch tsconfig.json next.config.js
-
-# Crie a estrutura básica
-mkdir src
-mkdir src/pages
-mkdir src/components
-mkdir src/styles
+---
 
 Instalação de dependências adicionais
 # ESLint e Prettier
 npm install --save-dev eslint prettier eslint-config-next eslint-plugin-prettier eslint-config-prettier
-
 # Configuração de arquivos
 touch .eslintrc.json .prettierrc
 
-Exemplo de .prettierrc
-{
-  "semi": true,
-  "singleQuote": true,
-  "tabWidth": 2,
-  "trailingComma": "es5",
-  "printWidth": 100
-}
+---
 
- Como rodar o projeto localmente
-# Instale as dependências
-npm install
-
-# Inicie o servidor de desenvolvimento
-npm run dev
-
-
- Estrutura de Pastas
+Estrutura de Pastas
 src/
 ├── components/       # Componentes reutilizáveis
 ├── pages/            # Rotas e páginas do Next.js
@@ -87,8 +60,9 @@ src/
 ├── services/         # Integração com APIs
 └── assets/           # Imagens e ícones
 
+---
 
- Padrões de Código
+Padrões de Código
 ESLint configurado com regras personalizadas
 
 Prettier para formatação automática
@@ -97,8 +71,9 @@ TypeScript com modo estrito ativado
 
 Commits padronizados com Conventional Commits (opcional)
 
+---
 
- Contribuindo
+Contribuindo
 Pull Requests são bem-vindos! 
 
 # Crie uma branch com sua feature
