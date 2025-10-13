@@ -104,17 +104,6 @@ src/
 ├── next.config.js        # Configuração do Next.js
 
 ```
-----
-
-#  Padrões de Código
-
-ESLint configurado com regras personalizadas
-
-Prettier para formatação automática
-
-TypeScript com modo estrito ativado
-
-Commits padronizados com Conventional Commits (opcional)
 
 ----
 
