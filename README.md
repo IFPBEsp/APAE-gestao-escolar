@@ -1,1 +1,0 @@
-# APAE-gestao-escolar

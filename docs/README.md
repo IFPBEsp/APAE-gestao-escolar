@@ -1,13 +1,7 @@
-#  APAE Gestão Escolar – Frontend
-
-Interface web para o sistema de gestão escolar da APAE, desenvolvida com foco em acessibilidade, organização pedagógica e eficiência administrativa.
-
-O projeto utiliza tecnologias modernas como Next.js, TypeScript, ESLint e Prettier para garantir qualidade, escalabilidade e padronização de código.
-
------
+#  APAE Gestão Escolar
 
 
-#  Objetivo do Projeto
+##  Objetivo do Projeto
 
 Facilitar a gestão escolar da APAE, permitindo o controle de:
 
@@ -26,7 +20,7 @@ O sistema foi desenvolvido para melhorar a organização, a acessibilidade e a e
 ----
 
 
-#  Tecnologias Utilizadas
+##  Tecnologias Utilizadas
 
 Next.js	       Framework React para aplicações web modernas
 
@@ -42,29 +36,33 @@ Git	            Controle de versão
 
 VS Code	        Editor de código recomendado
 
+Docker          Criação de um repositório remoto
+
 -----
 
 
-# Pré-requisitos
+## Pré-requisitos
 
 Antes de executar o projeto, certifique-se de ter instalado:
 
 Node.js (versão 18 ou superior)
 
- npm ou yarn
+npm ou yarn
 
- Git
+Git
+
+Docker
 
 ----
 
-#  Como Executar o Projeto
+##  Como Executar o Frontend
 ```bash
 
 # Clone o repositório
-git clone https://github.com/seu-usuario/apae-gestao-escolar.git
+git clone https://github.com/IFPBEsp/APAE-gestao-escolar.git
 
 # Acesse o diretório do projeto
-cd apae-gestao-escolar/frontend
+cd ./app
 
 # Instale as dependências
 npm install
@@ -80,6 +78,26 @@ O projeto será executado em:
 
 ----
 
+##  Como Executar o Backend
+
+```bash
+
+# Clone o repositório
+git clone https://github.com/seu-usuario/apae-gestao-escolar.git
+
+# Acesse o diretório do projeto
+cd ./api
+
+# inicie o docker-compose
+docker compose up
+
+# Inicie o servidor Spring
+javac .\src\main\java\com\apae\gestao\ApaeGestaoApplication.java
+
+
+```
+
+----
 
 #  Instalação de Dependências Adicionais
 ```bash
@@ -93,16 +111,28 @@ touch .eslintrc.json .prettierrc
 
 #  Estrutura de Pastas
 ```bash
-src/
-├── app/
-│   ├── components/       # Componentes reutilizáveis (Button, Header, Input, Layout)
-│   ├── services/         # Configuração da API com Axios
-│   ├── styles/           # Estilos globais e temas
-│   ├── utils/            # Funções auxiliares e constantes
-├── public/               # Assets públicos (favicon, imagens)
-├── tsconfig.json         # Configuração do TypeScript
-├── next.config.js        # Configuração do Next.js
-
+    APAE-gestao-escolar/
+    ├── api/
+    │   ├── src/
+    │   │   ├── main/
+    │   │   │   ├── java/com/apae/gestao/ApaeGestaoApplication.java
+    │   │   │   └── resources/
+    │   │   │       └── application.properties
+    │   │   └── test/
+    │   ├── pom.xml 
+    │   ├── docker-compose.yml
+    │   └── .gitignore
+    └── app/
+        ├──public/
+        ├──src/
+        │   ├── app/
+        │   ├── components/       
+        │   ├── services/         
+        │   ├── styles/           
+        │   ├── utils/            
+        ├── tsconfig.json     
+        ├── next.config.js    
+        └── .gitignore
 ```
 
 ----
