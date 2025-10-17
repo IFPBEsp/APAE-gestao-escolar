@@ -9,6 +9,7 @@ out/
 # Arquivos temporários do TypeScript
 *.tsbuildinfo
 
+
 #  Variáveis de ambiente
 .env
 .env.local
@@ -34,3 +35,4 @@ Thumbs.db
 # Build manual (caso use dist/)
 dist/
 build/
+
