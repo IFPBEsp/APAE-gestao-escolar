@@ -59,5 +59,6 @@ public class Professor {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
 }
 
