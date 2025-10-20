@@ -20,6 +20,16 @@ public class Aluno {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String nome;
+
+    @Column(nullable = false)
+    private Integer idade;
+
+    @Column(nullable = false)
+    private String deficiencia;
+
     @ManyToMany(mappedBy = "alunos")
     private Set<Avaliacao> avaliacoes = new HashSet<>();
+
 }
