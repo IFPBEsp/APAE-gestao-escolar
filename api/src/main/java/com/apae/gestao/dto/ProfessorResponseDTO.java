@@ -32,7 +32,7 @@ public class ProfessorResponseDTO {
         this.email = professor.getEmail();
         this.telefone = professor.getTelefone();
         this.dataNascimento = professor.getDataNascimento();
-        this.especialidade = professor.getEspecialidade();
+        // this.especialidade = professor.getEspecialidade();
         this.dataContratacao = professor.getDataContratacao();
         this.ativo = professor.getAtivo();
         this.createdAt = professor.getCreatedAt();
