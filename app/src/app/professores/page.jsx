@@ -1,8 +1,9 @@
 "use client";
 
-import ProfessorForm from "../../components/ProfessorForm";
+import { useRouter } from "next/navigation";
+import CadastrarProfessor from "../../components/CadastrarProfessor";
 
 export default function ProfessoresPage() {
-	return <ProfessorForm />;
+    const router = useRouter();
+    return <CadastrarProfessor onBack={() => router.back()} />;
 }
-

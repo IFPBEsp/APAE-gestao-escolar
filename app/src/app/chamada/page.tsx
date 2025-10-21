@@ -1,12 +1,11 @@
-import { Metadata } from 'next';
-import Chamada from '@/components/Chamada/Chamada';
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Chamada - APAE Gestão Escolar',
-  description: 'Registre a presença dos alunos',
-};
+import { useRouter, useSearchParams } from 'next/navigation'
+import Chamada from '@/components/Chamada'
 
 export default function ChamadaPage() {
-  return <Chamada />;
+  const router = useRouter()
+  const search = useSearchParams()
+  const initialClass = search.get('class') ?? undefined
+  return <Chamada onBack={() => router.back()} initialClass={initialClass} />
 }
-
