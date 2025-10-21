@@ -1,3 +1,5 @@
+'use client';
+
 import styles from '@/components/PageTheme.module.css';
 
 export default function LoginPage() {
