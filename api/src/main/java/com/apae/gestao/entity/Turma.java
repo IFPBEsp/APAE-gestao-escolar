@@ -1,4 +1,5 @@
 package com.apae.gestao.entity;
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,9 +24,9 @@ public class Turma {
     @Column(nullable = false)
     private String turno;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "alunos_id")
-    private Aluno aluno;
+    private List<Aluno> alunos;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "professores_id")
