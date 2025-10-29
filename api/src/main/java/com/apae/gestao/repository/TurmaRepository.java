@@ -10,8 +10,5 @@ import com.apae.gestao.entity.Turma;
 
 @Repository
 public interface TurmaRepository extends JpaRepository<Turma, Long>{
-
-    Optional<Turma> findById(Long id);
     
-    //preencher depois
 }

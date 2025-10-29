@@ -21,7 +21,6 @@ public class TurmaResponseDTO {
     private List<Aluno> alunos;
     private Professor professor;
     
-
     public TurmaResponseDTO(Turma turma){
         this.id = turma.getId();
         this.nome = turma.getNome();
