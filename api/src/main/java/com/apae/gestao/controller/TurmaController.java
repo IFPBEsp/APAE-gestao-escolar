@@ -89,7 +89,7 @@ public class TurmaController {
         }
     }
 
-    @DeleteMapping("/api/turmas/{turmaId}/professores/{professorId}")
+    @DeleteMapping("/{turmaId}/professores/{professorId}")
     public ResponseEntity<TurmaResponseDTO> desvincularProfessor(
         @PathVariable Long turmaId,
         @PathVariable Long professorId
