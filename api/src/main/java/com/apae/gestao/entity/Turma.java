@@ -1,5 +1,7 @@
 package com.apae.gestao.entity;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,10 +28,14 @@ public class Turma {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "alunos_id")
-    private List<Aluno> alunos;
+    private Set<Aluno> alunos;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "professores_id")
-    private Professor professor;
+    @ManyToMany
+    @JoinTable(
+            name = "turma_professor",
+            joinColumns = @JoinColumn(name = "turma_id"),
+            inverseJoinColumns = @JoinColumn(name = "professor_id")
+    )
+    private Set<Professor> professores = new HashSet<>();
 
 }

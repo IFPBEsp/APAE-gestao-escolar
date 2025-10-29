@@ -1,6 +1,6 @@
 package com.apae.gestao.dto;
 
-import java.util.List;
+import java.util.Set;
 
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Professor;
@@ -18,8 +18,8 @@ public class TurmaResponseDTO {
     private String nome;
     private Integer anoCriacao;
     private String turno;
-    private List<Aluno> alunos;
-    private Professor professor;
+    private Set<Aluno> alunos;
+    private Set<Professor>professores;
     
     public TurmaResponseDTO(Turma turma){
         this.id = turma.getId();
@@ -27,6 +27,6 @@ public class TurmaResponseDTO {
         this.anoCriacao = turma.getAnoCriacao();
         this.turno = turma.getTurno();
         this.alunos = turma.getAlunos();
-        this.professor = turma.getProfessor();
+        this.professores = turma.getProfessores();
     }
 }

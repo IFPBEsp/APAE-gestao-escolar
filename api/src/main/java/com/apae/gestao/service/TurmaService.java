@@ -6,64 +6,110 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.apae.gestao.dto.ProfessorResponseDTO;
 import com.apae.gestao.dto.TurmaRequestDTO;
 import com.apae.gestao.dto.TurmaResponseDTO;
+import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Turma;
+import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.repository.TurmaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TurmaService {
     @Autowired
-    private TurmaRepository dao;
+    private TurmaRepository turmaDAO;
+
+    @Autowired
+    private ProfessorRepository professorDAO;
 
     @Transactional
     public TurmaResponseDTO criar(TurmaRequestDTO dto){
         Turma turma = new Turma();
         mapearDtoParaEntity(dto, turma);
-        Turma salvo = dao.save(turma);
+        Turma salvo = turmaDAO.save(turma);
         return new TurmaResponseDTO(salvo);
     }
 
     @Transactional(readOnly = true)
     public List<TurmaResponseDTO> listarTodas(){
-        return dao.findAll()
+        return turmaDAO.findAll()
             .stream()
             .map(TurmaResponseDTO::new)
             .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public TurmaResponseDTO buscarPorId(Long id){
-        Turma turma = dao.findById(id)
-            .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + id));
+    public TurmaResponseDTO buscarPorId(Long turmaId){
+        Turma turma = turmaDAO.findById(turmaId)
+            .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
         return new TurmaResponseDTO(turma);
     }
 
     @Transactional
-    public TurmaResponseDTO atualizar(Long id, TurmaRequestDTO dto){
-        Turma turma = dao.findById(id)
-            .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + id));
+    public TurmaResponseDTO atualizar(Long turmaId, TurmaRequestDTO dto){
+        Turma turma = turmaDAO.findById(turmaId)
+            .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
         mapearDtoParaEntity(dto, turma);
-        Turma atualizado = dao.save(turma);
+        Turma atualizado = turmaDAO.save(turma);
         return new TurmaResponseDTO(atualizado);
     }
 
     @Transactional
-    public void deletarPorId(Long id){
-        Turma turma = dao.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Turma não encontrada com ID: " + id));
-        dao.delete(turma);
+    public void deletarPorId(Long turmaId){
+        Turma turma = turmaDAO.findById(turmaId)
+            .orElseThrow(() -> new IllegalArgumentException("Turma não encontrada com ID: " + turmaId));
+        turmaDAO.delete(turma);
     }
+
+    @Transactional
+    public TurmaResponseDTO vincularProfessoresATurma(Long turmaId, List<Long> idsProfessores) {
+        Turma turma = turmaDAO.findById(turmaId)
+            .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
+
+        for (Long idProfessor : idsProfessores) {
+            Professor professor = professorDAO.findById(idProfessor)
+                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + idProfessor));
+
+            if (!turma.getProfessores().contains(professor)) {
+                turma.getProfessores().add(professor);
+            }
+        }
+        Turma atualizado = turmaDAO.save(turma);
+        return new TurmaResponseDTO(atualizado);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProfessorResponseDTO> listarProfessoresNaTurma(Long turmaId) {
+        Turma turma = turmaDAO.findById(turmaId)
+            .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
+        return turma.getProfessores().stream()
+            .map(ProfessorResponseDTO::new)
+            .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public TurmaResponseDTO desvincularProfessor(Long turmaId, Long idProfessor){
+        Turma turma = turmaDAO.findById(turmaId)
+            .orElseThrow(()-> new RuntimeException("Turma não encontrada com ID: " + turmaId));
+        Professor professor = professorDAO.findById(idProfessor)
+            .orElseThrow(()-> new RuntimeException("Professor não encontrado com ID: " + idProfessor));
+
+        if (turma.getProfessores().contains(professor)){
+            turma.getProfessores().remove(professor);
+        }
+        
+        Turma atualizado = turmaDAO.save(turma);
+        return new TurmaResponseDTO(atualizado);
+    }
+
 
     private void mapearDtoParaEntity(TurmaRequestDTO dto, Turma turma) {
         turma.setNome(dto.getNome());
         turma.setAnoCriacao(dto.getAnoCriacao());
         turma.setTurno(dto.getTurno());
         turma.setAlunos(dto.getAlunos());
-        turma.setProfessor(dto.getProfessor());
+        turma.setProfessores(dto.getProfessores());
     }
-
-
     
 }

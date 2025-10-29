@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.apae.gestao.dto.ProfessorResponseDTO;
 import com.apae.gestao.dto.TurmaRequestDTO;
 import com.apae.gestao.dto.TurmaResponseDTO;
 import com.apae.gestao.service.TurmaService;
@@ -30,10 +30,10 @@ public class TurmaController {
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<TurmaResponseDTO> listarPorId(@PathVariable long id){
+    @GetMapping("/{turmaId}")
+    public ResponseEntity<TurmaResponseDTO> listarPorId(@PathVariable long turmaId){
         try {
-            TurmaResponseDTO response = service.buscarPorId(id);
+            TurmaResponseDTO response = service.buscarPorId(turmaId);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -46,10 +46,10 @@ public class TurmaController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<TurmaResponseDTO> atualizar(@PathVariable Long id, @Valid @RequestBody TurmaRequestDTO dto){
+    @PutMapping("/{turmaId}")
+    public ResponseEntity<TurmaResponseDTO> atualizar(@PathVariable Long turmaId, @Valid @RequestBody TurmaRequestDTO dto){
         try {
-            TurmaResponseDTO response = service.atualizar(id, dto);
+            TurmaResponseDTO response = service.atualizar(turmaId, dto);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
@@ -63,6 +63,42 @@ public class TurmaController {
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/{turmaId}/professores/add")
+    public ResponseEntity<TurmaResponseDTO> vincularProfessoresATurma(
+        @PathVariable Long turmaId,
+        @RequestBody List<Long> idProfessores
+    ){
+        try {
+            TurmaResponseDTO atualizado = service.vincularProfessoresATurma(turmaId, idProfessores);
+            return ResponseEntity.ok(atualizado);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/{turmaId}/professores")
+    public ResponseEntity<List<ProfessorResponseDTO>> listarProfessoresNaTurma(@PathVariable Long turmaId){
+        try {
+            List<ProfessorResponseDTO> response = service.listarProfessoresNaTurma(turmaId);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/api/turmas/{turmaId}/professores/{professorId}")
+    public ResponseEntity<TurmaResponseDTO> desvincularProfessor(
+        @PathVariable Long turmaId,
+        @PathVariable Long professorId
+    ){
+        try {
+            TurmaResponseDTO atualizado = service.desvincularProfessor(turmaId, professorId);
+            return ResponseEntity.ok(atualizado);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 }

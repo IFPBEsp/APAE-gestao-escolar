@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "professores")
@@ -46,6 +48,9 @@ public class Professor {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @ManyToMany(mappedBy = "professores")
+    private Set<Turma> turmas = new HashSet<>();
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -54,6 +59,8 @@ public class Professor {
             ativo = true;
         }
     }
+
+    
 
     @PreUpdate
     protected void onUpdate() {

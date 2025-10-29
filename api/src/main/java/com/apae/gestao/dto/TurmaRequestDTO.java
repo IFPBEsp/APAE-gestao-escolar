@@ -1,6 +1,7 @@
 package com.apae.gestao.dto;
 
 import java.util.List;
+import java.util.Set;
 
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Professor;
@@ -25,8 +26,7 @@ public class TurmaRequestDTO {
     @NotBlank
     private String turno;
 
-    private List<Aluno> alunos;
+    private Set<Aluno> alunos;
 
-    @NotNull
-    private Professor professor;
+    private Set<Professor> professores;
 }
