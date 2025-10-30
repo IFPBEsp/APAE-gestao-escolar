@@ -71,10 +71,9 @@ public class TurmaService {
             Professor professor = professorDAO.findById(idProfessor)
                 .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + idProfessor));
 
-            if (!turma.getProfessores().contains(professor)) {
-                turma.getProfessores().add(professor);
-            }
+            turma.addProfessor(professor);
         }
+        
         Turma atualizado = turmaDAO.save(turma);
         return new TurmaResponseDTO(atualizado);
     }
@@ -95,9 +94,7 @@ public class TurmaService {
         Professor professor = professorDAO.findById(idProfessor)
             .orElseThrow(()-> new RuntimeException("Professor não encontrado com ID: " + idProfessor));
 
-        if (turma.getProfessores().contains(professor)){
-            turma.getProfessores().remove(professor);
-        }
+        turma.removeProfessor(professor);
         
         Turma atualizado = turmaDAO.save(turma);
         return new TurmaResponseDTO(atualizado);

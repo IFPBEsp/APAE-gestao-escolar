@@ -1,6 +1,5 @@
 package com.apae.gestao.dto;
 
-import java.util.List;
 import java.util.Set;
 
 import com.apae.gestao.entity.Aluno;

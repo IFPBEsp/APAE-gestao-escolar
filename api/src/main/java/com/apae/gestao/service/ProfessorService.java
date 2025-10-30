@@ -4,6 +4,8 @@ import com.apae.gestao.dto.ProfessorRequestDTO;
 import com.apae.gestao.dto.ProfessorResponseDTO;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.repository.ProfessorRepository;
+import com.apae.gestao.repository.TurmaRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,7 @@ public class ProfessorService {
     @Autowired
     private ProfessorRepository professorRepository;
 
+
     @Transactional
     public ProfessorResponseDTO criar(ProfessorRequestDTO dto) {
         validarCpfUnico(dto.getCpf(), null);
@@ -25,7 +28,6 @@ public class ProfessorService {
         Professor professor = new Professor();
         mapearDtoParaEntity(dto, professor);
         professor.setAtivo(true);
-
         Professor salvo = professorRepository.save(professor);
         return new ProfessorResponseDTO(salvo);
     }
