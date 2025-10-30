@@ -3,6 +3,8 @@ package com.apae.gestao.entity;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 
 import lombok.*;
@@ -29,6 +31,7 @@ public class Aluno {
     @Column(nullable = false)
     private String deficiencia;
 
+    @JsonBackReference
     @ManyToMany(mappedBy = "alunos")
     private Set<Avaliacao> avaliacoes = new HashSet<>();
 
