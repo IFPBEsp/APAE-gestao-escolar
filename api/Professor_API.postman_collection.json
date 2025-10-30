@@ -1,0 +1,108 @@
+{
+  "info": {
+    "name": "Professor API",
+    "_postman_id": "5f1a9b9b-4c64-4c2a-9cda-apae-professor-api",
+    "description": "Testes da API de Professores conforme a issue (especialidade mapeada e CPF opcional).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Criar Professor - SEM CPF",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/professores",
+          "host": [ "{{baseUrl}}" ],
+          "path": [ "api", "professores" ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Prof Sem CPF\",\n  \"email\": \"semcpf+{{timestamp}}@example.com\",\n  \"especialidade\": \"Educacao Especial\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('201 Created', function () { pm.response.to.have.status(201); });",
+              "const b = pm.response.json();",
+              "pm.test('Especialidade correta', function () { pm.expect(b.especialidade).to.eql('Educacao Especial'); });",
+              "pm.test('CPF opcional (nulo ou vazio)', function () { pm.expect(b.cpf === null || b.cpf === '' || b.cpf === undefined).to.be.true; });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Listar Professores",
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Accept", "value": "application/json" } ],
+        "url": {
+          "raw": "{{baseUrl}}/api/professores",
+          "host": [ "{{baseUrl}}" ],
+          "path": [ "api", "professores" ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200 OK', function () { pm.response.to.have.status(200); });",
+              "const list = pm.response.json();",
+              "pm.test('Lista contem especialidade do Sem CPF', function () { ",
+              "  const found = list.some(p => (p.email || '').startsWith('semcpf+') && p.especialidade === 'Educacao Especial');",
+              "  pm.expect(found).to.be.true;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Criar Professor - COM CPF",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/professores",
+          "host": [ "{{baseUrl}}" ],
+          "path": [ "api", "professores" ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Prof Com CPF\",\n  \"email\": \"comcpf+{{timestamp}}@example.com\",\n  \"especialidade\": \"Psicopedagogia\",\n  \"cpf\": \"98765432101\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('201 Created', function () { pm.response.to.have.status(201); });",
+              "const b = pm.response.json();",
+              "pm.test('CPF retornado', function () { pm.expect(b.cpf).to.eql('98765432101'); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ],
+  "event": [],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
+    { "key": "timestamp", "value": "{{$timestamp}}", "type": "string" }
+  ]
+}

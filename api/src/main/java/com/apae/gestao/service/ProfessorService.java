@@ -91,10 +91,14 @@ public class ProfessorService {
         professor.setEmail(dto.getEmail());
         professor.setTelefone(dto.getTelefone());
         professor.setDataNascimento(dto.getDataNascimento());
+        professor.setEspecialidade(dto.getEspecialidade());
         professor.setDataContratacao(dto.getDataContratacao());
     }
 
     private void validarCpfUnico(String cpf, Long id) {
+        if (cpf == null || cpf.isBlank()) {
+            return; // CPF opcional: não validar quando ausente
+        }
         if (id == null) {
             if (professorRepository.existsByCpf(cpf)) {
                 throw new RuntimeException("CPF já cadastrado: " + cpf);
