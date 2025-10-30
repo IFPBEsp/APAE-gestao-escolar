@@ -2,7 +2,6 @@ package com.apae.gestao.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,8 +18,6 @@ public class ProfessorRequestDTO {
     @Size(max = 100, message = "Nome deve ter no máximo 100 caracteres")
     private String nome;
 
-    @NotBlank(message = "CPF é obrigatório")
-    @Size(min = 11, max = 14, message = "CPF deve ter entre 11 e 14 caracteres")
     private String cpf;
 
     @NotBlank(message = "Email é obrigatório")
