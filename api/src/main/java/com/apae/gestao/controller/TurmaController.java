@@ -66,7 +66,7 @@ public class TurmaController {
         }
     }
 
-    @PostMapping("/{turmaId}/professores/add")
+    @PostMapping("/{turmaId}/professores")
     public ResponseEntity<TurmaResponseDTO> vincularProfessoresATurma(
         @PathVariable Long turmaId,
         @RequestBody List<Long> idProfessores

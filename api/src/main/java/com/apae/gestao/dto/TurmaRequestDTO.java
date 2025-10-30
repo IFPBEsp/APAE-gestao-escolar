@@ -20,7 +20,7 @@ public class TurmaRequestDTO {
     @NotBlank
     private String nome;
 
-    @NotBlank
+    @NotNull
     private Integer anoCriacao;
 
     @NotBlank
