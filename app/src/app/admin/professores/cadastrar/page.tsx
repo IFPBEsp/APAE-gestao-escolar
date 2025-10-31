@@ -1,18 +1,21 @@
 'use client'
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Button } from "./ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, User } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-interface CadastrarProfessorProps {
-  onBack: () => void;
-}
-
-export default function CadastrarProfessor({ onBack }: CadastrarProfessorProps) {
+export default function CadastrarProfessorPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -22,11 +25,13 @@ export default function CadastrarProfessor({ onBack }: CadastrarProfessorProps) 
     specialization: "",
     hireDate: "",
   });
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     setIsSubmitting(false);
@@ -39,9 +44,13 @@ export default function CadastrarProfessor({ onBack }: CadastrarProfessorProps) 
       specialization: "",
       hireDate: "",
     });
+    
+    router.push("/admin/professores");
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -52,13 +61,14 @@ export default function CadastrarProfessor({ onBack }: CadastrarProfessorProps) 
     <div className="min-h-[calc(100vh-5rem)] bg-[#E5E5E5] p-4 md:p-8">
       <div className="mx-auto max-w-2xl">
         <button
-          onClick={onBack}
+          onClick={() => router.back()}
           className="mb-6 flex items-center gap-2 text-[#0D4F97] transition-colors hover:text-[#FFD000]"
         >
           <ArrowLeft className="h-5 w-5" />
           <span>Voltar</span>
         </button>
 
+        {/* ✅ AQUI ESTÁ FALTANDO O CARD COM O FORMULÁRIO! */}
         <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -66,7 +76,9 @@ export default function CadastrarProfessor({ onBack }: CadastrarProfessorProps) 
                 <User className="h-6 w-6 text-[#0D4F97]" />
               </div>
               <div>
-                <CardTitle className="text-[#0D4F97]">Cadastrar Professor</CardTitle>
+                <CardTitle className="text-[#0D4F97]">
+                  Cadastrar Professor
+                </CardTitle>
                 <CardDescription className="text-[#222222]">
                   Adicione um novo professor ao sistema
                 </CardDescription>
@@ -76,7 +88,9 @@ export default function CadastrarProfessor({ onBack }: CadastrarProfessorProps) 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-[#0D4F97]">Nome Completo</Label>
+                <Label htmlFor="name" className="text-[#0D4F97]">
+                  Nome Completo
+                </Label>
                 <Input
                   id="name"
                   name="name"
@@ -89,7 +103,9 @@ export default function CadastrarProfessor({ onBack }: CadastrarProfessorProps) 
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[#0D4F97]">E-mail</Label>
+                <Label htmlFor="email" className="text-[#0D4F97]">
+                  E-mail
+                </Label>
                 <Input
                   id="email"
                   name="email"
@@ -103,7 +119,9 @@ export default function CadastrarProfessor({ onBack }: CadastrarProfessorProps) 
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-[#0D4F97]">Telefone</Label>
+                <Label htmlFor="phone" className="text-[#0D4F97]">
+                  Telefone
+                </Label>
                 <Input
                   id="phone"
                   name="phone"
@@ -117,7 +135,9 @@ export default function CadastrarProfessor({ onBack }: CadastrarProfessorProps) 
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="birthDate" className="text-[#0D4F97]">Data de Nascimento</Label>
+                <Label htmlFor="birthDate" className="text-[#0D4F97]">
+                  Data de Nascimento
+                </Label>
                 <Input
                   id="birthDate"
                   name="birthDate"
@@ -130,7 +150,9 @@ export default function CadastrarProfessor({ onBack }: CadastrarProfessorProps) 
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="specialization" className="text-[#0D4F97]">Especialidade</Label>
+                <Label htmlFor="specialization" className="text-[#0D4F97]">
+                  Especialidade
+                </Label>
                 <Input
                   id="specialization"
                   name="specialization"
@@ -143,7 +165,9 @@ export default function CadastrarProfessor({ onBack }: CadastrarProfessorProps) 
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="hireDate" className="text-[#0D4F97]">Data de Contratação</Label>
+                <Label htmlFor="hireDate" className="text-[#0D4F97]">
+                  Data de Contratação
+                </Label>
                 <Input
                   id="hireDate"
                   name="hireDate"
@@ -159,7 +183,7 @@ export default function CadastrarProfessor({ onBack }: CadastrarProfessorProps) 
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={onBack}
+                  onClick={() => router.back()}
                   className="h-12 justify-center border-2 border-[#B2D7EC] px-4 text-[#0D4F97] hover:bg-[#B2D7EC]/20"
                 >
                   Cancelar
@@ -182,6 +206,7 @@ export default function CadastrarProfessor({ onBack }: CadastrarProfessorProps) 
             </form>
           </CardContent>
         </Card>
+        {/* ✅ FIM DO CARD QUE ESTAVA FALTANDO */}
       </div>
     </div>
   );
