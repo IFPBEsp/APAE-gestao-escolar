@@ -19,8 +19,7 @@ export default function RoleSelectionPage() {
       icon: GraduationCap,
       title: "Sou Professor", 
       description: "Acessar minhas turmas e fazer chamadas",
-      route: "/professor",
-      disabled: true,
+      route: "/professor", 
     },
   ];
 
@@ -38,32 +37,21 @@ export default function RoleSelectionPage() {
             return (
               <div
                 key={role.id}
-                className={`flex flex-col overflow-hidden rounded-xl border-2 bg-white shadow-md transition-shadow ${
-                  role.disabled
-                    ? 'border-gray-300 opacity-60 cursor-not-allowed'
-                    : 'border-[#B2D7EC] hover:shadow-lg'
-                }`}
+                className="flex flex-col overflow-hidden rounded-xl border-2 border-[#B2D7EC] bg-white shadow-md transition-shadow hover:shadow-lg"
               >
                 <div className="flex flex-1 flex-col items-center p-8 text-center">
-                  <div className={`mb-6 flex h-16 w-16 items-center justify-center rounded-full ${
-                    role.disabled ? 'bg-gray-200' : 'bg-[#B2D7EC]/20'
-                  }`}>
-                    <Icon className={`h-6 w-6 ${role.disabled ? 'text-gray-400' : 'text-[#0D4F97]'}`} strokeWidth={2} />
+                  <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#B2D7EC]/20">
+                    <Icon className="h-6 w-6 text-[#0D4F97]" strokeWidth={2} />
                   </div>
-                  <h3 className={`mb-3 ${role.disabled ? 'text-gray-400' : 'text-[#0D4F97]'}`}>{role.title}</h3>
-                  <p className={`${role.disabled ? 'text-gray-400' : 'text-[#222222]'}`}>{role.description}</p>
+                  <h3 className="mb-3 text-[#0D4F97]">{role.title}</h3>
+                  <p className="text-[#222222]">{role.description}</p>
                 </div>
                 <div className="p-6 pt-0">
                   <button
-                    onClick={() => !role.disabled && router.push(role.route)}
-                    disabled={role.disabled}
-                    className={`flex h-12 w-full items-center justify-center rounded-lg px-4 text-center transition-all ${
-                      role.disabled
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97]'
-                    }`}
+                    onClick={() => router.push(role.route)} 
+                    className="flex h-12 w-full items-center justify-center rounded-lg bg-[#0D4F97] px-4 text-center text-white transition-all hover:bg-[#FFD000] hover:text-[#0D4F97]"
                   >
-                    {role.disabled ? 'Em Breve' : 'Acessar'}
+                    Acessar
                   </button>
                 </div>
               </div>
