@@ -1,13 +1,12 @@
+'use client'
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users, Pencil, Trash2, ClipboardCheck, UserPlus, UserMinus } from "lucide-react";
+import { ArrowLeft, Users, Pencil, Trash2, UserPlus, UserMinus, Eye } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-interface GerenciarTurmasProps {
-  onBack: () => void;
-  onFazerChamada: (turmaId: number, turmaNome: string) => void;
-}
-
+// ✅ MOCK DATA - COLE ESTA PARTE
 const mockTurmas = [
   {
     id: 1,
@@ -25,14 +24,15 @@ const mockTurmas = [
   },
 ];
 
-export default function GerenciarTurmas({ onBack, onFazerChamada }: GerenciarTurmasProps) {
+export default function GerenciarTurmasPage() {
   const [turmas] = useState(mockTurmas);
+  const router = useRouter();
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-[#E5E5E5] p-4 md:p-8">
       <div className="mx-auto max-w-4xl">
         <button
-          onClick={onBack}
+          onClick={() => router.back()}
           className="mb-6 flex items-center gap-2 text-[#0D4F97] transition-colors hover:text-[#FFD000]"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -69,7 +69,7 @@ export default function GerenciarTurmas({ onBack, onFazerChamada }: GerenciarTur
                           </div>
                           <h3 className="text-[#0D4F97]">{turma.name}</h3>
                         </div>
-                        <div className="space-y-1 pl-13 text-[#222222]">
+                        <div className="space-y-1 pl-15 text-[#222222]">
                           <p>
                             <strong>Professor:</strong> {turma.teacher}
                           </p>
@@ -117,11 +117,11 @@ export default function GerenciarTurmas({ onBack, onFazerChamada }: GerenciarTur
                         </Button>
                       </div>
                       <Button
-                        onClick={() => onFazerChamada(turma.id, turma.name)}
+                        onClick={() => router.push(`/admin/turmas/${turma.id}`)}
                         className="h-12 justify-center bg-[#0D4F97] px-4 text-white hover:bg-[#FFD000] hover:text-[#0D4F97]"
                       >
-                        <ClipboardCheck className="mr-2 h-5 w-5" />
-                        Fazer Chamada
+                        <Eye className="mr-2 h-5 w-5" />
+                        Ver Informações
                       </Button>
                     </div>
                   </div>

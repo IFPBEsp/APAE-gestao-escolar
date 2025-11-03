@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Set;
+
+import com.apae.gestao.entity.Turma;
 
 @Data
 @NoArgsConstructor
@@ -34,5 +37,7 @@ public class ProfessorRequestDTO {
     private String especialidade;
 
     private LocalDate dataContratacao;
+
+    private Set<Turma> turmas;
 }
 

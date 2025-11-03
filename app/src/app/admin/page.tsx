@@ -1,30 +1,41 @@
-import { UserPlus, Users } from "lucide-react";
+'use client'
 
-interface HomeProps {
-  onNavigate: (page: string) => void;
-}
+import { UserPlus, Users, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-export default function Home({ onNavigate }: HomeProps) {
+export default function AdminHomePage() {
+  const router = useRouter();
+
   const cards = [
     {
-      id: "cadastrar-professor",
+      id: "gerenciar-professores",
       icon: UserPlus,
-      title: "Cadastrar Professor",
+      title: "Gerenciar Professores",
       description: "Adicione e gerencie professores do sistema",
-      page: "cadastrar-professor",
+      route: "/admin/professores",
     },
     {
       id: "gerenciar-turmas",
-      icon: Users,
+      icon: Users, 
       title: "Gerenciar Turmas",
       description: "Organize e administre as turmas",
-      page: "gerenciar-turmas",
+      route: "/admin/turmas",
     },
   ];
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-[#E5E5E5] px-4 py-12 md:px-8">
       <div className="mx-auto max-w-4xl">
+        <div className="mb-8 flex items-center justify-between">
+          <h1 className="text-[#0D4F97]">Painel do Administrador</h1>
+          <button
+            onClick={() => router.push("/")}
+            className="flex items-center gap-2 rounded-lg border-2 border-[#B2D7EC] bg-white px-4 py-2 text-[#0D4F97] transition-all hover:bg-red-50 hover:border-red-200 hover:text-red-600"
+          >
+            <LogOut className="h-5 w-5" />
+            <span>Sair</span>
+          </button>
+        </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {cards.map((card) => {
             const Icon = card.icon;
@@ -42,7 +53,7 @@ export default function Home({ onNavigate }: HomeProps) {
                 </div>
                 <div className="p-6 pt-0">
                   <button
-                    onClick={() => onNavigate(card.page)}
+                    onClick={() => router.push(card.route)}
                     className="flex h-12 w-full items-center justify-center rounded-lg bg-[#0D4F97] px-4 text-center text-white transition-all hover:bg-[#FFD000] hover:text-[#0D4F97]"
                   >
                     Acessar

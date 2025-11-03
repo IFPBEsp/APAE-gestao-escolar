@@ -68,5 +68,15 @@ public class ProfessorController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PatchMapping("/{id}/ativar")
+    public ResponseEntity<Void> reativar(@PathVariable Long id) {
+        try {
+            professorService.reativarProfessor(id);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
 

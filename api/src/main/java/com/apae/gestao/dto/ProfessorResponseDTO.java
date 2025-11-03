@@ -1,12 +1,15 @@
 package com.apae.gestao.dto;
 
 import com.apae.gestao.entity.Professor;
+import com.apae.gestao.entity.Turma;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -24,6 +27,7 @@ public class ProfessorResponseDTO {
     private Boolean ativo;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Set<Turma> turmas;
 
     public ProfessorResponseDTO(Professor professor) {
         this.id = professor.getId();
@@ -37,6 +41,7 @@ public class ProfessorResponseDTO {
         this.ativo = professor.getAtivo();
         this.createdAt = professor.getCreatedAt();
         this.updatedAt = professor.getUpdatedAt();
+        this.turmas = professor.getTurmas();
     }
 }
 
