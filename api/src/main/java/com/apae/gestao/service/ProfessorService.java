@@ -70,12 +70,22 @@ public class ProfessorService {
     }
 
     @Transactional
-    public void deletar(Long id) {
+    public void desativarProfessor(Long id) {
         Professor professor = professorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
 
         // Desativação lógica
         professor.setAtivo(false);
+        professorRepository.save(professor);
+    }
+
+    @Transactional
+    public void reativarProfessor(Long id) {
+        Professor professor = professorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
+
+        // Ativação lógica
+        professor.setAtivo(true);
         professorRepository.save(professor);
     }
 
