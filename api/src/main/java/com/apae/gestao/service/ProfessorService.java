@@ -68,21 +68,14 @@ public class ProfessorService {
     }
 
     @Transactional
-    public void deletar(Long id) {
+    public ProfessorResponseDTO inativar(Long id) {
         Professor professor = professorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
 
         // Desativação lógica
         professor.setAtivo(false);
-        professorRepository.save(professor);
-    }
-
-    @Transactional
-    public void deletarFisicamente(Long id) {
-        if (!professorRepository.existsById(id)) {
-            throw new RuntimeException("Professor não encontrado com ID: " + id);
-        }
-        professorRepository.deleteById(id);
+        Professor salvo = professorRepository.save(professor);
+        return new ProfessorResponseDTO(salvo);
     }
 
     private void mapearDtoParaEntity(ProfessorRequestDTO dto, Professor professor) {

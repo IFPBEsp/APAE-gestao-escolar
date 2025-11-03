@@ -59,11 +59,11 @@ public class ProfessorController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    @PatchMapping("/{id}/inativar")
+    public ResponseEntity<ProfessorResponseDTO> inativar(@PathVariable Long id) {
         try {
-            professorService.deletar(id);
-            return ResponseEntity.noContent().build();
+            ProfessorResponseDTO response = professorService.inativar(id);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
