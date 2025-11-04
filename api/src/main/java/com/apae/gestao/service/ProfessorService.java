@@ -70,13 +70,14 @@ public class ProfessorService {
     }
 
     @Transactional
-    public void desativarProfessor(Long id) {
+    public ProfessorResponseDTO inativar(Long id) {
         Professor professor = professorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
 
         // Desativação lógica
         professor.setAtivo(false);
-        professorRepository.save(professor);
+        Professor salvo = professorRepository.save(professor);
+        return new ProfessorResponseDTO(salvo);
     }
 
     @Transactional
