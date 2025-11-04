@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 export default function GerenciarProfessoresPage() {
   const router = useRouter();
 
-//Vou provavelmente mexer aqui(?)
   const actions = [
     {
       id: "adicionar",

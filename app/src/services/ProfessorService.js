@@ -1,11 +1,4 @@
-/**
- * ProfessorService.js
- * Localização sugerida: app/src/services/
- *
- * Este serviço é responsável por encapsular a chamada POST para o Controller Java.
- * Ele utiliza a instância do Axios configurada no 'api.ts' para padronizar
- * o uso do baseURL '/api' e o tratamento de timeout.
- */
+
 import api from './api'; // Importa a instância do Axios configurada
 
 /**
@@ -29,19 +22,12 @@ export async function registerProfessor(professorData) {
         return response.data;
 
     } catch (error) {
-        // O Axios lança o erro para status HTTP 4xx e 5xx ou erros de rede.
-        
-        // 1. Tenta extrair a mensagem de erro detalhada do corpo da resposta da API
         const apiMessage = error.response?.data?.message;
-
-        // 2. Define a mensagem de erro que será propagada
         const errorMessage = apiMessage 
                              || error.message 
                              || "Erro desconhecido ao tentar se conectar com a API.";
         
         console.error("ProfessorService Error:", error.response || error);
-        
-        // Relança o erro para que o componente React possa capturá-lo no 'catch'
         throw new Error(errorMessage);
     }
 }

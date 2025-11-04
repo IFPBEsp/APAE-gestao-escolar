@@ -21,15 +21,16 @@ import { registerProfessor } from "@/services/ProfessorService";
 export default function CadastrarProfessorPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    nome: "",
     email: "",
-    phone: "",
-    birthDate: "",
-    specialization: "",
-    hireDate: "",
+    telefone: "",
+    dataNascimento: "",
+    especialidade: "",
+    dataContratacao: "",
   });
   const router = useRouter();
 
+//isso é o que eu estou mechendo(JG)***************************************************************
   const handleSubmit = async (e) => {
       e.preventDefault();
       setIsSubmitting(true);
@@ -44,12 +45,12 @@ export default function CadastrarProfessorPage() {
           
           // Limpa o formulário e navega
           setFormData({
-              name: "",
+              nome: "",
               email: "",
-              phone: "",
-              birthDate: "",
-              specialization: "",
-              hireDate: "",
+              telefone: "",
+              dataNascimento: "",
+              especialidade: "",
+              dataContratacao: "",
           });
           router.push("/admin/professores");
 
@@ -105,13 +106,13 @@ export default function CadastrarProfessorPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-[#0D4F97]">
+                <Label htmlFor="nome" className="text-[#0D4F97]">
                   Nome Completo
                 </Label>
                 <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
+                  id="nome"
+                  name="nome"
+                  value={formData.nome}
                   onChange={handleChange}
                   required
                   placeholder="Digite o nome do professor"
@@ -140,10 +141,10 @@ export default function CadastrarProfessorPage() {
                   Telefone
                 </Label>
                 <Input
-                  id="phone"
-                  name="phone"
+                  id="telefone"
+                  name="telefone"
                   type="tel"
-                  value={formData.phone}
+                  value={formData.telefone}
                   onChange={handleChange}
                   required
                   placeholder="(00) 00000-0000"
@@ -152,14 +153,14 @@ export default function CadastrarProfessorPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="birthDate" className="text-[#0D4F97]">
+                <Label htmlFor="dataNascimento" className="text-[#0D4F97]">
                   Data de Nascimento
                 </Label>
                 <Input
-                  id="birthDate"
-                  name="birthDate"
+                  id="dataNascimento"
+                  name="dataNascimento"
                   type="date"
-                  value={formData.birthDate}
+                  value={formData.dataNascimento}
                   onChange={handleChange}
                   required
                   className="border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
@@ -167,13 +168,13 @@ export default function CadastrarProfessorPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="specialization" className="text-[#0D4F97]">
+                <Label htmlFor="especialidade" className="text-[#0D4F97]">
                   Especialidade
                 </Label>
                 <Input
-                  id="specialization"
-                  name="specialization"
-                  value={formData.specialization}
+                  id="especialidade"
+                  name="especialidade"
+                  value={formData.especialidade}
                   onChange={handleChange}
                   required
                   placeholder="Ex: Educação Especial"
@@ -182,14 +183,14 @@ export default function CadastrarProfessorPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="hireDate" className="text-[#0D4F97]">
+                <Label htmlFor="dataContratacao" className="text-[#0D4F97]">
                   Data de Contratação
                 </Label>
                 <Input
-                  id="hireDate"
-                  name="hireDate"
+                  id="dataContratacao"
+                  name="dataContratacao"
                   type="date"
-                  value={formData.hireDate}
+                  value={formData.dataContratacao}
                   onChange={handleChange}
                   required
                   className="border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
