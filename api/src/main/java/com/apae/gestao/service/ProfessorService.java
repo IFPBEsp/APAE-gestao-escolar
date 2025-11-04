@@ -50,14 +50,16 @@ public class ProfessorService {
 
     @Transactional(readOnly = true)
     public ProfessorResponseDTO buscarPorId(Long id) {
-        Professor professor = professorRepository.findById(id)
+        // ALTERAÇÃO APLICADA AQUI
+        Professor professor = professorRepository.findByIdWithTurmas(id)
                 .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
         return new ProfessorResponseDTO(professor);
     }
 
     @Transactional
     public ProfessorResponseDTO atualizar(Long id, ProfessorRequestDTO dto) {
-        Professor professor = professorRepository.findById(id)
+        // ALTERAÇÃO APLICADA AQUI
+        Professor professor = professorRepository.findByIdWithTurmas(id)
                 .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
 
         validarCpfUnico(dto.getCpf(), id);
@@ -70,22 +72,13 @@ public class ProfessorService {
     }
 
     @Transactional
-    public void desativarProfessor(Long id) {
-        Professor professor = professorRepository.findById(id)
+    public void deletar(Long id) {
+        // ALTERAÇÃO APLICADA AQUI
+        Professor professor = professorRepository.findByIdWithTurmas(id)
                 .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
 
         // Desativação lógica
         professor.setAtivo(false);
-        professorRepository.save(professor);
-    }
-
-    @Transactional
-    public void reativarProfessor(Long id) {
-        Professor professor = professorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
-
-        // Ativação lógica
-        professor.setAtivo(true);
         professorRepository.save(professor);
     }
 
@@ -134,4 +127,3 @@ public class ProfessorService {
         }
     }
 }
-
