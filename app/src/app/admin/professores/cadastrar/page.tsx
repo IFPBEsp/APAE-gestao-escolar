@@ -14,38 +14,56 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { registerProfessor } from "@/services/ProfessorService"; 
+
+
 
 export default function CadastrarProfessorPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    nome: "",
     email: "",
-    phone: "",
-    birthDate: "",
-    specialization: "",
-    hireDate: "",
+    telefone: "",
+    dataNascimento: "",
+    especialidade: "",
+    dataContratacao: "",
   });
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+//isso é o que eu estou mechendo(JG)***************************************************************
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+      setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      try {
+          // ✅ CHAMA A FUNÇÃO REAL QUE FAZ O POST PARA /api/professores
+          const response = await registerProfessor(formData);
 
-    setIsSubmitting(false);
-    toast.success("Professor cadastrado com sucesso!");
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      birthDate: "",
-      specialization: "",
-      hireDate: "",
-    });
-    
-    router.push("/admin/professores");
+          // Se chegou aqui, o status HTTP foi 2xx (sucesso)
+          console.log("Professor cadastrado com sucesso (API Response):", response);
+          toast.success("Professor cadastrado com sucesso!");
+          
+          // Limpa o formulário e navega
+          setFormData({
+              nome: "",
+              email: "",
+              telefone: "",
+              dataNascimento: "",
+              especialidade: "",
+              dataContratacao: "",
+          });
+          router.push("/admin/professores");
+
+      } catch (error) {
+          // Captura o erro que foi "throw" do ProfessorService (erros de rede ou 4xx/5xx)
+          console.error("Erro no cadastro:", error);
+          // Exibe a mensagem de erro tratada que vem do service
+          toast.error(error.message || "Ocorreu um erro desconhecido ao cadastrar.");
+
+      } finally {
+          // Sempre desativa o loading
+          setIsSubmitting(false);
+      }
   };
 
   const handleChange = (
@@ -88,13 +106,13 @@ export default function CadastrarProfessorPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-[#0D4F97]">
+                <Label htmlFor="nome" className="text-[#0D4F97]">
                   Nome Completo
                 </Label>
                 <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
+                  id="nome"
+                  name="nome"
+                  value={formData.nome}
                   onChange={handleChange}
                   required
                   placeholder="Digite o nome do professor"
@@ -123,10 +141,10 @@ export default function CadastrarProfessorPage() {
                   Telefone
                 </Label>
                 <Input
-                  id="phone"
-                  name="phone"
+                  id="telefone"
+                  name="telefone"
                   type="tel"
-                  value={formData.phone}
+                  value={formData.telefone}
                   onChange={handleChange}
                   required
                   placeholder="(00) 00000-0000"
@@ -135,14 +153,14 @@ export default function CadastrarProfessorPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="birthDate" className="text-[#0D4F97]">
+                <Label htmlFor="dataNascimento" className="text-[#0D4F97]">
                   Data de Nascimento
                 </Label>
                 <Input
-                  id="birthDate"
-                  name="birthDate"
+                  id="dataNascimento"
+                  name="dataNascimento"
                   type="date"
-                  value={formData.birthDate}
+                  value={formData.dataNascimento}
                   onChange={handleChange}
                   required
                   className="border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
@@ -150,13 +168,13 @@ export default function CadastrarProfessorPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="specialization" className="text-[#0D4F97]">
+                <Label htmlFor="especialidade" className="text-[#0D4F97]">
                   Especialidade
                 </Label>
                 <Input
-                  id="specialization"
-                  name="specialization"
-                  value={formData.specialization}
+                  id="especialidade"
+                  name="especialidade"
+                  value={formData.especialidade}
                   onChange={handleChange}
                   required
                   placeholder="Ex: Educação Especial"
@@ -165,14 +183,14 @@ export default function CadastrarProfessorPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="hireDate" className="text-[#0D4F97]">
+                <Label htmlFor="dataContratacao" className="text-[#0D4F97]">
                   Data de Contratação
                 </Label>
                 <Input
-                  id="hireDate"
-                  name="hireDate"
+                  id="dataContratacao"
+                  name="dataContratacao"
                   type="date"
-                  value={formData.hireDate}
+                  value={formData.dataContratacao}
                   onChange={handleChange}
                   required
                   className="border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
@@ -183,11 +201,12 @@ export default function CadastrarProfessorPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.back()}
+                  onClick={() => router.back()} 
                   className="h-12 justify-center border-2 border-[#B2D7EC] px-4 text-[#0D4F97] hover:bg-[#B2D7EC]/20"
                 >
                   Cancelar
                 </Button>
+
                 <Button
                   type="submit"
                   disabled={isSubmitting}
