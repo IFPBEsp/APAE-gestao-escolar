@@ -14,6 +14,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { registerProfessor } from "@/services/ProfessorService"; 
+
+
 
 export default function CadastrarProfessorPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,25 +30,39 @@ export default function CadastrarProfessorPage() {
   });
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+      setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      try {
+          // ✅ CHAMA A FUNÇÃO REAL QUE FAZ O POST PARA /api/professores
+          const response = await registerProfessor(formData);
 
-    setIsSubmitting(false);
-    toast.success("Professor cadastrado com sucesso!");
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      birthDate: "",
-      specialization: "",
-      hireDate: "",
-    });
-    
-    router.push("/admin/professores");
+          // Se chegou aqui, o status HTTP foi 2xx (sucesso)
+          console.log("Professor cadastrado com sucesso (API Response):", response);
+          toast.success("Professor cadastrado com sucesso!");
+          
+          // Limpa o formulário e navega
+          setFormData({
+              name: "",
+              email: "",
+              phone: "",
+              birthDate: "",
+              specialization: "",
+              hireDate: "",
+          });
+          router.push("/admin/professores");
+
+      } catch (error) {
+          // Captura o erro que foi "throw" do ProfessorService (erros de rede ou 4xx/5xx)
+          console.error("Erro no cadastro:", error);
+          // Exibe a mensagem de erro tratada que vem do service
+          toast.error(error.message || "Ocorreu um erro desconhecido ao cadastrar.");
+
+      } finally {
+          // Sempre desativa o loading
+          setIsSubmitting(false);
+      }
   };
 
   const handleChange = (
@@ -183,11 +200,12 @@ export default function CadastrarProfessorPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.back()}
+                  onClick={() => router.back()} 
                   className="h-12 justify-center border-2 border-[#B2D7EC] px-4 text-[#0D4F97] hover:bg-[#B2D7EC]/20"
                 >
                   Cancelar
                 </Button>
+
                 <Button
                   type="submit"
                   disabled={isSubmitting}
