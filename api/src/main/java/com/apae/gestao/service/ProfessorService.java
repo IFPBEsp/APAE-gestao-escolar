@@ -72,14 +72,15 @@ public class ProfessorService {
     }
 
     @Transactional
-    public void deletar(Long id) {
+    public ProfessorResponseDTO inativar(Long id) {
         // ALTERAÇÃO APLICADA AQUI
         Professor professor = professorRepository.findByIdWithTurmas(id)
                 .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
 
         // Desativação lógica
         professor.setAtivo(false);
-        professorRepository.save(professor);
+        Professor salvo = professorRepository.save(professor);
+        return new ProfessorResponseDTO(salvo);
     }
 
     @Transactional
