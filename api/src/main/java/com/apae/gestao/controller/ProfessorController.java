@@ -20,12 +20,8 @@ public class ProfessorController {
 
     @PostMapping
     public ResponseEntity<ProfessorResponseDTO> criar(@Valid @RequestBody ProfessorRequestDTO dto) {
-        try {
-            ProfessorResponseDTO response = professorService.criar(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        ProfessorResponseDTO response = professorService.criar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
@@ -39,44 +35,28 @@ public class ProfessorController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProfessorResponseDTO> buscarPorId(@PathVariable Long id) {
-        try {
-            ProfessorResponseDTO response = professorService.buscarPorId(id);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        ProfessorResponseDTO response = professorService.buscarPorId(id);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProfessorResponseDTO> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody ProfessorRequestDTO dto) {
-        try {
-            ProfessorResponseDTO response = professorService.atualizar(id, dto);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        ProfessorResponseDTO response = professorService.atualizar(id, dto);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        try {
-            professorService.desativarProfessor(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        professorService.desativarProfessor(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/ativar")
     public ResponseEntity<Void> reativar(@PathVariable Long id) {
-        try {
-            professorService.reativarProfessor(id);
-            return ResponseEntity.ok().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        professorService.reativarProfessor(id);
+        return ResponseEntity.ok().build();
     }
 }
 
