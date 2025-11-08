@@ -19,6 +19,7 @@ public class TurmaResponseDTO {
     private String nome;
     private Integer anoCriacao;
     private String turno;
+    private Boolean isAtiva;
     private Set<Aluno> alunos;
 
     @JsonIgnore
@@ -29,6 +30,7 @@ public class TurmaResponseDTO {
         this.nome = turma.getNome();
         this.anoCriacao = turma.getAnoCriacao();
         this.turno = turma.getTurno();
+        this.isAtiva = turma.getIsAtiva();
         this.alunos = turma.getAlunos();
         this.professores = turma.getProfessores();
     }
