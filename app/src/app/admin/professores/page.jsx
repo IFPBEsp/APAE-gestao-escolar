@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, UserPlus, Edit, Eye } from "lucide-react";
+import { ArrowLeft, UserPlus, Eye } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 
@@ -14,13 +14,6 @@ export default function GerenciarProfessoresPage() {
       title: "Adicionar Professor",
       description: "Cadastrar um novo professor no sistema",
       route: "/admin/professores/cadastrar", // ✅ Rota Next.js
-    },
-    {
-      id: "atualizar", 
-      icon: Edit,
-      title: "Atualizar Dados",
-      description: "Editar informações de professores cadastrados",
-      route: "/admin/professores/editar", // ✅ Rota Next.js
     },
     {
       id: "visualizar",
@@ -50,7 +43,7 @@ export default function GerenciarProfessoresPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {actions.map((action) => {
                 const Icon = action.icon;
                 return (
