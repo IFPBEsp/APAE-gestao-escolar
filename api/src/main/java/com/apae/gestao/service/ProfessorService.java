@@ -127,4 +127,7 @@ public class ProfessorService {
             }
         }
     }
+
+    public void reativarProfessor(Long id) {
+    }
 }
