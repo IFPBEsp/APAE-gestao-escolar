@@ -22,22 +22,14 @@ public class TurmaController {
 
     @PostMapping
     public ResponseEntity<TurmaResponseDTO> criar(@Valid @RequestBody TurmaRequestDTO dto){
-        try {
-            TurmaResponseDTO response = service.criar(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        TurmaResponseDTO response = service.criar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{turmaId}")
     public ResponseEntity<TurmaResponseDTO> listarPorId(@PathVariable long turmaId){
-        try {
-            TurmaResponseDTO response = service.buscarPorId(turmaId);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        TurmaResponseDTO response = service.buscarPorId(turmaId);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
@@ -48,22 +40,14 @@ public class TurmaController {
 
     @PutMapping("/{turmaId}")
     public ResponseEntity<TurmaResponseDTO> atualizar(@PathVariable Long turmaId, @Valid @RequestBody TurmaRequestDTO dto){
-        try {
-            TurmaResponseDTO response = service.atualizar(turmaId, dto);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        TurmaResponseDTO response = service.atualizar(turmaId, dto);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<TurmaResponseDTO> deletar(@PathVariable Long id){
-        try {
-            service.buscarPorId(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        service.deletarPorId(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{turmaId}/professores")
@@ -71,22 +55,14 @@ public class TurmaController {
         @PathVariable Long turmaId,
         @RequestBody List<Long> idProfessores
     ){
-        try {
-            TurmaResponseDTO atualizado = service.vincularProfessoresATurma(turmaId, idProfessores);
-            return ResponseEntity.ok(atualizado);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+        TurmaResponseDTO atualizado = service.vincularProfessoresATurma(turmaId, idProfessores);
+        return ResponseEntity.ok(atualizado);
     }
 
     @GetMapping("/{turmaId}/professores")
     public ResponseEntity<List<ProfessorResponseDTO>> listarProfessoresNaTurma(@PathVariable Long turmaId){
-        try {
-            List<ProfessorResponseDTO> response = service.listarProfessoresNaTurma(turmaId);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        List<ProfessorResponseDTO> response = service.listarProfessoresNaTurma(turmaId);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{turmaId}/professores/{professorId}")
@@ -94,11 +70,7 @@ public class TurmaController {
         @PathVariable Long turmaId,
         @PathVariable Long professorId
     ){
-        try {
-            TurmaResponseDTO atualizado = service.desvincularProfessor(turmaId, professorId);
-            return ResponseEntity.ok(atualizado);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+        TurmaResponseDTO atualizado = service.desvincularProfessor(turmaId, professorId);
+        return ResponseEntity.ok(atualizado);
     }
 }
