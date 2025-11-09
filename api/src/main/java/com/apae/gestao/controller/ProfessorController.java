@@ -20,12 +20,8 @@ public class ProfessorController {
 
     @PostMapping
     public ResponseEntity<ProfessorResponseDTO> criar(@Valid @RequestBody ProfessorRequestDTO dto) {
-        try {
-            ProfessorResponseDTO response = professorService.criar(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        ProfessorResponseDTO response = professorService.criar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping

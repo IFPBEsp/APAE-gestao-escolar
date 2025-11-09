@@ -21,6 +21,8 @@ public class ProfessorRequestDTO {
     @Size(max = 100, message = "Nome deve ter no máximo 100 caracteres")
     private String nome;
 
+    @NotBlank(message = "CPF é obrigatório")
+    @Size(min = 11, max = 14 , message = "CPF deve ter entre 11 e 14 caracteres")
     private String cpf;
 
     @NotBlank(message = "Email é obrigatório")
@@ -37,6 +39,9 @@ public class ProfessorRequestDTO {
     private String especialidade;
 
     private LocalDate dataContratacao;
+
+    @Size(max = 255, message = "Endereço deve ter no máximo 255 caracteres")
+    private String endereco;
 
     private Set<Turma> turmas;
 }
