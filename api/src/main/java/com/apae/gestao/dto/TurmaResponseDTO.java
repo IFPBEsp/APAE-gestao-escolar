@@ -5,6 +5,7 @@ import java.util.Set;
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Turma;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,8 +20,10 @@ public class TurmaResponseDTO {
     private Integer anoCriacao;
     private String turno;
     private Set<Aluno> alunos;
-    private Set<Professor>professores;
-    
+
+    @JsonIgnore
+    private Set<Professor> professores;
+
     public TurmaResponseDTO(Turma turma){
         this.id = turma.getId();
         this.nome = turma.getNome();
