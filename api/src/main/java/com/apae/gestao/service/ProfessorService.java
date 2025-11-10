@@ -4,7 +4,6 @@ import com.apae.gestao.dto.ProfessorRequestDTO;
 import com.apae.gestao.dto.ProfessorResponseDTO;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.repository.ProfessorRepository;
-import com.apae.gestao.repository.TurmaRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -128,6 +127,13 @@ public class ProfessorService {
         }
     }
 
-    public void reativarProfessor(Long id) {
+    @Transactional
+    public ProfessorResponseDTO reativarProfessor(Long id) {
+        Professor professor = professorRepository.findByIdWithTurmas(id)
+                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
+
+        professor.setAtivo(true);
+        Professor salvo = professorRepository.save(professor);
+        return new ProfessorResponseDTO(salvo);
     }
 }
