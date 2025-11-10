@@ -58,7 +58,7 @@ public class TurmaService {
     @Transactional
     public void deletarPorId(Long turmaId){
         Turma turma = turmaDAO.findById(turmaId)
-            .orElseThrow(() -> new IllegalArgumentException("Turma não encontrada com ID: " + turmaId));
+                .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
         turmaDAO.delete(turma);
     }
 
@@ -105,8 +105,33 @@ public class TurmaService {
         turma.setNome(dto.getNome());
         turma.setAnoCriacao(dto.getAnoCriacao());
         turma.setTurno(dto.getTurno());
+
+        if(dto.getIsAtiva() != null){
+            turma.setIsAtiva(dto.getIsAtiva());
+        }
+
         turma.setAlunos(dto.getAlunos());
         turma.setProfessores(dto.getProfessores());
+    }
+
+    @Transactional
+    public TurmaResponseDTO ativarTurma(Long turmaId) {
+        Turma turma = turmaDAO.findById(turmaId)
+                .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
+
+        turma.setIsAtiva(true);
+        Turma atualizado = turmaDAO.save(turma);
+        return new TurmaResponseDTO(atualizado);
+    }
+
+    @Transactional
+    public TurmaResponseDTO desativarTurma(Long turmaId) {
+        Turma turma = turmaDAO.findById(turmaId)
+                .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
+
+        turma.setIsAtiva(false);
+        Turma atualizado = turmaDAO.save(turma);
+        return new TurmaResponseDTO(atualizado);
     }
     
 }

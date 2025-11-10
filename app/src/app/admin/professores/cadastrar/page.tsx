@@ -14,65 +14,113 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, User } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { registerProfessor } from "@/services/ProfessorService"; 
-
-
+import { registerProfessor } from "@/services/ProfessorService";
 
 export default function CadastrarProfessorPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     nome: "",
+    cpf: "",
     email: "",
     telefone: "",
+    endereco: "",
     dataNascimento: "",
     especialidade: "",
     dataContratacao: "",
   });
+  const [errors, setErrors] = useState({
+    cpf: "",
+    endereco: "",
+  });
+
   const router = useRouter();
 
-//isso é o que eu estou mechendo(JG)***************************************************************
-  const handleSubmit = async (e) => {
-      e.preventDefault();
-      setIsSubmitting(true);
-
-      try {
-          // ✅ CHAMA A FUNÇÃO REAL QUE FAZ O POST PARA /api/professores
-          const response = await registerProfessor(formData);
-
-          // Se chegou aqui, o status HTTP foi 2xx (sucesso)
-          console.log("Professor cadastrado com sucesso (API Response):", response);
-          toast.success("Professor cadastrado com sucesso!");
-          
-          // Limpa o formulário e navega
-          setFormData({
-              nome: "",
-              email: "",
-              telefone: "",
-              dataNascimento: "",
-              especialidade: "",
-              dataContratacao: "",
-          });
-          router.push("/admin/professores");
-
-      } catch (error) {
-          // Captura o erro que foi "throw" do ProfessorService (erros de rede ou 4xx/5xx)
-          console.error("Erro no cadastro:", error);
-          // Exibe a mensagem de erro tratada que vem do service
-          toast.error(error.message || "Ocorreu um erro desconhecido ao cadastrar.");
-
-      } finally {
-          // Sempre desativa o loading
-          setIsSubmitting(false);
-      }
+  // 🧮 Máscara de CPF
+  const applyCPFMask = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 3) return numbers;
+    if (numbers.length <= 6) return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
+    if (numbers.length <= 9)
+      return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
+    return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(
+      6,
+      9
+    )}-${numbers.slice(9, 11)}`;
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+  // ✅ Validação de CPF
+  const validateCPF = (cpf: string) => {
+    const numbers = cpf.replace(/\D/g, "");
+    if (numbers.length !== 11 || /^(\d)\1+$/.test(numbers)) return false;
+
+    let sum = 0;
+    for (let i = 0; i < 9; i++) sum += parseInt(numbers[i]) * (10 - i);
+    let remainder = (sum * 10) % 11;
+    if (remainder === 10) remainder = 0;
+    if (remainder !== parseInt(numbers[9])) return false;
+
+    sum = 0;
+    for (let i = 0; i < 10; i++) sum += parseInt(numbers[i]) * (11 - i);
+    remainder = (sum * 10) % 11;
+    if (remainder === 10) remainder = 0;
+    return remainder === parseInt(numbers[10]);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    if (name === "cpf") {
+      const masked = applyCPFMask(value);
+      setFormData((prev) => ({ ...prev, cpf: masked }));
+      if (errors.cpf) setErrors((prev) => ({ ...prev, cpf: "" }));
+    } else if (name === "endereco") {
+      setFormData((prev) => ({ ...prev, endereco: value }));
+      if (errors.endereco) setErrors((prev) => ({ ...prev, endereco: "" }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // 🧩 Validação frontend
+    if (!validateCPF(formData.cpf)) {
+      setErrors((prev) => ({ ...prev, cpf: "CPF inválido" }));
+      toast.error("Por favor, corrija o CPF antes de enviar.");
+      return;
+    }
+    if (!formData.endereco.trim()) {
+      setErrors((prev) => ({ ...prev, endereco: "Endereço é obrigatório" }));
+      toast.error("Por favor, preencha o endereço.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await registerProfessor(formData);
+      console.log("Professor cadastrado (API):", response);
+
+      toast.success("Professor cadastrado com sucesso!");
+      setFormData({
+        nome: "",
+        cpf: "",
+        email: "",
+        telefone: "",
+        endereco: "",
+        dataNascimento: "",
+        especialidade: "",
+        dataContratacao: "",
+      });
+      setErrors({ cpf: "", endereco: "" });
+      router.push("/admin/professores");
+    } catch (error: any) {
+      console.error("Erro no cadastro:", error);
+      toast.error(error.message || "Erro ao cadastrar o professor.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -86,7 +134,6 @@ export default function CadastrarProfessorPage() {
           <span>Voltar</span>
         </button>
 
-        {/* ✅ AQUI ESTÁ FALTANDO O CARD COM O FORMULÁRIO! */}
         <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -94,21 +141,20 @@ export default function CadastrarProfessorPage() {
                 <User className="h-6 w-6 text-[#0D4F97]" />
               </div>
               <div>
-                <CardTitle className="text-[#0D4F97]">
-                  Cadastrar Professor
-                </CardTitle>
+                <CardTitle className="text-[#0D4F97]">Cadastrar Professor</CardTitle>
                 <CardDescription className="text-[#222222]">
                   Adicione um novo professor ao sistema
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+
+              {/* Nome */}
               <div className="space-y-2">
-                <Label htmlFor="nome" className="text-[#0D4F97]">
-                  Nome Completo
-                </Label>
+                <Label htmlFor="nome" className="text-[#0D4F97]">Nome Completo *</Label>
                 <Input
                   id="nome"
                   name="nome"
@@ -120,10 +166,29 @@ export default function CadastrarProfessorPage() {
                 />
               </div>
 
+              {/* CPF */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[#0D4F97]">
-                  E-mail
-                </Label>
+                <Label htmlFor="cpf" className="text-[#0D4F97]">CPF *</Label>
+                <Input
+                  id="cpf"
+                  name="cpf"
+                  value={formData.cpf}
+                  onChange={handleChange}
+                  required
+                  maxLength={14}
+                  placeholder="000.000.000-00"
+                  className={`border-2 ${
+                    errors.cpf
+                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                      : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                  }`}
+                />
+                {errors.cpf && <p className="text-red-500">{errors.cpf}</p>}
+              </div>
+
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-[#0D4F97]">E-mail *</Label>
                 <Input
                   id="email"
                   name="email"
@@ -136,10 +201,9 @@ export default function CadastrarProfessorPage() {
                 />
               </div>
 
+              {/* Telefone */}
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-[#0D4F97]">
-                  Telefone
-                </Label>
+                <Label htmlFor="telefone" className="text-[#0D4F97]">Telefone *</Label>
                 <Input
                   id="telefone"
                   name="telefone"
@@ -152,10 +216,28 @@ export default function CadastrarProfessorPage() {
                 />
               </div>
 
+              {/* Endereço */}
               <div className="space-y-2">
-                <Label htmlFor="dataNascimento" className="text-[#0D4F97]">
-                  Data de Nascimento
-                </Label>
+                <Label htmlFor="endereco" className="text-[#0D4F97]">Endereço *</Label>
+                <Input
+                  id="endereco"
+                  name="endereco"
+                  value={formData.endereco}
+                  onChange={handleChange}
+                  required
+                  placeholder="Digite o endereço completo"
+                  className={`border-2 ${
+                    errors.endereco
+                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                      : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                  }`}
+                />
+                {errors.endereco && <p className="text-red-500">{errors.endereco}</p>}
+              </div>
+
+              {/* Data de Nascimento */}
+              <div className="space-y-2">
+                <Label htmlFor="dataNascimento" className="text-[#0D4F97]">Data de Nascimento *</Label>
                 <Input
                   id="dataNascimento"
                   name="dataNascimento"
@@ -167,10 +249,9 @@ export default function CadastrarProfessorPage() {
                 />
               </div>
 
+              {/* Especialidade */}
               <div className="space-y-2">
-                <Label htmlFor="especialidade" className="text-[#0D4F97]">
-                  Especialidade
-                </Label>
+                <Label htmlFor="especialidade" className="text-[#0D4F97]">Especialidade *</Label>
                 <Input
                   id="especialidade"
                   name="especialidade"
@@ -182,10 +263,9 @@ export default function CadastrarProfessorPage() {
                 />
               </div>
 
+              {/* Data de Contratação */}
               <div className="space-y-2">
-                <Label htmlFor="dataContratacao" className="text-[#0D4F97]">
-                  Data de Contratação
-                </Label>
+                <Label htmlFor="dataContratacao" className="text-[#0D4F97]">Data de Contratação *</Label>
                 <Input
                   id="dataContratacao"
                   name="dataContratacao"
@@ -197,16 +277,16 @@ export default function CadastrarProfessorPage() {
                 />
               </div>
 
+              {/* Botões */}
               <div className="flex justify-end gap-4 pt-4">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.back()} 
+                  onClick={() => router.back()}
                   className="h-12 justify-center border-2 border-[#B2D7EC] px-4 text-[#0D4F97] hover:bg-[#B2D7EC]/20"
                 >
                   Cancelar
                 </Button>
-
                 <Button
                   type="submit"
                   disabled={isSubmitting}
@@ -225,7 +305,6 @@ export default function CadastrarProfessorPage() {
             </form>
           </CardContent>
         </Card>
-        {/* ✅ FIM DO CARD QUE ESTAVA FALTANDO */}
       </div>
     </div>
   );

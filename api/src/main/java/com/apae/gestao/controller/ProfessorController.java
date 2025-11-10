@@ -49,18 +49,14 @@ public class ProfessorController {
 
     @PatchMapping("/{id}/inativar")
     public ResponseEntity<ProfessorResponseDTO> inativar(@PathVariable Long id) {
-        try {
-            ProfessorResponseDTO response = professorService.inativar(id);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        ProfessorResponseDTO response = professorService.inativar(id);
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}/ativar")
-    public ResponseEntity<Void> reativar(@PathVariable Long id) {
-        professorService.reativarProfessor(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ProfessorResponseDTO> reativar(@PathVariable Long id) {
+        ProfessorResponseDTO response = professorService.reativarProfessor(id);
+        return ResponseEntity.ok(response);
     }
 }
 

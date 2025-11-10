@@ -4,7 +4,6 @@ import com.apae.gestao.dto.ProfessorRequestDTO;
 import com.apae.gestao.dto.ProfessorResponseDTO;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.repository.ProfessorRepository;
-import com.apae.gestao.repository.TurmaRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import com.apae.gestao.exception.ConflitoDeDadosException;
@@ -108,16 +107,17 @@ public class ProfessorService {
         professor.setDataNascimento(dto.getDataNascimento());
         professor.setEspecialidade(dto.getEspecialidade());
         professor.setDataContratacao(dto.getDataContratacao());
+        professor.setEndereco(dto.getEndereco());
     }
 
     private void validarCpfUnico(String cpf, Long id) {
-        if (cpf != null && !cpf.trim().isEmpty()) {
-            boolean cpfEmUso = id == null 
-                ? professorRepository.existsByCpf(cpf)
-                : professorRepository.existsByCpfAndIdNot(cpf, id);
-            
-            if (cpfEmUso) {
-                throw new ConflitoDeDadosException("Já existe um professor cadastrado com este CPF");
+        if (id == null) {
+            if (professorRepository.existsByCpf(cpf)) {
+                throw new RuntimeException("CPF já cadastrado: " + cpf);
+            }
+        } else {
+            if (professorRepository.existsByCpfAndIdNot(cpf, id)) {
+                throw new RuntimeException("CPF já cadastrado: " + cpf);
             }
         }
     }
@@ -132,5 +132,15 @@ public class ProfessorService {
                 throw new ConflitoDeDadosException("Já existe um professor cadastrado com este e-mail");
             }
         }
+    }
+
+    @Transactional
+    public ProfessorResponseDTO reativarProfessor(Long id) {
+        Professor professor = professorRepository.findByIdWithTurmas(id)
+                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
+
+        professor.setAtivo(true);
+        Professor salvo = professorRepository.save(professor);
+        return new ProfessorResponseDTO(salvo);
     }
 }

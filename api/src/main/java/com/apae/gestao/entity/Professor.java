@@ -29,7 +29,7 @@ public class Professor {
     @Column(nullable = false, length = 100)
     private String nome;
 
-    @Column(nullable = true, unique = true, length = 14)
+    @Column(nullable = false, unique = true, length = 14)
     private String cpf;
 
     @Column(nullable = true, unique = true, length = 100)
@@ -46,6 +46,9 @@ public class Professor {
 
     @Column(name = "data_contratacao")
     private LocalDate dataContratacao;
+
+    @Column(length = 255)
+    private String endereco;
 
     @Column(nullable = false)
     private Boolean ativo = true;
