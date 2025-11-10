@@ -32,6 +32,8 @@ public class Turma {
     @Column(nullable = false)
     private String turno;
 
+    @Column(nullable = false)
+    private Boolean isAtiva = true;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "alunos_id")

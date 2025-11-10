@@ -25,6 +25,8 @@ public class TurmaRequestDTO {
     @NotBlank
     private String turno;
 
+    private Boolean isAtiva;
+
     private Set<Aluno> alunos;
 
     private Set<Professor> professores;

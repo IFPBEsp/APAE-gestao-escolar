@@ -73,4 +73,24 @@ public class TurmaController {
         TurmaResponseDTO atualizado = service.desvincularProfessor(turmaId, professorId);
         return ResponseEntity.ok(atualizado);
     }
+
+    @PatchMapping("/{turmaId}/ativar")
+    public ResponseEntity<TurmaResponseDTO> ativarTurma(@PathVariable Long turmaId) {
+        try {
+            TurmaResponseDTO response = service.ativarTurma(turmaId);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PatchMapping("/{turmaId}/desativar")
+    public ResponseEntity<TurmaResponseDTO> desativarTurma(@PathVariable Long turmaId) {
+        try {
+            TurmaResponseDTO response = service.desativarTurma(turmaId);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
