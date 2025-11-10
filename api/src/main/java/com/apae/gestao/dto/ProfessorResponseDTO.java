@@ -24,6 +24,7 @@ public class ProfessorResponseDTO {
     private LocalDate dataNascimento;
     private String especialidade;
     private LocalDate dataContratacao;
+    private String endereco;
     private Boolean ativo;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -38,6 +39,7 @@ public class ProfessorResponseDTO {
         this.dataNascimento = professor.getDataNascimento();
         this.especialidade = professor.getEspecialidade();
         this.dataContratacao = professor.getDataContratacao();
+        this.endereco = professor.getEndereco();
         this.ativo = professor.getAtivo();
         this.createdAt = professor.getCreatedAt();
         this.updatedAt = professor.getUpdatedAt();
