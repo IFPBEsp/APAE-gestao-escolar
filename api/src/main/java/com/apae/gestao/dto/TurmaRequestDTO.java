@@ -34,5 +34,5 @@ public class TurmaRequestDTO {
 
     private Set<Aluno> alunos;
 
-    private Set<Professor> professores;
+    private Professor professor;
 }
