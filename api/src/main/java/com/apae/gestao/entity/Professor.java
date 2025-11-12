@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
 @Table(name = "professores")
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -63,8 +62,14 @@ public class Professor {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @ManyToMany(mappedBy = "professores")
+    @OneToMany(mappedBy = "professor")
     private Set<Turma> turmas = new HashSet<>();
+
+    @OneToMany(mappedBy = "professor", cascade = CascadeType.ALL)
+    private Set<Relatorio> relatorios = new HashSet<>();
+
+    @OneToMany(mappedBy = "professor", cascade = CascadeType.ALL)
+    private Set<Avaliacao> avaliacoes = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

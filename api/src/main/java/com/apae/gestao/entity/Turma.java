@@ -37,10 +37,6 @@ public class Turma {
     @Column(nullable = false)
     private Boolean isAtiva = true;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "alunos_id")
-    private Set<Aluno> alunos = new HashSet<>();
-
     @OneToMany(mappedBy = "turma", cascade = CascadeType.ALL)
     private Set<TurmaAluno> turmaAlunos = new HashSet<>();
 
@@ -50,6 +46,20 @@ public class Turma {
 
     @OneToMany(mappedBy = "turma", cascade = CascadeType.ALL)
     private Set<Aula> aulas = new HashSet<>();
+
+    public void addAluno(Aluno aluno, Boolean isAlunoAtivo) {
+        TurmaAluno turmaAluno = new TurmaAluno();
+        turmaAluno.setTurma(this);
+        turmaAluno.setAluno(aluno);
+        turmaAluno.setIsAlunoAtivo(isAlunoAtivo != null ? isAlunoAtivo : true);
+        turmaAlunos.add(turmaAluno);
+        aluno.getTurmaAlunos().add(turmaAluno);
+    }
+
+    public void removeAluno(Aluno aluno) {
+        turmaAlunos.removeIf(ta -> ta.getAluno().equals(aluno));
+        aluno.getTurmaAlunos().removeIf(ta -> ta.getTurma().equals(this));
+    }
 
     @Override
     public boolean equals(Object o) {
