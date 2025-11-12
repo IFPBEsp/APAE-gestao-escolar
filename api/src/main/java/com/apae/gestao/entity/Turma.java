@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
@@ -32,32 +31,25 @@ public class Turma {
     @Column(nullable = false)
     private String turno;
 
+    @Column(nullable = false, length = 50)
+    private String tipo;
+
     @Column(nullable = false)
     private Boolean isAtiva = true;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "alunos_id")
-    private Set<Aluno> alunos = new HashSet<>(); 
+    private Set<Aluno> alunos = new HashSet<>();
 
-    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    @JoinTable(
-            name = "turma_professor",
-            joinColumns = @JoinColumn(name = "turma_id"),
-            inverseJoinColumns = @JoinColumn(name = "professor_id")
-    )
-    private Set<Professor> professores = new HashSet<>();
+    @OneToMany(mappedBy = "turma", cascade = CascadeType.ALL)
+    private Set<TurmaAluno> turmaAlunos = new HashSet<>();
 
-    public void addProfessor(Professor professor) {
-        if (this.professores.add(professor)) {
-            professor.getTurmas().add(this); 
-        }
-    }
+    @ManyToOne
+    @JoinColumn(name = "professor_id", nullable = false)
+    private Professor professor;
 
-    public void removeProfessor(Professor professor) {
-        if (this.professores.remove(professor)) {
-            professor.getTurmas().remove(this);
-        }
-    }
+    @OneToMany(mappedBy = "turma", cascade = CascadeType.ALL)
+    private Set<Aula> aulas = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
