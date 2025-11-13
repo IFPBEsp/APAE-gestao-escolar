@@ -1,14 +1,10 @@
 package com.apae.gestao.entity;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.*;
-
 import lombok.*;
-
 
 //Placeholder. Trocar para a entidade Paciente do outro repo depois...
 @Entity
@@ -31,8 +27,10 @@ public class Aluno {
     @Column(nullable = false)
     private String deficiencia;
 
-    @JsonBackReference
-    @ManyToMany(mappedBy = "alunos")
+    @Column(name = "link_foto", length = 500)
+    private String linkFoto;
+
+    @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL)
     private Set<Avaliacao> avaliacoes = new HashSet<>();
 
     public Aluno(Long id, String nome, Integer idade, String deficiencia) {
@@ -40,5 +38,24 @@ public class Aluno {
         this.nome = nome;
         this.idade = idade;
         this.deficiencia = deficiencia;
+    }
+    
+    @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL)
+    private Set<Presenca> presencas = new HashSet<>();
+
+    @OneToMany(mappedBy = "aluno")
+    private Set<TurmaAluno> turmaAlunos = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Aluno aluno = (Aluno) o;
+        return id != null && Objects.equals(id, aluno.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? Objects.hash(id) : getClass().hashCode();
     }
 }

@@ -1,10 +1,13 @@
 package com.apae.gestao.dto;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Turma;
+import com.apae.gestao.entity.TurmaAluno;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
@@ -19,11 +22,10 @@ public class TurmaResponseDTO {
     private String nome;
     private Integer anoCriacao;
     private String turno;
+    private String tipo;
     private Boolean isAtiva;
-    private Set<Aluno> alunos;
-
-    @JsonIgnore
-    private Set<Professor> professores;
+    private ProfessorResponseDTO professor;
+    private List<Long> alunosIds;
 
     public TurmaResponseDTO(Turma turma){
         this.id = turma.getId();
@@ -31,7 +33,16 @@ public class TurmaResponseDTO {
         this.anoCriacao = turma.getAnoCriacao();
         this.turno = turma.getTurno();
         this.isAtiva = turma.getIsAtiva();
-        this.alunos = turma.getAlunos();
-        this.professores = turma.getProfessores();
+
+        if(turma.getProfessor() != null) {
+            this.professor = new ProfessorResponseDTO(turma.getProfessor());
+        }
+
+        if(turma.getTurmaAlunos() != null) {
+            this.alunosIds = turma.getTurmaAlunos().stream()
+                    .filter(TurmaAluno::getIsAlunoAtivo)
+                    .map(ta -> ta.getAluno().getId())
+                    .collect(Collectors.toList());
+        }
     }
 }
