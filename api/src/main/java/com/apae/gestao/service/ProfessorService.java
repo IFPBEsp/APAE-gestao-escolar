@@ -82,16 +82,6 @@ public class ProfessorService {
     }
 
     @Transactional
-    public void reativarProfessor(Long id) {
-        Professor professor = professorRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id));
-
-        // Ativação lógica
-        professor.setAtivo(true);
-        professorRepository.save(professor);
-    }
-
-    @Transactional
     public void deletarFisicamente(Long id) {
         if (!professorRepository.existsById(id)) {
             throw new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id);

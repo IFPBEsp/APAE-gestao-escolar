@@ -16,7 +16,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Deprecated
+
 public class Aluno {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,4 +35,10 @@ public class Aluno {
     @ManyToMany(mappedBy = "alunos")
     private Set<Avaliacao> avaliacoes = new HashSet<>();
 
+    public Aluno(Long id, String nome, Integer idade, String deficiencia) {
+        this.id = id;
+        this.nome = nome;
+        this.idade = idade;
+        this.deficiencia = deficiencia;
+    }
 }
