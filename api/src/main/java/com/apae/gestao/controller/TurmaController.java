@@ -50,27 +50,12 @@ public class TurmaController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{turmaId}/professores")
-    public ResponseEntity<TurmaResponseDTO> vincularProfessoresATurma(
-        @PathVariable Long turmaId,
-        @RequestBody List<Long> idProfessores
+    @PutMapping("/{turmaId}/professor/{professorId}")
+    public ResponseEntity<TurmaResponseDTO> atribuirProfessor(
+            @PathVariable Long turmaId,
+            @PathVariable Long professorId
     ){
-        TurmaResponseDTO atualizado = service.vincularProfessoresATurma(turmaId, idProfessores);
-        return ResponseEntity.ok(atualizado);
-    }
-
-    @GetMapping("/{turmaId}/professores")
-    public ResponseEntity<List<ProfessorResponseDTO>> listarProfessoresNaTurma(@PathVariable Long turmaId){
-        List<ProfessorResponseDTO> response = service.listarProfessoresNaTurma(turmaId);
-        return ResponseEntity.ok(response);
-    }
-
-    @DeleteMapping("/{turmaId}/professores/{professorId}")
-    public ResponseEntity<TurmaResponseDTO> desvincularProfessor(
-        @PathVariable Long turmaId,
-        @PathVariable Long professorId
-    ){
-        TurmaResponseDTO atualizado = service.desvincularProfessor(turmaId, professorId);
+        TurmaResponseDTO atualizado = service.vincularProfessoresATurma(turmaId, professorId);
         return ResponseEntity.ok(atualizado);
     } @PatchMapping("/{turmaId}/ativar")
     public ResponseEntity<TurmaResponseDTO> ativarTurma(@PathVariable Long turmaId) {

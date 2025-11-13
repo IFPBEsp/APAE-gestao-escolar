@@ -14,11 +14,11 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
 @Table(name = "professores")
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Professor {
 
@@ -53,14 +53,23 @@ public class Professor {
     @Column(nullable = false)
     private Boolean ativo = true;
 
+    @Column(name = "link_foto", length = 500)
+    private String linkFoto;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @ManyToMany(mappedBy = "professores")
+    @OneToMany(mappedBy = "professor")
     private Set<Turma> turmas = new HashSet<>();
+
+    @OneToMany(mappedBy = "professor", cascade = CascadeType.ALL)
+    private Set<Relatorio> relatorios = new HashSet<>();
+
+    @OneToMany(mappedBy = "professor", cascade = CascadeType.ALL)
+    private Set<Avaliacao> avaliacoes = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
