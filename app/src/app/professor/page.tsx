@@ -6,20 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Users, ClipboardCheck, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-// ✅ MOCK DATA
+//  MOCK DATA
 const mockProfessorData = {
   name: "Prof. Maria Silva",
   turmas: [
     {
       id: 1,
-      name: "Alfabetização",
+      name: "Alfabetização 2025 - Manhã",
       students: 8,
       schedule: "Segunda a Sexta - 08:00 às 12:00",
       nextClass: "Hoje - 08:00",
     },
     {
       id: 2,
-      name: "Estimulação",
+      name: "Estimulação 2025 - Tarde",
       students: 6,
       schedule: "Segunda a Sexta - 14:00 às 18:00",
       nextClass: "Hoje - 14:00",
@@ -96,7 +96,7 @@ export default function ProfessorDashboardPage() {
                   </div>
                   <Button
                     onClick={() => handleFazerChamada(turma.id, turma.name)}
-                    className="flex h-12 w-full items-center justify-center rounded-lg bg-[#0D4F97] px-4 text-center text-white transition-all hover:bg-[#FFD000] hover:text-[#0D4F97]"
+                    className="flex h-12 w-full items-center justify-center rounded-lg bg-[#0D4F97] px-4 text-center text-white transition-all hover:bg-[#FFD000] hover:text-[#0D4F97]" // ✅ CORES CORRETAS
                   >
                     <ClipboardCheck className="mr-2 h-5 w-5" />
                     Fazer Chamada

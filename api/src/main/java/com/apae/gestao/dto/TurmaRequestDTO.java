@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TurmaRequestDTO {
 
-    @NotBlank
+    @NotBlank(message = "Nome é obrigatorio")
     private String nome;
 
     @NotNull
@@ -25,9 +25,14 @@ public class TurmaRequestDTO {
     @NotBlank
     private String turno;
 
+    @NotNull
+    private Long professorId;
+
     private Boolean isAtiva;
+
+    private String tipo;
 
     private Set<Aluno> alunos;
 
-    private Set<Professor> professores;
+    private Professor professor;
 }

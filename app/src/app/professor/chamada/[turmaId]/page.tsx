@@ -32,8 +32,8 @@ const studentsByClass: Record<string, Array<{ id: number; name: string }>> = {
 };
 
 const turmaNames: Record<string, string> = {
-  "1": "Alfabetização",
-  "2": "Estimulação",
+  "1": "Alfabetização 2025 - Manhã",
+  "2": "Estimulação 2025 - Tarde",
 };
 
 interface ChamadaPageProps {

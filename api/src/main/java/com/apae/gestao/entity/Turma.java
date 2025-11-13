@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
@@ -32,31 +31,34 @@ public class Turma {
     @Column(nullable = false)
     private String turno;
 
+    @Column(nullable = false, length = 50)
+    private String tipo;
+
     @Column(nullable = false)
     private Boolean isAtiva = true;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "alunos_id")
-    private Set<Aluno> alunos = new HashSet<>(); 
+    @OneToMany(mappedBy = "turma", cascade = CascadeType.ALL)
+    private Set<TurmaAluno> turmaAlunos = new HashSet<>();
 
-    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    @JoinTable(
-            name = "turma_professor",
-            joinColumns = @JoinColumn(name = "turma_id"),
-            inverseJoinColumns = @JoinColumn(name = "professor_id")
-    )
-    private Set<Professor> professores = new HashSet<>();
+    @ManyToOne
+    @JoinColumn(name = "professor_id", nullable = false)
+    private Professor professor;
 
-    public void addProfessor(Professor professor) {
-        if (this.professores.add(professor)) {
-            professor.getTurmas().add(this); 
-        }
+    @OneToMany(mappedBy = "turma", cascade = CascadeType.ALL)
+    private Set<Aula> aulas = new HashSet<>();
+
+    public void addAluno(Aluno aluno, Boolean isAlunoAtivo) {
+        TurmaAluno turmaAluno = new TurmaAluno();
+        turmaAluno.setTurma(this);
+        turmaAluno.setAluno(aluno);
+        turmaAluno.setIsAlunoAtivo(isAlunoAtivo != null ? isAlunoAtivo : true);
+        turmaAlunos.add(turmaAluno);
+        aluno.getTurmaAlunos().add(turmaAluno);
     }
 
-    public void removeProfessor(Professor professor) {
-        if (this.professores.remove(professor)) {
-            professor.getTurmas().remove(this);
-        }
+    public void removeAluno(Aluno aluno) {
+        turmaAlunos.removeIf(ta -> ta.getAluno().equals(aluno));
+        aluno.getTurmaAlunos().removeIf(ta -> ta.getTurma().equals(this));
     }
 
     @Override

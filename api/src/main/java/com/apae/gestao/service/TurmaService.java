@@ -63,41 +63,23 @@ public class TurmaService {
     }
 
     @Transactional
-    public TurmaResponseDTO vincularProfessoresATurma(Long turmaId, List<Long> idsProfessores) {
+    public TurmaResponseDTO vincularProfessoresATurma(Long turmaId, Long professorId) {
         Turma turma = turmaDAO.findById(turmaId)
             .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
 
-        for (Long idProfessor : idsProfessores) {
-            Professor professor = professorDAO.findById(idProfessor)
-                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + idProfessor));
+        Professor professor = professorDAO.findById(professorId)
+                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + professorId));
 
-            turma.addProfessor(professor);
-        }
-        
+        turma.setProfessor(professor);
         Turma atualizado = turmaDAO.save(turma);
         return new TurmaResponseDTO(atualizado);
     }
 
     @Transactional(readOnly = true)
-    public List<ProfessorResponseDTO> listarProfessoresNaTurma(Long turmaId) {
+    public ProfessorResponseDTO buscarProfessorDaTurma(Long turmaId) {
         Turma turma = turmaDAO.findById(turmaId)
-            .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
-        return turma.getProfessores().stream()
-            .map(ProfessorResponseDTO::new)
-            .collect(Collectors.toList());
-    }
-
-    @Transactional
-    public TurmaResponseDTO desvincularProfessor(Long turmaId, Long idProfessor){
-        Turma turma = turmaDAO.findById(turmaId)
-            .orElseThrow(()-> new RuntimeException("Turma não encontrada com ID: " + turmaId));
-        Professor professor = professorDAO.findById(idProfessor)
-            .orElseThrow(()-> new RuntimeException("Professor não encontrado com ID: " + idProfessor));
-
-        turma.removeProfessor(professor);
-        
-        Turma atualizado = turmaDAO.save(turma);
-        return new TurmaResponseDTO(atualizado);
+                .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
+        return new ProfessorResponseDTO(turma.getProfessor());
     }
 
 
@@ -105,13 +87,17 @@ public class TurmaService {
         turma.setNome(dto.getNome());
         turma.setAnoCriacao(dto.getAnoCriacao());
         turma.setTurno(dto.getTurno());
+        turma.setTipo(dto.getTipo());
 
         if(dto.getIsAtiva() != null){
             turma.setIsAtiva(dto.getIsAtiva());
         }
 
-        turma.setAlunos(dto.getAlunos());
-        turma.setProfessores(dto.getProfessores());
+        if(dto.getProfessorId() != null) {
+            Professor professor = professorDAO.findById(dto.getProfessorId())
+                    .orElseThrow(() -> new RuntimeException("Professor não encontrado"));
+            turma.setProfessor(professor);
+        }
     }
 
     @Transactional

@@ -6,6 +6,8 @@ import com.apae.gestao.entity.Professor;
 import com.apae.gestao.repository.ProfessorRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import com.apae.gestao.exception.ConflitoDeDadosException;
+import com.apae.gestao.exception.RecursoNaoEncontradoException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,17 +51,15 @@ public class ProfessorService {
 
     @Transactional(readOnly = true)
     public ProfessorResponseDTO buscarPorId(Long id) {
-        // ALTERAÇÃO APLICADA AQUI
-        Professor professor = professorRepository.findByIdWithTurmas(id)
-                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
+        Professor professor = professorRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id));
         return new ProfessorResponseDTO(professor);
     }
 
     @Transactional
     public ProfessorResponseDTO atualizar(Long id, ProfessorRequestDTO dto) {
-        // ALTERAÇÃO APLICADA AQUI
-        Professor professor = professorRepository.findByIdWithTurmas(id)
-                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
+        Professor professor = professorRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id));
 
         validarCpfUnico(dto.getCpf(), id);
         validarEmailUnico(dto.getEmail(), id);
@@ -72,9 +72,8 @@ public class ProfessorService {
 
     @Transactional
     public ProfessorResponseDTO inativar(Long id) {
-        // ALTERAÇÃO APLICADA AQUI
-        Professor professor = professorRepository.findByIdWithTurmas(id)
-                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
+        Professor professor = professorRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id));
 
         // Desativação lógica
         professor.setAtivo(false);
@@ -85,7 +84,7 @@ public class ProfessorService {
     @Transactional
     public void deletarFisicamente(Long id) {
         if (!professorRepository.existsById(id)) {
-            throw new RuntimeException("Professor não encontrado com ID: " + id);
+            throw new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id);
         }
         professorRepository.deleteById(id);
     }
@@ -114,13 +113,13 @@ public class ProfessorService {
     }
 
     private void validarEmailUnico(String email, Long id) {
-        if (id == null) {
-            if (professorRepository.existsByEmail(email)) {
-                throw new RuntimeException("Email já cadastrado: " + email);
-            }
-        } else {
-            if (professorRepository.existsByEmailAndIdNot(email, id)) {
-                throw new RuntimeException("Email já cadastrado: " + email);
+        if (email != null && !email.trim().isEmpty()) {
+            boolean emailEmUso = id == null 
+                ? professorRepository.existsByEmail(email)
+                : professorRepository.existsByEmailAndIdNot(email, id);
+            
+            if (emailEmUso) {
+                throw new ConflitoDeDadosException("Já existe um professor cadastrado com este e-mail");
             }
         }
     }
