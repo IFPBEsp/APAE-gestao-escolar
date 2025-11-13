@@ -12,9 +12,6 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Setter
-@Getter
-@EqualsAndHashCode
 
 public class Aluno {
     @Id
@@ -36,6 +33,13 @@ public class Aluno {
     @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL)
     private Set<Avaliacao> avaliacoes = new HashSet<>();
 
+    public Aluno(Long id, String nome, Integer idade, String deficiencia) {
+        this.id = id;
+        this.nome = nome;
+        this.idade = idade;
+        this.deficiencia = deficiencia;
+    }
+    
     @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL)
     private Set<Presenca> presencas = new HashSet<>();
 
