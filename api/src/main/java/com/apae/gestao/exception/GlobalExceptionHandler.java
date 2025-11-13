@@ -71,7 +71,7 @@ public class GlobalExceptionHandler {
         Map<String, Object> error = new HashMap<>();
         error.put("timestamp", LocalDateTime.now());
         error.put("status", HttpStatus.BAD_REQUEST.value());
-        error.put("message", ex.getMessage()); // ✅ Retorna a mensagem da exception
+        error.put("message", ex.getMessage());
         return ResponseEntity.badRequest().body(error);
     }
 
