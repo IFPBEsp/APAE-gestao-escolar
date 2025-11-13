@@ -4,10 +4,10 @@ import { ArrowLeft, Users, TrendingUp, TrendingDown } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 
-// ✅ COLE AQUI O mockTurmaData COMPLETO:
+// mockTurmaData COMPLETO:
 const mockTurmaData = {
   1: {
-    name: "Alfabetização",
+    name: "Alfabetização 2025 - Manhã",
     alunos: [
       { id: 1, name: "Ana Silva", faltas: 2, presenca: 95, status: "ativo" },
       { id: 2, name: "Bruno Santos", faltas: 5, presenca: 87.5, status: "ativo" },
@@ -20,7 +20,7 @@ const mockTurmaData = {
     ],
   },
   2: {
-    name: "Estimulação", 
+    name: "Estimulação 2025 - Tarde", 
     alunos: [
       { id: 1, name: "Igor Martins", faltas: 1, presenca: 97.5, status: "ativo" },
       { id: 2, name: "Julia Alves", faltas: 3, presenca: 92.5, status: "ativo" },
