@@ -68,4 +68,7 @@ public class TurmaController {
         TurmaResponseDTO response = service.desativarTurma(turmaId);
         return ResponseEntity.ok(response);
     }
+
+    // @PostMapping
+    // public ResponseEntity<>
 }
