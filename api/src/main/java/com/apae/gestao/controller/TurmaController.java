@@ -63,7 +63,7 @@ public class TurmaController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{turmaId}/desativar")
+    @PatchMapping("/{turmaId}/inativar")
     public ResponseEntity<TurmaResponseDTO> desativarTurma(@PathVariable Long turmaId) {
         TurmaResponseDTO response = service.desativarTurma(turmaId);
         return ResponseEntity.ok(response);
@@ -99,7 +99,7 @@ public class TurmaController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{turmaId}/alunos/{alunoId}/desativar")
+    @PatchMapping("/{turmaId}/alunos/{alunoId}/inativar")
     public ResponseEntity<TurmaAlunoResponseDTO> desativarAlunoNaTurma(@PathVariable Long turmaId, @PathVariable Long alunoId){
         service.desativarAluno(alunoId, turmaId);
         return ResponseEntity.ok().build();
