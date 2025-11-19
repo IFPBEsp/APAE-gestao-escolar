@@ -58,5 +58,6 @@ public class ProfessorController {
         ProfessorResponseDTO response = professorService.reativarProfessor(id);
         return ResponseEntity.ok(response);
     }
+    
 }
 

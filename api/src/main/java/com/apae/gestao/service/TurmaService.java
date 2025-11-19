@@ -190,7 +190,6 @@ public class TurmaService {
                 .orElseThrow(() -> new RuntimeException("O aluno não pertence a esta turma."));
 
         turmaAluno.setIsAlunoAtivo(ativo);
-
         turmaAlunoDAO.save(turmaAluno);
     }
 
@@ -210,6 +209,4 @@ public class TurmaService {
             turma.setProfessor(professor);
         }
     }
-
-
 }
