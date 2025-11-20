@@ -18,7 +18,7 @@ public class Presenca {
     private Long id;
 
     @Column
-    private Integer faltas;
+    private Boolean faltou;
 
     @ManyToOne
     @JoinColumn(name = "alunos_id")
@@ -30,7 +30,7 @@ public class Presenca {
 
     @PrePersist
     private void init() {
-        if (this.faltas == null) this.faltas = 0;
+        if (this.faltou == null) this.faltou = false;
     }
 
     @Override
