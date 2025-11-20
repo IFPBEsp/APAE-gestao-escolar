@@ -2,6 +2,7 @@ package com.apae.gestao.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,11 +34,13 @@ public class ProfessorRequestDTO {
     @Size(max = 15, message = "Telefone deve ter no máximo 15 caracteres")
     private String telefone;
 
+    @NotNull(message = "Data de nascimento é obrigatória")
     private LocalDate dataNascimento;
 
     @Size(max = 100, message = "Especialidade deve ter no máximo 100 caracteres")
     private String especialidade;
 
+    @NotNull(message = "Data de contratação é obrigatória")
     private LocalDate dataContratacao;
 
     @Size(max = 255, message = "Endereço deve ter no máximo 255 caracteres")

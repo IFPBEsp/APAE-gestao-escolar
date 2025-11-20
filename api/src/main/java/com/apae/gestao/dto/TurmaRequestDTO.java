@@ -2,9 +2,6 @@ package com.apae.gestao.dto;
 
 import java.util.Set;
 
-import com.apae.gestao.entity.Aluno;
-import com.apae.gestao.entity.Professor;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -30,9 +27,8 @@ public class TurmaRequestDTO {
 
     private Boolean isAtiva;
 
+    @NotBlank(message = "Tipo é obrigatório")
     private String tipo;
 
-    private Set<Aluno> alunos;
-
-    private Professor professor;
+    private Set<Long> alunosIds;
 }

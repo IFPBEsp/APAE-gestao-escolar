@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import com.apae.gestao.dto.ProfessorResponseDTO;
 import com.apae.gestao.dto.TurmaRequestDTO;
 import com.apae.gestao.dto.TurmaResponseDTO;
+import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Turma;
+import com.apae.gestao.repository.AlunoRepository;
 import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.repository.TurmaRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,9 @@ public class TurmaService {
 
     @Autowired
     private ProfessorRepository professorDAO;
+
+    @Autowired
+    private AlunoRepository alunoRepository;
 
     @Transactional
     public TurmaResponseDTO criar(TurmaRequestDTO dto){
@@ -97,6 +102,20 @@ public class TurmaService {
             Professor professor = professorDAO.findById(dto.getProfessorId())
                     .orElseThrow(() -> new RuntimeException("Professor não encontrado"));
             turma.setProfessor(professor);
+        }
+
+        // Processar alunosIds e vincular alunos à turma
+        if(dto.getAlunosIds() != null && !dto.getAlunosIds().isEmpty()) {
+            for(Long alunoId : dto.getAlunosIds()) {
+                Aluno aluno = alunoRepository.findById(alunoId)
+                        .orElseThrow(() -> new RuntimeException("Aluno não encontrado com ID: " + alunoId));
+                // Verificar se o aluno já não está na turma (evitar duplicatas)
+                boolean alunoJaExiste = turma.getTurmaAlunos().stream()
+                        .anyMatch(ta -> ta.getAluno().getId().equals(alunoId));
+                if(!alunoJaExiste) {
+                    turma.addAluno(aluno, true);
+                }
+            }
         }
     }
 
