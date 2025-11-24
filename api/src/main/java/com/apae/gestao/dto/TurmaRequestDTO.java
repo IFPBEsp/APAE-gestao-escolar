@@ -27,7 +27,6 @@ public class TurmaRequestDTO {
 
     private Boolean isAtiva;
 
-    @NotBlank(message = "Tipo é obrigatório")
     private String tipo;
 
     private Set<Long> alunosIds;
