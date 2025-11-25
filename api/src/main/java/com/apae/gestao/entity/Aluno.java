@@ -3,16 +3,18 @@ package com.apae.gestao.entity;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
 
-//Placeholder. Trocar para a entidade Paciente do outro repo depois...
+//Trocar para a entidade Paciente do outro repo depois...
 @Entity
 @Table(name = "alunos")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Aluno {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
