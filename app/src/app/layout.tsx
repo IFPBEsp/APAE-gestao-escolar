@@ -1,6 +1,6 @@
 import "../styles/globals.css";
-import { ToasterProvider } from "@/components/ToasterProvider"; // ✅ Corrigido
-import Header from "@/components/Header/Header"; // ✅ Corrigido
+import { ToasterProvider } from "@/components/ToasterProvider";
+import Header from "@/components/Header/Header";
 
 export default function RootLayout({ 
   children 
@@ -9,9 +9,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body>
+      <body className="min-h-screen bg-[#E5E5E5]">
         <Header />
-        {children}
+        <main className="min-h-[calc(100vh-5rem)]">
+          {children}
+        </main>
         <ToasterProvider />
       </body>
     </html>
