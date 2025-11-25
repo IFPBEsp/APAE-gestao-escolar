@@ -149,28 +149,28 @@ export default function ProfessorDashboard() {
                 {/* Resumo Rápido */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#B2D7EC]/20">
-                          <BookOpen className="h-7 w-7 text-[#0D4F97]" />
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-center gap-3"> 
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#B2D7EC]/20">
+                          <BookOpen className="h-5 w-5 text-[#0D4F97]" />
                         </div>
-                        <div>
-                          <p className="text-[#222222]">Turmas Ativas</p>
-                          <p className="text-[#0D4F97] text-2xl font-bold">{professorData.turmas.length}</p>
+                        <div className="text-center"> 
+                          <p className="text-[#222222] text-sm">Turmas Ativas</p>
+                          <p className="text-[#0D4F97] text-lg font-semibold">{professorData.turmas.length}</p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
 
                   <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#B2D7EC]/20">
-                          <Users className="h-7 w-7 text-[#0D4F97]" />
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-center gap-3"> 
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#B2D7EC]/20">
+                          <Users className="h-5 w-5 text-[#0D4F97]" />
                         </div>
-                        <div>
-                          <p className="text-[#222222]">Total de Alunos</p>
-                          <p className="text-[#0D4F97] text-2xl font-bold">
+                        <div className="text-center"> 
+                          <p className="text-[#222222] text-sm">Total de Alunos</p>
+                          <p className="text-[#0D4F97] text-lg font-semibold">
                             {professorData.turmas.reduce((sum, t) => sum + t.students, 0)}
                           </p>
                         </div>
