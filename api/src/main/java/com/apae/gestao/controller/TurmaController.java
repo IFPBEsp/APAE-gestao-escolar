@@ -2,6 +2,12 @@ package com.apae.gestao.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.apae.gestao.dto.TurmaAlunoResponseDTO;
 import com.apae.gestao.dto.ApiErrorResponse;
 import com.apae.gestao.dto.TurmaRequestDTO;
 import com.apae.gestao.dto.TurmaResponseDTO;
@@ -133,6 +139,42 @@ public class TurmaController {
             @PathVariable Long turmaId) {
         TurmaResponseDTO response = service.desativarTurma(turmaId);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{turmaId}/alunos")
+    public ResponseEntity<TurmaResponseDTO> adicionarAlunos(@RequestBody List<Long> alunosId, @PathVariable Long turmaId){
+        TurmaResponseDTO response = service.adicionarAlunos(turmaId, alunosId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{turmaId}/alunos")
+    public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosNaTurma(@PathVariable Long turmaId){
+        List<TurmaAlunoResponseDTO> response = service.listarAlunos(turmaId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{turmaId}/alunos/ativos")
+    public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosAtivosNaTurma(@PathVariable Long turmaId){
+        List<TurmaAlunoResponseDTO> response = service.listarAlunosAtivos(turmaId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{turmaId}/alunos/inativos")
+    public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosInativosNaTurma(@PathVariable Long turmaId){
+        List<TurmaAlunoResponseDTO> response = service.listarAlunosInativos(turmaId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{turmaId}/alunos/{alunoId}/ativar")
+    public ResponseEntity<TurmaAlunoResponseDTO> ativarAlunoNaTurma(@PathVariable Long turmaId, @PathVariable Long alunoId){
+        service.ativarAluno(alunoId, turmaId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{turmaId}/alunos/{alunoId}/inativar")
+    public ResponseEntity<TurmaAlunoResponseDTO> desativarAlunoNaTurma(@PathVariable Long turmaId, @PathVariable Long alunoId){
+        service.desativarAluno(alunoId, turmaId);
+        return ResponseEntity.ok().build();
     }
 }
 
