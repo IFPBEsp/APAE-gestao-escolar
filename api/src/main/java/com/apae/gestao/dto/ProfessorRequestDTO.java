@@ -41,7 +41,6 @@ public class ProfessorRequestDTO {
     private String telefone;
 
     @NotNull(message = "Data de nascimento é obrigatória")
-    @Schema(description = "Data de nascimento no formato ISO-8601", example = "1990-05-12")
     private LocalDate dataNascimento;
 
     @Size(max = 100, message = "Especialidade deve ter no máximo 100 caracteres")
@@ -49,7 +48,6 @@ public class ProfessorRequestDTO {
     private String especialidade;
 
     @NotNull(message = "Data de contratação é obrigatória")
-    @Schema(description = "Data de contratação no formato ISO-8601", example = "2024-02-01")
     private LocalDate dataContratacao;
 
     @Size(max = 255, message = "Endereço deve ter no máximo 255 caracteres")
