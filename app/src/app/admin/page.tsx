@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { User, Users, GraduationCap, TrendingUp } from "lucide-react";
 
 export default function AdminHomePage() {
-  // Dados dinâmicos simulados (substituir com dados reais depois)
   const [totalAlunos, setTotalAlunos] = useState(20);
   const [totalTurmas, setTotalTurmas] = useState(6);
   const [totalProfessores, setTotalProfessores] = useState(12);

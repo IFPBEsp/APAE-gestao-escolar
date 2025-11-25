@@ -52,7 +52,6 @@ export default function GerenciarTurmasPage() {
             key={turma.id}
             className="border border-[#B2D7EC] bg-white rounded-xl shadow-sm p-6 relative"
           >
-            {/* Contador de alunos */}
             <div className="absolute right-4 top-4 bg-[#E8F3FF] text-[#0D4F97] px-4 py-1 rounded-full text-sm font-medium">
               {turma.students} alunos
             </div>

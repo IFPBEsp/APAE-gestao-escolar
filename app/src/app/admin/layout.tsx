@@ -19,9 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="h-screen bg-[#E5E5E5]">
       
-      {/* SIDEBAR FIXA SEMPRE ABERTA */}
-      <aside className="fixed top-0 left-0 w-64 h-screen bg-[#B2D7EC] z-[9999] flex flex-col justify-between py-6 shadow-xl">
-        
+<aside className="fixed top-0 left-0 w-64 h-screen bg-[#B2D7EC] z-[9999] flex flex-col justify-between py-6 shadow-xl **rounded-r-md**">        
         <div>
           <div className="flex flex-col items-center mb-8">
             <Image src="/apae-logo.png" alt="Logo APAE" width={60} height={60} className="mb-2" />
@@ -51,7 +49,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </nav>
         </div>
 
-        {/* BOTÃO SAIR */}
         <button
           onClick={() => router.push("/")}
           className="flex items-center gap-2 mx-4 px-4 py-2 rounded-lg text-[#0D4F97] border border-[#0D4F97]/30 hover:bg-red-100 hover:text-red-600 transition"
@@ -61,7 +58,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </button>
       </aside>
 
-      {/* CONTEÚDO EMPURRADO PARA O LADO */}
       <main className="ml-64 h-screen p-8">
         {children}
       </main>
