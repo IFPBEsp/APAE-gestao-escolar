@@ -31,11 +31,10 @@ public class TurmaService {
     private ProfessorRepository professorDAO;
 
     @Autowired
-    private AlunoRepository alunoDAO; //trocar esse depois, para ter só um
+    private AlunoRepository alunoDAO; 
 
     @Autowired
     private TurmaAlunoRepository turmaAlunoDAO;
-    private AlunoRepository alunoRepository;
 
     @Transactional
     public TurmaResponseDTO criar(TurmaRequestDTO dto){
@@ -212,7 +211,7 @@ public class TurmaService {
 
         if (dto.getAlunosIds() != null && !dto.getAlunosIds().isEmpty()) {
             dto.getAlunosIds().forEach(alunoId -> {
-                Aluno aluno = alunoRepository.findById(alunoId)
+                Aluno aluno = alunoDAO.findById(alunoId)
                         .orElseThrow(() -> new RuntimeException("Aluno não encontrado com ID: " + alunoId));
 
                 boolean alunoJaExiste = turma.getTurmaAlunos().stream()
