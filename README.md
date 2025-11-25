@@ -151,3 +151,15 @@ git push origin minha-feature
 
 Abra um Pull Request descrevendo suas alterações.
 ```
+
+---
+
+# Utilizando o Swagger
+
+Primeiro, é necessário iniciar o backend.
+
+## Acesso ao Swagger
+localhost:8080/swagger-ui.html
+
+## Acesso à documentação
+localhost:8080/v3/api-docs
