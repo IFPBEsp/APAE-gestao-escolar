@@ -57,35 +57,35 @@ export default function ProfessorSidebar({
           </button>
         </div>
 
-        {/* Logo e Nome no Topo */}
-        <div className="border-b-2 border-[#0D4F97]/20 p-6 mt-16"> {/* Aumentei o mt para dar espaço ao botão */}
+        {/* Logo e Nome no Topo - AGORA SEM FUNDO BRANCO */}
+        <div className="border-b-2 border-[#0D4F97]/20 p-6 mt-16">
           {!isCollapsed ? (
-            <div className="flex items-center gap-3 mb-2">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white p-1 flex-shrink-0">
+            <div className="flex flex-col items-center gap-3 mb-2">
+              {/* Logo sem fundo branco - igual ao admin */}
+              <div className="flex items-center justify-center">
                 <Image 
-                  src="/logo.APAE.jpg" 
+                  src="/apae-logo.png" 
                   alt="Logo APAE" 
-                  width={48}
-                  height={48}
-                  className="h-full w-full object-contain"
+                  width={60}
+                  height={60}
+                  className="object-contain"
                 />
               </div>
-              <div>
+              <div className="text-center">
                 <h2 className="text-[#0D4F97] font-bold">APAE Esperança</h2>
                 <p className="text-[#0D4F97]/70 text-sm">Painel do Professor</p>
               </div>
             </div>
           ) : (
             <div className="flex justify-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white p-1">
-                <Image 
-                  src="/logo.APAE.jpg" 
-                  alt="Logo APAE" 
-                  width={48}
-                  height={48}
-                  className="h-full w-full object-contain"
-                />
-              </div>
+              {/* Logo colapsada sem fundo branco */}
+              <Image 
+                src="/apae-logo.png" 
+                alt="Logo APAE" 
+                width={40}
+                height={40}
+                className="object-contain"
+              />
             </div>
           )}
         </div>
@@ -145,19 +145,19 @@ export default function ProfessorSidebar({
           {/* Sidebar Mobile */}
           <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-[#B2D7EC] rounded-r-3xl md:hidden overflow-y-auto">
             <div className="flex h-full flex-col">
-              {/* Header Mobile */}
-              <div className="flex items-center justify-between border-b-2 border-[#0D4F97]/20 p-4 mt-8">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white p-1">
-                    <Image 
-                      src="/logo.APAE.jpg" 
-                      alt="Logo APAE" 
-                      width={40}
-                      height={40}
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-                  <h2 className="text-[#0D4F97] font-bold">Menu</h2>
+              {/* Header Mobile - AGORA SEM FUNDO BRANCO */}
+              <div className="flex flex-col items-center border-b-2 border-[#0D4F97]/20 p-4 mt-8">
+                <div className="flex flex-col items-center gap-3 mb-4">
+                  {/* Logo mobile sem fundo branco */}
+                  <Image 
+                    src="/apae-logo.png" 
+                    alt="Logo APAE" 
+                    width={60}
+                    height={60}
+                    className="object-contain"
+                  />
+                  <h2 className="text-[#0D4F97] font-bold">APAE Esperança</h2>
+                  <p className="text-[#0D4F97]/70 text-sm">Painel do Professor</p>
                 </div>
                 <button
                   onClick={() => setSidebarOpen(false)}
