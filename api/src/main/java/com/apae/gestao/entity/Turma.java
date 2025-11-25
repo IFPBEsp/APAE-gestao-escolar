@@ -31,7 +31,7 @@ public class Turma {
     @Column(nullable = false)
     private String turno;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private String tipo;
 
     @Column(nullable = false)
