@@ -3,7 +3,7 @@ package com.apae.gestao.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -22,7 +22,10 @@ public class Aula {
     private Long id;
 
     @Column(name = "data_da_aula", nullable = false)
-    private LocalDateTime dataDaAula;
+    private LocalDate dataDaAula;
+
+    @Column(nullable = false)
+    private String descricao;
 
     @ManyToOne
     @JoinColumn(name = "turmas_id")
