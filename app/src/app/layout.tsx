@@ -14,6 +14,11 @@ export default function RootLayout({
         <main className="min-h-[calc(100vh-5rem)]">
           {children}
         </main>
+      <body> 
+        <Header />
+        <div className="mt-[50px]">
+        {children}
+        </div>
         <ToasterProvider />
       </body>
     </html>
