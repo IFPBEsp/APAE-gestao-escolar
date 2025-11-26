@@ -1,0 +1,35 @@
+:root {
+  --apae-primary: #0d4f97;
+  --apae-secondary: #f2b705;
+}
+
+.swagger-ui .topbar {
+  background-color: var(--apae-primary);
+  border-bottom: 4px solid var(--apae-secondary);
+}
+
+.swagger-ui .topbar .download-url-wrapper .select-label span {
+  color: #fff;
+}
+
+.swagger-ui .info .title {
+  color: var(--apae-primary);
+}
+
+.swagger-ui .btn.authorize {
+  border-color: var(--apae-primary);
+  color: var(--apae-primary);
+}
+
+.swagger-ui .btn.authorize svg {
+  fill: var(--apae-primary);
+}
+
+.swagger-ui .opblock.opblock-post {
+  border-color: var(--apae-primary);
+}
+
+.swagger-ui .opblock-summary-method {
+  color: #fff;
+}
+
