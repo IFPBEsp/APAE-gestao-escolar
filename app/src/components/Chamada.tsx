@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { AttendanceSwitch } from "./Button/Attendance-switch";
 
 const studentsByClass: Record<string, Array<{id: number, name: string}>> = {
   "Alfabetização 2025 - Manhã": [
@@ -246,14 +247,11 @@ export default function Chamada({
                                 </TableCell>
                                 <TableCell className="text-center">
                                   <div className="flex justify-center">
-                                    <Checkbox
-                                      id={`student-${student.id}`}
-                                      checked={isAbsent}
-                                      onCheckedChange={(checked) =>
-                                        handleAttendanceChange(student.id, checked as boolean)
-                                      }
-                                      className="h-6 w-6 border-2 border-[#0D4F97] data-[state=checked]:bg-[#0D4F97] data-[state=checked]:text-white"
+                                    <AttendanceSwitch
+                                      value={isAbsent}
+                                      onChange={(v) => handleAttendanceChange(student.id, v)}
                                     />
+
                                   </div>
                                 </TableCell>
                               </TableRow>

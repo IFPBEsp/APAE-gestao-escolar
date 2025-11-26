@@ -31,7 +31,7 @@ export default function ProfessorDashboard() {
   const [turmaAlunosSelecionada, setTurmaAlunosSelecionada] = useState<string>("");
 
   const professorData = {
-    nome: "Maria Santos",
+    nome: "Hugo Figueiredo",
     turmas: [
       {
         id: 1,
