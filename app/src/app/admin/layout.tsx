@@ -19,7 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="h-screen bg-[#E5E5E5]">
       
-<aside className="fixed top-0 left-0 w-64 h-screen bg-[#B2D7EC] z-[9999] flex flex-col justify-between py-6 shadow-xl **rounded-r-md**">        
+    <aside className="fixed top-0 left-0 w-64 h-screen bg-[#B2D7EC] z-[9999] flex flex-col justify-between py-6 shadow-xl **rounded-r-md**">        
         <div>
           <div className="flex flex-col items-center mb-8">
             <Image src="/apae-logo.png" alt="Logo APAE" width={60} height={60} className="mb-2" />
