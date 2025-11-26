@@ -9,9 +9,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body>
+      <body> 
         <Header />
+        <div className="mt-[50px]">
         {children}
+        </div>
         <ToasterProvider />
       </body>
     </html>
