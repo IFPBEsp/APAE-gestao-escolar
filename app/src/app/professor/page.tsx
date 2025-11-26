@@ -150,31 +150,32 @@ export default function ProfessorDashboard() {
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-center gap-3"> 
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#B2D7EC]/20">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#B2D7EC]/20 mt-6">
                           <BookOpen className="h-5 w-5 text-[#0D4F97]" />
                         </div>
-                        <div className="text-center"> 
-                          <p className="text-[#222222] text-sm">Turmas Ativas</p>
-                          <p className="text-[#0D4F97] text-lg font-semibold">{professorData.turmas.length}</p>
-                        </div>
+
+                        <p className="text-[#222222] text-sm text-center mt-3">Turmas Ativas</p>
+                        <p className="text-[#0D4F97] text-lg font-semibold text-center">
+                          {professorData.turmas.length}
+                        </p>
                       </div>
                     </CardContent>
                   </Card>
 
                   <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-center gap-3"> 
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#B2D7EC]/20">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#B2D7EC]/20 mt-6">
                           <Users className="h-5 w-5 text-[#0D4F97]" />
                         </div>
-                        <div className="text-center"> 
-                          <p className="text-[#222222] text-sm">Total de Alunos</p>
-                          <p className="text-[#0D4F97] text-lg font-semibold">
-                            {professorData.turmas.reduce((sum, t) => sum + t.students, 0)}
-                          </p>
-                        </div>
+
+                        <p className="text-[#222222] text-sm text-center mt-3">Total de Alunos</p>
+                        <p className="text-[#0D4F97] text-lg font-semibold text-center">
+                          {professorData.turmas.reduce((sum, t) => sum + t.students, 0)}
+                        </p>
                       </div>
+
                     </CardContent>
                   </Card>
                 </div>
