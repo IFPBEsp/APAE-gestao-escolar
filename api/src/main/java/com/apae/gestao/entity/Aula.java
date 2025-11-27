@@ -16,6 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@Builder
 public class Aula {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

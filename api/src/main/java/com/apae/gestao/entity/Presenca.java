@@ -6,12 +6,12 @@ import lombok.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "presencas")
+@Table(name = "presencas", uniqueConstraints = @UniqueConstraint(columnNames = {"alunos_id", "aulas_id"}))
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter@Setter
-
+@Builder
 public class Presenca {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,5 +44,15 @@ public class Presenca {
     @Override
     public int hashCode() {
         return id != null ? Objects.hash(id) : getClass().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Presenca{" +
+                "id=" + id +
+                ", faltou=" + faltou +
+                ", alunoId=" + (aluno != null ? aluno.getId() : null) +
+                ", aulaId=" + (aula != null ? aula.getId() : null) +
+                '}';
     }
 }
