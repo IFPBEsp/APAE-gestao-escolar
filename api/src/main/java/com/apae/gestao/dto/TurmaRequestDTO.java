@@ -16,10 +16,6 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Informações necessárias para criar ou atualizar uma turma.")
 public class TurmaRequestDTO {
 
-    @NotBlank(message = "Nome é obrigatorio")
-    @Schema(description = "Nome completo da turma", example = "Alfabetização 2025 - Manhã")
-    private String nome;
-
     @NotNull
     @Schema(description = "Ano letivo de criação da turma", example = "2025")
     private Integer anoCriacao;
