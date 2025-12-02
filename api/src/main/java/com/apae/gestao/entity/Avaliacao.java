@@ -15,6 +15,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 @EqualsAndHashCode
 public class Avaliacao {
     @Id
