@@ -1,88 +1,127 @@
 'use client'
 
-import { ArrowLeft, UserPlus, Eye } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { UserPlus, UserCircle, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function GerenciarProfessoresPage() {
+const mockProfessores = [
+  {
+    id: 1,
+    nome: "Maria Silva",
+    status: "Ativo",
+    turmas: [
+      "Alfabetização 2023 - Manhã",
+      "Matemática Básica 2023 - Manhã"
+    ]
+  },
+  {
+    id: 2,
+    nome: "João Santos",
+    status: "Ativo",
+    turmas: [
+      "Língua Portuguesa 2023 - Tarde"
+    ]
+  },
+  {
+    id: 3,
+    nome: "Ana Costa",
+    status: "Ativo",
+    turmas: [
+      "Matemática Básica 2023 - Manhã"
+    ]
+  },
+  {
+    id: 4,
+    nome: "Carlos Lima",
+    status: "Ativo",
+    turmas: [
+      "Educação Física 2023 - Tarde"
+    ]
+  },
+  {
+    id: 5,
+    nome: "Paula Oliveira",
+    status: "Ativo",
+    turmas: [
+      "Alfabetização 2023 - Manhã"
+    ]
+  },
+  {
+    id: 6,
+    nome: "Roberta Mendes",
+    status: "Ativo",
+    turmas: [
+      "Estimulação 2023 - Tarde",
+      "Linguagem 2023 - Tarde"
+    ]
+  },
+];
+
+export default function Professores() {
   const router = useRouter();
 
-  const actions = [
-    {
-      id: "adicionar",
-      icon: UserPlus,
-      title: "Adicionar Professor",
-      description: "Cadastrar um novo professor no sistema",
-      route: "/admin/professores/cadastrar",
-    },
-    {
-      id: "visualizar",
-      icon: Eye,
-      title: "Ver Informações",
-      description: "Consultar dados dos professores",
-      route: "/admin/professores/visualizar",
-    },
-  ];
-
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-[#E5E5E5] p-6 md:p-10">
+    <main className="p-8">
       <div className="mx-auto max-w-6xl">
-        {/* Botão Voltar */}
-        <button
-          onClick={() => router.back()}
-          className="mb-8 flex items-center gap-2 text-[#0D4F97] transition-colors hover:text-[#FFD000]"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          <span>Voltar</span>
-        </button>
-
-        {/* Card Principal */}
-        <Card className="rounded-2xl border border-[#B2D7EC] bg-white shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-2xl font-semibold text-[#0D4F97]">
+        <div className="mb-6 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-[#0D4F97] mb-2">
               Gerenciar Professores
-            </CardTitle>
-            <CardDescription className="text-[#222222] text-base">
-              Escolha uma ação para gerenciar os professores
-            </CardDescription>
-          </CardHeader>
+            </h1>
+            <p className="text-[#222222]">Visualize e edite a lista de professores</p>
+          </div>
 
-          <CardContent className="pt-4 pb-10">
-            {/* Ações */}
-            <div className="flex flex-col items-center justify-center gap-8 md:flex-row">
-              {actions.map((action) => {
-                const Icon = action.icon;
-                return (
-                  <div
-                    key={action.id}
-                    className="flex w-full max-w-[480px] flex-col justify-between overflow-hidden rounded-2xl border border-[#B2D7EC] bg-white shadow-md transition-all hover:shadow-lg"
-                  >
-                    <div className="flex flex-col items-center px-10 pt-10 pb-8 text-center">
-                      <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#B2D7EC]/20">
-                        <Icon className="h-8 w-8 text-[#0D4F97]" strokeWidth={2.2} />
-                      </div>
-                      <h3 className="mb-3 text-lg font-semibold text-[#0D4F97]">
-                        {action.title}
-                      </h3>
-                      <p className="text-sm text-[#222222] leading-relaxed">
-                        {action.description}
-                      </p>
-                    </div>
-                    <div className="px-10 pb-8">
-                      <button
-                        onClick={() => router.push(action.route)}
-                        className="flex h-12 w-full items-center justify-center rounded-lg bg-[#0D4F97] text-white font-medium transition-colors hover:bg-[#FFD000] hover:text-[#0D4F97]"
-                      >
-                        Acessar
-                      </button>
-                    </div>
+          <Button
+            onClick={() => router.push("/admin/professores/cadastrar")}
+            className="h-12 justify-center bg-[#0D4F97] px-6 text-white hover:bg-[#FFD000] hover:text-[#0D4F97]"
+          >
+            <UserPlus className="mr-2 h-5 w-5" />
+            Adicionar Professor
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {mockProfessores.map((professor) => (
+            <Card
+              key={professor.id}
+              className="rounded-xl border-2 border-[#B2D7EC] bg-white shadow-md transition-all hover:border-[#0D4F97] hover:shadow-lg"
+            >
+              <CardContent className="p-6">
+                <div className="mb-4 flex items-start gap-3">
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#B2D7EC]/20">
+                    <UserCircle className="h-7 w-7 text-[#0D4F97]" />
                   </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg font-semibold text-[#0D4F97] mb-1">
+                      {professor.nome}
+                    </h3>
+                    <span className="inline-block rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
+                      {professor.status}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <div className="mb-2 flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-[#0D4F97]" />
+                    <span className="text-sm font-medium text-[#0D4F97]">Turmas</span>
+                  </div>
+                  <ul className="space-y-1">
+                    {professor.turmas.map((turma, index) => (
+                      <li key={index} className="text-sm text-[#222222]">
+                        • {turma}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
+
+
