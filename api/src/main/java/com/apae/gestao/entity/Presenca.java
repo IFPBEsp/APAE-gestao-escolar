@@ -12,6 +12,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Getter@Setter
 
+
 public class Presenca {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
