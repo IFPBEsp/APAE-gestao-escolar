@@ -193,10 +193,10 @@ public class TurmaService {
     }
 
     private void mapearDtoParaEntity(TurmaRequestDTO dto, Turma turma) {
-        turma.setNome(dto.getNome());
         turma.setAnoCriacao(dto.getAnoCriacao());
         turma.setTurno(dto.getTurno());
         turma.setTipo(dto.getTipo());
+        turma.setNome(dto.getTipo() + " " + dto.getAnoCriacao() + " " + dto.getTurno());
 
         if (dto.getIsAtiva() != null) {
             turma.setIsAtiva(dto.getIsAtiva());
