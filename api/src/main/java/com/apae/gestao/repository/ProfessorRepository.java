@@ -28,4 +28,23 @@ public interface ProfessorRepository extends JpaRepository<Professor, Long> {
     boolean existsByCpfAndIdNot(String cpf, Long id);
     
     boolean existsByEmailAndIdNot(String email, Long id);
+    
+    /**
+     * Busca professores com filtros opcionais de nome e status.
+     * Suporta combinação flexível dos parâmetros:
+     * - Se nome for null: ignora filtro de nome
+     * - Se ativo for null: ignora filtro de status (retorna todos)
+     * - Se ambos forem fornecidos: aplica ambos os filtros
+     * 
+     * @param nome Parâmetro opcional para busca por nome (case-insensitive, contém)
+     * @param ativo Parâmetro opcional para filtrar por status (true=ativos, false=inativos, null=todos)
+     * @return Lista de professores que atendem aos critérios
+     */
+    @Query("SELECT p FROM Professor p WHERE " +
+           "(:nome IS NULL OR :nome = '' OR LOWER(p.nome) LIKE LOWER(CONCAT('%', :nome, '%'))) AND " +
+           "(:ativo IS NULL OR p.ativo = :ativo)")
+    List<Professor> findByNomeContainingIgnoreCaseAndAtivo(
+            @Param("nome") String nome, 
+            @Param("ativo") Boolean ativo
+    );
 }
