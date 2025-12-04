@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 export default function Header() {
   return (
-    <header className="flex h-20 items-center justify-center bg-[#0D4F97] px-6">
+    <header className="flex h-20 items-center justify-center bg-[#0D4F97] px-6 fixed top-0 w-screen" >
       <div className="flex items-center gap-3">
         
         <Image
@@ -17,4 +17,4 @@ export default function Header() {
       </div>
     </header>
   );
-}
+}	
