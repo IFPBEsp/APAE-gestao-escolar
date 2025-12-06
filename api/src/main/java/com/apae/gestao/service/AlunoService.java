@@ -29,6 +29,14 @@ public class AlunoService {
     }
 
     @Transactional(readOnly = true)
+    public List<AlunoResponseDTO> buscarPorNome(String nome) {
+        return alunoRepository.findByNomeContainingIgnoreCase(nome)
+                .stream()
+                .map(AlunoResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public AlunoResponseDTO buscarPorId(Long id) {
         Aluno aluno = alunoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado com ID: " + id));

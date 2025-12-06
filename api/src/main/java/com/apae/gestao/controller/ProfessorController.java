@@ -86,14 +86,23 @@ public class ProfessorController {
     @GetMapping
     @Operation(
         summary = "Listar professores",
-        description = "Retorna todos os professores cadastrados com opção de filtrar apenas os ativos."
+        description = "Retorna todos os professores cadastrados com opção de filtrar apenas os ativos ou por nome (busca parcial e case-insensitive)."
     )
     public ResponseEntity<List<ProfessorResponseDTO>> listarTodos(
             @Parameter(description = "Quando verdadeiro, retorna apenas professores ativos", example = "true", in = ParameterIn.QUERY)
-            @RequestParam(value = "ativos", required = false, defaultValue = "false") boolean ativos) {
-        List<ProfessorResponseDTO> professores = ativos
-                ? professorService.listarAtivos()
-                : professorService.listarTodos();
+            @RequestParam(value = "ativos", required = false, defaultValue = "false") boolean ativos, 
+            @Parameter(description = "Filtra professores por nome (busca parcial e ignora miúsculas/minúsculas)", example ="Maria", in = ParameterIn.QUERY)
+            @RequestParam(value = "nome", required = false) String nome) {
+        List<ProfessorResponseDTO> professores;
+        if (nome != null && !nome.trim().isEmpty()) {
+            professores = professorService.buscarPorNome(nome.trim());
+        }
+        else if (ativos) {
+            professores = professorService.listarAtivos();
+        }
+        else {
+            professores = professorService.listarTodos();
+        }
         return ResponseEntity.ok(professores);
     }
 

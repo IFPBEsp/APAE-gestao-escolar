@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -33,9 +34,23 @@ public class AlunoController {
     }
 
     @GetMapping
-    @Operation(summary = "Listar alunos", description = "Retorna todos os alunos cadastrados.")
-    public List<AlunoResponseDTO> listarTodos() {
-        return alunoService.listarTodos();
+    @Operation(
+        summary = "Listar alunos", 
+        description = "Retorna todos os alunos cadastrados com opção de filtrar por nome (busca parcial case-insensitive)."
+    )
+    public ResponseEntity<List<AlunoResponseDTO>> listarTodos(
+            @Parameter(description = "Filtra alunos por nome (busca parcial e ignora maiúsculas/minúsculas)", example = "João", in = ParameterIn.QUERY)
+            @RequestParam(value = "nome", required = false) String nome) {
+        
+        List<AlunoResponseDTO> alunos;
+        
+        if (nome != null && !nome.trim().isEmpty()) {
+            alunos = alunoService.buscarPorNome(nome.trim());
+        } else {
+            alunos = alunoService.listarTodos();
+        }
+        
+        return ResponseEntity.ok(alunos);
     }
 
     @GetMapping("/{id}")

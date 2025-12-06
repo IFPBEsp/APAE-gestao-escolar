@@ -50,6 +50,14 @@ public class ProfessorService {
     }
 
     @Transactional(readOnly = true)
+    public List<ProfessorResponseDTO> buscarPorNome(String nome) {
+        return professorRepository.findByNomeContainingIgnoreCase(nome)
+                .stream()
+                .map(ProfessorResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public ProfessorResponseDTO buscarPorId(Long id) {
         Professor professor = professorRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id));

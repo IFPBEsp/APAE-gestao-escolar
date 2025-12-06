@@ -28,4 +28,6 @@ public interface ProfessorRepository extends JpaRepository<Professor, Long> {
     boolean existsByCpfAndIdNot(String cpf, Long id);
     
     boolean existsByEmailAndIdNot(String email, Long id);
+
+    List<Professor> findByNomeContainingIgnoreCase(String nome);
 }
