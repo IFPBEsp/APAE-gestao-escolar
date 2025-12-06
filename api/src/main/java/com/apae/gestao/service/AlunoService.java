@@ -21,9 +21,14 @@ public class AlunoService {
     }
 
     @Transactional(readOnly = true)
-    public List<AlunoResponseDTO> listarTodos() {
-        return alunoRepository.findAll()
-                .stream()
+    public List<AlunoResponseDTO> listarTodos(String nome) {
+        List<Aluno> alunos;
+        if (nome != null && !nome.trim().isEmpty()) {
+            alunos = alunoRepository.findByNomeContainingIgnoreCase(nome);
+        } else {
+            alunos = alunoRepository.findAll();
+        }
+        return alunos.stream()
                 .map(AlunoResponseDTO::new)
                 .collect(Collectors.toList());
     }
