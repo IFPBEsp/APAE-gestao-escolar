@@ -8,7 +8,7 @@ import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { useRouter, useParams } from "next/navigation";
 
 export default function TurmaDetalhesPage() {
-  const params = useParams();
+  const params = useParams()!;
   const turmaId = params.turmaId as string;
   const router = useRouter();
   

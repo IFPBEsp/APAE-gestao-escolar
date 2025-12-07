@@ -14,7 +14,7 @@ import { ptBR } from "date-fns/locale";
 import { useRouter, useParams } from "next/navigation";
 
 export default function NovaAvaliacaoPage() {
-  const params = useParams();
+  const params = useParams()!;
   const turmaId = params.turmaId as string;
   const alunoId = parseInt(params.alunoId as string);
   const router = useRouter();

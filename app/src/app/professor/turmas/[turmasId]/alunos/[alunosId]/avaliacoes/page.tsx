@@ -22,7 +22,7 @@ interface Avaliacao {
 }
 
 export default function AvaliacoesAlunoPage() {
-  const params = useParams();
+  const params = useParams()!;
   const turmaId = params.turmaId as string;
   const alunoId = parseInt(params.alunoId as string);
   const router = useRouter();

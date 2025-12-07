@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function ChamadaPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams()!;
   
   const dataParam = searchParams.get('data');
   const descricao = searchParams.get('descricao');
