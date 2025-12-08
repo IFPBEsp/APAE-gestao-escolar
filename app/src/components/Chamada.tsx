@@ -1,132 +1,192 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { Loader2, Users, ArrowLeft, CalendarIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+// Importa as funções de serviço (assumindo que estão exportadas no arquivo)
+import { 
+  getChamadaPorTurmaEData, 
+  registrarChamada, 
+  getAlunosDaTurma // Incluindo a função de buscar alunos
+} from "@/services/chamadaService"; 
 
-const studentsByClass: Record<string, Array<{id: number, name: string}>> = {
-  "Alfabetização 2025 - Manhã": [
-    { id: 1, name: "Ana Silva" },
-    { id: 2, name: "Bruno Costa" },
-    { id: 3, name: "Carlos Oliveira" },
-    { id: 4, name: "Diana Santos" },
-    { id: 5, name: "Eduardo Ferreira" },
-    { id: 6, name: "Fernanda Lima" },
-    { id: 7, name: "Gabriel Souza" },
-    { id: 8, name: "Helena Rodrigues" },
-  ],
-  "Estimulação 2025 - Tarde": [
-    { id: 9, name: "Igor Martins" },
-    { id: 10, name: "Juliana Alves" },
-    { id: 11, name: "Lucas Pereira" },
-    { id: 12, name: "Maria Cardoso" },
-    { id: 13, name: "Nicolas Ribeiro" },
-    { id: 14, name: "Olivia Gomes" },
-  ],
-  "Alfabetização 2025": [
-    { id: 1, name: "Ana Silva" },
-    { id: 2, name: "Bruno Costa" },
-    { id: 3, name: "Carlos Oliveira" },
-    { id: 4, name: "Diana Santos" },
-    { id: 5, name: "Eduardo Ferreira" },
-    { id: 6, name: "Fernanda Lima" },
-    { id: 7, name: "Gabriel Souza" },
-    { id: 8, name: "Helena Rodrigues" },
-  ],
-  "Estimulação 2025": [
-    { id: 9, name: "Igor Martins" },
-    { id: 10, name: "Juliana Alves" },
-    { id: 11, name: "Lucas Pereira" },
-    { id: 12, name: "Maria Cardoso" },
-    { id: 13, name: "Nicolas Ribeiro" },
-    { id: 14, name: "Olivia Gomes" },
-  ],
-};
+// --- Tipos Locais (Simplificados) ---
+// Usamos a interface de aluno com name em vez de nome para compatibilidade com o código original.
+interface StudentAttendance {
+    id: number;
+    name: string; // Nome do aluno
+    isAbsent: boolean; // true = AUSENTE (checkbox marcado), false = PRESENTE
+}
 
+// --- Props do Componente ---
 interface ChamadaProps {
   onBack: () => void;
-  initialClass?: string;
+  initialClass?: string; 
   onLogout?: () => void;
   onNavigateToDashboard?: (tab: string) => void;
   data?: Date;
-  descricao?: string;
+  descricao?: string; 
 }
 
+// --- Componente Chamada ---
 export default function Chamada({ 
   onBack, 
   initialClass, 
   onLogout, 
   onNavigateToDashboard,
-  data,
-  descricao 
+  data: selectedDateProp,
+  descricao: initialDescription
 }: ChamadaProps) {
-  const [selectedClass, setSelectedClass] = useState<string>("");
-  const [attendance, setAttendance] = useState<Record<number, boolean>>({});
+  
+  const [students, setStudents] = useState<StudentAttendance[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const selectedDate = data || new Date();
+  
+  const selectedDate = selectedDateProp || new Date();
+  const dateFormatted = format(selectedDate, "yyyy-MM-dd"); // Formato exigido pelo backend
+  
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState("turmas");
-
-  useEffect(() => {
-    if (initialClass) {
-      const availableClass = Object.keys(studentsByClass).find(
-        className => className.includes(initialClass) || initialClass.includes(className)
-      ) || Object.keys(studentsByClass)[0]; // Fallback para a primeira turma
-      
-      setSelectedClass(availableClass);
-    } else {
-      setSelectedClass(Object.keys(studentsByClass)[0]);
-    }
+  
+  // Extrai Turma ID e Nome de initialClass (Ex: "10-Alfabetização 2025 - Manhã")
+  const { turmaId, turmaNome } = useMemo(() => {
+    if (!initialClass) return { turmaId: undefined, turmaNome: "Turma Inválida" };
+    const parts = initialClass.split('-');
+    const id = parseInt(parts[0], 10);
+    const name = parts.slice(1).join('-').trim();
+    return { 
+      turmaId: isNaN(id) ? undefined : id, 
+      turmaNome: name || "Turma Selecionada" 
+    };
   }, [initialClass]);
 
-  useEffect(() => {
-    if (selectedClass && studentsByClass[selectedClass]) {
-      const students = studentsByClass[selectedClass];
-      const initialAttendance: Record<number, boolean> = {};
-      students.forEach((student) => {
-        initialAttendance[student.id] = false; // false = checkbox desmarcado = presente
-      });
-      setAttendance(initialAttendance);
+  // Função de carregamento dos dados
+  const loadAttendanceData = async () => {
+    if (!turmaId) {
+      setIsLoading(false);
+      toast.error("ID da Turma inválido. Não foi possível carregar a chamada.");
+      return;
     }
-  }, [selectedClass]);
 
-  const handleAttendanceChange = (studentId: number, checked: boolean) => {
-    setAttendance((prev) => ({
-      ...prev,
-      [studentId]: checked,
-    }));
+    setIsLoading(true);
+    let isFound = false;
+    let studentsFromApi: any[] = [];
+    
+    // 1. Tenta carregar a chamada já registrada
+    try {
+      // Usamos 'any' para a resposta, já que o arquivo service não tem a tipagem formal
+      const chamadaResponse: any = await getChamadaPorTurmaEData(turmaId, dateFormatted);
+      
+      // Mapeia a chamada existente para o estado local
+      studentsFromApi = chamadaResponse.listaPresencas.map((p: any) => ({
+        id: p.alunoId,
+        name: p.alunoNome,
+        // status: true = AUSENTE, false = PRESENTE
+        isAbsent: p.status !== 'PRESENTE', 
+      }));
+      isFound = true;
+
+    } catch (error: any) {
+      // Se a chamada NÃO EXISTE (e.g., erro 404/204), tentamos carregar APENAS a lista de alunos
+      if (error.response?.status === 404 || error.response?.status === 204) {
+          console.log("Chamada não encontrada. Carregando lista de alunos da turma.");
+          isFound = false;
+      } else {
+        // Outros erros de backend (500, etc.)
+        console.error("Erro ao carregar chamada existente:", error);
+        toast.error("Erro ao carregar a chamada: " + (error.message || "Verifique a conexão."));
+        setIsLoading(false);
+        return; // Sai da função em caso de erro grave
+      }
+    }
+
+    // 2. Se a chamada não foi encontrada, carrega a lista de alunos para iniciar uma nova
+    if (!isFound) {
+        try {
+            // Chama a função real para buscar alunos da turma
+            const alunosResponse: any[] = await getAlunosDaTurma(turmaId);
+            
+            // Mapeia alunos para o estado, definindo todos como PRESENTE (isAbsent: false)
+            studentsFromApi = alunosResponse.map((aluno: any) => ({
+              id: aluno.id,
+              name: aluno.nome || aluno.name, // Suporta 'nome' ou 'name' vindo do backend
+              isAbsent: false, 
+            }));
+            
+        } catch (listError: any) {
+            console.error("Erro ao buscar lista de alunos:", listError);
+            toast.error("Erro ao carregar a lista de alunos: " + (listError.message || "Verifique a Turma."));
+            studentsFromApi = [];
+        }
+    }
+
+    setStudents(studentsFromApi);
+    setIsLoading(false);
   };
 
+  useEffect(() => {
+    loadAttendanceData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [turmaId, dateFormatted]);
+
+
+  // Função para mudar o status de presença/ausência de um aluno
+  const handleAttendanceChange = (studentId: number, checked: boolean) => {
+    setStudents(prevStudents => 
+        prevStudents.map(student => 
+            student.id === studentId ? { ...student, isAbsent: checked } : student
+        )
+    );
+  };
+
+
+  // Função de salvar (integração real)
   const handleSaveChamada = async () => {
-    if (!selectedClass) return;
+    if (!turmaId) return;
 
     setIsSaving(true);
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    setIsSaving(false);
-    toast.success("Chamada salva com sucesso!");
     
-    setTimeout(() => {
-      onBack();
-    }, 1500);
+    // Converte o estado local (StudentAttendance[]) para o DTO de requisição
+    const requestBody = {
+      descricao: initialDescription || `Chamada do dia ${format(selectedDate, "dd/MM/yyyy")}`,
+      presencas: students.map(student => ({
+        alunoId: student.id,
+        // Converte o booleano 'isAbsent' para o enum de String exigido pelo backend
+        status: student.isAbsent ? 'AUSENTE' : 'PRESENTE', 
+      }))
+    };
+
+    try {
+      await registrarChamada(turmaId, dateFormatted, requestBody);
+      
+      toast.success("Chamada salva com sucesso!");
+      
+      setTimeout(() => {
+        onBack(); // Retorna para a página anterior após salvar
+      }, 1500);
+
+    } catch (error: any) {
+      console.error("Erro ao salvar chamada:", error);
+      // Pega a mensagem de erro do objeto Error ou usa uma mensagem genérica
+      toast.error(error.message || "Falha ao salvar a chamada. Tente novamente.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const students = selectedClass && studentsByClass[selectedClass] 
-    ? studentsByClass[selectedClass] 
-    : [];
+  // Cálculos de contagem
   const totalCount = students.length;
-  const absentCount = Object.values(attendance).filter((isAbsent) => isAbsent).length;
+  const absentCount = students.filter(s => s.isAbsent).length;
   const presentCount = totalCount - absentCount;
 
+  // Handlers de Sidebar (mantidos)
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     if (onNavigateToDashboard) {
@@ -143,15 +203,27 @@ export default function Chamada({
   const handleToggleCollapse = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
-
-  if (!selectedClass) {
+  
+  // Tratamento de carregamento e IDs inválidos
+  if (!turmaId) {
     return (
       <div className="flex min-h-screen bg-[#E5E5E5] items-center justify-center">
-        <div className="text-[#0D4F97]">Carregando...</div>
+        <div className="text-red-500">Erro: ID da Turma não encontrado.</div>
       </div>
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-[#E5E5E5] items-center justify-center">
+        <Loader2 className="mr-2 h-8 w-8 animate-spin text-[#0D4F97]" />
+        <div className="text-[#0D4F97] text-xl">Carregando Chamada...</div>
+      </div>
+    );
+  }
+
+
+  // --- Renderização (Sem alterações de Design) ---
   return (
     <div className="flex min-h-screen bg-[#E5E5E5]">
       {/* Sidebar - SEMPRE VISÍVEL */}
@@ -183,7 +255,7 @@ export default function Chamada({
                   <div>
                     <CardTitle className="text-[#0D4F97] text-2xl">Registro de Presença</CardTitle>
                     <CardDescription className="text-[#222222] text-lg">
-                      {selectedClass}
+                      {turmaNome}
                     </CardDescription>
                   </div>
                 </div>
@@ -202,12 +274,12 @@ export default function Chamada({
                         {format(selectedDate, "dd/MM/yyyy", { locale: ptBR })}
                       </p>
                     </div>
-                    {descricao && (
+                    {initialDescription && (
                       <div className="rounded-xl border-2 border-[#B2D7EC] bg-white p-4">
                         <div className="flex items-center gap-2 text-[#0D4F97] font-semibold">
                           <span>Descrição da Aula</span>
                         </div>
-                        <p className="mt-2 text-[#222222] text-lg">{descricao}</p>
+                        <p className="mt-2 text-[#222222] text-lg">{initialDescription}</p>
                       </div>
                     )}
                   </div>
@@ -233,32 +305,28 @@ export default function Chamada({
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {students.map((student) => {
-                            const isAbsent = attendance[student.id] || false;
-                            
-                            return (
-                              <TableRow
-                                key={student.id}
-                                className="transition-colors hover:bg-[#B2D7EC]/10"
-                              >
-                                <TableCell className="text-[#222222] text-lg">
-                                  {student.name}
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  <div className="flex justify-center">
-                                    <Checkbox
-                                      id={`student-${student.id}`}
-                                      checked={isAbsent}
-                                      onCheckedChange={(checked) =>
-                                        handleAttendanceChange(student.id, checked as boolean)
-                                      }
-                                      className="h-6 w-6 border-2 border-[#0D4F97] data-[state=checked]:bg-[#0D4F97] data-[state=checked]:text-white"
-                                    />
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
+                          {students.map((student) => (
+                            <TableRow
+                              key={student.id}
+                              className="transition-colors hover:bg-[#B2D7EC]/10"
+                            >
+                              <TableCell className="text-[#222222] text-lg">
+                                {student.name}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <div className="flex justify-center">
+                                  <Checkbox
+                                    id={`student-${student.id}`}
+                                    checked={student.isAbsent}
+                                    onCheckedChange={(checked) =>
+                                      handleAttendanceChange(student.id, checked as boolean)
+                                    }
+                                    className="h-6 w-6 border-2 border-[#0D4F97] data-[state=checked]:bg-[#0D4F97] data-[state=checked]:text-white"
+                                  />
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
                         </TableBody>
                       </Table>
                     </div>
