@@ -58,18 +58,26 @@ public class ProfessorService {
      */
     @Transactional(readOnly = true)
     public List<ProfessorResponseDTO> listarTodos(String nome, Boolean ativo) {
-        // Normaliza string vazia para null
-        String nomeNormalizado = (nome != null && nome.trim().isEmpty()) ? null : nome;
-        
-        // Se ambos os parâmetros forem null, usa o método findAll para melhor performance
-        if (nomeNormalizado == null && ativo == null) {
-            return listarTodos();
+        try {
+            // Normaliza string vazia para null
+            String nomeNormalizado = (nome != null && nome.trim().isEmpty()) ? null : nome;
+            
+            // Se ambos os parâmetros forem null, usa o método findAll para melhor performance
+            if (nomeNormalizado == null && ativo == null) {
+                return listarTodos();
+            }
+            
+            List<Professor> professores = professorRepository.findByNomeContainingIgnoreCaseAndAtivo(nomeNormalizado, ativo);
+            
+            return professores.stream()
+                    .map(ProfessorResponseDTO::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            // Log do erro para debug
+            System.err.println("Erro ao listar professores: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao buscar professores: " + e.getMessage(), e);
         }
-        
-        return professorRepository.findByNomeContainingIgnoreCaseAndAtivo(nomeNormalizado, ativo)
-                .stream()
-                .map(ProfessorResponseDTO::new)
-                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
