@@ -18,6 +18,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@Builder
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 
 public class Aula {
@@ -36,7 +37,7 @@ public class Aula {
     private Turma turma;
 
     @OneToMany(mappedBy = "aula", cascade = CascadeType.ALL)
-    private Set<Presenca> presencas = new HashSet<>();
+    private Set<Presenca> presencas = new HashSet<>(); 
 
     @Override
     public boolean equals(Object o) {
