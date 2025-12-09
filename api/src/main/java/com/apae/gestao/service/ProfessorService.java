@@ -20,6 +20,37 @@ public class ProfessorService {
     @Autowired
     private ProfessorRepository professorRepository;
 
+    @Transactional(readOnly = true)
+public List<ProfessorResponseDTO> listarPorNomeEStatus(String nome, Boolean ativo) {
+    // Prioridade 1: Busca por nome (pode combinar com ativo)
+    if (nome != null && !nome.trim().isEmpty()) {
+        if (ativo != null) {
+            // Busca por nome E status (ativo/inativo)
+            return professorRepository.findByNomeContainingIgnoreCaseAndAtivo(nome.trim(), ativo)
+                    .stream()
+                    .map(ProfessorResponseDTO::new)
+                    .collect(Collectors.toList());
+        } else {
+            // Apenas por nome
+            return buscarPorNome(nome.trim());
+        }
+    }
+    
+    // Prioridade 2: Filtro apenas por status
+    if (ativo != null) {
+        return ativo ? listarAtivos() : listarInativos();
+    }
+        
+        return listarTodos();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProfessorResponseDTO> listarInativos() {
+        return professorRepository.findByAtivoFalse()
+                .stream()
+                .map(ProfessorResponseDTO::new)
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public ProfessorResponseDTO criar(ProfessorRequestDTO dto) {

@@ -21,6 +21,15 @@ public class AlunoService {
     }
 
     @Transactional(readOnly = true)
+    public List<AlunoResponseDTO> listarAlunosPorNome(String nome) {
+        if (nome != null && !nome.trim().isEmpty()) {
+            return buscarPorNome(nome.trim());  
+        } else {
+            return listarTodos(); 
+        }
+    }
+
+    @Transactional(readOnly = true)
     public List<AlunoResponseDTO> listarTodos() {
         return alunoRepository.findAll()
                 .stream()

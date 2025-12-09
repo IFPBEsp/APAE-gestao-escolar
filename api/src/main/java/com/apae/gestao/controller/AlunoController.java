@@ -36,19 +36,13 @@ public class AlunoController {
     @GetMapping
     @Operation(
         summary = "Listar alunos", 
-        description = "Retorna todos os alunos cadastrados com opção de filtrar por nome (busca parcial case-insensitive)."
+        description = "Retorna todos os alunos que têm essa String no nome, desconsiderando letra maiúscula."
     )
-    public ResponseEntity<List<AlunoResponseDTO>> listarTodos(
-            @Parameter(description = "Filtra alunos por nome (busca parcial e ignora maiúsculas/minúsculas)", example = "João", in = ParameterIn.QUERY)
+    public ResponseEntity<List<AlunoResponseDTO>> listarAlunosPorNome(
+            @Parameter(example = "João", in = ParameterIn.QUERY)
             @RequestParam(value = "nome", required = false) String nome) {
         
-        List<AlunoResponseDTO> alunos;
-        
-        if (nome != null && !nome.trim().isEmpty()) {
-            alunos = alunoService.buscarPorNome(nome.trim());
-        } else {
-            alunos = alunoService.listarTodos();
-        }
+        List<AlunoResponseDTO> alunos = alunoService.listarAlunosPorNome(nome);
         
         return ResponseEntity.ok(alunos);
     }

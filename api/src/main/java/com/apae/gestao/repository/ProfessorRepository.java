@@ -18,6 +18,8 @@ public interface ProfessorRepository extends JpaRepository<Professor, Long> {
 
     @EntityGraph(attributePaths = "turmas")
     List<Professor> findByAtivoTrue();
+
+    List<Professor> findByAtivoFalse();
     
     Optional<Professor> findByIdAndAtivoTrue(Long id);
     
@@ -30,4 +32,6 @@ public interface ProfessorRepository extends JpaRepository<Professor, Long> {
     boolean existsByEmailAndIdNot(String email, Long id);
 
     List<Professor> findByNomeContainingIgnoreCase(String nome);
+
+    List<Professor> findByNomeContainingIgnoreCaseAndAtivo(String nome, boolean ativo);
 }
