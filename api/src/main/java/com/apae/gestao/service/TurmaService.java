@@ -45,9 +45,16 @@ public class TurmaService {
     }
 
     @Transactional(readOnly = true)
-    public List<TurmaResponseDTO> listarTodas() {
-        return turmaDAO.findAll()
-                .stream()
+    public List<TurmaResponseDTO> listarTodas(String nome) {
+        List<Turma> turmas;
+
+        if (nome != null && !nome.trim().isEmpty()) {
+            turmas = turmaDAO.findByNomeContainingIgnoreCase(nome);
+        } else {
+            turmas = turmaDAO.findAll();
+        }
+
+        return turmas.stream()
                 .map(TurmaResponseDTO::new)
                 .collect(Collectors.toList());
     }

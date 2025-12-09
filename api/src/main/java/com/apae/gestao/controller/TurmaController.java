@@ -87,8 +87,13 @@ public class TurmaController {
 
     @GetMapping
     @Operation(summary = "Listar todas as turmas")
-    public ResponseEntity<List<TurmaResponseDTO>> listarTodas(){
-        List<TurmaResponseDTO> response = service.listarTodas();
+    public ResponseEntity<List<TurmaResponseDTO>> listarTodas(@Parameter(
+            description = "Filtro opcional: busca turmas cujo nome contenha este texto (case insensitive)",
+            example = "2025",
+            in = ParameterIn.QUERY
+    )
+                                                                  @RequestParam(required = false) String nome){
+        List<TurmaResponseDTO> response = service.listarTodas(nome);
         return ResponseEntity.ok(response);
     }
 
