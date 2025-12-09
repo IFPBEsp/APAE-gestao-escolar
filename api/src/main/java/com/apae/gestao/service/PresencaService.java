@@ -3,14 +3,8 @@ package com.apae.gestao.service;
 import com.apae.gestao.dto.ChamadaResponseDTO;
 import com.apae.gestao.dto.PresencaAlunoDTO;
 import com.apae.gestao.dto.RegistrarChamadaRequestDTO;
-import com.apae.gestao.entity.Aluno;
-import com.apae.gestao.entity.Aula;
-import com.apae.gestao.entity.Presenca;
-import com.apae.gestao.entity.Turma;
-import com.apae.gestao.repository.AlunoRepository;
-import com.apae.gestao.repository.AulaRepository;
-import com.apae.gestao.repository.PresencaRepository;
-import com.apae.gestao.repository.TurmaRepository;
+import com.apae.gestao.entity.*;
+import com.apae.gestao.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,31 +18,40 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class PresencaService {
+
     private final PresencaRepository presencaRepository;
-    private final AlunoRepository alunoRepository;
     private final AulaRepository aulaRepository;
     private final TurmaRepository turmaRepository;
+    private final AlunoRepository alunoRepository;
+    private final TurmaAlunoRepository turmaAlunoRepository;
+
 
     @Transactional(readOnly = true)
     public ChamadaResponseDTO getChamadaPorTurmaEData(Long turmaId, LocalDate data) {
+
         Turma turma = turmaRepository.findById(turmaId)
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada com id: " + turmaId));
 
         Aula aula = aulaRepository.findByTurmaAndDataDaAula(turma, data).orElse(null);
 
-        List<Aluno> alunosDaTurma = alunoRepository.findByTurmaAndAtivoTrue(turma);
+        List<TurmaAluno> turmaAlunoList =
+                turmaAlunoRepository.findByTurmaAndIsAlunoAtivo(turma, true);
+
+        List<Aluno> alunosDaTurma = turmaAlunoList.stream()
+                .map(TurmaAluno::getAluno)
+                .toList();
 
         Map<Long, Presenca> presencasPorAluno = Map.of();
         if (aula != null) {
-            presencasPorAluno = presencaRepository.findByAula(aula).stream()
-                    .collect(Collectors.toMap(
-                            p -> p.getAluno().getId(),
-                            p -> p
-                    ));
+            presencasPorAluno =
+                    presencaRepository.findByAula(aula).stream()
+                            .collect(Collectors.toMap(p -> p.getAluno().getId(), p -> p));
         }
 
         List<PresencaAlunoDTO> listaPresencas = new ArrayList<>();
+
         for (Aluno aluno : alunosDaTurma) {
+
             Presenca presenca = presencasPorAluno.get(aluno.getId());
 
             PresencaAlunoDTO dto = PresencaAlunoDTO.builder()
@@ -73,13 +76,15 @@ public class PresencaService {
                 .build();
 
         response.calcularTotalPresentes();
-
         return response;
     }
 
     @Transactional
-    public ChamadaResponseDTO registrarChamada(Long turmaId, LocalDate data,
-                                               RegistrarChamadaRequestDTO request) {
+    public ChamadaResponseDTO registrarChamada(
+            Long turmaId,
+            LocalDate data,
+            RegistrarChamadaRequestDTO request
+    ) {
 
         Turma turma = turmaRepository.findById(turmaId)
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada com id: " + turmaId));
@@ -89,7 +94,7 @@ public class PresencaService {
 
         if (request.getDescricao() != null && !request.getDescricao().isBlank()) {
             aula.setDescricao(request.getDescricao());
-            aula = aulaRepository.save(aula);
+            aulaRepository.save(aula);
         }
 
         for (RegistrarChamadaRequestDTO.PresencaItemDTO item : request.getPresencas()) {
@@ -100,12 +105,12 @@ public class PresencaService {
     }
 
     private Aula criarNovaAula(Turma turma, LocalDate data, String descricao) {
-        Aula novaAula = Aula.builder()
+        Aula aula = Aula.builder()
                 .turma(turma)
                 .dataDaAula(data)
                 .descricao(descricao)
                 .build();
-        return aulaRepository.save(novaAula);
+        return aulaRepository.save(aula);
     }
 
     @Transactional
@@ -116,8 +121,11 @@ public class PresencaService {
         presencaRepository.deleteById(id);
     }
 
-    private void registrarOuAtualizarPresencaIndividual(Aula aula,
-                                                        RegistrarChamadaRequestDTO.PresencaItemDTO item) {
+    private void registrarOuAtualizarPresencaIndividual(
+            Aula aula,
+            RegistrarChamadaRequestDTO.PresencaItemDTO item
+    ) {
+
         Aluno aluno = alunoRepository.findById(item.getAlunoId())
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado com id: " + item.getAlunoId()));
 
@@ -127,9 +135,9 @@ public class PresencaService {
                         .aluno(aluno)
                         .build());
 
-
         presenca.setFaltou(item.getStatus() == PresencaAlunoDTO.StatusPresenca.FALTA);
 
         presencaRepository.save(presenca);
     }
 }
+

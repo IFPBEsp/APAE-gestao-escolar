@@ -12,6 +12,5 @@ import java.util.List;
 
 @Repository
 public interface AlunoRepository extends JpaRepository<Aluno, Long> {
-    List<Aluno> findByTurmaAndAtivoTrue(@Param("turma") Turma turma);
     List<Aluno> findByNomeContainingIgnoreCase(String nome);
 }
