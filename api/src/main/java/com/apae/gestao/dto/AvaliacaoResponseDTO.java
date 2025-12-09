@@ -26,7 +26,7 @@ public class AvaliacaoResponseDTO {
     public static AvaliacaoResponseDTO fromEntity(Avaliacao avaliacao) {
         return AvaliacaoResponseDTO.builder()
                 .id(avaliacao.getId())
-                .descricao(avaliacao.getPontosPositivos())
+                .descricao(avaliacao.getDescricao())
                 .alunoId(avaliacao.getAluno().getId())
                 .alunoNome(avaliacao.getAluno().getNome())
                 .professorId(avaliacao.getProfessor().getId())
