@@ -80,6 +80,29 @@ public List<ProfessorResponseDTO> listarPorNomeEStatus(String nome, Boolean ativ
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Lista professores com filtros opcionais de nome e status.
+     * 
+     * @param nome Parâmetro opcional para busca por nome (case-insensitive, contém)
+     * @param ativo Parâmetro opcional para filtrar por status (true=ativos, false=inativos, null=todos)
+     * @return Lista de professores que atendem aos critérios
+     */
+    @Transactional(readOnly = true)
+    public List<ProfessorResponseDTO> listarTodos(String nome, Boolean ativo) {
+        // Normaliza string vazia para null
+        String nomeNormalizado = (nome != null && nome.trim().isEmpty()) ? null : nome;
+        
+        // Se ambos os parâmetros forem null, usa o método findAll para melhor performance
+        if (nomeNormalizado == null && ativo == null) {
+            return listarTodos();
+        }
+        
+        return professorRepository.findByNomeContainingIgnoreCaseAndAtivo(nomeNormalizado, ativo)
+                .stream()
+                .map(ProfessorResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
     @Transactional(readOnly = true)
     public List<ProfessorResponseDTO> buscarPorNome(String nome) {
         return professorRepository.findByNomeContainingIgnoreCase(nome)

@@ -23,7 +23,10 @@ public class AlunoService {
     @Transactional(readOnly = true)
     public List<AlunoResponseDTO> listarAlunosPorNome(String nome) {
         if (nome != null && !nome.trim().isEmpty()) {
-            return buscarPorNome(nome.trim());  
+            return alunoRepository.findByNomeContainingIgnoreCase(nome.trim())
+                .stream()
+                .map(AlunoResponseDTO::new)
+                .collect(Collectors.toList());  
         } else {
             return listarTodos(); 
         }
@@ -32,14 +35,6 @@ public class AlunoService {
     @Transactional(readOnly = true)
     public List<AlunoResponseDTO> listarTodos() {
         return alunoRepository.findAll()
-                .stream()
-                .map(AlunoResponseDTO::new)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<AlunoResponseDTO> buscarPorNome(String nome) {
-        return alunoRepository.findByNomeContainingIgnoreCase(nome)
                 .stream()
                 .map(AlunoResponseDTO::new)
                 .collect(Collectors.toList());

@@ -50,14 +50,12 @@ public class AlunoController {
     @GetMapping("/{id}")
     @Operation(summary = "Buscar aluno por ID")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Aluno encontrado", content = @Content(schema = @Schema(implementation = AlunoResponseDTO.class))),
-        @ApiResponse(responseCode = "404", description = "Aluno não encontrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Aluno encontrado", content = @Content(schema = @Schema(implementation = AlunoResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Aluno não encontrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
     public ResponseEntity<AlunoResponseDTO> buscarPorId(
-            @Parameter(description = "Identificador do aluno", example = "4", in = ParameterIn.PATH)
-            @PathVariable Long id) {
+            @Parameter(description = "Identificador do aluno", example = "4", in = ParameterIn.PATH) @PathVariable Long id) {
         AlunoResponseDTO aluno = alunoService.buscarPorId(id);
         return ResponseEntity.ok(aluno);
     }
 }
-
