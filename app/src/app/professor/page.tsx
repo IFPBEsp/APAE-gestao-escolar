@@ -112,12 +112,11 @@ export default function ProfessorDashboard() {
   };
 
   const handleVerAvaliacoes = (alunoId: number) => {
-    // Encontrar a turma do aluno
     const aluno = alunosData.find(a => a.id === alunoId);
     if (aluno) {
       const turma = professorData.turmas.find(t => t.name === aluno.turma);
       if (turma) {
-        router.push(`/professor/turmas/${turma.id}/alunos/${alunoId}/avaliacoes`);
+        router.push(`/professor/alunos/${alunoId}/avaliacoes?turmaId=${turma.id}`);
       }
     }
   };

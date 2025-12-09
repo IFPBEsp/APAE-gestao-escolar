@@ -1,5 +1,5 @@
 
-import api from './api'; // Importa a instância do Axios configurada
+import api from './api'; 
 
 /**
  * Cadastra um novo professor na API.
@@ -14,11 +14,8 @@ import api from './api'; // Importa a instância do Axios configurada
 export async function registerProfessor(professorData) {
     
     try {
-        // Faz a requisição POST para o endpoint /professores
-        // O Axios adiciona automaticamente o prefixo /api (do api.ts)
         const response = await api.post('/professores', professorData);
 
-        // O Axios retorna o corpo da resposta em 'response.data' em caso de sucesso (status 2xx)
         return response.data;
 
     } catch (error) {
