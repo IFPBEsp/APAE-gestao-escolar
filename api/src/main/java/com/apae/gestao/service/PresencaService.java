@@ -34,18 +34,14 @@ public class PresencaService {
 
         Aula aula = aulaRepository.findByTurmaAndDataDaAula(turma, data).orElse(null);
 
-        List<TurmaAluno> turmaAlunoList =
-                turmaAlunoRepository.findByTurmaAndIsAlunoAtivo(turma, true);
+        List<TurmaAluno> turmaAlunoList = turmaAlunoRepository.findByTurmaAndIsAlunoAtivo(turma,true);
 
-        List<Aluno> alunosDaTurma = turmaAlunoList.stream()
-                .map(TurmaAluno::getAluno)
-                .toList();
+        List<Aluno> alunosDaTurma = turmaAlunoList.stream().map(TurmaAluno::getAluno).toList();
 
         Map<Long, Presenca> presencasPorAluno = Map.of();
         if (aula != null) {
-            presencasPorAluno =
-                    presencaRepository.findByAula(aula).stream()
-                            .collect(Collectors.toMap(p -> p.getAluno().getId(), p -> p));
+            presencasPorAluno = presencaRepository.findByAula(aula).stream()
+            .collect(Collectors.toMap(p -> p.getAluno().getId(), p -> p));
         }
 
         List<PresencaAlunoDTO> listaPresencas = new ArrayList<>();
