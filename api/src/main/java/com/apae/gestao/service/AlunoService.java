@@ -5,10 +5,8 @@ import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.repository.AlunoRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
-import com.apae.gestao.mock.AlunoMockData;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
