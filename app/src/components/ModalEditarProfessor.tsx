@@ -57,6 +57,19 @@ export default function ModalEditarProfessor({
   const [turmasVinculadas, setTurmasVinculadas] = useState<string[]>([]);
   const [novaTurma, setNovaTurma] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sugestoesTurmas, setSugestoesTurmas] = useState<string[]>([]);
+
+  // Mock de turmas disponíveis para o autocomplete
+  const mockTurmasDisponiveis = [
+    "Alfabetização 2025 - Manhã",
+    "Alfabetização 2025 - Tarde",
+    "Estimulação 2025 - Manhã",
+    "Estimulação 2025 - Tarde",
+    "Matemática Básica 2025 - Manhã",
+    "Educação Física 2025 - Tarde",
+    "Artes 2025 - Manhã",
+    "Música 2025 - Tarde"
+  ];
 
   useEffect(() => {
     if (professor && isOpen) {
@@ -301,27 +314,87 @@ export default function ModalEditarProfessor({
               <Label htmlFor="novaTurma" className="text-[#0D4F97]">
                 Adicionar Turma
               </Label>
-              <div className="flex gap-2">
-                <Input
-                  id="novaTurma"
-                  value={novaTurma}
-                  onChange={(e) => setNovaTurma(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleAddTurma();
-                    }
-                  }}
-                  className="h-12 border-2 border-[#B2D7EC]"
-                  placeholder="Digite o nome da turma..."
-                />
-                <Button
-                  type="button"
-                  onClick={handleAddTurma}
-                  className="h-12 bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97]"
-                >
-                  Adicionar
-                </Button>
+              <div className="relative">
+                <div className="flex gap-2">
+                  <Input
+                    id="novaTurma"
+                    value={novaTurma}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setNovaTurma(value);
+                      if (value.trim().length > 0) {
+                        const searchLower = value.toLowerCase();
+                        const filtradas = mockTurmasDisponiveis.filter(
+                          (t) =>
+                            t.toLowerCase().includes(searchLower) &&
+                            !turmasVinculadas.includes(t)
+                        );
+                        setSugestoesTurmas(filtradas);
+                      } else {
+                        setSugestoesTurmas([]);
+                      }
+                    }}
+                    onFocus={() => {
+                      if (novaTurma.trim().length > 0) {
+                        const searchLower = novaTurma.toLowerCase();
+                        const filtradas = mockTurmasDisponiveis.filter(
+                          (t) =>
+                            t.toLowerCase().includes(searchLower) &&
+                            !turmasVinculadas.includes(t)
+                        );
+                        setSugestoesTurmas(filtradas);
+                      } else {
+                        // Opcional: mostrar todas as opções válidas se vazio
+                        const filtradas = mockTurmasDisponiveis.filter(t => !turmasVinculadas.includes(t));
+                        setSugestoesTurmas(filtradas);
+                      }
+                    }}
+                    // onBlur com atraso para permitir o clique na sugestão
+                    onBlur={() => {
+                      setTimeout(() => setSugestoesTurmas([]), 200);
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddTurma();
+                      }
+                    }}
+                    className="h-12 border-2 border-[#B2D7EC]"
+                    placeholder="Busque e selecione a turma..."
+                    autoComplete="off"
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleAddTurma}
+                    className="h-12 bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97]"
+                  >
+                    Adicionar
+                  </Button>
+                </div>
+                {/* Lista de Sugestões de Autocomplete */}
+                {sugestoesTurmas.length > 0 && (
+                  <div className="absolute z-10 mt-1 w-full max-w-[calc(100%-100px)] rounded-md border border-[#B2D7EC] bg-white shadow-lg">
+                    <ul className="max-h-60 overflow-auto py-1">
+                      {sugestoesTurmas.map((turma, index) => (
+                        <li
+                          key={index}
+                          className="cursor-pointer px-4 py-2 hover:bg-[#E8F3FF] text-[#222222]"
+                          onMouseDown={(e) => {
+                            // Previne que o onBlur dispare antes do clique
+                            e.preventDefault();
+                          }}
+                          onClick={() => {
+                            setTurmasVinculadas([...turmasVinculadas, turma]);
+                            setNovaTurma("");
+                            setSugestoesTurmas([]);
+                          }}
+                        >
+                          {turma}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
 
