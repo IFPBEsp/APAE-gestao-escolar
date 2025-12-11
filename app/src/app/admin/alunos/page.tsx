@@ -1,11 +1,11 @@
 'use client'
 import { useState } from "react";
-import { Card, CardContent } from "@components/ui/card";
-import { UserCircle, Eye } from "lucide-react";
-import router from "next/router";
+import { Card, CardContent } from "@/components/ui/card";
+import { UserCircle, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface AvaliacoesAdminProps {
-  onNavigate: (page: string, id?: number) => void;
+  onNavigate?: (page: string, id?: number) => void;
 }
 
 const mockAlunos = [
@@ -69,6 +69,12 @@ const mockAlunos = [
 
 export default function AvaliacoesAdmin({ onNavigate }: AvaliacoesAdminProps) {
   const [alunos] = useState(mockAlunos);
+  const [searchTerm, setSearchTerm] = useState("");
+  const router = useRouter();
+
+  const filteredAlunos = alunos.filter((aluno) =>
+    aluno.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const getPresencaColor = (presenca: number) => {
     if (presenca >= 90) return "text-green-600";
@@ -80,16 +86,38 @@ export default function AvaliacoesAdmin({ onNavigate }: AvaliacoesAdminProps) {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-[#0D4F97]">Avaliações dos Alunos</h1>
+        <h1 className="text-[#0D4F97] text-2xl font-bold">Gerenciamento de Alunos</h1>
         <p className="text-[#222222]">Visualize e gerencie as avaliações de todos os alunos</p>
+      </div>
+
+      {/* Filtros */}
+      <div className="rounded-lg bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-lg font-semibold text-[#0D4F97]">Filtros de Alunos</h2>
+        <div className="relative">
+          <label htmlFor="search-aluno" className="mb-2 block text-sm font-medium text-gray-700">
+            Buscar Aluno
+          </label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+            <input
+              id="search-aluno"
+              type="text"
+              placeholder="Digite o nome do aluno..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-md border border-gray-300 py-2 pl-10 pr-4 focus:border-[#0D4F97] focus:outline-none focus:ring-1 focus:ring-[#0D4F97]"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Grid de Cards de Alunos */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {alunos.map((aluno) => (
+        {filteredAlunos.map((aluno) => (
           <Card
             key={aluno.id}
-            className="rounded-xl border-2 border-[#B2D7EC] shadow-md transition-all hover:border-[#0D4F97] hover:shadow-lg"
+            onClick={() => router.push(`/admin/alunos/detalhes/${aluno.id}`)}
+            className="cursor-pointer rounded-xl border-2 border-[#B2D7EC] shadow-md transition-all hover:border-[#0D4F97] hover:shadow-lg"
           >
             <CardContent className="p-6">
               {/* Header do Card com Avatar e Nome */}
@@ -98,35 +126,23 @@ export default function AvaliacoesAdmin({ onNavigate }: AvaliacoesAdminProps) {
                   <UserCircle className="h-7 w-7 text-[#0D4F97]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-[#0D4F97]">{aluno.nome}</h3>
-                  <p className="text-[#222222]">{aluno.turma}</p>
+                  <h3 className="text-[#0D4F97] font-semibold">{aluno.nome}</h3>
+                  <p className="text-[#222222] text-sm">{aluno.turma}</p>
                 </div>
               </div>
 
               {/* Informações de Presença e Última Avaliação */}
-              <div className="mb-4 space-y-2">
+              <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-[#222222]">Presença:</span>
-                  <span className={`${getPresencaColor(aluno.presenca)}`}>
+                  <span className={`font-bold ${getPresencaColor(aluno.presenca)}`}>
                     {aluno.presenca}%
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[#222222]">Última Avaliação:</span>
-                  <span className="text-[#222222]">{aluno.ultimaAvaliacao}</span>
+                  <span className="text-[#222222] font-medium">{aluno.ultimaAvaliacao}</span>
                 </div>
-              </div>
-
-              {/* Botões de Ação */}
-              <div>
-                <button
-                  onClick={() => router.push(`/admin/alunos/detalhes/${aluno.id}`)}
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#0D4F97] text-white transition-all hover:bg-[#FFD000] hover:text-[#0D4F97]"
-                  title="Ver Detalhes do Aluno"
-                >
-                  <Eye className="h-5 w-5" />
-                  <span>Ver Detalhes</span>
-                </button>
               </div>
             </CardContent>
           </Card>
