@@ -275,56 +275,66 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label className="text-[#0D4F97]">Alunos</Label>
-                        <p className="text-sm font-medium text-[#0D4F97]">Buscar Aluno (Nome)</p>
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                            <Input
-                                placeholder="Buscar aluno por nome..."
-                                className="pl-10 bg-white border-[#B2D7EC]"
-                                value={buscaAluno}
-                                onChange={(e) => setBuscaAluno(e.target.value)}
-                            />
-                        </div>
+                    <div className="space-y-4">
+                        <Label className="text-[#0D4F97] font-medium border-b border-[#B2D7EC] pb-2 block">Gerenciar Alunos na Turma</Label>
 
-                        {/* Resultados da Busca */}
-                        {alunosEncontrados.length > 0 && (
-                            <div className="border rounded-md max-h-40 overflow-y-auto bg-white shadow-sm mt-1">
-                                {alunosEncontrados.map(aluno => (
-                                    <div
-                                        key={aluno.id}
-                                        className="p-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center"
-                                        onClick={() => adicionarAluno(aluno)}
-                                    >
-                                        <span className="text-sm font-medium">{aluno.nome}</span>
-                                        <span className="text-xs text-gray-500">Adicionar</span>
-                                    </div>
-                                ))}
+                        <div className="space-y-2">
+                            <Label className="text-[#0D4F97]">Adicionar Aluno</Label>
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                                <Input
+                                    placeholder="Buscar aluno por nome..."
+                                    className="pl-10 bg-white border-[#B2D7EC]"
+                                    value={buscaAluno}
+                                    onChange={(e) => setBuscaAluno(e.target.value)}
+                                />
                             </div>
-                        )}
 
-                        {/* Alunos Selecionados */}
-                        {alunosSelecionados.length > 0 && (
-                            <div className="mt-4 space-y-2">
-                                <Label className="text-xs font-semibold text-gray-500 uppercase">Alunos Selecionados ({alunosSelecionados.length})</Label>
-                                <div className="border border-[#B2D7EC] rounded-lg p-2 max-h-40 overflow-y-auto space-y-2">
-                                    {alunosSelecionados.map(aluno => (
-                                        <div key={aluno.id} className="flex justify-between items-center bg-gray-50 p-2 rounded border border-gray-100">
-                                            <span className="text-sm font-medium text-[#222222]">{aluno.nome}</span>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                                onClick={() => removerAluno(aluno.id)}
-                                            >
-                                                <X size={14} />
-                                            </Button>
+                            {/* Resultados da Busca */}
+                            {alunosEncontrados.length > 0 && (
+                                <div className="border rounded-md max-h-40 overflow-y-auto bg-white shadow-sm mt-1">
+                                    {alunosEncontrados.map(aluno => (
+                                        <div
+                                            key={aluno.id}
+                                            className="p-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center"
+                                            onClick={() => adicionarAluno(aluno)}
+                                        >
+                                            <span className="text-sm font-medium">{aluno.nome}</span>
+                                            <span className="text-xs text-gray-500">Adicionar</span>
                                         </div>
                                     ))}
                                 </div>
+                            )}
+                        </div>
+
+                        <div className="border border-[#B2D7EC] rounded-lg p-4 bg-white">
+                            <Label className="text-[#0D4F97] mb-2 block font-medium">Alunos na Turma ({alunosSelecionados.length})</Label>
+                            <div className="max-h-60 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                                {alunosSelecionados.length === 0 && <p className="text-sm text-gray-400 italic text-center py-4">Nenhum aluno vinculado.</p>}
+                                {alunosSelecionados.map(aluno => (
+                                    <div key={aluno.id} className="flex justify-between items-center bg-white p-3 rounded-lg border border-[#B2D7EC] shadow-sm hover:shadow transition-shadow">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-8 w-8 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97]">
+                                                {/* Ícone de Usuário Simples */}
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-[#0D4F97]">{aluno.nome}</p>
+                                                <p className="text-xs text-gray-500">Matrícula: {2025000 + aluno.id}</p>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 h-8 w-8 rounded-full"
+                                            onClick={() => removerAluno(aluno.id)}
+                                        >
+                                            <X size={16} />
+                                        </Button>
+                                    </div>
+                                ))}
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
 

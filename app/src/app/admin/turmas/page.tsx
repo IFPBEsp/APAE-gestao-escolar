@@ -60,7 +60,7 @@ export default function GerenciarTurmasPage() {
   const [isEditarTurmaOpen, setIsEditarTurmaOpen] = useState(false);
 
   const turmasFiltradas = turmas.filter((t) =>
-    t.status === "Ativa" && t.name.toLowerCase().includes(busca.toLowerCase())
+    t.name.toLowerCase().includes(busca.toLowerCase())
   );
 
   const handleCardClick = (turma: any) => {
@@ -146,8 +146,16 @@ export default function GerenciarTurmasPage() {
                 onClick={() => handleCardClick(turma)}
                 className="border border-[#B2D7EC] bg-white rounded-xl shadow-sm p-6 relative cursor-pointer hover:shadow-md transition-shadow group"
               >
-                <div className="absolute right-4 top-4 bg-[#E8F3FF] text-[#0D4F97] px-4 py-1 rounded-full text-sm font-medium">
-                  {turma.students} alunos
+                <div className="absolute right-4 top-4 flex gap-2">
+                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${turma.status === "Ativa"
+                      ? "bg-green-100 text-green-700 border border-green-200"
+                      : "bg-gray-100 text-gray-700 border border-gray-200"
+                    }`}>
+                    {turma.status}
+                  </div>
+                  <div className="bg-[#E8F3FF] text-[#0D4F97] px-3 py-1 rounded-full text-xs font-medium border border-[#B2D7EC]">
+                    {turma.students} alunos
+                  </div>
                 </div>
 
                 <h2 className="text-lg font-semibold text-[#0D4F97] mb-3 group-hover:text-[#0B3E78]">
