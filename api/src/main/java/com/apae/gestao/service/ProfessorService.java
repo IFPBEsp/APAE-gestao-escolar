@@ -122,7 +122,7 @@ public class ProfessorService {
         professor.setEmail(dto.getEmail());
         professor.setTelefone(dto.getTelefone());
         professor.setDataNascimento(dto.getDataNascimento());
-        professor.setEspecialidade(dto.getEspecialidade());
+        professor.setFormacao(dto.getFormacao());
         professor.setDataContratacao(dto.getDataContratacao());
         professor.setEndereco(dto.getEndereco());
     }

@@ -42,8 +42,8 @@ public class Professor {
     @Column(name = "data_nascimento")
     private LocalDate dataNascimento;
 
-    @Column(length = 100)
-    private String especialidade;
+    @Column(name = "formacao", length = 100)
+    private String formacao;
 
     @Column(name = "data_contratacao")
     private LocalDate dataContratacao;

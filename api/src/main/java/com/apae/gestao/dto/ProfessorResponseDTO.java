@@ -30,8 +30,8 @@ public class ProfessorResponseDTO {
     private String telefone;
     @Schema(description = "Data de nascimento", example = "1990-05-12")
     private LocalDate dataNascimento;
-    @Schema(description = "Especialidade/área de atuação", example = "Educação Especial")
-    private String especialidade;
+    @Schema(description = "Formação acadêmica", example = "Licenciatura em Educação Especial")
+    private String formacao;
     @Schema(description = "Data de contratação", example = "2024-02-01")
     private LocalDate dataContratacao;
     @Schema(description = "Endereço completo", example = "Av. Brasil, 1000 - Centro, Recife/PE")
@@ -52,14 +52,12 @@ public class ProfessorResponseDTO {
         this.email = professor.getEmail();
         this.telefone = professor.getTelefone();
         this.dataNascimento = professor.getDataNascimento();
-        this.especialidade = professor.getEspecialidade();
+        this.formacao = professor.getFormacao();
         this.dataContratacao = professor.getDataContratacao();
         this.endereco = professor.getEndereco();
         this.ativo = professor.getAtivo();
         this.createdAt = professor.getCreatedAt();
         this.updatedAt = professor.getUpdatedAt();
-        
-        // Inclui turmas (a serialização será controlada por @JsonIgnoreProperties na entidade)
         this.turmas = professor.getTurmas();
     }
 }
