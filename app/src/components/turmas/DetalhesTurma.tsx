@@ -12,59 +12,16 @@ import {
 import { useState } from "react";
 
 interface DetalhesTurmaProps {
-    turmaId: number;
+    turmaId?: number;
+    turmaData?: any;
     onBack: () => void;
     onNavigate: (screen: string, turmaId?: number) => void;
     onEdit: () => void;
     onInactivate: () => void;
 }
 
-// Lógica de dados mock dentro do componente por enquanto, a ser substituída ou passada via props
-const mockTurmaData = {
-    1: {
-        id: 1,
-        name: "Alfabetização 2025 - Manhã",
-        status: "Ativa",
-        teacher: "Prof. Maria Silva",
-        ano: "2025",
-        turno: "Manhã",
-        schedule: "Segunda a Sexta - 08:00 às 12:00",
-        studentsCount: 8,
-    },
-    2: {
-        id: 2,
-        name: "Estimulação 2025 - Tarde",
-        status: "Ativa",
-        teacher: "Prof. João Santos",
-        ano: "2025",
-        turno: "Tarde",
-        schedule: "Segunda a Sexta - 14:00 às 18:00",
-        studentsCount: 6,
-    },
-    3: {
-        id: 3,
-        name: "Matemática Básica 2025 - Manhã",
-        status: "Ativa",
-        teacher: "Prof. Ana Costa",
-        ano: "2025",
-        turno: "Manhã",
-        schedule: "Segunda a Sexta - 09:00 às 11:00",
-        studentsCount: 10,
-    },
-    4: {
-        id: 4,
-        name: "Educação Física 2025 - Tarde",
-        status: "Ativa",
-        teacher: "Prof. Carlos Lima",
-        ano: "2025",
-        turno: "Tarde",
-        schedule: "Terça e Quinta - 15:00 às 17:00",
-        studentsCount: 12,
-    },
-};
-
-export function DetalhesTurma({ turmaId, onBack, onNavigate, onEdit, onInactivate }: DetalhesTurmaProps) {
-    const turma = mockTurmaData[turmaId as keyof typeof mockTurmaData];
+export function DetalhesTurma({ turmaId, turmaData, onBack, onNavigate, onEdit, onInactivate }: DetalhesTurmaProps) {
+    const turma = turmaData;
     const [isInativarDialogOpen, setIsInativarDialogOpen] = useState(false);
 
     if (!turma) {
@@ -153,10 +110,12 @@ export function DetalhesTurma({ turmaId, onBack, onNavigate, onEdit, onInactivat
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-gray-500 mb-1">Quantidade de Alunos</p>
-                                <p className="text-[#0D4F97] font-medium">{turma.studentsCount}</p>
+                                <p className="text-[#0D4F97] font-medium">{turma.students || turma.studentsCount || 0}</p>
                             </div>
                         </div>
                     </div>
+
+                    {/* Lista de Alunos removida conforme solicitação */}
 
                     <div className="pt-6 border-t border-gray-100 flex gap-4">
                         <Button

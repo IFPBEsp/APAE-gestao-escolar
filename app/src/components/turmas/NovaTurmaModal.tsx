@@ -165,10 +165,11 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
             name: nomeTurma,
             students: alunosSelecionados.length,
             teacher: professorSelecionado?.nome || "Sem Professor",
-            schedule: turno === 'manha' ? "Segunda a Sexta - 08:00 às 12:00" : "Segunda a Sexta - 13:00 às 17:00",
+            schedule: turno === 'manha' ? "Segunda a Sexta - 07:30 às 11:00" : "Segunda a Sexta - 13:30 às 17:00",
             turno: formatTurno(turno),
             status: "Ativa",
-            ano
+            ano,
+            alunos: alunosSelecionados
         };
 
         if (onSave) {
@@ -275,7 +276,7 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-[#0D4F97]">Alunos (Opcional)</Label>
+                        <Label className="text-[#0D4F97]">Alunos</Label>
                         <p className="text-sm font-medium text-[#0D4F97]">Buscar Aluno (Nome)</p>
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />

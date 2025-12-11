@@ -175,6 +175,7 @@ export default function GerenciarTurmasPage() {
         <>
           <DetalhesTurma
             turmaId={selectedTurma.id}
+            turmaData={selectedTurma}
             onBack={handleBackToGerenciarTurmas}
             onNavigate={handleNavigate}
             onEdit={handleEditClick}

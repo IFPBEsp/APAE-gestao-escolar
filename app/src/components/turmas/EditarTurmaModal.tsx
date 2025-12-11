@@ -48,8 +48,12 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     useEffect(() => {
         if (turmaData) {
             setProfessorAtual(turmaData.teacher);
-            // Em uma app real, popular alunosNaTurma da lista turmaData.students
-            // Por enquanto iniciamos vazio ou mock
+            // Inicializar alunos se existirem
+            if (turmaData.alunos) {
+                setAlunosNaTurma(turmaData.alunos);
+            } else {
+                setAlunosNaTurma([]);
+            }
             setBuscaProfessor("");
         }
     }, [turmaData, isOpen]);
@@ -150,7 +154,8 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
         const updated = {
             ...turmaData,
             teacher: professorAtual,
-            studentsCount: (turmaData.studentsCount || 0) + alunosNaTurma.length
+            studentsCount: (turmaData.studentsCount || 0) + alunosNaTurma.length,
+            alunos: alunosNaTurma
         };
         onSave(updated);
         onClose();
@@ -250,22 +255,29 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                             )}
                         </div>
 
-                        <div className="border border-[#B2D7EC] rounded-lg p-4">
-                            <Label className="text-[#0D4F97] mb-2 block">Novos Alunos Adicionados ({alunosNaTurma.length})</Label>
-                            <div className="max-h-40 overflow-y-auto space-y-2">
-                                {alunosNaTurma.length === 0 && <p className="text-sm text-gray-500">Nenhum aluno adicionado nesta sessão.</p>}
+                        <div className="border border-[#B2D7EC] rounded-lg p-4 bg-white">
+                            <Label className="text-[#0D4F97] mb-2 block font-medium">Alunos na Turma ({alunosNaTurma.length})</Label>
+                            <div className="max-h-60 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                                {alunosNaTurma.length === 0 && <p className="text-sm text-gray-400 italic text-center py-4">Nenhum aluno vinculado.</p>}
                                 {alunosNaTurma.map(aluno => (
-                                    <div key={aluno.id} className="flex justify-between items-center bg-gray-50 p-2 rounded border border-gray-100">
-                                        <div>
-                                            <p className="text-sm font-medium text-[#222222]">{aluno.nome}</p>
+                                    <div key={aluno.id} className="flex justify-between items-center bg-white p-3 rounded-lg border border-[#B2D7EC] shadow-sm hover:shadow transition-shadow">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-8 w-8 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97]">
+                                                {/* Ícone de Usuário Simples */}
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-[#0D4F97]">{aluno.nome}</p>
+                                                <p className="text-xs text-gray-500">Matrícula: {2025000 + aluno.id}</p>
+                                            </div>
                                         </div>
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-0 w-6 h-6"
+                                            className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 h-8 w-8 rounded-full"
                                             onClick={() => removerAluno(aluno.id)}
                                         >
-                                            <X size={14} />
+                                            <X size={16} />
                                         </Button>
                                     </div>
                                 ))}
