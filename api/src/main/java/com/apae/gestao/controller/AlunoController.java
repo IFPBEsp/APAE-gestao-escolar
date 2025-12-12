@@ -34,10 +34,17 @@ public class AlunoController {
     }
 
     @GetMapping
-    @Operation(summary = "Listar alunos", description = "Retorna todos os alunos cadastrados. Permite filtrar por nome.")
-    public List<AlunoResponseDTO> listarTodos(
-            @Parameter(description = "Nome do aluno para filtro", required = false) @RequestParam(required = false) String nome) {
-        return alunoService.listarTodos(nome);
+    @Operation(
+        summary = "Listar alunos", 
+        description = "Retorna todos os alunos que têm essa String no nome, desconsiderando letra maiúscula."
+    )
+    public ResponseEntity<List<AlunoResponseDTO>> listarAlunosPorNome(
+            @Parameter(example = "João", in = ParameterIn.QUERY)
+            @RequestParam(value = "nome", required = false) String nome) {
+        
+        List<AlunoResponseDTO> alunos = alunoService.listarAlunosPorNome(nome);
+        
+        return ResponseEntity.ok(alunos);
     }
 
     @GetMapping("/{id}")

@@ -87,25 +87,26 @@ public class ProfessorController {
 
     @GetMapping
     @Operation(
-        summary = "Listar professores",
-        description = "Retorna professores com opção de filtro por nome e status. " +
-                     "Permite combinações flexíveis: buscar por nome apenas entre os ativos, " +
-                     "ou buscar em todo o banco ignorando o status."
+        summary = "Listar todos os professores",
+        description = "Retorna TODOS os professores cadastrados (ativos e inativos)."
     )
-    public ResponseEntity<List<ProfessorResponseDTO>> listarTodos(
-            @Parameter(
-                description = "Nome do professor para busca (case-insensitive, contém o texto)", 
-                example = "Maria", 
-                in = ParameterIn.QUERY
-            )
+    public ResponseEntity<List<ProfessorResponseDTO>> listarTodos() {
+        List<ProfessorResponseDTO> professores = professorService.listarTodos();
+        return ResponseEntity.ok(professores);
+    }
+
+    @GetMapping("/buscar")
+    @Operation(
+        summary = "Buscar professores com filtros",
+        description = "Busca professores por nome e/ou status ativo."
+    )
+    public ResponseEntity<List<ProfessorResponseDTO>> listarPorNomeEStatus(
+            @Parameter(example = "Maria", in = ParameterIn.QUERY)
             @RequestParam(value = "nome", required = false) String nome,
-            @Parameter(
-                description = "Status do professor: true=apenas ativos, false=apenas inativos, null=todos (padrão)", 
-                example = "true", 
-                in = ParameterIn.QUERY
-            )
+            @Parameter(example = "true", in = ParameterIn.QUERY)
             @RequestParam(value = "ativo", required = false) Boolean ativo) {
-        List<ProfessorResponseDTO> professores = professorService.listarTodos(nome, ativo);
+        
+        List<ProfessorResponseDTO> professores = professorService.listarPorNomeEStatus(nome, ativo);
         return ResponseEntity.ok(professores);
     }
 
