@@ -9,10 +9,9 @@ import { useRouter, useParams } from "next/navigation";
 
 export default function TurmaDetalhesPage() {
   const params = useParams();
-  const turmaId = params.turmaId as string;
+  const turmaId = params?.turmasId ? String(params.turmasId) : null;
   const router = useRouter();
   
-  const [activeTab, setActiveTab] = useState("turmas");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Mock data para turma e alunos
@@ -45,11 +44,26 @@ export default function TurmaDetalhesPage() {
     }
   };
 
-  const turma = turmaData[turmaId] || { nome: "Turma não encontrada", alunos: [] };
+  if (!turmaId) {
+    return (
+      <div className="flex min-h-screen bg-[#E5E5E5] items-center justify-center">
+        <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md p-8">
+          <CardContent className="text-center">
+            <h2 className="text-[#0D4F97] text-2xl font-bold mb-4">Turma não encontrada</h2>
+            <p className="text-[#222222] mb-6">Não foi possível identificar a turma.</p>
+            <Button
+              onClick={() => router.push("/professor/turmas")}
+              className="h-12 bg-[#0D4F97] px-6 text-white hover:bg-[#FFD000] hover:text-[#0D4F97]"
+            >
+              Voltar para Turmas
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-  };
+  const turma = turmaData[turmaId] || { nome: "Turma não encontrada", alunos: [] };
 
   const handleLogout = () => {
     router.push("/");
@@ -71,8 +85,6 @@ export default function TurmaDetalhesPage() {
     <div className="flex min-h-screen bg-[#E5E5E5]">
       {/* Sidebar */}
       <ProfessorSidebar
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
         onLogout={handleLogout}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={handleToggleCollapse}
@@ -82,7 +94,8 @@ export default function TurmaDetalhesPage() {
       <main className={`flex-1 overflow-y-auto transition-all duration-300 ${
         isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
       }`}>
-        <div className="p-8">
+        <div className="p-4 md:p-8">
+          <div className="mx-auto max-w-6xl">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <Button
@@ -159,6 +172,7 @@ export default function TurmaDetalhesPage() {
               </div>
             </CardContent>
           </Card>
+          </div>
         </div>
       </main>
     </div>

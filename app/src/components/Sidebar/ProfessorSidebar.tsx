@@ -1,33 +1,54 @@
 'use client'
 
-import { Home, BookOpen, BarChart3, LogOut, Menu, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Home, BookOpen, LogOut, Menu, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 
 interface ProfessorSidebarProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
-  onLogout: () => void;
+  onLogout?: () => void;
   showMobileMenu?: boolean;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
 }
 
 export default function ProfessorSidebar({ 
-  activeTab, 
-  onTabChange, 
   onLogout, 
   showMobileMenu = true, 
   isCollapsed = false, 
   onToggleCollapse 
 }: ProfessorSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const menuItems = [
-    { id: "inicio", label: "Início", icon: Home },
-    { id: "turmas", label: "Turmas", icon: BookOpen },
-    { id: "relatorios", label: "Relatórios", icon: BarChart3 },
+    { 
+      id: "inicio", 
+      label: "Início", 
+      icon: Home, 
+      href: "/professor" 
+    },
+    { 
+      id: "turmas", 
+      label: "Turmas", 
+      icon: BookOpen, 
+      href: "/professor/turmas" 
+    },
   ];
+
+  const handleLogout = () => {
+    if (onLogout) {
+      onLogout();
+    } else {
+      router.push("/");
+    }
+  };
+
+  const isActive = (href: string) => {
+    return pathname === href;
+  };
 
   return (
     <>
@@ -94,16 +115,16 @@ export default function ProfessorSidebar({
         <div className="flex-1 space-y-2 p-4">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeTab === item.id;
+            const active = isActive(item.href);
             
             return (
-              <button
+              <Link
                 key={item.id}
-                onClick={() => onTabChange(item.id)}
+                href={item.href}
                 className={`flex w-full items-center ${
                   isCollapsed ? 'justify-center' : 'gap-3'
                 } rounded-3xl px-4 py-3 transition-all ${
-                  isActive
+                  active
                     ? "bg-[#0D4F97] text-white shadow-md"
                     : "bg-transparent text-[#0D4F97] hover:bg-[#0D4F97] hover:text-white"
                 }`}
@@ -113,7 +134,7 @@ export default function ProfessorSidebar({
                 {!isCollapsed && (
                   <span className="font-medium">{item.label}</span>
                 )}
-              </button>
+              </Link>
             );
           })}
         </div>
@@ -121,7 +142,7 @@ export default function ProfessorSidebar({
         {/* Logout Button */}
         <div className="border-t-2 border-[#0D4F97]/20 p-4">
           <button
-            onClick={onLogout}
+            onClick={handleLogout}
             className={`flex w-full items-center ${
               isCollapsed ? 'justify-center' : 'gap-3'
             } rounded-3xl bg-transparent px-4 py-3 text-[#0D4F97] transition-all hover:bg-white/40`}
@@ -171,24 +192,22 @@ export default function ProfessorSidebar({
               <div className="flex-1 space-y-2 p-4">
                 {menuItems.map((item) => {
                   const Icon = item.icon;
-                  const isActive = activeTab === item.id;
+                  const active = isActive(item.href);
                   
                   return (
-                    <button
+                    <Link
                       key={item.id}
-                      onClick={() => {
-                        onTabChange(item.id);
-                        setSidebarOpen(false);
-                      }}
+                      href={item.href}
+                      onClick={() => setSidebarOpen(false)}
                       className={`flex w-full items-center gap-3 rounded-3xl px-4 py-3 text-left transition-all ${
-                        isActive
+                        active
                           ? "bg-[#0D4F97] text-white shadow-md"
                           : "bg-transparent text-[#0D4F97] hover:bg-[#0D4F97] hover:text-white"
                       }`}
                     >
                       <Icon className="h-5 w-5" />
                       <span className="font-medium">{item.label}</span>
-                    </button>
+                    </Link>
                   );
                 })}
               </div>
@@ -197,7 +216,7 @@ export default function ProfessorSidebar({
               <div className="border-t-2 border-[#0D4F97]/20 p-4">
                 <button
                   onClick={() => {
-                    onLogout();
+                    handleLogout();
                     setSidebarOpen(false);
                   }}
                   className="flex w-full items-center gap-3 rounded-3xl bg-transparent px-4 py-3 text-[#0D4F97] transition-all hover:bg-white/40"
