@@ -21,7 +21,7 @@ interface Turma {
 const turmaData: Record<string, Turma> = {
     "1": {
         nome: "Alfabetização 2025 - Manhã",
-        periodo: "Manhã",
+        periodo: "Segunda a Sexta - 07:30 às 13:30",
         alunos: [
             { id: 1, name: "Ana Silva" },
             { id: 2, name: "Bruno Costa" },
@@ -35,7 +35,7 @@ const turmaData: Record<string, Turma> = {
     },
     "2": {
         nome: "Estimulação 2025 - Tarde",
-        periodo: "Tarde",
+        periodo: "Segunda a Sexta - 13:30 às 17:00",
         alunos: [
             { id: 9, name: "Igor Martins" },
             { id: 10, name: "Juliana Alves" },
