@@ -3,6 +3,7 @@ package com.apae.gestao.controller;
 import java.util.List;
 
 import com.apae.gestao.dto.AlunoResponseDTO;
+import com.apae.gestao.dto.AvaliacaoHistoricoResponseDTO;
 import com.apae.gestao.dto.ApiErrorResponse;
 import com.apae.gestao.service.AlunoService;
 
@@ -34,10 +35,17 @@ public class AlunoController {
     }
 
     @GetMapping
-    @Operation(summary = "Listar alunos", description = "Retorna todos os alunos cadastrados. Permite filtrar por nome.")
-    public List<AlunoResponseDTO> listarTodos(
-            @Parameter(description = "Nome do aluno para filtro", required = false) @RequestParam(required = false) String nome) {
-        return alunoService.listarTodos(nome);
+    @Operation(
+        summary = "Listar alunos", 
+        description = "Retorna todos os alunos que têm essa String no nome, desconsiderando letra maiúscula."
+    )
+    public ResponseEntity<List<AlunoResponseDTO>> listarAlunosPorNome(
+            @Parameter(example = "João", in = ParameterIn.QUERY)
+            @RequestParam(value = "nome", required = false) String nome) {
+        
+        List<AlunoResponseDTO> alunos = alunoService.listarAlunosPorNome(nome);
+        
+        return ResponseEntity.ok(alunos);
     }
 
     @GetMapping("/{id}")
@@ -50,5 +58,13 @@ public class AlunoController {
             @Parameter(description = "Identificador do aluno", example = "4", in = ParameterIn.PATH) @PathVariable Long id) {
         AlunoResponseDTO aluno = alunoService.buscarPorId(id);
         return ResponseEntity.ok(aluno);
+    }
+
+    @GetMapping("/{id}/avaliacoes")
+    @Operation(summary = "Buscar histórico de avaliações do aluno")
+    public ResponseEntity<List<AvaliacaoHistoricoResponseDTO>> buscarAvaliacoesPorAlunoId(
+            @Parameter(description = "Identificador do aluno") @PathVariable Long id) {
+        List<AvaliacaoHistoricoResponseDTO> avaliacoes = alunoService.buscarAvaliacoesPorAlunoId(id);
+        return ResponseEntity.ok(avaliacoes);
     }
 }

@@ -1,5 +1,5 @@
 
-import api from './api'; // Importa a instância do Axios configurada
+import api from './api'; 
 
 /**
  * Cadastra um novo professor na API.
@@ -14,11 +14,8 @@ import api from './api'; // Importa a instância do Axios configurada
 export async function registerProfessor(professorData) {
     
     try {
-        // Faz a requisição POST para o endpoint /professores
-        // O Axios adiciona automaticamente o prefixo /api (do api.ts)
         const response = await api.post('/professores', professorData);
 
-        // O Axios retorna o corpo da resposta em 'response.data' em caso de sucesso (status 2xx)
         return response.data;
 
     } catch (error) {
@@ -29,5 +26,59 @@ export async function registerProfessor(professorData) {
         
         console.error("ProfessorService Error:", error.response || error);
         throw new Error(errorMessage);
+    }
+}
+
+/**
+ * Busca professores com filtros opcionais.
+ * 
+ * @param {string} nome - Nome para busca (opcional)
+ * @param {boolean} ativo - Status do professor (opcional)
+ * @returns {Promise<Array>} Lista de professores
+ */
+export async function listarProfessores(nome, ativo) {
+    try {
+        const params = new URLSearchParams();
+        if (nome) params.append('nome', nome);
+        if (ativo !== undefined) params.append('ativo', ativo.toString());
+        
+        const response = await api.get(`/professores?${params.toString()}`);
+        return response.data;
+    } catch (error) {
+        console.error("Erro ao listar professores:", error);
+        throw new Error("Erro ao carregar professores");
+    }
+}
+
+/**
+ * Busca um professor por ID.
+ * 
+ * @param {number} id - ID do professor
+ * @returns {Promise<object>} Dados do professor
+ */
+export async function buscarProfessorPorId(id) {
+    try {
+        const response = await api.get(`/professores/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Erro ao buscar professor:", error);
+        throw new Error("Erro ao carregar dados do professor");
+    }
+}
+
+/**
+ * Atualiza um professor existente.
+ * 
+ * @param {number} id - ID do professor
+ * @param {object} professorData - Dados atualizados
+ * @returns {Promise<object>} Professor atualizado
+ */
+export async function atualizarProfessor(id, professorData) {
+    try {
+        const response = await api.put(`/professores/${id}`, professorData);
+        return response.data;
+    } catch (error) {
+        console.error("Erro ao atualizar professor:", error);
+        throw new Error("Erro ao atualizar professor");
     }
 }

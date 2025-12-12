@@ -74,7 +74,7 @@ export default function TurmaDetalhesPage() {
   };
 
   const handleVerAvaliacoes = (alunoId: number) => {
-    router.push(`/professor/turmas/${turmaId}/alunos/${alunoId}/avaliacoes`);
+    router.push(`/professor/alunos/${alunoId}/avaliacoes?turmaId=${turmaId}`);
   };
 
   const handleFazerChamada = () => {

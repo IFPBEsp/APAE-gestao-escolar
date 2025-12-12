@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
@@ -42,6 +43,7 @@ public class Turma {
 
     @ManyToOne
     @JoinColumn(name = "professor_id", nullable = false)
+    @JsonIgnoreProperties({"turmas", "relatorios", "avaliacoes"}) // Evita referência circular
     private Professor professor;
 
     @OneToMany(mappedBy = "turma", cascade = CascadeType.ALL)

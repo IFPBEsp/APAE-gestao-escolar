@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
@@ -41,8 +42,8 @@ public class Professor {
     @Column(name = "data_nascimento")
     private LocalDate dataNascimento;
 
-    @Column(length = 100)
-    private String especialidade;
+    @Column(name = "formacao", length = 100)
+    private String formacao;
 
     @Column(name = "data_contratacao")
     private LocalDate dataContratacao;
@@ -63,6 +64,7 @@ public class Professor {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "professor")
+    @JsonIgnoreProperties({"professor", "turmaAlunos", "aulas"}) // Evita referência circular
     private Set<Turma> turmas = new HashSet<>();
 
     @OneToMany(mappedBy = "professor", cascade = CascadeType.ALL)

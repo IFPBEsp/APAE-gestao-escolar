@@ -50,6 +50,14 @@ public class AvaliacaoController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<AvaliacaoResponseDTO> atualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody AvaliacaoRequestDTO dto) {
+        AvaliacaoResponseDTO response = avaliacaoService.atualizar(id, dto);
+        return ResponseEntity.ok(response);
+    }
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         avaliacaoService.deletar(id);
