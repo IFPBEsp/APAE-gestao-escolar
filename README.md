@@ -3,7 +3,7 @@
 
 ##  Objetivo do Projeto
 
-Facilitar a gestão escolar da APAE, permitindo o controle de:
+Facilitar a gestão escohttps://github.com/IFPBEsp/APAE-gestao-escolar/issues/132#issue-3700919353lar da APAE, permitindo o controle de:
 
  Alunos
 
