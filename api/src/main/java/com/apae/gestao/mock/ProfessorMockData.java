@@ -93,7 +93,7 @@ public class ProfessorMockData implements CommandLineRunner {
     }
 
     private Professor criarProfessor(String nome, String cpf, String email, String telefone,
-                                     LocalDate dataNascimento, String especialidade,
+                                     LocalDate dataNascimento, String formacao,
                                      LocalDate dataContratacao, String endereco, boolean ativo) {
         Professor professor = new Professor();
         professor.setNome(nome);
@@ -101,7 +101,7 @@ public class ProfessorMockData implements CommandLineRunner {
         professor.setEmail(email);
         professor.setTelefone(telefone);
         professor.setDataNascimento(dataNascimento);
-        professor.setEspecialidade(especialidade);
+        professor.setFormacao(formacao);
         professor.setDataContratacao(dataContratacao);
         professor.setEndereco(endereco);
         professor.setAtivo(ativo);

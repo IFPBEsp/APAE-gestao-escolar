@@ -26,6 +26,7 @@ interface Professor {
   nome: string;
   email: string;
   telefone?: string;
+  formacao?: string;
   dataContratacao: string;
   turmas?: Array<{ id: number; nome: string } | string>;
   ativo: boolean;
@@ -174,6 +175,14 @@ export default function DetalhesProfessor() {
                   </p>
                   <p className="text-[#222222]">{professor.telefone || "—"}</p>
                 </div>
+                
+                {/* Formação */}
+                <div>
+                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
+                    Formação
+                  </p>
+                  <p className="text-[#222222]">{professor.formacao || "—"}</p>
+                </div>
 
                 {/* Data de Contratação */}
                 <div>
@@ -210,7 +219,7 @@ export default function DetalhesProfessor() {
                   <div className="space-y-2">
                     {professor.turmas.map((turma, index) => {
                       const turmaNome =
-                        typeof turma === "object" ? turma.nome || turma.name : turma;
+                        typeof turma === "object" ? turma.nome : turma;
                       return (
                         <div
                           key={index}

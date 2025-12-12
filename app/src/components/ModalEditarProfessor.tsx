@@ -26,7 +26,7 @@ interface Professor {
   telefone?: string;
   endereco?: string;
   dataNascimento?: string;
-  especialidade?: string;
+  formacao?: string;
   dataContratacao?: string;
   turmas?: Array<{ id: number; nome: string } | string>;
 }
@@ -51,7 +51,7 @@ export default function ModalEditarProfessor({
     telefone: "",
     endereco: "",
     dataNascimento: "",
-    especialidade: "",
+    formacao: "",
     dataContratacao: "",
   });
   const [turmasVinculadas, setTurmasVinculadas] = useState<string[]>([]);
@@ -82,16 +82,15 @@ export default function ModalEditarProfessor({
         dataNascimento: professor.dataNascimento
           ? format(new Date(professor.dataNascimento), "yyyy-MM-dd")
           : "",
-        especialidade: professor.especialidade || "",
+        formacao: professor.formacao || "",
         dataContratacao: professor.dataContratacao
           ? format(new Date(professor.dataContratacao), "yyyy-MM-dd")
           : "",
       });
 
-      // Processar turmas
       const turmas = professor.turmas || [];
       setTurmasVinculadas(
-        turmas.map((t) => (typeof t === "object" ? t.nome || t.name : t))
+        turmas.map((t) => (typeof t === "object" ? t.nome : t))
       );
     }
   }, [professor, isOpen]);
@@ -271,13 +270,13 @@ export default function ModalEditarProfessor({
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <Label htmlFor="especialidade" className="text-[#0D4F97]">
-                  Especialidade
+                <Label htmlFor="formacao" className="text-[#0D4F97]">
+                  Formação
                 </Label>
                 <Input
-                  id="especialidade"
-                  name="especialidade"
-                  value={formData.especialidade}
+                  id="formacao"
+                  name="formacao"
+                  value={formData.formacao}
                   onChange={handleChange}
                   className="h-12 border-2 border-[#B2D7EC]"
                   placeholder="Pedagogia Especial"

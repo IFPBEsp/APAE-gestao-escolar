@@ -25,7 +25,7 @@ export default function CadastrarProfessorPage() {
     telefone: "",
     endereco: "",
     dataNascimento: "",
-    especialidade: "",
+    formacao: "",
     dataContratacao: "",
   });
   const [errors, setErrors] = useState({
@@ -110,7 +110,7 @@ export default function CadastrarProfessorPage() {
         telefone: "",
         endereco: "",
         dataNascimento: "",
-        especialidade: "",
+        formacao: "",
         dataContratacao: "",
       });
       setErrors({ cpf: "", endereco: "" });
@@ -249,16 +249,16 @@ export default function CadastrarProfessorPage() {
                 />
               </div>
 
-              {/* Especialidade */}
+              {/* Formação */}
               <div className="space-y-2">
-                <Label htmlFor="especialidade" className="text-[#0D4F97]">Especialidade *</Label>
+                <Label htmlFor="formacao" className="text-[#0D4F97]">Formação *</Label>
                 <Input
-                  id="especialidade"
-                  name="especialidade"
-                  value={formData.especialidade}
+                  id="formacao"
+                  name="formacao"
+                  value={formData.formacao}
                   onChange={handleChange}
                   required
-                  placeholder="Ex: Educação Especial"
+                  placeholder="Ex: Licenciatura em Educação Especial"
                   className="border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
                 />
               </div>
