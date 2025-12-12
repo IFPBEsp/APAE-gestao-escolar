@@ -58,6 +58,8 @@ public class ProfessorResponseDTO {
         this.ativo = professor.getAtivo();
         this.createdAt = professor.getCreatedAt();
         this.updatedAt = professor.getUpdatedAt();
+        
+        // Inclui turmas (a serialização será controlada por @JsonIgnoreProperties na entidade)
         this.turmas = professor.getTurmas();
     }
 }
