@@ -1,12 +1,11 @@
 package com.apae.gestao.entity;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,34 +20,32 @@ import lombok.*;
 @EqualsAndHashCode
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Avaliacao {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
-    private String pontosPositivos;
-
-    @Column(nullable = false)
-    private String pontosNegativos;
-
+    
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String descricao; 
+    
     @Column(name = "data_avaliacao", nullable = false)
     private LocalDateTime dataAvaliacao;
-
+    
     @ManyToOne
     @JoinColumn(name = "aluno_id", nullable = false)
     private Aluno aluno;
-
+    
     @ManyToOne
     @JoinColumn(name = "professor_id", nullable = false)
     private Professor professor;
-
+    
     @PrePersist
     protected void onCreate() {
         if (dataAvaliacao == null) {
             dataAvaliacao = LocalDateTime.now();
         }
     }
-
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -56,7 +53,7 @@ public class Avaliacao {
         Avaliacao avaliacao = (Avaliacao) o;
         return id != null && Objects.equals(id, avaliacao.id);
     }
-
+    
     @Override
     public int hashCode() {
         return id != null ? Objects.hash(id) : getClass().hashCode();

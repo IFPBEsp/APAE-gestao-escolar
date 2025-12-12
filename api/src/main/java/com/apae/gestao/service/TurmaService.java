@@ -6,9 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.apae.gestao.dto.AlunoResponseDTO;
 import com.apae.gestao.dto.ProfessorResponseDTO;
-import com.apae.gestao.dto.TurmaAlunoRequestDTO;
 import com.apae.gestao.dto.TurmaAlunoResponseDTO;
 import com.apae.gestao.dto.TurmaRequestDTO;
 import com.apae.gestao.dto.TurmaResponseDTO;
@@ -141,7 +139,6 @@ public class TurmaService {
                 .toList();
     }
 
-    // GET /api/turmas/{turmaId}/alunos/ativos
     @Transactional(readOnly = true)
     public List<TurmaAlunoResponseDTO> listarAlunosAtivos(Long turmaId) {
         Turma turma = turmaDAO.findById(turmaId)
@@ -153,7 +150,6 @@ public class TurmaService {
                 .toList();
     }
 
-    // GET /api/turmas/{turmaId}/alunos/inativos
     @Transactional(readOnly = true)
     public List<TurmaAlunoResponseDTO> listarAlunosInativos(Long turmaId) {
         Turma turma = turmaDAO.findById(turmaId)
@@ -165,7 +161,6 @@ public class TurmaService {
                 .toList();
     }
 
-    // PATCH /ativar
     @Transactional
     public void ativarAluno(Long turmaId, Long alunoId) {
         alterarStatus(turmaId, alunoId, true);
@@ -176,7 +171,6 @@ public class TurmaService {
         alterarStatus(turmaId, alunoId, false);
     }
 
-    // ***********************************************************************************************
     private void alterarStatus(Long turmaId, Long alunoId, boolean ativo) {
 
         Turma turma = turmaDAO.findById(turmaId)
@@ -208,12 +202,10 @@ public class TurmaService {
             turma.setProfessor(professor);
         }
 
-        // Processar alunosIds e vincular alunos à turma
         if (dto.getAlunosIds() != null && !dto.getAlunosIds().isEmpty()) {
             for (Long alunoId : dto.getAlunosIds()) {
                 Aluno aluno = alunoDAO.findById(alunoId)
                         .orElseThrow(() -> new RuntimeException("Aluno não encontrado com ID: " + alunoId));
-                // Verificar se o aluno já não está na turma (evitar duplicatas)
                 boolean alunoJaExiste = turma.getTurmaAlunos().stream()
                         .anyMatch(ta -> ta.getAluno().getId().equals(alunoId));
                 if (!alunoJaExiste) {

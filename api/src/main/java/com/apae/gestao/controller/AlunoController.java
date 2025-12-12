@@ -3,6 +3,7 @@ package com.apae.gestao.controller;
 import java.util.List;
 
 import com.apae.gestao.dto.AlunoResponseDTO;
+import com.apae.gestao.dto.AvaliacaoHistoricoResponseDTO;
 import com.apae.gestao.dto.ApiErrorResponse;
 import com.apae.gestao.service.AlunoService;
 
@@ -57,5 +58,13 @@ public class AlunoController {
             @Parameter(description = "Identificador do aluno", example = "4", in = ParameterIn.PATH) @PathVariable Long id) {
         AlunoResponseDTO aluno = alunoService.buscarPorId(id);
         return ResponseEntity.ok(aluno);
+    }
+
+    @GetMapping("/{id}/avaliacoes")
+    @Operation(summary = "Buscar histórico de avaliações do aluno")
+    public ResponseEntity<List<AvaliacaoHistoricoResponseDTO>> buscarAvaliacoesPorAlunoId(
+            @Parameter(description = "Identificador do aluno") @PathVariable Long id) {
+        List<AvaliacaoHistoricoResponseDTO> avaliacoes = alunoService.buscarAvaliacoesPorAlunoId(id);
+        return ResponseEntity.ok(avaliacoes);
     }
 }
