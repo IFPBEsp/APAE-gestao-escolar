@@ -21,11 +21,17 @@ public class Relatorio {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String descricao;
+    @Column(length = 1000)
+    private String atividades;
 
-    @Column(name = "link_relatorio", length = 500)
-    private String linkRelatorio;
+    @Column(length = 1000)
+    private String habilidades;
+
+    @Column(length = 1000)
+    private String estrategias;
+
+    @Column(length = 1000)
+    private String recursos;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
