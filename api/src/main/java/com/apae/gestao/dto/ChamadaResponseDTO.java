@@ -1,6 +1,5 @@
 package com.apae.gestao.dto;
 
-import com.apae.gestao.entity.Presenca;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
