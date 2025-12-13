@@ -77,43 +77,43 @@ export default function AvaliacoesAdmin({ onNavigate }: AvaliacoesAdminProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-[#0D4F97]">Avaliações dos Alunos</h1>
-        <p className="text-[#222222]">Visualize e gerencie as avaliações de todos os alunos</p>
+        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-[#0D4F97] mb-2">Avaliações dos Alunos</h1>
+        <p className="text-sm md:text-base text-[#222222]">Visualize e gerencie as avaliações de todos os alunos</p>
       </div>
 
       {/* Grid de Cards de Alunos */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
         {alunos.map((aluno) => (
           <Card
             key={aluno.id}
             className="rounded-xl border-2 border-[#B2D7EC] shadow-md transition-all hover:border-[#0D4F97] hover:shadow-lg"
           >
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               {/* Header do Card com Avatar e Nome */}
-              <div className="mb-4 flex items-start gap-3">
-                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#B2D7EC]/20">
-                  <UserCircle className="h-7 w-7 text-[#0D4F97]" />
+              <div className="mb-3 md:mb-4 flex items-start gap-2 md:gap-3">
+                <div className="flex h-10 w-10 md:h-12 md:w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#B2D7EC]/20">
+                  <UserCircle className="h-6 w-6 md:h-7 md:w-7 text-[#0D4F97]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-[#0D4F97]">{aluno.nome}</h3>
-                  <p className="text-[#222222]">{aluno.turma}</p>
+                  <h3 className="text-sm md:text-base font-semibold text-[#0D4F97] mb-1">{aluno.nome}</h3>
+                  <p className="text-xs md:text-sm text-[#222222] line-clamp-2">{aluno.turma}</p>
                 </div>
               </div>
 
               {/* Informações de Presença e Última Avaliação */}
-              <div className="mb-4 space-y-2">
+              <div className="mb-3 md:mb-4 space-y-1.5 md:space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[#222222]">Presença:</span>
-                  <span className={`${getPresencaColor(aluno.presenca)}`}>
+                  <span className="text-xs md:text-sm text-[#222222]">Presença:</span>
+                  <span className={`text-xs md:text-sm font-medium ${getPresencaColor(aluno.presenca)}`}>
                     {aluno.presenca}%
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#222222]">Última Avaliação:</span>
-                  <span className="text-[#222222]">{aluno.ultimaAvaliacao}</span>
+                  <span className="text-xs md:text-sm text-[#222222]">Última Avaliação:</span>
+                  <span className="text-xs md:text-sm text-[#222222]">{aluno.ultimaAvaliacao}</span>
                 </div>
               </div>
 
@@ -121,10 +121,10 @@ export default function AvaliacoesAdmin({ onNavigate }: AvaliacoesAdminProps) {
               <div>
                 <button
                   onClick={() => router.push(`/admin/alunos/detalhes/${aluno.id}`)}
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#0D4F97] text-white transition-all hover:bg-[#FFD000] hover:text-[#0D4F97]"
+                  className="flex h-10 md:h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#0D4F97] text-white text-sm md:text-base transition-all hover:bg-[#FFD000] hover:text-[#0D4F97]"
                   title="Ver Detalhes do Aluno"
                 >
-                  <Eye className="h-5 w-5" />
+                  <Eye className="h-4 w-4 md:h-5 md:w-5" />
                   <span>Ver Detalhes</span>
                 </button>
               </div>
