@@ -1,5 +1,6 @@
 package com.apae.gestao.entity;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -24,6 +25,9 @@ public class Aluno {
     private String nome;
 
     @Column(nullable = false)
+    private LocalDate dataNascimento;
+
+    @Column(nullable = false)
     private Integer idade;
 
     @Column(nullable = false)
@@ -35,9 +39,10 @@ public class Aluno {
     @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL)
     private Set<Avaliacao> avaliacoes = new HashSet<>();
 
-    public Aluno(Long id, String nome, Integer idade, String deficiencia) {
+    public Aluno(Long id, String nome, LocalDate dataNascimento, Integer idade, String deficiencia) {
         this.id = id;
         this.nome = nome;
+        this.dataNascimento = dataNascimento;
         this.idade = idade;
         this.deficiencia = deficiencia;
     }
