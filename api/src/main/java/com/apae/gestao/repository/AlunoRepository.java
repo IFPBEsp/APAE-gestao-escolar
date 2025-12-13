@@ -9,7 +9,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AlunoRepository extends JpaRepository<Aluno, Long> {
 
-    List<Aluno> findByTurmaAndAtivoTrue(Turma turma);
+    //tá dando erro nesse filtro aqui embaixo:
+    // List<Aluno> findByTurmaAndAtivoTrue(Turma turma);
 
     List<Aluno> findByNomeContainingIgnoreCase(String nome);
 }

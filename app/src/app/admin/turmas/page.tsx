@@ -7,60 +7,40 @@ import { Input } from "@/components/ui/input";
 import { NovaTurmaModal } from "@/components/turmas/NovaTurmaModal";
 import { DetalhesTurma } from "@/components/turmas/DetalhesTurma";
 import { EditarTurmaModal } from "@/components/turmas/EditarTurmaModal";
+import { useEffect } from "react";
+import { listarTurmas } from "@/services/TurmaService";
+import { toast } from "sonner";
 
-const mockTurmasInitial = [
-  {
-    id: 1,
-    name: "Alfabetização 2025 - Manhã",
-    students: 8,
-    teacher: "Prof. Maria Silva",
-    schedule: "Segunda a Sexta - 08:00 às 12:00",
-    turno: "Manhã",
-    status: "Ativa",
-    ano: "2025"
-  },
-  {
-    id: 2,
-    name: "Estimulação 2025 - Tarde",
-    students: 6,
-    teacher: "Prof. João Santos",
-    schedule: "Segunda a Sexta - 14:00 às 18:00",
-    turno: "Tarde",
-    status: "Ativa",
-    ano: "2025"
-  },
-  {
-    id: 3,
-    name: "Matemática Básica 2025 - Manhã",
-    students: 10,
-    teacher: "Prof. Ana Costa",
-    schedule: "Segunda a Sexta - 09:00 às 11:00",
-    turno: "Manhã",
-    status: "Ativa",
-    ano: "2025"
-  },
-  {
-    id: 4,
-    name: "Educação Física 2025 - Tarde",
-    students: 12,
-    teacher: "Prof. Carlos Lima",
-    schedule: "Terça e Quinta - 15:00 às 17:00",
-    turno: "Tarde",
-    status: "Ativa",
-    ano: "2025"
-  },
-];
+
 
 export default function GerenciarTurmasPage() {
-  const [turmas, setTurmas] = useState(mockTurmasInitial);
+  const [turmas, setTurmas] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState("");
   const [isNovaTurmaOpen, setIsNovaTurmaOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<"listar-turmas" | "detalhes-turma">("listar-turmas");
   const [selectedTurma, setSelectedTurma] = useState<any>(null);
   const [isEditarTurmaOpen, setIsEditarTurmaOpen] = useState(false);
 
+  useEffect(() => {
+    async function carregarTurmas() {
+      try {
+        setLoading(true);
+        const data = await listarTurmas();
+        setTurmas(data);
+      } catch (error: any) {
+        toast.error(error.message || "Erro ao carregar turmas");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    carregarTurmas();
+  }, []);
+
+
   const turmasFiltradas = turmas.filter((t) =>
-    t.name.toLowerCase().includes(busca.toLowerCase())
+    t.nome?.toLowerCase().includes(busca.toLowerCase())
   );
 
   const handleCardClick = (turma: any) => {
@@ -82,8 +62,9 @@ export default function GerenciarTurmasPage() {
     setIsEditarTurmaOpen(true);
   };
 
-  const handleSaveNovaTurma = (novaTurma: any) => {
-    setTurmas([...turmas, novaTurma]);
+  const handleSaveNovaTurma = async () => {
+    const data = await listarTurmas();
+    setTurmas(data);
   };
 
   const handleUpdateTurma = (updatedTurma: any) => {
@@ -147,31 +128,35 @@ export default function GerenciarTurmasPage() {
                 className="border border-[#B2D7EC] bg-white rounded-xl shadow-sm p-6 relative cursor-pointer hover:shadow-md transition-shadow group"
               >
                 <div className="absolute right-4 top-4 flex gap-2">
-                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${turma.status === "Ativa"
+                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    turma.isAtiva
                       ? "bg-green-100 text-green-700 border border-green-200"
                       : "bg-gray-100 text-gray-700 border border-gray-200"
-                    }`}>
-                    {turma.status}
+                  }`}>
+                    {turma.isAtiva ? "Ativa" : "Inativa"}
                   </div>
+
                   <div className="bg-[#E8F3FF] text-[#0D4F97] px-3 py-1 rounded-full text-xs font-medium border border-[#B2D7EC]">
-                    {turma.students} alunos
+                    {turma.alunos?.length ?? 0} alunos
                   </div>
                 </div>
 
-                <h2 className="text-lg font-semibold text-[#0D4F97] mb-3 group-hover:text-[#0B3E78]">
-                  {turma.name}
+                <h2 className="text-lg font-semibold text-[#0D4F97] mb-3">
+                  {turma.nome}
                 </h2>
 
                 <div className="text-gray-700 space-y-1">
                   <p>
-                    <strong>Professor:</strong> {turma.teacher}
+                    <strong>Professor:</strong> {turma.professor?.nome}
                   </p>
                   <p>
                     <strong>Turno:</strong> {turma.turno}
                   </p>
-                  <p>
+
+                  {/* <p>
                     <strong>Horário:</strong> {turma.schedule}
-                  </p>
+                  </p> */}
+
                 </div>
               </div>
             ))}

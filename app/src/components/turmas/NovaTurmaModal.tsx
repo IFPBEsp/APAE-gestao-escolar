@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  criarTurma,
+} from "@/services/TurmaService";
+import { toast } from "sonner";
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +23,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Search, X } from "lucide-react";
+import { listarProfessores } from "@/services/ProfessorService";
+
 
 interface Aluno {
     id: number;
@@ -68,29 +75,19 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
         return val;
     }
 
-    // Dados Mock para Fallback
-    const mockProfessores: Professor[] = [
-        { id: 91, nome: "Prof. Maria Silva" },
-        { id: 92, nome: "Prof. João Santos" },
-        { id: 93, nome: "Prof. Ana Costa" },
-        { id: 94, nome: "Prof. Carlos Lima" }
-    ];
+    const mockAlunos: Aluno[] = [ //quando criar o service de alunos, remover isso aqui!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        { id: 1, nome: "Ana Silva", deficiencia: "Nenhuma" },
+        { id: 2, nome: "Beatriz Costa", deficiencia: "Auditiva" },
+        { id: 3, nome: "Carlos Oliveira", deficiencia: "Visual" },
+        { id: 4, nome: "Daniela Souza", deficiencia: "Nenhuma" },
+        { id: 5, nome: "Eduardo Lima", deficiencia: "Motora" },
+    ]; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    const mockAlunos: Aluno[] = [
-        { id: 101, nome: "Ana Silva", deficiencia: "Nenhuma" },
-        { id: 102, nome: "Beatriz Costa", deficiencia: "Auditiva" },
-        { id: 103, nome: "Carlos Oliveira", deficiencia: "Visual" },
-        { id: 104, nome: "Daniela Souza", deficiencia: "Nenhuma" },
-        { id: 105, nome: "Eduardo Lima", deficiencia: "Motora" },
-    ];
-
-    // Buscar Professores
     useEffect(() => {
         if (buscaProfessor.length > 0 && !professorSelecionado) {
-            // Removendo atraso para melhor UX com dados mock
             const delayDebounceFn = setTimeout(() => {
                 fetchProfessores(buscaProfessor);
-            }, 300); // Atraso reduzido
+            }, 300); 
             return () => clearTimeout(delayDebounceFn);
         } else {
             setProfessoresEncontrados([]);
@@ -99,19 +96,14 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
 
     async function fetchProfessores(nome: string) {
         try {
-            const response = await fetch(`http://localhost:8080/api/professores?nome=${nome}`);
-            if (response.ok) {
-                const data = await response.json();
-                setProfessoresEncontrados(data);
-                return;
-            }
-            throw new Error("Failed to fetch");
-        } catch (error) {
-            console.log("Backend offline, using mock data for professors");
-            const filtered = mockProfessores.filter(p => p.nome.toLowerCase().includes(nome.toLowerCase()));
-            setProfessoresEncontrados(filtered);
+            const data = await listarProfessores(nome, true);
+            setProfessoresEncontrados(data);
+        } catch (error: any) {
+            toast.error(error.message || "Erro ao buscar professores");
+            setProfessoresEncontrados([]);
         }
     }
+
 
     function selecionarProfessor(prof: Professor) {
         setProfessorSelecionado(prof);
@@ -119,9 +111,8 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
         setProfessoresEncontrados([]);
     }
 
-    // Buscar Alunos
     useEffect(() => {
-        if (buscaAluno.length > 0) { // Permitir busca com apenas 1 caractere para teste fácil
+        if (buscaAluno.length > 0) { 
             const delayDebounceFn = setTimeout(() => {
                 fetchAlunos(buscaAluno);
             }, 300);
@@ -131,9 +122,9 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
         }
     }, [buscaAluno]);
 
-    async function fetchAlunos(nome: string) {
+    async function fetchAlunos(nome: string) {  //alterar isso aqui pós criar service de alunos!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        const response = await fetch(`http://localhost:8080/api/alunos?nome=${nome}`); 
         try {
-            const response = await fetch(`http://localhost:8080/api/alunos?nome=${nome}`);
             if (response.ok) {
                 const data = await response.json();
                 setAlunosEncontrados(data);
@@ -145,7 +136,7 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
             const filtered = mockAlunos.filter(a => a.nome.toLowerCase().includes(nome.toLowerCase()));
             setAlunosEncontrados(filtered);
         }
-    }
+    } //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     function adicionarAluno(aluno: Aluno) {
         if (!alunosSelecionados.find(a => a.id === aluno.id)) {
@@ -159,30 +150,50 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
         setAlunosSelecionados(alunosSelecionados.filter(a => a.id !== id));
     }
 
-    function handleSave() {
-        const newTurma = {
-            id: Math.floor(Math.random() * 1000) + 10,
-            name: nomeTurma,
-            students: alunosSelecionados.length,
-            teacher: professorSelecionado?.nome || "Sem Professor",
-            schedule: turno === 'manha' ? "Segunda a Sexta - 07:30 às 11:00" : "Segunda a Sexta - 13:30 às 17:00",
-            turno: formatTurno(turno),
-            status: "Ativa",
-            ano,
-            alunos: alunosSelecionados
-        };
+    async function handleSave() {
+        try {
+            if (!tipo || !ano || !turno) {
+            toast.error("Preencha todos os campos obrigatórios");
+            return;
+            }
 
-        if (onSave) {
-            onSave(newTurma);
+            if (!professorSelecionado) {
+                toast.error("Selecione um professor responsável");
+                return;
+            }
+
+            const turmaCriada = await criarTurma({
+            tipo: tipo.toUpperCase(),       
+            anoCriacao: Number(ano),
+            turno: turno.toUpperCase(),
+            professorId: professorSelecionado.id,
+            isAtiva: true,
+            alunosId: alunosSelecionados.map(a => a.id)
+            });
+
+            toast.success("Turma criada com sucesso");
+
+            if (onSave) {
+                onSave(turmaCriada);
+            }
+
+            onClose();
+            resetForm();
+
+        } catch (error: any) {
+            toast.error(error.message || "Erro ao criar turma");
         }
-        onClose();
+    }
 
-        // Resetar formulário
+    function resetForm() {
         setTipo("");
         setAno("2025");
         setTurno("");
-        setProfessorSelecionado(null);
         setBuscaProfessor("");
+        setProfessorSelecionado(null);
+        setProfessoresEncontrados([]);
+        setBuscaAluno("");
+        setAlunosEncontrados([]);
         setAlunosSelecionados([]);
     }
 
