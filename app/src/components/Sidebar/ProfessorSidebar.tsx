@@ -31,11 +31,11 @@ export default function ProfessorSidebar({
 
   return (
     <>
-      {/* Mobile Menu Button */}
+      {/* Mobile Menu Button - AGORA FIXO NO CANTO SUPERIOR ESQUERDO (igual Admin) */}
       {showMobileMenu && (
         <button
           onClick={() => setSidebarOpen(true)}
-          className="fixed left-4 top-24 z-40 rounded-lg bg-[#0D4F97] p-2 text-white md:hidden"
+          className="fixed left-4 top-4 z-40 rounded-lg bg-[#0D4F97] p-2 text-white md:hidden"
         >
           <Menu className="h-6 w-6" />
         </button>
@@ -47,7 +47,7 @@ export default function ProfessorSidebar({
           isCollapsed ? 'w-20' : 'w-64'
         }`}
       >
-        {/* Toggle Button - NO CANTO SUPERIOR ESQUERDO (igual Figma) */}
+        {/* Toggle Button - NO CANTO SUPERIOR ESQUERDO */}
         <div className="absolute left-4 top-4 z-40">
           <button
             onClick={onToggleCollapse}
@@ -57,11 +57,10 @@ export default function ProfessorSidebar({
           </button>
         </div>
 
-        {/* Logo e Nome no Topo - AGORA SEM FUNDO BRANCO */}
+        {/* Logo e Nome no Topo */}
         <div className="border-b-2 border-[#0D4F97]/20 p-6 mt-16">
           {!isCollapsed ? (
             <div className="flex flex-col items-center gap-3 mb-2">
-              {/* Logo sem fundo branco - igual ao admin */}
               <div className="flex items-center justify-center">
                 <Image 
                   src="/apae-logo.png" 
@@ -78,7 +77,6 @@ export default function ProfessorSidebar({
             </div>
           ) : (
             <div className="flex justify-center">
-              {/* Logo colapsada sem fundo branco */}
               <Image 
                 src="/apae-logo.png" 
                 alt="Logo APAE" 
@@ -135,81 +133,83 @@ export default function ProfessorSidebar({
 
       {/* Sidebar Mobile */}
       {sidebarOpen && (
-        <>
-          {/* Overlay */}
-          <div
-            className="fixed inset-0 z-40 bg-black/50 md:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-          
-          {/* Sidebar Mobile */}
-          <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-[#B2D7EC] rounded-r-3xl md:hidden overflow-y-auto">
-            <div className="flex h-full flex-col">
-              {/* Header Mobile - AGORA SEM FUNDO BRANCO */}
-              <div className="flex flex-col items-center border-b-2 border-[#0D4F97]/20 p-4 mt-8">
-                <div className="flex flex-col items-center gap-3 mb-4">
-                  {/* Logo mobile sem fundo branco */}
-                  <Image 
-                    src="/apae-logo.png" 
-                    alt="Logo APAE" 
-                    width={60}
-                    height={60}
-                    className="object-contain"
-                  />
-                  <h2 className="text-[#0D4F97] font-bold">APAE Esperança</h2>
-                  <p className="text-[#0D4F97]/70 text-sm">Painel do Professor</p>
-                </div>
-                <button
-                  onClick={() => setSidebarOpen(false)}
-                  className="rounded-lg bg-transparent p-2 text-[#0D4F97] transition-all hover:bg-white/40"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
+    <>
+      {/* Overlay */}
+      <div
+        className="fixed inset-0 z-40 bg-black/50 md:hidden"
+        onClick={() => setSidebarOpen(false)}
+      />
+      
+      {/* Sidebar Mobile */}
+      <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-[#B2D7EC] rounded-r-3xl md:hidden overflow-y-auto">
+        <div className="flex h-full flex-col">
+          {/* Header Mobile - AGORA COM "X" NO CANTO SUPERIOR DIREITO (igual Admin) */}
+          <div className="relative border-b-2 border-[#0D4F97]/20 p-4 mt-8">
+            {/* Botão de fechar no canto superior direito */}
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="absolute right-4 top-4 text-[#0D4F97]"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            
+            {/* Logo e título centralizados */}
+            <div className="flex flex-col items-center gap-3 pt-4">
+              <Image 
+                src="/apae-logo.png" 
+                alt="Logo APAE" 
+                width={60}
+                height={60}
+                className="object-contain"
+              />
+              <h2 className="text-[#0D4F97] font-bold">APAE Esperança</h2>
+              <p className="text-[#0D4F97]/70 text-sm">Painel do Professor</p>
+            </div>
+          </div>
 
-              {/* Menu Items Mobile */}
-              <div className="flex-1 space-y-2 p-4">
-                {menuItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeTab === item.id;
-                  
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        onTabChange(item.id);
-                        setSidebarOpen(false);
-                      }}
-                      className={`flex w-full items-center gap-3 rounded-3xl px-4 py-3 text-left transition-all ${
-                        isActive
-                          ? "bg-[#0D4F97] text-white shadow-md"
-                          : "bg-transparent text-[#0D4F97] hover:bg-[#0D4F97] hover:text-white"
-                      }`}
-                    >
-                      <Icon className="h-5 w-5" />
-                      <span className="font-medium">{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Logout Mobile */}
-              <div className="border-t-2 border-[#0D4F97]/20 p-4">
+          {/* Menu Items Mobile */}
+          <div className="flex-1 space-y-2 p-4">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              
+              return (
                 <button
+                  key={item.id}
                   onClick={() => {
-                    onLogout();
+                    onTabChange(item.id);
                     setSidebarOpen(false);
                   }}
-                  className="flex w-full items-center gap-3 rounded-3xl bg-transparent px-4 py-3 text-[#0D4F97] transition-all hover:bg-white/40"
+                  className={`flex w-full items-center gap-3 rounded-3xl px-4 py-3 text-left transition-all ${
+                    isActive
+                      ? "bg-[#0D4F97] text-white shadow-md"
+                      : "bg-transparent text-[#0D4F97] hover:bg-[#0D4F97] hover:text-white"
+                  }`}
                 >
-                  <LogOut className="h-5 w-5" />
-                  <span className="font-medium">Sair</span>
+                  <Icon className="h-5 w-5" />
+                  <span className="font-medium">{item.label}</span>
                 </button>
-              </div>
-            </div>
-          </aside>
-        </>
-      )}
+              );
+            })}
+          </div>
+
+          {/* Logout Mobile */}
+          <div className="border-t-2 border-[#0D4F97]/20 p-4">
+            <button
+              onClick={() => {
+                onLogout();
+                setSidebarOpen(false);
+              }}
+              className="flex w-full items-center gap-3 rounded-3xl bg-transparent px-4 py-3 text-[#0D4F97] transition-all hover:bg-white/40"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="font-medium">Sair</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
+  )}
     </>
   );
 }
