@@ -1,16 +1,20 @@
-'use client'
+"use client"
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, User, Calendar, BookOpen, Heart, Phone, Eye, PenSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ModalEditarAluno from "@/components/alunos/ModalEditarAluno";
+import ModalVisualizarAvaliacao from "@/components/alunos/ModalVisualizarAvaliacao";
+import ModalVisualizarRelatorio from "@/components/alunos/ModalVisualizarRelatorio";
 
 export default function DetalhesDoAluno({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedAvaliacao, setSelectedAvaliacao] = useState<any>(null);
+  const [selectedRelatorio, setSelectedRelatorio] = useState<any>(null);
 
-  // Mock de dados do aluno (inicializado como estado para permitir edição)
+  // Dados simulados do aluno
   const [alunoData, setAlunoData] = useState({
     id: 1,
     nome: "Ana Silva",
@@ -24,9 +28,68 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
     dataMatricula: "05/02/2025"
   });
 
+  // Dados expandidos (mantive os dados completos aqui)
+  const mockAvaliacoes = [
+    {
+      data: "05/11/2025",
+      professor: "Prof. Maria Silva",
+      turma: "Alfabetização 2025 - Manhã",
+      aluno: "Ana Silva",
+      descricao: "Demonstrou excelente progresso na leitura de sílabas simples. Participou ativamente das atividades em grupo.",
+      desenvolvimentoCognitivo: "A aluna tem demonstrado grande evolução na identificação de sílabas complexas...",
+      desenvolvimentoMotor: "Coordenação motora fina bem desenvolvida...",
+      desenvolvimentoSocial: "Interage muito bem com os colegas...",
+      autonomia: "Realiza tarefas de higiene pessoal com mínima supervisão...",
+      habilidades: ["Leitura", "Participação", "Socialização", "Alfabetização"],
+      observacoes: "Continuar estimulando a leitura com palavras de complexidade gradual."
+    },
+    {
+      data: "28/10/2025",
+      professor: "Prof. Maria Silva",
+      turma: "Alfabetização 2025 - Manhã",
+      aluno: "Ana Silva",
+      descricao: "Conseguiu identificar todas as vogais e está começando a formar palavras simples.",
+      desenvolvimentoCognitivo: "Identifica vogais e consoantes principais...",
+      desenvolvimentoMotor: "Apresenta boa preensão do lápis...",
+      desenvolvimentoSocial: "Participativa...",
+      autonomia: "Necessita de auxílio para amarrar os sapatos...",
+      habilidades: ["Coordenação Motora", "Vogais"],
+      observacoes: "Reforçar exercícios de caligrafia."
+    },
+    // ... outros dados
+  ];
+
+  const mockRelatorios = [
+    {
+      data: "15/11/2025",
+      professor: "Prof. Maria Silva",
+      turma: "Alfabetização 2025 - Manhã",
+      aluno: "Ana Silva",
+      atividade: "Atividades em grupo com jogos cooperativos e brincadeiras dirigidas.",
+      atividades: "Jogos cooperativos com bola, dança das cadeiras adaptada...",
+      habilidades: "Trabalho em equipe, respeito às regras...",
+      estrategias: "Divisão da turma em pequenos grupos...",
+      recursos: "Bola de borracha, cadeiras..."
+    },
+    {
+      data: "10/11/2025",
+      professor: "Prof. Maria Silva",
+      turma: "Alfabetização 2025 - Manhã",
+      aluno: "Ana Silva",
+      atividade: "Atividades de escrita do nome com apoio de modelos visuais.",
+      atividades: "Escrita do nome próprio utilizando crachá de mesa...",
+      habilidades: "Reconhecimento do próprio nome...",
+      estrategias: "Apresentação do crachá...",
+      recursos: "Crachás, letras móveis..."
+    }
+    // ... outros dados
+  ];
+
   const handleSaveAluno = (alunoAtualizado: any) => {
     setAlunoData(alunoAtualizado);
   };
+
+
 
   return (
     <div className="w-full">
@@ -55,21 +118,21 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
                   <User size={40} className="text-blue-700" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-[#0D4F97]">{alunoData.nome}</h2>
+                  <h2 className="text-2xl font-bold text-[#0D4F97] mt-8">{alunoData.nome}</h2>
                   <p className="text-gray-600 text-lg">{alunoData.idade} anos</p>
                 </div>
               </div>
 
               <Button
                 onClick={() => setIsEditModalOpen(true)}
-                className="flex items-center gap-2 bg-[#0D4F97] hover:bg-[#0A4080] text-white px-6"
+                className="flex items-center gap-2 bg-[#0D4F97] hover:bg-[#0A4080] text-white px-6 mt-8"
               >
                 <PenSquare size={18} />
                 Editar Aluno
               </Button>
             </div>
 
-            {/* Infos */}
+            {/* Informações */}
             <div className="grid grid-cols-2 gap-y-6 mt-10 text-gray-800">
               <div className="flex gap-3">
                 <Calendar className="text-[#0D4F97]" />
@@ -115,11 +178,10 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
           </CardContent>
         </Card>
 
-        {/* ... (Evaluation History Table remains the same) ... */}
-        {/* ... (Reports History Table remains the same) ... */}
+        {/* Histórico de Avaliações */}
         <Card className="border border-blue-200 shadow-md rounded-2xl">
           <CardContent className="p-8">
-            <h2 className="text-2xl font-bold text-[#0D4F97] mb-2">Histórico de Avaliações</h2>
+            <h2 className="text-2xl font-bold text-[#0D4F97] mb-2 mt-8">Histórico de Avaliações</h2>
             <p className="text-gray-600 mb-6">Avaliações realizadas pelos professores (3 registros)</p>
 
             <table className="w-full text-left border-collapse">
@@ -133,29 +195,20 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
                 </tr>
               </thead>
               <tbody className="text-gray-600">
-                <tr className="border-b border-gray-100">
-                  <td className="py-4 font-medium text-gray-900">05/11/2025</td>
-                  <td className="font-medium text-gray-900">Prof. Maria Silva</td>
-                  <td className="text-gray-600">Alfabetização 2025 - Manhã</td>
-                  <td className="text-gray-600">Demonstrou excelente progresso na leitura de sílabas simples. Participou ativamente das atividades em grupo.</td>
-                  <td><Eye className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]" /></td>
-                </tr>
-
-                <tr className="border-b border-gray-100">
-                  <td className="py-4 font-medium text-gray-900">28/10/2025</td>
-                  <td className="font-medium text-gray-900">Prof. Maria Silva</td>
-                  <td className="text-gray-600">Alfabetização 2025 - Manhã</td>
-                  <td className="text-gray-600">Conseguiu identificar todas as vogais e está começando a formar palavras simples. Ótima coordenação motora.</td>
-                  <td><Eye className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]" /></td>
-                </tr>
-
-                <tr>
-                  <td className="py-4 font-medium text-gray-900">15/10/2025</td>
-                  <td className="font-medium text-gray-900">Prof. João Santos</td>
-                  <td className="text-gray-600">Estimulação 2025 - Tarde</td>
-                  <td className="text-gray-600">Mostrou melhora significativa na concentração durante as atividades de estimulação sensorial.</td>
-                  <td><Eye className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]" /></td>
-                </tr>
+                {mockAvaliacoes.map((avaliacao: any, index: number) => (
+                  <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-4 font-medium text-gray-900">{avaliacao.data}</td>
+                    <td className="font-medium text-gray-900">{avaliacao.professor}</td>
+                    <td className="text-gray-600">{avaliacao.turma}</td>
+                    <td className="text-gray-600 max-w-md truncate" title={avaliacao.descricao}>{avaliacao.descricao}</td>
+                    <td>
+                      <Eye
+                        className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]"
+                        onClick={() => setSelectedAvaliacao(avaliacao)}
+                      />
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </CardContent>
@@ -164,7 +217,7 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
         {/* Histórico de Relatórios Individuais */}
         <Card className="border border-blue-200 shadow-md rounded-2xl">
           <CardContent className="p-8">
-            <h2 className="text-2xl font-bold text-[#0D4F97] mb-2">Histórico de Relatórios Individuais</h2>
+            <h2 className="text-2xl font-bold text-[#0D4F97] mb-2 mt-8">Histórico de Relatórios Individuais</h2>
             <p className="text-gray-600 mb-6">Relatórios individuais realizados pelos professores (3 registros)</p>
 
             <table className="w-full text-left border-collapse">
@@ -178,29 +231,20 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
                 </tr>
               </thead>
               <tbody className="text-gray-600">
-                <tr className="border-b border-gray-100">
-                  <td className="py-4 font-medium text-gray-900">15/11/2025</td>
-                  <td className="font-medium text-gray-900">Prof. Maria Silva</td>
-                  <td className="text-gray-600">Alfabetização 2025 - Manhã</td>
-                  <td className="text-gray-600">Atividades em grupo com jogos cooperativos e brincadeiras dirigidas.</td>
-                  <td><Eye className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]" /></td>
-                </tr>
-
-                <tr className="border-b border-gray-100">
-                  <td className="py-4 font-medium text-gray-900">10/11/2025</td>
-                  <td className="font-medium text-gray-900">Prof. Maria Silva</td>
-                  <td className="text-gray-600">Alfabetização 2025 - Manhã</td>
-                  <td className="text-gray-600">Atividades de escrita do nome com apoio de modelos visuais e tracejados.</td>
-                  <td><Eye className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]" /></td>
-                </tr>
-
-                <tr>
-                  <td className="py-4 font-medium text-gray-900">05/11/2025</td>
-                  <td className="font-medium text-gray-900">Prof. Maria Silva</td>
-                  <td className="text-gray-600">Alfabetização 2025 - Manhã</td>
-                  <td className="text-gray-600">Atividades de coordenação motora fina, incluindo desenho livre, recorte e colagem.</td>
-                  <td><Eye className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]" /></td>
-                </tr>
+                {mockRelatorios.map((relatorio: any, index: number) => (
+                  <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-4 font-medium text-gray-900">{relatorio.data}</td>
+                    <td className="font-medium text-gray-900">{relatorio.professor}</td>
+                    <td className="text-gray-600">{relatorio.turma}</td>
+                    <td className="text-gray-600 max-w-md truncate" title={relatorio.atividade}>{relatorio.atividade}</td>
+                    <td>
+                      <Eye
+                        className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]"
+                        onClick={() => setSelectedRelatorio(relatorio)}
+                      />
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </CardContent>
@@ -212,8 +256,22 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
           aluno={alunoData}
           onSave={handleSaveAluno}
         />
+
+        <ModalVisualizarAvaliacao
+          isOpen={!!selectedAvaliacao}
+          onClose={() => setSelectedAvaliacao(null)}
+          avaliacao={selectedAvaliacao}
+          alunoNome={alunoData.nome}
+        />
+
+        <ModalVisualizarRelatorio
+          isOpen={!!selectedRelatorio}
+          onClose={() => setSelectedRelatorio(null)}
+          relatorio={selectedRelatorio}
+          alunoNome={alunoData.nome}
+          alunoDataNascimento={alunoData.dataNascimento}
+        />
       </div>
     </div>
   );
 }
-

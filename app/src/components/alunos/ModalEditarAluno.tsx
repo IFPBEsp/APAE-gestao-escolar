@@ -31,7 +31,7 @@ interface ModalEditarAlunoProps {
     };
 }
 
-// Mock data para turmas disponíveis
+// Dados simulados para turmas disponíveis
 const mockTurmasDisponiveis = [
     { id: 1, nome: "Alfabetização 2025 - Manhã" },
     { id: 2, nome: "Matemática Básica 2025 - Manhã" },
@@ -276,12 +276,12 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                                 Turma Atual <span className="text-red-500">*</span>
                             </Label>
                             <Select value={turmaId} onValueChange={setTurmaId}>
-                                <SelectTrigger className="h-12 border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]">
+                                <SelectTrigger className="h-12 border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97] cursor-pointer">
                                     <SelectValue placeholder="Selecione uma turma" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="bg-white">
                                     {mockTurmasDisponiveis.map((turma) => (
-                                        <SelectItem key={turma.id} value={turma.id.toString()}>
+                                        <SelectItem key={turma.id} value={turma.id.toString()} className="cursor-pointer">
                                             {turma.nome}
                                         </SelectItem>
                                     ))}
