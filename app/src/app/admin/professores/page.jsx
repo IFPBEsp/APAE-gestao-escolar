@@ -78,19 +78,19 @@ export default function Professores() {
   };
 
   return (
-    <main className="p-8">
+    <main className="p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex items-start justify-between">
+        <div className="mb-4 md:mb-6 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-[#0D4F97] mb-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
               Gerenciar Professores
             </h1>
-            <p className="text-[#222222]">Visualize e edite a lista de professores</p>
+            <p className="text-sm md:text-base text-[#222222]">Visualize e edite a lista de professores</p>
           </div>
 
           <Button
             onClick={() => router.push("/admin/professores/cadastrar")}
-            className="h-12 justify-center bg-[#0D4F97] px-6 text-white hover:bg-[#FFD000] hover:text-[#0D4F97]"
+            className="h-11 md:h-12 w-full md:w-auto justify-center bg-[#0D4F97] px-6 text-white hover:bg-[#FFD000] hover:text-[#0D4F97]"
           >
             <UserPlus className="mr-2 h-5 w-5" />
             Cadastrar Professor
@@ -98,7 +98,7 @@ export default function Professores() {
         </div>
 
         {/* Campo de Busca */}
-        <div className="mb-6">
+        <div className="mb-4 md:mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#0D4F97]" />
             <Input
@@ -106,7 +106,7 @@ export default function Professores() {
               placeholder="Buscar professor..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-12 pl-10 border-2 border-[#B2D7EC] bg-white text-[#222222] placeholder:text-gray-400 focus:border-[#0D4F97]"
+              className="h-11 md:h-12 pl-10 border-2 border-[#B2D7EC] bg-white text-[#222222] placeholder:text-gray-400 focus:border-[#0D4F97]"
             />
           </div>
         </div>
@@ -118,11 +118,11 @@ export default function Professores() {
           </div>
         ) : professores.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 space-y-2">
-            <p className="text-[#222222] text-lg font-medium">
+            <p className="text-[#222222] text-base md:text-lg font-medium text-center px-4">
               {searchTerm ? "Nenhum professor encontrado." : "Nenhum professor cadastrado."}
             </p>
             {error ? (
-              <div className="mt-4 p-4 bg-red-50 border-2 border-red-200 rounded-lg max-w-md">
+              <div className="mt-4 p-4 bg-red-50 border-2 border-red-200 rounded-lg max-w-md mx-4">
                 <p className="text-red-700 font-semibold">Erro de Conexão</p>
                 <p className="text-red-600 text-sm mt-1">{error}</p>
                 <p className="text-red-500 text-xs mt-2">
@@ -130,34 +130,34 @@ export default function Professores() {
                 </p>
               </div>
             ) : !searchTerm ? (
-              <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg max-w-md text-center">
+              <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg max-w-md text-center mx-4">
                 <p className="text-blue-700 text-sm">
                   Verifique se o backend está rodando e se o mock foi executado.
                 </p>
-                <p className="text-blue-600 text-xs mt-2">
+                <p className="text-blue-600 text-xs mt-2 break-all">
                   Teste: <code className="bg-blue-100 px-2 py-1 rounded">http://localhost:8080/api/professores</code>
                 </p>
               </div>
             ) : null}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {professores.map((professor) => (
               <Card
                 key={professor.id}
                 onClick={() => handleCardClick(professor.id)}
                 className="rounded-xl border-2 border-[#B2D7EC] bg-white shadow-md transition-all hover:border-[#0D4F97] hover:shadow-lg cursor-pointer"
               >
-              <CardContent className="p-6">
-                <div className="mb-4 flex items-start gap-3">
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#B2D7EC]/20">
-                    <UserCircle className="h-7 w-7 text-[#0D4F97]" />
+              <CardContent className="p-4 md:p-6">
+                <div className="mb-3 md:mb-4 flex items-start gap-2 md:gap-3">
+                  <div className="flex h-10 w-10 md:h-12 md:w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#B2D7EC]/20">
+                    <UserCircle className="h-6 w-6 md:h-7 md:w-7 text-[#0D4F97]" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-lg font-semibold text-[#0D4F97] mb-1">
+                    <h3 className="text-base md:text-lg font-semibold text-[#0D4F97] mb-1 truncate">
                       {professor.nome}
                     </h3>
-                    <span className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${
+                    <span className={`inline-block rounded-full px-2 md:px-3 py-1 text-xs md:text-sm font-medium ${
                       professor.ativo 
                         ? "bg-green-100 text-green-700" 
                         : "bg-gray-100 text-gray-700"
@@ -167,26 +167,26 @@ export default function Professores() {
                   </div>
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-3 md:mt-4">
                   <div className="mb-2 flex items-center gap-2">
                     <BookOpen className="h-4 w-4 text-[#0D4F97]" />
-                    <span className="text-sm font-medium text-[#0D4F97]">Turmas</span>
+                    <span className="text-xs md:text-sm font-medium text-[#0D4F97]">Turmas</span>
                   </div>
                   {professor.turmas && professor.turmas.length > 0 ? (
                     <ul className="space-y-1">
                       {professor.turmas.slice(0, 2).map((turma, index) => (
-                        <li key={index} className="text-sm text-[#222222]">
+                        <li key={index} className="text-xs md:text-sm text-[#222222] truncate">
                           • {typeof turma === 'object' ? turma.nome || turma.name : turma}
                         </li>
                       ))}
                       {professor.turmas.length > 2 && (
-                        <li className="text-sm text-[#0D4F97] font-medium">
+                        <li className="text-xs md:text-sm text-[#0D4F97] font-medium">
                           +{professor.turmas.length - 2} mais
                         </li>
                       )}
                     </ul>
                   ) : (
-                    <p className="text-sm text-gray-400">Nenhuma turma vinculada</p>
+                    <p className="text-xs md:text-sm text-gray-400">Nenhuma turma vinculada</p>
                   )}
                 </div>
               </CardContent>
