@@ -5,15 +5,13 @@ import com.apae.gestao.dto.PresencaAlunoDTO;
 import com.apae.gestao.dto.RegistrarChamadaRequestDTO;
 import com.apae.gestao.entity.*;
 import com.apae.gestao.repository.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -23,56 +21,17 @@ public class PresencaService {
     private final AulaRepository aulaRepository;
     private final TurmaRepository turmaRepository;
     private final AlunoRepository alunoRepository;
-    private final TurmaAlunoRepository turmaAlunoRepository;
+    private final ObjectMapper objectMapper;
 
 
     @Transactional(readOnly = true)
     public ChamadaResponseDTO getChamadaPorTurmaEData(Long turmaId, LocalDate data) {
-
-        Turma turma = turmaRepository.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada com id: " + turmaId));
-
-        Aula aula = aulaRepository.findByTurmaAndDataDaAula(turma, data).orElse(null);
-
-        List<TurmaAluno> turmaAlunoList = turmaAlunoRepository.findByTurmaAndIsAlunoAtivo(turma,true);
-
-        List<Aluno> alunosDaTurma = turmaAlunoList.stream().map(TurmaAluno::getAluno).toList();
-
-        Map<Long, Presenca> presencasPorAluno = Map.of();
-        if (aula != null) {
-            presencasPorAluno = presencaRepository.findByAula(aula).stream()
-            .collect(Collectors.toMap(p -> p.getAluno().getId(), p -> p));
+        try {
+            String presenca = presencaRepository.getChamadaPorTurmaEData(turmaId, data);
+            return objectMapper.readValue(presenca, ChamadaResponseDTO.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao buscar chamada: " + e.getMessage(), e);
         }
-
-        List<PresencaAlunoDTO> listaPresencas = new ArrayList<>();
-
-        for (Aluno aluno : alunosDaTurma) {
-
-            Presenca presenca = presencasPorAluno.get(aluno.getId());
-
-            PresencaAlunoDTO dto = PresencaAlunoDTO.builder()
-                    .alunoId(aluno.getId())
-                    .alunoNome(aluno.getNome())
-                    .presencaId(presenca != null ? presenca.getId() : null)
-                    .status(presenca != null
-                            ? PresencaAlunoDTO.getStatusFromFaltou(presenca.getFaltou())
-                            : PresencaAlunoDTO.StatusPresenca.PRESENTE)
-                    .build();
-
-            listaPresencas.add(dto);
-        }
-
-        ChamadaResponseDTO response = ChamadaResponseDTO.builder()
-                .turmaId(turma.getId())
-                .turmaNome(turma.getNome())
-                .dataChamada(data)
-                .descricao(aula != null ? aula.getDescricao() : null)
-                .totalAlunosNaTurma(alunosDaTurma.size())
-                .listaPresencas(listaPresencas)
-                .build();
-
-        response.calcularTotalPresentes();
-        return response;
     }
 
     @Transactional
