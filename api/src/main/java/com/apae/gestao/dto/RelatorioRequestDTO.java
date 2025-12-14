@@ -25,6 +25,9 @@ public class RelatorioRequestDTO {
     @Schema(description = "ID do aluno", example = "1")
     private Long alunoId;
 
+    @Schema(description = "ID da turma à qual o relatório está associado", example = "3")
+    private Long turmaId; 
+
     @Schema(description = "ID do professor", example = "2")
     private Long professorId;
 }

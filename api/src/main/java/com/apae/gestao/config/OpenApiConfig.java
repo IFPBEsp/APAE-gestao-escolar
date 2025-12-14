@@ -31,7 +31,9 @@ import io.swagger.v3.oas.annotations.ExternalDocumentation;
     tags = {
         @Tag(name = "Professores", description = "Recursos relacionados ao cadastro e manutenção de professores"),
         @Tag(name = "Turmas", description = "Fluxos de criação, vinculação e acompanhamento de turmas"),
-        @Tag(name = "Alunos", description = "Consultas públicas sobre alunos ativos")
+        @Tag(name = "Alunos", description = "Consultas públicas sobre alunos ativos"),
+        @Tag(name = "Relatórios", description = "Gerenciamento de relatórios individuais dos alunos."),
+        @Tag(name = "Avaliações", description = "Criação e gerenciamento de avaliações dos alunos.") 
     },
     externalDocs = @ExternalDocumentation(
         description = "Guia funcional do Sistema APAE",
@@ -94,6 +96,23 @@ public class OpenApiConfig {
         return GroupedOpenApi.builder()
                 .group("Alunos")
                 .pathsToMatch("/api/alunos/**")
+                .build();
+    }
+    
+    
+    @Bean
+    public GroupedOpenApi relatorioApi() {
+        return GroupedOpenApi.builder()
+                .group("Relatórios")
+                .pathsToMatch("/api/relatorios/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi avaliacaoApi() {
+        return GroupedOpenApi.builder()
+                .group("Avaliações")
+                .pathsToMatch("/api/avaliacoes/**")
                 .build();
     }
 }

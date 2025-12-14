@@ -18,7 +18,6 @@ public class RelatorioService {
     private final AlunoRepository alunoRepository;
     private final ProfessorRepository professorRepository;
     private final TurmaRepository turmaRepository;
-    private final TurmaAlunoRepository turmaAlunoRepository;
 
     public RelatorioService(RelatorioRepository relatorioRepository,
                             AlunoRepository alunoRepository,
@@ -29,7 +28,6 @@ public class RelatorioService {
         this.alunoRepository = alunoRepository;
         this.professorRepository = professorRepository;
         this.turmaRepository = turmaRepository;
-        this.turmaAlunoRepository = turmaAlunoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -53,6 +51,8 @@ public class RelatorioService {
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado com ID: " + request.getAlunoId()));
         Professor professor = professorRepository.findById(request.getProfessorId())
                 .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + request.getProfessorId()));
+        Turma turma = turmaRepository.findById(request.getTurmaId())
+                .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + request.getTurmaId()));
 
         Relatorio relatorio = new Relatorio();
         relatorio.setAtividades(request.getAtividades());
@@ -61,6 +61,7 @@ public class RelatorioService {
         relatorio.setRecursos(request.getRecursos());
         relatorio.setAluno(aluno);
         relatorio.setProfessor(professor);
+        relatorio.setTurma(turma);
 
         Relatorio saved = relatorioRepository.save(relatorio);
         return toResponseDTO(saved);
@@ -75,6 +76,8 @@ public class RelatorioService {
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado com ID: " + request.getAlunoId()));
         Professor professor = professorRepository.findById(request.getProfessorId())
                 .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + request.getProfessorId()));
+        Turma turma = turmaRepository.findById(request.getTurmaId())
+                .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + request.getTurmaId()));
 
         relatorio.setAtividades(request.getAtividades());
         relatorio.setHabilidades(request.getHabilidades());
@@ -82,6 +85,7 @@ public class RelatorioService {
         relatorio.setRecursos(request.getRecursos());
         relatorio.setAluno(aluno);
         relatorio.setProfessor(professor);
+        relatorio.setTurma(turma);
 
         Relatorio updated = relatorioRepository.save(relatorio);
         return toResponseDTO(updated);
@@ -102,19 +106,7 @@ public class RelatorioService {
 
         Aluno aluno = relatorio.getAluno();
         Professor professor = relatorio.getProfessor();
-
-        // Find active Turma for the aluno
-        TurmaAluno turmaAluno = turmaAlunoRepository.findByAlunoAndIsAlunoAtivo(aluno, true)
-                .stream()
-                .findFirst()
-                .orElse(null);
-
-        Turma turma = null;
-        if (turmaAluno != null) {
-            turma = turmaRepository.findById(turmaAluno.getTurma().getId())
-                    .filter(Turma::getIsAtiva)
-                    .orElse(null);
-        }
+        Turma turma = relatorio.getTurma(); 
 
         return new RelatorioResponseDTO(
                 relatorio.getId(),
@@ -125,18 +117,16 @@ public class RelatorioService {
                 aluno.getNome(),
                 aluno.getDataNascimento(),
                 turma != null ? turma.getNome() : null,
-                turma != null ? turma.getAnoCriacao() : null,
                 professor.getNome(),
                 relatorio.getCreatedAt()
         );
     }
-
+    
     private RelatorioResponseDTO toResponseDTO(Relatorio relatorio) {
         Aluno aluno = relatorio.getAluno();
         Professor professor = relatorio.getProfessor();
+        Turma turma = relatorio.getTurma(); 
 
-        // For simple response, maybe don't fetch Turma, or fetch minimally
-        // Since the spec for listarTodos and buscarPorId doesn't specify consolidation, I'll keep it simple
         return new RelatorioResponseDTO(
                 relatorio.getId(),
                 relatorio.getAtividades(),
@@ -145,8 +135,7 @@ public class RelatorioService {
                 relatorio.getRecursos(),
                 aluno.getNome(),
                 aluno.getDataNascimento(),
-                null, // Not fetching Turma for simple responses
-                null,
+                turma != null ? turma.getNome() : null, 
                 professor.getNome(),
                 relatorio.getCreatedAt()
         );

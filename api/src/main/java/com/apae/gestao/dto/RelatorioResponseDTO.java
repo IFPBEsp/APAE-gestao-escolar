@@ -37,8 +37,6 @@ public class RelatorioResponseDTO {
     @Schema(description = "Nome da turma ativa do aluno", example = "Turma A")
     private String turmaNome;
 
-    @Schema(description = "Ano de criação da turma", example = "2023")
-    private Integer turmaAno;
 
     @Schema(description = "Nome do professor", example = "Maria Silva")
     private String professorNome;
