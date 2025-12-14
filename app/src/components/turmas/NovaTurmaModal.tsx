@@ -53,7 +53,7 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
     const [professoresEncontrados, setProfessoresEncontrados] = useState<Professor[]>([]);
     const [professorSelecionado, setProfessorSelecionado] = useState<Professor | null>(null);
 
-    // Estados dos Alunos
+    // Estados dos Alunos - mecher depois que criar o service de alunos!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     const [buscaAluno, setBuscaAluno] = useState("");
     const [alunosEncontrados, setAlunosEncontrados] = useState<Aluno[]>([]);
     const [alunosSelecionados, setAlunosSelecionados] = useState<Aluno[]>([]);
