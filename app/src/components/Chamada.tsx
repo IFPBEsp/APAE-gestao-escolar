@@ -1,296 +1,205 @@
 'use client'
 
-import { useState, useEffect } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { Loader2, Users, ArrowLeft, CalendarIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
-import { format } from "date-fns";
+import { Loader2, ArrowLeft, CalendarIcon, AlertCircle, Users } from "lucide-react";
+import { format, isPast, startOfDay, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-const studentsByClass: Record<string, Array<{id: number, name: string}>> = {
-  "Alfabetização 2025 - Manhã": [
-    { id: 1, name: "Ana Silva" },
-    { id: 2, name: "Bruno Costa" },
-    { id: 3, name: "Carlos Oliveira" },
-    { id: 4, name: "Diana Santos" },
-    { id: 5, name: "Eduardo Ferreira" },
-    { id: 6, name: "Fernanda Lima" },
-    { id: 7, name: "Gabriel Souza" },
-    { id: 8, name: "Helena Rodrigues" },
-  ],
-  "Estimulação 2025 - Tarde": [
-    { id: 9, name: "Igor Martins" },
-    { id: 10, name: "Juliana Alves" },
-    { id: 11, name: "Lucas Pereira" },
-    { id: 12, name: "Maria Cardoso" },
-    { id: 13, name: "Nicolas Ribeiro" },
-    { id: 14, name: "Olivia Gomes" },
-  ],
-  "Alfabetização 2025": [
-    { id: 1, name: "Ana Silva" },
-    { id: 2, name: "Bruno Costa" },
-    { id: 3, name: "Carlos Oliveira" },
-    { id: 4, name: "Diana Santos" },
-    { id: 5, name: "Eduardo Ferreira" },
-    { id: 6, name: "Fernanda Lima" },
-    { id: 7, name: "Gabriel Souza" },
-    { id: 8, name: "Helena Rodrigues" },
-  ],
-  "Estimulação 2025": [
-    { id: 9, name: "Igor Martins" },
-    { id: 10, name: "Juliana Alves" },
-    { id: 11, name: "Lucas Pereira" },
-    { id: 12, name: "Maria Cardoso" },
-    { id: 13, name: "Nicolas Ribeiro" },
-    { id: 14, name: "Olivia Gomes" },
-  ],
-};
+import ChamadaCalendar from "./ChamadaCalendar";
 
 interface ChamadaProps {
+  turmaNome: string; 
+  students: { id: number; name: string }[];
   onBack: () => void;
-  initialClass?: string;
-  onLogout?: () => void;
-  onNavigateToDashboard?: (tab: string) => void;
-  data?: Date;
-  descricao?: string;
+  onSaveSuccess: () => void;
 }
 
-export default function Chamada({ 
-  onBack, 
-  initialClass, 
-  onLogout, 
-  onNavigateToDashboard,
-  data,
-  descricao 
-}: ChamadaProps) {
-  const [selectedClass, setSelectedClass] = useState<string>("");
+export default function Chamada({ turmaNome, students, onBack, onSaveSuccess }: ChamadaProps) {
   const [attendance, setAttendance] = useState<Record<number, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
-  const selectedDate = data || new Date();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState("turmas");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [descricaoAula, setDescricaoAula] = useState("");
+  const [isEditingPastDate, setIsEditingPastDate] = useState(false);
+  const [savedAttendanceDates, setSavedAttendanceDates] = useState<string[]>([]);
+
+  const storageKey = `chamadas_${turmaNome}`;
 
   useEffect(() => {
-    if (initialClass) {
-      const availableClass = Object.keys(studentsByClass).find(
-        className => className.includes(initialClass) || initialClass.includes(className)
-      ) || Object.keys(studentsByClass)[0]; // Fallback para a primeira turma
-      
-      setSelectedClass(availableClass);
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      const parsedData = JSON.parse(saved);
+      setSavedAttendanceDates(Object.keys(parsedData));
+    }
+  }, [storageKey]);
+
+  useEffect(() => {
+    const dateKey = format(selectedDate, 'yyyy-MM-dd');
+    const saved = localStorage.getItem(storageKey);
+    
+    if (saved) {
+      const parsedData = JSON.parse(saved);
+      const dataForThisDay = parsedData[dateKey];
+
+      if (dataForThisDay) {
+        setAttendance(dataForThisDay.attendance);
+        setDescricaoAula(dataForThisDay.descricao || "");
+        toast.info(`Dados do dia ${format(selectedDate, 'dd/MM')} carregados.`);
+      } else {
+        resetFields();
+      }
     } else {
-      setSelectedClass(Object.keys(studentsByClass)[0]);
+      resetFields();
     }
-  }, [initialClass]);
 
-  useEffect(() => {
-    if (selectedClass && studentsByClass[selectedClass]) {
-      const students = studentsByClass[selectedClass];
-      const initialAttendance: Record<number, boolean> = {};
-      students.forEach((student) => {
-        initialAttendance[student.id] = false; // false = checkbox desmarcado = presente
-      });
-      setAttendance(initialAttendance);
-    }
-  }, [selectedClass]);
+    const today = startOfDay(new Date());
+    setIsEditingPastDate(isPast(startOfDay(selectedDate)) && !isSameDay(selectedDate, today));
+  }, [selectedDate, storageKey]);
 
-  const handleAttendanceChange = (studentId: number, checked: boolean) => {
-    setAttendance((prev) => ({
-      ...prev,
-      [studentId]: checked,
-    }));
+  const resetFields = () => {
+    const initial: Record<number, boolean> = {};
+    students.forEach(s => { initial[s.id] = true; }); 
+    setAttendance(initial);
+    setDescricaoAula("");
   };
 
-  const handleSaveChamada = async () => {
-    if (!selectedClass) return;
+  const savedDatesAsObjects = useMemo(() => {
+    return savedAttendanceDates.map(dateStr => {
+      const [year, month, day] = dateStr.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    });
+  }, [savedAttendanceDates]);
+
+  const handleSave = async () => {
+    if (!descricaoAula.trim()) {
+      toast.error("Por favor, adicione uma descrição para a aula.");
+      return;
+    }
 
     setIsSaving(true);
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    setIsSaving(false);
-    toast.success("Chamada salva com sucesso!");
     
-    setTimeout(() => {
-      onBack();
-    }, 1500);
-  };
+    try {
+      await new Promise(r => setTimeout(r, 800));
 
-  const students = selectedClass && studentsByClass[selectedClass] 
-    ? studentsByClass[selectedClass] 
-    : [];
-  const totalCount = students.length;
-  const absentCount = Object.values(attendance).filter((isAbsent) => isAbsent).length;
-  const presentCount = totalCount - absentCount;
+      const dateKey = format(selectedDate, 'yyyy-MM-dd');
+      const existingData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      
+      existingData[dateKey] = {
+        attendance,
+        descricao: descricaoAula,
+        lastUpdate: new Date().toISOString()
+      };
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    if (onNavigateToDashboard) {
-      onNavigateToDashboard(tab);
+      localStorage.setItem(storageKey, JSON.stringify(existingData));
+      
+      setSavedAttendanceDates(Object.keys(existingData));
+
+      toast.success("Chamada salva com sucesso!");
+    } catch (error) {
+      toast.error("Erro ao salvar.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleLogout = () => {
-    if (onLogout) {
-      onLogout();
-    }
-  };
-
-  const handleToggleCollapse = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
-  };
-
-  if (!selectedClass) {
-    return (
-      <div className="flex min-h-screen bg-[#E5E5E5] items-center justify-center">
-        <div className="text-[#0D4F97]">Carregando...</div>
-      </div>
-    );
-  }
+  const presentCount = Object.values(attendance).filter(v => v).length;
 
   return (
-    <div className="flex min-h-screen bg-[#E5E5E5]">
-      {/* Sidebar - SEMPRE VISÍVEL */}
-      <ProfessorSidebar
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        onLogout={handleLogout}
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={handleToggleCollapse}
-      />
+    <div className="max-w-5xl mx-auto p-4">
+      <Button onClick={onBack} variant="outline" className="mb-6 border-[#B2D7EC] text-[#0D4F97] hover:bg-[#B2D7EC]/20 h-12">
+        <ArrowLeft className="mr-2 h-5 w-5" /> Voltar para Turmas
+      </Button>
 
-      {/* Main Content */}
-      <main className={`flex-1 overflow-y-auto transition-all duration-300 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
-        <div className="p-4 md:p-8">
-          <div className="mx-auto max-w-5xl">
-            {/* Botão Voltar */}
-            <Button
-              onClick={onBack}
-              variant="outline"
-              className="mb-6 h-12 justify-center border-2 border-[#B2D7EC] px-4 text-[#0D4F97] hover:bg-[#B2D7EC]/20"
-            >
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              Voltar para Turmas
-            </Button>
+      <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
+        <CardHeader>
+          <CardTitle className="text-[#0D4F97] text-2xl">Registro de Presença</CardTitle>
+          <CardDescription className="text-[#222222] font-semibold text-lg">{turmaNome}</CardDescription>
+        </CardHeader>
+        
+        <CardContent className="space-y-6">
+          {isEditingPastDate && (
+            <div className="rounded-xl border-2 border-[#FFD000] bg-[#FFD000]/10 p-4 flex gap-3 items-center">
+              <AlertCircle className="text-[#0D4F97] h-5 w-5 flex-shrink-0" />
+              <p className="text-[#0D4F97] text-sm">Visualizando/Editando chamada de: <strong>{format(selectedDate, "dd/MM/yyyy")}</strong></p>
+            </div>
+          )}
 
-            <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
-              <CardHeader>
-                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                  <div>
-                    <CardTitle className="text-[#0D4F97] text-2xl">Registro de Presença</CardTitle>
-                    <CardDescription className="text-[#222222] text-lg">
-                      {selectedClass}
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Informações da Chamada */}
-                <div className="space-y-4">
-                  {/* Data e Descrição */}
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border-2 border-[#B2D7EC] bg-white p-4">
-                      <div className="flex items-center gap-2 text-[#0D4F97] font-semibold">
-                        <CalendarIcon className="h-5 w-5" />
-                        <span>Data da Chamada</span>
-                      </div>
-                      <p className="mt-2 text-[#222222] text-lg">
-                        {format(selectedDate, "dd/MM/yyyy", { locale: ptBR })}
-                      </p>
-                    </div>
-                    {descricao && (
-                      <div className="rounded-xl border-2 border-[#B2D7EC] bg-white p-4">
-                        <div className="flex items-center gap-2 text-[#0D4F97] font-semibold">
-                          <span>Descrição da Aula</span>
-                        </div>
-                        <p className="mt-2 text-[#222222] text-lg">{descricao}</p>
-                      </div>
-                    )}
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="rounded-xl border-2 border-[#B2D7EC] p-4 bg-[#F8FAFC]">
+              <label className="text-[#0D4F97] text-sm font-bold flex items-center gap-2 mb-2">
+                <CalendarIcon className="h-4 w-4" /> Data da Chamada
+              </label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start border-[#B2D7EC] h-11 bg-white">
+                    {format(selectedDate, "dd/MM/yyyy", { locale: ptBR })}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <ChamadaCalendar 
+                    selected={selectedDate} 
+                    onSelect={(d) => d && setSelectedDate(d)} 
+                    savedDates={savedDatesAsObjects} 
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
 
-                  {/* Contador de Presentes */}
-                  <div className="rounded-xl border-2 border-[#B2D7EC] bg-[#B2D7EC]/20 p-4">
-                    <div className="flex items-center justify-center gap-2">
-                      <Users className="h-6 w-6 text-[#0D4F97]" />
-                      <span className="text-[#0D4F97] text-lg font-semibold">
-                        <strong>{presentCount}</strong> de <strong>{totalCount}</strong> alunos presentes
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Tabela de Alunos */}
-                  {students.length > 0 ? (
-                    <div className="rounded-xl border-2 border-[#B2D7EC] bg-white overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-[#B2D7EC]/20 hover:bg-[#B2D7EC]/20">
-                            <TableHead className="text-[#0D4F97] font-semibold text-lg">Nome do Aluno(a)</TableHead>
-                            <TableHead className="text-center text-[#0D4F97] font-semibold text-lg w-32">Ausente</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {students.map((student) => {
-                            const isAbsent = attendance[student.id] || false;
-                            
-                            return (
-                              <TableRow
-                                key={student.id}
-                                className="transition-colors hover:bg-[#B2D7EC]/10"
-                              >
-                                <TableCell className="text-[#222222] text-lg">
-                                  {student.name}
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  <div className="flex justify-center">
-                                    <Checkbox
-                                      id={`student-${student.id}`}
-                                      checked={isAbsent}
-                                      onCheckedChange={(checked) =>
-                                        handleAttendanceChange(student.id, checked as boolean)
-                                      }
-                                      className="h-6 w-6 border-2 border-[#0D4F97] data-[state=checked]:bg-[#0D4F97] data-[state=checked]:text-white"
-                                    />
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-[#222222]">
-                      Nenhum aluno encontrado para esta turma.
-                    </div>
-                  )}
-
-                  {/* Save Button */}
-                  <div className="flex justify-end pt-4">
-                    <Button
-                      onClick={handleSaveChamada}
-                      disabled={isSaving || students.length === 0}
-                      className="h-12 min-w-[200px] justify-center bg-[#0D4F97] px-6 text-white hover:bg-[#FFD000] hover:text-[#0D4F97] font-semibold text-lg"
-                    >
-                      {isSaving ? (
-                        <>
-                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                          Salvando...
-                        </>
-                      ) : (
-                        "Salvar Chamada"
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="rounded-xl border-2 border-[#B2D7EC] p-4 bg-[#F8FAFC]">
+              <label className="text-[#0D4F97] text-sm font-bold mb-2 block">Resumo da Aula</label>
+              <Textarea 
+                value={descricaoAula} 
+                onChange={(e) => setDescricaoAula(e.target.value)} 
+                placeholder="O que foi ensinado hoje?" 
+                className="min-h-[44px] border-[#B2D7EC] bg-white text-[#222222]"
+              />
+            </div>
           </div>
-        </div>
-      </main>
+
+          <div className="bg-[#B2D7EC]/20 rounded-xl p-3 flex justify-center items-center gap-2 text-[#0D4F97] font-semibold border border-[#B2D7EC]">
+            <Users className="h-5 w-5" /> {presentCount} de {students.length} presentes
+          </div>
+
+          <div className="rounded-xl border-2 border-[#B2D7EC] overflow-hidden bg-white">
+            <Table>
+              <TableHeader className="bg-[#B2D7EC]/20">
+                <TableRow>
+                  <TableHead className="text-[#0D4F97] font-bold">Aluno</TableHead>
+                  <TableHead className="text-center text-[#0D4F97] font-bold w-32">Presença</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {students.map((s) => (
+                  <TableRow key={s.id} className="hover:bg-[#B2D7EC]/5 border-b border-[#B2D7EC]/30">
+                    <TableCell className="text-[#222222] font-medium">{s.name}</TableCell>
+                    <TableCell>
+                      <div className="flex justify-center">
+                        <Switch 
+                          checked={attendance[s.id] ?? true} 
+                          onCheckedChange={(v) => setAttendance(p => ({...p, [s.id]: v}))} 
+                          className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-red-500"
+                        />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="flex justify-end pt-4">
+            <Button onClick={handleSave} disabled={isSaving} className="bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97] h-12 px-10 font-bold">
+              {isSaving ? <Loader2 className="animate-spin mr-2" /> : "Salvar Chamada"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
