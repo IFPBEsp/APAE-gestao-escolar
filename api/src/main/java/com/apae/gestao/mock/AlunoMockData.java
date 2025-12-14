@@ -19,32 +19,92 @@ public class AlunoMockData implements CommandLineRunner {
     public void run(String... args) {
         if (alunoRepository.count() == 0) {
             List<Aluno> alunos = List.of(
-                    new Aluno(null, "Ana Beatriz", LocalDate.of(2014, 3, 15), 10, "Autismo leve"),
-                    new Aluno(null, "Carlos Eduardo", LocalDate.of(2013, 7, 22), 11, "Síndrome de Down"),
-                    new Aluno(null, "João Pedro", LocalDate.of(2012, 1, 10), 12, "Deficiência visual"),
-                    new Aluno(null, "Mariana Silva", LocalDate.of(2015, 9, 5), 9, "Autismo leve"),
-                    new Aluno(null, "Pedro Lucas", LocalDate.of(2011, 11, 30), 13, "Deficiência auditiva"),
-                    new Aluno(null, "Eduardo", LocalDate.of(2014, 5, 18), 10, "Autismo leve"),
-                    new Aluno(null, "Pedro Silva", LocalDate.of(2013, 2, 14), 11, "Síndrome de Down"),
-                    new Aluno(null, "Thiago da Silva", LocalDate.of(2012, 8, 25), 12, "Deficiência visual"),
-                    new Aluno(null, "Marina Costa", LocalDate.of(2015, 4, 12), 9, "Autismo leve"),
-                    new Aluno(null, "Pedro Neto", LocalDate.of(2011, 6, 8), 13, "Deficiência auditiva"),
-                    new Aluno(null, "Ana Luiza", LocalDate.of(2014, 10, 20), 10, "Autismo leve"),
-                    new Aluno(null, "João Gabriel", LocalDate.of(2013, 12, 3), 11, "Síndrome de Down"),
-                    new Aluno(null, "João Lucas", LocalDate.of(2012, 3, 17), 12, "Deficiência visual"),
-                    new Aluno(null, "Margarida Oliveira", LocalDate.of(2015, 7, 9), 9, "Autismo leve"),
-                    new Aluno(null, "Larissa Pereira", LocalDate.of(2011, 9, 21), 13, "Deficiência auditiva"),
-                    new Aluno(null, "Beatriz Costa", LocalDate.of(2014, 1, 28), 10, "Autismo leve"),
-                    new Aluno(null, "Carlos Emanuel", LocalDate.of(2013, 6, 11), 11, "Síndrome de Down"),
-                    new Aluno(null, "Peter Jordan", LocalDate.of(2012, 11, 4), 12, "Deficiência visual"),
-                    new Aluno(null, "Eduarda Silva", LocalDate.of(2015, 2, 19), 9, "Autismo leve"),
-                    new Aluno(null, "Pedro Almeida", LocalDate.of(2011, 4, 7), 13, "Deficiência auditiva")
+                new Aluno(
+                    null, "Ana Beatriz Costa", "Transtorno do Espectro Autista (TEA) leve", 
+                    LocalDate.of(2014, 5, 10), "(11) 98765-1111", "Cláudia Souza"
+                ),
+                new Aluno(
+                    null, "Carlos Eduardo Silva", "Síndrome de Down", 
+                    LocalDate.of(2013, 8, 25), "(11) 99876-2222", "Fernando Lima"
+                ),
+                new Aluno(
+                    null, "João Pedro Oliveira", "Deficiência Visual Total", 
+                    LocalDate.of(2015, 3, 1), "(21) 97654-3333", "Patrícia Ribeiro"
+                ),
+                new Aluno(
+                    null, "Mariana Silva Santos", "Transtorno do Espectro Autista (TEA) leve", 
+                    LocalDate.of(2016, 11, 19), "(21) 96543-4444", "Roberto Santos"
+                ),
+                new Aluno(
+                    null, "Pedro Lucas Mendes", "Deficiência Auditiva Bilateral", 
+                    LocalDate.of(2017, 7, 30), "(31) 95432-5555", "Luciana Mendes"
+                ),
+                new Aluno(
+                    null, "Eduardo Gomes Ferreira", "TDAH e Dislexia", 
+                    LocalDate.of(2012, 1, 14), "(31) 94321-6666", "Gustavo Ferreira"
+                ),
+                new Aluno(
+                    null, "Pedro Silva Neto", "Síndrome de Down", 
+                    LocalDate.of(2014, 4, 5), "(41) 93210-7777", "Adriana Neto"
+                ),
+                new Aluno(
+                    null, "Thiago da Silva Martins", "Deficiência Visual Parcial", 
+                    LocalDate.of(2015, 9, 22), "(41) 92109-8888", "José Martins"
+                ),
+                new Aluno(
+                    null, "Marina Costa Ribeiro", "Transtorno do Espectro Autista (TEA) nível 1", 
+                    LocalDate.of(2013, 2, 7), "(51) 91098-9999", "Sofia Ribeiro"
+                ),
+                new Aluno(
+                    null, "Pedro Neto Almeida", "Deficiência Auditiva Parcial", 
+                    LocalDate.of(2016, 12, 3), "(51) 90987-0000", "Ricardo Almeida"
+                ),
+                new Aluno(
+                    null, "Ana Luiza Nogueira", "Deficiência Intelectual Leve", 
+                    LocalDate.of(2014, 6, 18), "(61) 99876-1234", "Helena Nogueira"
+                ),
+                new Aluno(
+                    null, "João Gabriel Melo", "Síndrome de Down", 
+                    LocalDate.of(2017, 10, 28), "(61) 98765-2345", "Paulo Melo"
+                ),
+                new Aluno(
+                    null, "João Lucas Pires", "Deficiência Visual Total", 
+                    LocalDate.of(2012, 3, 9), "(71) 97654-3456", "Camila Pires"
+                ),
+                new Aluno(
+                    null, "Margarida Oliveira Vaz", "Transtorno do Espectro Autista (TEA) nível 2", 
+                    LocalDate.of(2018, 1, 6), "(71) 96543-4567", "Antônio Vaz"
+                ),
+                new Aluno(
+                    null, "Larissa Pereira Rocha", "Deficiência Auditiva Bilateral", 
+                    LocalDate.of(2015, 11, 12), "(81) 95432-5678", "Viviane Rocha"
+                ),
+                new Aluno(
+                    null, "Beatriz Costa Freire", "Paralisia Cerebral", 
+                    LocalDate.of(2013, 5, 29), "(81) 94321-6789", "Marcelo Freire"
+                ),
+                new Aluno(
+                    null, "Carlos Emanuel Lima", "Síndrome de Down", 
+                    LocalDate.of(2016, 9, 2), "(91) 93210-7890", "Regina Lima"
+                ),
+                new Aluno(
+                    null, "Peter Jordan Nolasco", "Deficiência Visual Parcial", 
+                    LocalDate.of(2014, 8, 20), "(91) 92109-8901", "Fábio Nolasco"
+                ),
+                new Aluno(
+                    null, "Eduarda Silva Almeida", "Deficiência Intelectual Moderada", 
+                    LocalDate.of(2017, 1, 1), "(11) 91098-9012", "Sandra Almeida"
+                ),
+                new Aluno(
+                    null, "Pedro Almeida Cruz", "Deficiência Auditiva Parcial", 
+                    LocalDate.of(2012, 10, 17), "(11) 90987-0123", "Thiago Cruz"
+                )
             );
 
             alunoRepository.saveAll(alunos);
             System.out.println("✅ 20 alunos mockados inseridos no banco!");
         } else {
-            System.out.println("ℹ️  Alunos já existentes — mock não inserido.");
+            System.out.println("ℹ️ Alunos já existentes — mock não inserido.");
         }
     }
 }

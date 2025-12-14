@@ -33,18 +33,32 @@ public class Aluno {
     @Column(nullable = false)
     private String deficiencia;
 
+    @Column(nullable = false)
+    private String telefoneResponsavel;
+
+    @Column(nullable = false)
+    private String nomeResponsavel;
+
     @Column(name = "link_foto", length = 500)
     private String linkFoto;
 
     @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL)
     private Set<Avaliacao> avaliacoes = new HashSet<>();
 
-    public Aluno(Long id, String nome, LocalDate dataNascimento, Integer idade, String deficiencia) {
+    public Aluno(
+        Long id, 
+        String nome, 
+        String deficiencia, 
+        LocalDate dataNascimento, 
+        String telefoneResponsavel,
+        String nomeResponsavel 
+    ) {
         this.id = id;
         this.nome = nome;
-        this.dataNascimento = dataNascimento;
-        this.idade = idade;
         this.deficiencia = deficiencia;
+        this.dataNascimento = dataNascimento;
+        this.nomeResponsavel = nomeResponsavel;
+        this.telefoneResponsavel = telefoneResponsavel;
     }
     
     @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL)
