@@ -5,6 +5,7 @@ import com.apae.gestao.dto.AvaliacaoResponseDTO;
 import com.apae.gestao.entity.Avaliacao;
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Professor;
+import com.apae.gestao.entity.Turma;
 import com.apae.gestao.repository.AvaliacaoRepository;
 import com.apae.gestao.repository.AlunoRepository;
 import com.apae.gestao.repository.ProfessorRepository;
@@ -12,7 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.util.Optional; 
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,20 @@ public class AvaliacaoService {
     private final AlunoRepository alunoRepository;
     private final ProfessorRepository professorRepository;
 
+    private String getTurmaCompleta(Avaliacao avaliacao) {
+        
+        if (avaliacao.getAluno() == null) {
+            return "Sem Turma Ativa";
+        }
+
+        Optional<Turma> turmaOptional = avaliacao.getAluno().getTurmaAtual();
+        
+        return turmaOptional
+                .map(turma -> turma.getNome() + " - " + turma.getTurno())
+                .orElse("Sem Turma Ativa");
+    }
+
+    
     @Transactional
     public AvaliacaoResponseDTO criar(AvaliacaoRequestDTO dto) {
         Aluno aluno = alunoRepository.findById(dto.getAlunoId())
@@ -38,14 +53,19 @@ public class AvaliacaoService {
                 .build();
         
         Avaliacao saved = avaliacaoRepository.save(avaliacao);
-        return AvaliacaoResponseDTO.fromEntity(saved);
+        
+        String turmaCompleta = getTurmaCompleta(saved);
+        return AvaliacaoResponseDTO.fromEntity(saved, turmaCompleta);
     }
 
     @Transactional(readOnly = true)
     public List<AvaliacaoResponseDTO> listarTodas() {
         return avaliacaoRepository.findAllByOrderByDataAvaliacaoDesc()
                 .stream()
-                .map(AvaliacaoResponseDTO::fromEntity)
+                .map(avaliacao -> {
+                    String turmaCompleta = getTurmaCompleta(avaliacao);
+                    return AvaliacaoResponseDTO.fromEntity(avaliacao, turmaCompleta);
+                })
                 .collect(Collectors.toList());
     }
     
@@ -53,7 +73,9 @@ public class AvaliacaoService {
     public AvaliacaoResponseDTO buscarPorId(Long id) {
         Avaliacao avaliacao = avaliacaoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Avaliação não encontrada"));
-        return AvaliacaoResponseDTO.fromEntity(avaliacao);
+        
+        String turmaCompleta = getTurmaCompleta(avaliacao);
+        return AvaliacaoResponseDTO.fromEntity(avaliacao, turmaCompleta);
     }
     
     @Transactional(readOnly = true)
@@ -63,7 +85,10 @@ public class AvaliacaoService {
         
         return avaliacaoRepository.findByAlunoOrderByDataAvaliacaoDesc(aluno)
                 .stream()
-                .map(AvaliacaoResponseDTO::fromEntity)
+                .map(avaliacao -> {
+                    String turmaCompleta = getTurmaCompleta(avaliacao);
+                    return AvaliacaoResponseDTO.fromEntity(avaliacao, turmaCompleta);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -74,7 +99,10 @@ public class AvaliacaoService {
         
         return avaliacaoRepository.findByProfessorOrderByDataAvaliacaoDesc(professor)
                 .stream()
-                .map(AvaliacaoResponseDTO::fromEntity)
+                .map(avaliacao -> {
+                    String turmaCompleta = getTurmaCompleta(avaliacao);
+                    return AvaliacaoResponseDTO.fromEntity(avaliacao, turmaCompleta);
+                })
                 .collect(Collectors.toList());
     }
     
@@ -98,7 +126,9 @@ public class AvaliacaoService {
         }
         
         Avaliacao updated = avaliacaoRepository.save(avaliacao);
-        return AvaliacaoResponseDTO.fromEntity(updated);
+        
+        String turmaCompleta = getTurmaCompleta(updated);
+        return AvaliacaoResponseDTO.fromEntity(updated, turmaCompleta);
     }
 
     @Transactional

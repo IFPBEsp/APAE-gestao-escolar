@@ -13,7 +13,9 @@ import { ptBR } from "date-fns/locale";
 interface ModalVisualizarAvaliacaoProps {
     isOpen: boolean;
     onClose: () => void;
-    avaliacao: any;
+    // O tipo 'any' foi mantido, mas as propriedades usadas agora são: 
+    // dataAvaliacao, professorNome, turmaNomeCompleto
+    avaliacao: any; 
     alunoNome: string;
 }
 
@@ -29,27 +31,30 @@ export default function ModalVisualizarAvaliacao({
         window.print();
     };
 
-    const dataAvaliacao = avaliacao?.data
-        ? new Date(avaliacao.data.split('/').reverse().join('-'))
-        : new Date();
+    // A data é agora formatada diretamente onde é exibida.
+    // Usamos a chave correta: avaliacao.dataAvaliacao
+    const dataAvaliacaoFormatada = avaliacao.dataAvaliacao
+        ? format(new Date(avaliacao.dataAvaliacao), "dd/MM/yyyy", { locale: ptBR })
+        : "N/A";
 
     const nomeAluno = alunoNome;
-    const turmaMock = avaliacao.turma || "Não informada";
+    const professorNome = avaliacao.professorNome || "Não informado"; // Chave corrigida
+    const turmaNome = avaliacao.turmaNomeCompleto || "Não informada"; // Chave corrigida
     
     const visualizationContent = (
         <div className="space-y-6 py-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
                     <p className="text-xs font-semibold text-[#0D4F97] uppercase">Data</p>
-                    <p className="text-gray-700">{avaliacao.data}</p>
+                    <p className="text-gray-700">{dataAvaliacaoFormatada}</p>
                 </div>
                 <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
                     <p className="text-xs font-semibold text-[#0D4F97] uppercase">Professor</p>
-                    <p className="text-gray-700">{avaliacao.professor}</p>
+                    <p className="text-gray-700">{professorNome}</p>
                 </div>
                 <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
                     <p className="text-xs font-semibold text-[#0D4F97] uppercase">Turma</p>
-                    <p className="text-gray-700">{avaliacao.turma || "Não informada"}</p>
+                    <p className="text-gray-700">{turmaNome}</p>
                 </div>
             </div>
 
@@ -84,17 +89,17 @@ export default function ModalVisualizarAvaliacao({
 
                 <div className="mt-2">
                     <span>TURMA: </span>
-                    <span className="border-b border-black px-2">{turmaMock}</span>
+                    <span className="border-b border-black px-2">{turmaNome}</span>
                 </div>
 
                 <div className="flex gap-4 mt-2">
                     <div className="flex-1">
                         <span>PROFESSOR: </span>
-                        <span className="border-b border-black px-2">{avaliacao.professor}</span>
+                        <span className="border-b border-black px-2">{professorNome}</span>
                     </div>
                     <div className="flex-1">
                         <span>DATA DA AVALIAÇÃO: </span>
-                        <span className="border-b border-black px-2">{avaliacao.data}</span>
+                        <span className="border-b border-black px-2">{dataAvaliacaoFormatada}</span>
                     </div>
                 </div>
             </div>
@@ -115,7 +120,7 @@ export default function ModalVisualizarAvaliacao({
             <div className="mt-16 grid grid-cols-2 gap-12 pt-8">
                 <div className="text-center">
                     <div className="mb-2 border-t-2 border-black pt-2 mx-4">
-                        <p className="font-bold text-sm">{avaliacao.professor}</p>
+                        <p className="font-bold text-sm">{professorNome}</p>
                         <p className="text-xs">PROFESSOR(A)</p>
                     </div>
                 </div>

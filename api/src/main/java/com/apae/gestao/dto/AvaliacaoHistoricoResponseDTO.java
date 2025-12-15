@@ -13,17 +13,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AvaliacaoHistoricoResponseDTO {
     private Long id;
-    private LocalDateTime data;
+    private LocalDateTime dataAvaliacao; 
     private String descricao;
-    private String nomeProfessor;
+    private String professorNome; 
+    private String turmaNomeCompleto; 
     
-    
-    public static AvaliacaoHistoricoResponseDTO fromEntity(Avaliacao avaliacao) {
+    public static AvaliacaoHistoricoResponseDTO fromEntity(
+        Avaliacao avaliacao, 
+        String nomeTurmaCompleto 
+    ) {
         return AvaliacaoHistoricoResponseDTO.builder()
                 .id(avaliacao.getId())
-                .data(avaliacao.getDataAvaliacao())
+                .dataAvaliacao(avaliacao.getDataAvaliacao())
                 .descricao(avaliacao.getDescricao()) 
-                .nomeProfessor(avaliacao.getProfessor().getNome())
+                .professorNome(avaliacao.getProfessor().getNome()) 
+                .turmaNomeCompleto(nomeTurmaCompleto)
                 .build();
     }
 }

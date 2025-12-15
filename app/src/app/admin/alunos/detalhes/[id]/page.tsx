@@ -1,63 +1,48 @@
 "use client"
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, User, Calendar, BookOpen, Heart, Phone, Eye, PenSquare } from "lucide-react";
+import { ArrowLeft, User, Calendar, BookOpen, Heart, Phone, Eye, PenSquare, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react"; 
 import ModalEditarAluno from "@/components/alunos/ModalEditarAluno";
 import ModalVisualizarAvaliacao from "@/components/alunos/ModalVisualizarAvaliacao";
 import ModalVisualizarRelatorio from "@/components/alunos/ModalVisualizarRelatorio";
+import { buscarAlunoPorId, buscarAvaliacoesPorAlunoId } from "@/services/AlunoService"; 
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale"; 
+
+interface AlunoDetailDTO {
+    id: number;
+    nome: string;
+    dataNascimento: string; 
+    deficiencia: string;
+    nomeResponsavel: string;
+    telefoneResponsavel: string;
+    nomeTurmaAtual: string | null;
+    turnoTurmaAtual: string | null;
+}
+
+interface AvaliacaoHistoricoDTO {
+    dataAvaliacao: string; 
+    professorNome: string;
+    turmaNomeCompleto: string;
+    descricao: string;
+    desenvolvimentoCognitivo: string;
+}
+
 
 export default function DetalhesDoAluno({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const alunoId = parseInt(params.id);
+  
+  const [alunoData, setAlunoData] = useState<AlunoDetailDTO | null>(null);
+  const [avaliacoes, setAvaliacoes] = useState<AvaliacaoHistoricoDTO[]>([]); 
+  const [loadingAluno, setLoadingAluno] = useState(true);
+  const [loadingAvaliacoes, setLoadingAvaliacoes] = useState(true);
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedAvaliacao, setSelectedAvaliacao] = useState<any>(null);
-  const [selectedRelatorio, setSelectedRelatorio] = useState<any>(null);
-
-  // Dados simulados do aluno
-  const [alunoData, setAlunoData] = useState({
-    id: 1,
-    nome: "Ana Silva",
-    idade: 12,
-    dataNascimento: "15/03/2013",
-    deficiencia: "Síndrome de Down",
-    responsavel: "Maria Silva (Mãe)",
-    telefoneResponsavel: "(11) 98765-4321",
-    turmaAtual: "Alfabetização 2025 - Manhã",
-    turmaId: 1,
-    dataMatricula: "05/02/2025"
-  });
-
-  // Dados expandidos (mantive os dados completos aqui)
-  const mockAvaliacoes = [
-    {
-      data: "05/11/2025",
-      professor: "Prof. Maria Silva",
-      turma: "Alfabetização 2025 - Manhã",
-      aluno: "Ana Silva",
-      descricao: "Demonstrou excelente progresso na leitura de sílabas simples. Participou ativamente das atividades em grupo.",
-      desenvolvimentoCognitivo: "A aluna tem demonstrado grande evolução na identificação de sílabas complexas...",
-      desenvolvimentoMotor: "Coordenação motora fina bem desenvolvida...",
-      desenvolvimentoSocial: "Interage muito bem com os colegas...",
-      autonomia: "Realiza tarefas de higiene pessoal com mínima supervisão...",
-      habilidades: ["Leitura", "Participação", "Socialização", "Alfabetização"],
-      observacoes: "Continuar estimulando a leitura com palavras de complexidade gradual."
-    },
-    {
-      data: "28/10/2025",
-      professor: "Prof. Maria Silva",
-      turma: "Alfabetização 2025 - Manhã",
-      aluno: "Ana Silva",
-      descricao: "Conseguiu identificar todas as vogais e está começando a formar palavras simples.",
-      desenvolvimentoCognitivo: "Identifica vogais e consoantes principais...",
-      desenvolvimentoMotor: "Apresenta boa preensão do lápis...",
-      desenvolvimentoSocial: "Participativa...",
-      autonomia: "Necessita de auxílio para amarrar os sapatos...",
-      habilidades: ["Coordenação Motora", "Vogais"],
-      observacoes: "Reforçar exercícios de caligrafia."
-    },
-    // ... outros dados
-  ];
+  const [selectedAvaliacao, setSelectedAvaliacao] = useState<any>(null); 
+  const [selectedRelatorio, setSelectedRelatorio] = useState<any>(null); 
 
   const mockRelatorios = [
     {
@@ -71,24 +56,104 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
       estrategias: "Divisão da turma em pequenos grupos...",
       recursos: "Bola de borracha, cadeiras..."
     },
-    {
-      data: "10/11/2025",
-      professor: "Prof. Maria Silva",
-      turma: "Alfabetização 2025 - Manhã",
-      aluno: "Ana Silva",
-      atividade: "Atividades de escrita do nome com apoio de modelos visuais.",
-      atividades: "Escrita do nome próprio utilizando crachá de mesa...",
-      habilidades: "Reconhecimento do próprio nome...",
-      estrategias: "Apresentação do crachá...",
-      recursos: "Crachás, letras móveis..."
-    }
-    // ... outros dados
   ];
 
-  const handleSaveAluno = (alunoAtualizado: any) => {
+  useEffect(() => {
+    async function loadAlunoData() {
+        setLoadingAluno(true);
+        try {
+            if (alunoId) {
+                const data = await buscarAlunoPorId(alunoId);
+                setAlunoData(data);
+            }
+        } catch (error) {
+            console.error("Erro ao carregar dados do aluno:", error);
+        } finally {
+            setLoadingAluno(false);
+        }
+    }
+    loadAlunoData();
+  }, [alunoId]);
+
+  useEffect(() => {
+    async function loadAvaliacoes() {
+        setLoadingAvaliacoes(true);
+        try {
+            if (alunoId) {
+                const data = await buscarAvaliacoesPorAlunoId(alunoId);
+                console.log("Dados de Avaliações Recebidos:", data); // <-- Adicione isto
+                setAvaliacoes(data);
+            }
+        } catch (error) {
+            console.error("Erro ao carregar avaliações:", error);
+        } finally {
+            setLoadingAvaliacoes(false);
+        }
+    }
+    loadAvaliacoes();
+  }, [alunoId]);
+
+
+  const turmaCompleta = useMemo(() => {
+      if (!alunoData) return "Carregando...";
+      if (alunoData.nomeTurmaAtual) {
+          return `${alunoData.nomeTurmaAtual} - ${alunoData.turnoTurmaAtual}`;
+      }
+      return "Sem Turma Ativa";
+  }, [alunoData]);
+
+  const calcularIdade = (dataNascimento: string | undefined) => {
+    if (!dataNascimento) return 'N/A';
+    const birthDate = new Date(dataNascimento);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+  };
+
+  const formatarData = (dataString: string) => {
+    if (!dataString) return 'N/A';
+    try {
+        const cleanDataString = dataString.split('.')[0]; 
+        const dataObj = new Date(cleanDataString);
+
+        if (isNaN(dataObj.getTime())) {
+            const originalDate = new Date(dataString);
+            if(isNaN(originalDate.getTime())) return "Data Inválida";
+            return format(originalDate, "dd/MM/yyyy", { locale: ptBR });
+        }
+
+        return format(dataObj, "dd/MM/yyyy", { locale: ptBR });
+    } catch (error) {
+        return "Data Inválida";
+    }
+};
+
+
+  const handleSaveAluno = (alunoAtualizado: AlunoDetailDTO) => {
     setAlunoData(alunoAtualizado);
   };
 
+
+  if (loadingAluno) {
+    return (
+        <div className="flex justify-center items-center h-[calc(100vh-64px)]">
+            <Loader2 className="h-10 w-10 animate-spin text-[#0D4F97]" />
+            <span className="ml-3 text-lg text-[#0D4F97]">Carregando detalhes do aluno...</span>
+        </div>
+    );
+  }
+
+  if (!alunoData) {
+    return (
+        <div className="p-8 text-center text-red-600">
+            Aluno não encontrado ou erro ao carregar dados.
+        </div>
+    );
+  }
 
 
   return (
@@ -100,7 +165,6 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
 
       {/* Conteúdo */}
       <div className="px-[50px] py-[30px] space-y-8">
-        {/* Botão voltar */}
         <Button
           variant="outline"
           onClick={() => router.push("/admin/alunos")}
@@ -119,7 +183,7 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-[#0D4F97] mt-8">{alunoData.nome}</h2>
-                  <p className="text-gray-600 text-lg">{alunoData.idade} anos</p>
+                  <p className="text-gray-600 text-lg">{calcularIdade(alunoData.dataNascimento)} anos</p>
                 </div>
               </div>
 
@@ -146,7 +210,7 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
                 <BookOpen className="text-[#0D4F97]" />
                 <div>
                   <p className="font-semibold text-[#0D4F97]">Turma Atual</p>
-                  <p>{alunoData.turmaAtual}</p>
+                  <p className="font-medium text-[#0D4F97]">{turmaCompleta}</p>
                 </div>
               </div>
 
@@ -162,7 +226,7 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
                 <Calendar className="text-[#0D4F97]" />
                 <div>
                   <p className="font-semibold text-[#0D4F97]">Data de Matrícula</p>
-                  <p>{alunoData.dataMatricula}</p>
+                  <p>N/A (Não fornecido)</p>
                 </div>
               </div>
 
@@ -170,7 +234,7 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
                 <Phone className="text-[#0D4F97]" />
                 <div>
                   <p className="font-semibold text-[#0D4F97]">Responsável</p>
-                  <p>{alunoData.responsavel}</p>
+                  <p>{alunoData.nomeResponsavel}</p>
                   <p>{alunoData.telefoneResponsavel}</p>
                 </div>
               </div>
@@ -178,47 +242,54 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
           </CardContent>
         </Card>
 
-        {/* Histórico de Avaliações */}
         <Card className="border border-blue-200 shadow-md rounded-2xl">
           <CardContent className="p-8">
             <h2 className="text-2xl font-bold text-[#0D4F97] mb-2 mt-8">Histórico de Avaliações</h2>
-            <p className="text-gray-600 mb-6">Avaliações realizadas pelos professores (3 registros)</p>
+            <p className="text-gray-600 mb-6">Avaliações realizadas pelos professores ({avaliacoes.length} registros)</p>
 
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="pb-3 font-bold text-[#0D4F97]">Data</th>
-                  <th className="pb-3 font-bold text-[#0D4F97]">Professor</th>
-                  <th className="pb-3 font-bold text-[#0D4F97]">Turma</th>
-                  <th className="pb-3 font-bold text-[#0D4F97]">Descrição</th>
-                  <th className="pb-3 font-bold text-[#0D4F97]">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="text-gray-600">
-                {mockAvaliacoes.map((avaliacao: any, index: number) => (
-                  <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-4 font-medium text-gray-900">{avaliacao.data}</td>
-                    <td className="font-medium text-gray-900">{avaliacao.professor}</td>
-                    <td className="text-gray-600">{avaliacao.turma}</td>
-                    <td className="text-gray-600 max-w-md truncate" title={avaliacao.descricao}>{avaliacao.descricao}</td>
-                    <td>
-                      <Eye
-                        className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]"
-                        onClick={() => setSelectedAvaliacao(avaliacao)}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {loadingAvaliacoes ? (
+                <div className="flex justify-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-[#0D4F97]" />
+                </div>
+            ) : avaliacoes.length === 0 ? (
+                <p className="text-center text-gray-500 py-4">Nenhuma avaliação encontrada para este aluno.</p>
+            ) : (
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="border-b border-gray-200">
+                        <th className="pb-3 font-bold text-[#0D4F97]">Data</th>
+                        <th className="pb-3 font-bold text-[#0D4F97]">Professor</th>
+                        <th className="pb-3 font-bold text-[#0D4F97]">Turma</th>
+                        <th className="pb-3 font-bold text-[#0D4F97]">Descrição</th>
+                        <th className="pb-3 font-bold text-[#0D4F97]">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody className="text-gray-600">
+                        {avaliacoes.map((avaliacao: any, index: number) => (
+                        <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                            <td className="py-4 font-medium text-gray-900">{formatarData(avaliacao.dataAvaliacao)}</td> 
+                            <td className="font-medium text-gray-900">{avaliacao.professorNome}</td>
+                            <td className="text-gray-600">{avaliacao.turmaNomeCompleto}</td>
+                            <td className="text-gray-600 max-w-md truncate" title={avaliacao.descricao}>{avaliacao.descricao}</td>
+                            <td>
+                            <Eye
+                                className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]"
+                                onClick={() => setSelectedAvaliacao(avaliacao)}
+                            />
+                            </td>
+                        </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
           </CardContent>
         </Card>
 
-        {/* Histórico de Relatórios Individuais */}
+        {/* Histórico de Relatórios Individuais (MANTIDO COM MOCK TEMPORARIAMENTE) */}
         <Card className="border border-blue-200 shadow-md rounded-2xl">
           <CardContent className="p-8">
             <h2 className="text-2xl font-bold text-[#0D4F97] mb-2 mt-8">Histórico de Relatórios Individuais</h2>
-            <p className="text-gray-600 mb-6">Relatórios individuais realizados pelos professores (3 registros)</p>
+            <p className="text-gray-600 mb-6">Relatórios individuais realizados pelos professores ({mockRelatorios.length} registros - MOCK)</p>
 
             <table className="w-full text-left border-collapse">
               <thead>

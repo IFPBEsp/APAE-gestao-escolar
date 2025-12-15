@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -57,12 +58,27 @@ public class Aluno {
         this.nomeResponsavel = nomeResponsavel;
         this.telefoneResponsavel = telefoneResponsavel;
     }
+
+    @OneToMany(mappedBy = "aluno")
+    private Set<TurmaAluno> turmaAlunos = new HashSet<>();
     
     @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL)
     private Set<Presenca> presencas = new HashSet<>();
 
-    @OneToMany(mappedBy = "aluno")
-    private Set<TurmaAluno> turmaAlunos = new HashSet<>();
+    public Set<TurmaAluno> getTurmaAlunos() {
+        return turmaAlunos;
+    }
+
+    public Optional<Turma> getTurmaAtual() {
+        if (this.turmaAlunos == null || this.turmaAlunos.isEmpty()) {
+            return Optional.empty();
+        }
+        
+        return this.turmaAlunos.stream()
+                .filter(TurmaAluno::getIsAlunoAtivo)
+                .findFirst()
+                .map(TurmaAluno::getTurma); 
+    }
 
     @Override
     public boolean equals(Object o) {

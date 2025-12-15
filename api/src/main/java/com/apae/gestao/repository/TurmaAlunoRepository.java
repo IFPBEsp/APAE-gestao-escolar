@@ -19,4 +19,6 @@ public interface TurmaAlunoRepository extends JpaRepository<TurmaAluno, Long>{
     List<TurmaAluno> findByTurmaAndIsAlunoAtivo(Turma turma, Boolean isAlunoAtivo);
 
     Optional<TurmaAluno> findByTurmaAndAluno(Turma turma, Aluno aluno);
+
+    Optional<TurmaAluno> findByAlunoAndIsAlunoAtivoTrue(Aluno aluno);
 } 
