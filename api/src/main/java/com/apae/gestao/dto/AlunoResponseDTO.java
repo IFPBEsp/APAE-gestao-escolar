@@ -1,12 +1,14 @@
 package com.apae.gestao.dto;
 
 import com.apae.gestao.entity.Aluno;
+import com.apae.gestao.entity.Turma;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate; 
+import java.util.Optional; 
 
 @Data
 @NoArgsConstructor
@@ -31,6 +33,12 @@ public class AlunoResponseDTO {
     @Schema(description = "Nome completo do responsável", example = "Maria Silva Andrade")
     private String nomeResponsavel;
 
+    @Schema(description = "Nome da turma atual (e.g., 'Alfabetização 2025')", example = "Alfabetização 2025")
+    private String nomeTurmaAtual;
+
+    @Schema(description = "Turno da turma atual (e.g., 'Manhã')", example = "Manhã")
+    private String turnoTurmaAtual;
+
     public AlunoResponseDTO(Aluno aluno) {
         this.id = aluno.getId();
         this.nome = aluno.getNome();        
@@ -38,5 +46,16 @@ public class AlunoResponseDTO {
         this.deficiencia = aluno.getDeficiencia();
         this.telefoneResponsavel = aluno.getTelefoneResponsavel();
         this.nomeResponsavel = aluno.getNomeResponsavel();
+        
+        Optional<Turma> turmaAtual = aluno.getTurmaAtual(); 
+
+        if (turmaAtual.isPresent()) {
+            Turma turma = turmaAtual.get();
+            this.nomeTurmaAtual = turma.getNome();
+            this.turnoTurmaAtual = turma.getTurno();
+        } else {
+            this.nomeTurmaAtual = null; 
+            this.turnoTurmaAtual = null;
+        }
     }
 }
