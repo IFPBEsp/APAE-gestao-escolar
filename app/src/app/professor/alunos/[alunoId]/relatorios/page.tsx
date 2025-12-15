@@ -18,6 +18,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import ModalVisualizarEditarRelatorio from "@/components/ModalVisualizarEditarRelatorio";
+import RelatorioService from "@/services/RelatorioService";
+import { useEffect } from "react";
 
 interface Relatorio {
   id: number;

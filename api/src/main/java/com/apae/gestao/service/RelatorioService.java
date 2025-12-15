@@ -1,15 +1,22 @@
 package com.apae.gestao.service;
 
-import com.apae.gestao.dto.RelatorioRequestDTO;
-import com.apae.gestao.dto.RelatorioResponseDTO;
-import com.apae.gestao.entity.*;
-import com.apae.gestao.repository.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.apae.gestao.dto.RelatorioRequestDTO;
+import com.apae.gestao.dto.RelatorioResponseDTO;
+import com.apae.gestao.entity.Aluno;
+import com.apae.gestao.entity.Professor;
+import com.apae.gestao.entity.Relatorio;
+import com.apae.gestao.entity.Turma;
+import com.apae.gestao.repository.AlunoRepository;
+import com.apae.gestao.repository.ProfessorRepository;
+import com.apae.gestao.repository.RelatorioRepository;
+import com.apae.gestao.repository.TurmaAlunoRepository;
+import com.apae.gestao.repository.TurmaRepository;
 
 @Service
 public class RelatorioService {
@@ -98,6 +105,15 @@ public class RelatorioService {
         }
         relatorioRepository.deleteById(id);
     }
+
+    public List<RelatorioResponseDTO> listarPorAluno(Long alunoId) {
+    return relatorioRepository
+        .findByAlunoId(alunoId)
+        .stream()
+        .map(RelatorioResponseDTO::new)
+        .toList();
+}
+
 
     @Transactional(readOnly = true)
     public RelatorioResponseDTO buscarCompletoPorId(Long id) {

@@ -49,7 +49,6 @@ public class RelatorioController {
         return ResponseEntity.ok(relatorio);
     }
 
-    
     @PostMapping
     @Operation(summary = "Criar um novo relatório")
     @ApiResponses({

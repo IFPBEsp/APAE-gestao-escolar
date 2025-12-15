@@ -61,7 +61,6 @@ public class AvaliacaoController {
         return ResponseEntity.ok(response);
     }
 
-
     @GetMapping("/alunos/{alunoId}")
     @Operation(summary = "Listar avaliações por aluno")
     public ResponseEntity<List<AvaliacaoResponseDTO>> listarPorAluno(
