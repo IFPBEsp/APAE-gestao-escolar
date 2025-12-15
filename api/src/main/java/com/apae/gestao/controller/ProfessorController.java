@@ -22,6 +22,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/professores")
 @Tag(name = "Professores", description = "Operações de cadastro e manutenção de professores.")
 @SecurityRequirement(name = "bearerAuth")
+@CrossOrigin(origins = "*")
 public class ProfessorController {
 
     @Autowired
@@ -85,15 +87,26 @@ public class ProfessorController {
 
     @GetMapping
     @Operation(
-        summary = "Listar professores",
-        description = "Retorna todos os professores cadastrados com opção de filtrar apenas os ativos."
+        summary = "Listar todos os professores",
+        description = "Retorna TODOS os professores cadastrados (ativos e inativos)."
     )
-    public ResponseEntity<List<ProfessorResponseDTO>> listarTodos(
-            @Parameter(description = "Quando verdadeiro, retorna apenas professores ativos", example = "true", in = ParameterIn.QUERY)
-            @RequestParam(value = "ativos", required = false, defaultValue = "false") boolean ativos) {
-        List<ProfessorResponseDTO> professores = ativos
-                ? professorService.listarAtivos()
-                : professorService.listarTodos();
+    public ResponseEntity<List<ProfessorResponseDTO>> listarTodos() {
+        List<ProfessorResponseDTO> professores = professorService.listarTodos();
+        return ResponseEntity.ok(professores);
+    }
+
+    @GetMapping("/buscar")
+    @Operation(
+        summary = "Buscar professores com filtros",
+        description = "Busca professores por nome e/ou status ativo."
+    )
+    public ResponseEntity<List<ProfessorResponseDTO>> listarPorNomeEStatus(
+            @Parameter(example = "Maria", in = ParameterIn.QUERY)
+            @RequestParam(value = "nome", required = false) String nome,
+            @Parameter(example = "true", in = ParameterIn.QUERY)
+            @RequestParam(value = "ativo", required = false) Boolean ativo) {
+        
+        List<ProfessorResponseDTO> professores = professorService.listarPorNomeEStatus(nome, ativo);
         return ResponseEntity.ok(professores);
     }
 

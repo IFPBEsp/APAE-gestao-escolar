@@ -1,8 +1,11 @@
 'use client'
 
-import { ArrowLeft, Users, TrendingUp, TrendingDown } from "lucide-react";
+import { ArrowLeft, Users, TrendingUp, TrendingDown, Pencil, Power } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { EditarTurmaModal } from "@/components/turmas/EditarTurmaModal";
 
 // mockTurmaData COMPLETO:
 const mockTurmaData = {
@@ -20,7 +23,7 @@ const mockTurmaData = {
     ],
   },
   2: {
-    name: "Estimulação 2025 - Tarde", 
+    name: "Estimulação 2025 - Tarde",
     alunos: [
       { id: 1, name: "Igor Martins", faltas: 1, presenca: 97.5, status: "ativo" },
       { id: 2, name: "Julia Alves", faltas: 3, presenca: 92.5, status: "ativo" },
@@ -40,9 +43,10 @@ interface VerInformacoesTurmaPageProps {
 
 export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaPageProps) {
   const router = useRouter();
+  const [isEditarOpen, setIsEditarOpen] = useState(false);
   const turmaId = parseInt(params.id);
   const turmaData = mockTurmaData[turmaId as keyof typeof mockTurmaData];
-  
+
   if (!turmaData) {
     return (
       <div className="min-h-[calc(100vh-5rem)] bg-[#E5E5E5] p-4 md:p-8">
@@ -78,10 +82,36 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
           <span>Voltar</span>
         </button>
 
-        <div className="mb-6">
-          <h1 className="mb-2 text-[#0D4F97]">{turmaData.name}</h1>
-          <p className="text-[#222222]">Informações detalhadas da turma</p>
+        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="mb-2 text-[#0D4F97] text-2xl font-bold">{turmaData.name}</h1>
+            <p className="text-[#222222]">Informações detalhadas da turma</p>
+          </div>
+
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 gap-2"
+              onClick={() => { }}
+            >
+              <Power className="h-4 w-4" />
+              Inativar Turma
+            </Button>
+            <Button
+              className="bg-[#0D4F97] hover:bg-[#0B3E78] text-white gap-2"
+              onClick={() => setIsEditarOpen(true)}
+            >
+              <Pencil className="h-4 w-4" />
+              Editar Turma
+            </Button>
+          </div>
         </div>
+
+        <EditarTurmaModal
+          isOpen={isEditarOpen}
+          onClose={() => setIsEditarOpen(false)}
+          turmaData={turmaData}
+        />
 
         {/* Cards de Resumo */}
         <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-4">
@@ -170,13 +200,12 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
                       <td className="p-3 text-[#222222]">{aluno.name}</td>
                       <td className="p-3 text-center">
                         <span
-                          className={`rounded-full px-3 py-1 ${
-                            aluno.faltas === 0
+                          className={`rounded-full px-3 py-1 ${aluno.faltas === 0
                               ? "bg-green-100 text-green-700"
                               : aluno.faltas <= 2
                                 ? "bg-yellow-100 text-yellow-700"
                                 : "bg-red-100 text-red-700"
-                          }`}
+                            }`}
                         >
                           {aluno.faltas}
                         </span>

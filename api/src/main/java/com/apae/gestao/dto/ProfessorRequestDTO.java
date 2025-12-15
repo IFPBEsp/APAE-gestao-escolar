@@ -43,9 +43,9 @@ public class ProfessorRequestDTO {
     @NotNull(message = "Data de nascimento é obrigatória")
     private LocalDate dataNascimento;
 
-    @Size(max = 100, message = "Especialidade deve ter no máximo 100 caracteres")
-    @Schema(description = "Especialidade ou área de atuação", example = "Educação Especial")
-    private String especialidade;
+    @Size(max = 100, message = "Formação deve ter no máximo 100 caracteres")
+    @Schema(description = "Formação acadêmica do professor", example = "Licenciatura em Educação Especial")
+    private String formacao;
 
     @NotNull(message = "Data de contratação é obrigatória")
     private LocalDate dataContratacao;

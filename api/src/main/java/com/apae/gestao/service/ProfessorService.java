@@ -20,6 +20,37 @@ public class ProfessorService {
     @Autowired
     private ProfessorRepository professorRepository;
 
+    @Transactional(readOnly = true)
+public List<ProfessorResponseDTO> listarPorNomeEStatus(String nome, Boolean ativo) {
+    // Prioridade 1: Busca por nome (pode combinar com ativo)
+    if (nome != null && !nome.trim().isEmpty()) {
+        if (ativo != null) {
+            // Busca por nome E status (ativo/inativo)
+            return professorRepository.findByNomeContainingIgnoreCaseAndAtivo(nome.trim(), ativo)
+                    .stream()
+                    .map(ProfessorResponseDTO::new)
+                    .collect(Collectors.toList());
+        } else {
+            // Apenas por nome
+            return buscarPorNome(nome.trim());
+        }
+    }
+    
+    // Prioridade 2: Filtro apenas por status
+    if (ativo != null) {
+        return ativo ? listarAtivos() : listarInativos();
+    }
+        
+        return listarTodos();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProfessorResponseDTO> listarInativos() {
+        return professorRepository.findByAtivoFalse()
+                .stream()
+                .map(ProfessorResponseDTO::new)
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public ProfessorResponseDTO criar(ProfessorRequestDTO dto) {
@@ -44,6 +75,42 @@ public class ProfessorService {
     @Transactional(readOnly = true)
     public List<ProfessorResponseDTO> listarAtivos() {
         return professorRepository.findByAtivoTrue()
+                .stream()
+                .map(ProfessorResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Lista professores com filtros opcionais de nome e status.
+     * 
+     * @param nome  Parâmetro opcional para busca por nome (case-insensitive,
+     *              contém)
+     * @param ativo Parâmetro opcional para filtrar por status (true=ativos,
+     *              false=inativos, null=todos)
+     * @return Lista de professores que atendem aos critérios
+     */
+    @Transactional(readOnly = true)
+    public List<ProfessorResponseDTO> listarTodos(String nome, Boolean ativo) {
+        // Normaliza string vazia para null
+        String nomeNormalizado = (nome != null && nome.trim().isEmpty()) ? null : nome;
+
+        // Se ambos os parâmetros forem null, usa o método findAll para melhor
+        // performance
+        if (nomeNormalizado == null && ativo == null) {
+            return listarTodos();
+        }
+
+        List<Professor> professores = professorRepository.findByNomeContainingIgnoreCaseAndAtivo(nomeNormalizado,
+                ativo);
+
+        return professores.stream()
+                .map(ProfessorResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProfessorResponseDTO> buscarPorNome(String nome) {
+        return professorRepository.findByNomeContainingIgnoreCase(nome)
                 .stream()
                 .map(ProfessorResponseDTO::new)
                 .collect(Collectors.toList());
@@ -95,7 +162,7 @@ public class ProfessorService {
         professor.setEmail(dto.getEmail());
         professor.setTelefone(dto.getTelefone());
         professor.setDataNascimento(dto.getDataNascimento());
-        professor.setEspecialidade(dto.getEspecialidade());
+        professor.setFormacao(dto.getFormacao());
         professor.setDataContratacao(dto.getDataContratacao());
         professor.setEndereco(dto.getEndereco());
     }
@@ -114,10 +181,10 @@ public class ProfessorService {
 
     private void validarEmailUnico(String email, Long id) {
         if (email != null && !email.trim().isEmpty()) {
-            boolean emailEmUso = id == null 
-                ? professorRepository.existsByEmail(email)
-                : professorRepository.existsByEmailAndIdNot(email, id);
-            
+            boolean emailEmUso = id == null
+                    ? professorRepository.existsByEmail(email)
+                    : professorRepository.existsByEmailAndIdNot(email, id);
+
             if (emailEmUso) {
                 throw new ConflitoDeDadosException("Já existe um professor cadastrado com este e-mail");
             }

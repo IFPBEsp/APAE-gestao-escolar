@@ -37,7 +37,7 @@ public class Aula {
     private Turma turma;
 
     @OneToMany(mappedBy = "aula", cascade = CascadeType.ALL)
-    private Set<Presenca> presencas = new HashSet<>();
+    private Set<Presenca> presencas = new HashSet<>(); 
 
     @Override
     public boolean equals(Object o) {
