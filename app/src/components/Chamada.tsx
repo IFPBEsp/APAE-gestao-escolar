@@ -113,7 +113,7 @@ export default function Chamada({ turmaNome, students, onBack, onSaveSuccess }: 
   return (
     <div className="max-w-5xl mx-auto p-4">
       <Button onClick={onBack} variant="outline" className="mb-6 border-[#B2D7EC] text-[#0D4F97] hover:bg-[#B2D7EC]/20 h-12">
-        <ArrowLeft className="mr-2 h-5 w-5" /> Voltar para Turmas
+        <ArrowLeft className="mr-2 h-5 w-5" /> Voltar
       </Button>
 
       <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">

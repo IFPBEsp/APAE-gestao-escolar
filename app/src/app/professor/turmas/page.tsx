@@ -75,11 +75,11 @@ export default function TurmasPage() {
                     </div>
                     <div className="flex gap-3">
                       <Button
-                        onClick={() => router.push(`/professor/turmas/${turma.id}`)}
+                        onClick={() => router.push(`/professor/turmas/${turma.id}/alunos`)}
                         variant="outline"
                         className="h-12 flex-1 border-2 border-[#0D4F97] text-[#0D4F97] font-bold hover:bg-[#0D4F97] hover:text-white"
                       >
-                        <Users className="mr-2 h-5 w-5" /> Ver Turma
+                        <Users className="mr-2 h-5 w-5" /> Ver Alunos
                       </Button>
                       <Button
                         onClick={() => router.push(`/professor/turmas/${turma.id}/chamada`)}
