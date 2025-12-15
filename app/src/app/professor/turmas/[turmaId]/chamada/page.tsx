@@ -27,7 +27,7 @@ export default function ChamadaPage() {
       <div className="flex min-h-screen bg-[#E5E5E5] items-center justify-center p-4">
         <div className="bg-white p-8 rounded-xl border-2 border-[#B2D7EC] text-center shadow-md">
           <h2 className="text-[#0D4F97] text-2xl font-bold mb-4">Turma não identificada</h2>
-          <Button onClick={() => router.push("/professor/turmas")} className="bg-[#0D4F97]">Voltar para Turmas</Button>
+          <Button onClick={() => router.push("/professor/turmas")} className="bg-[#0D4F97]"> Voltar </Button>
         </div>
       </div>
     );
@@ -43,7 +43,7 @@ export default function ChamadaPage() {
         <Chamada 
           turmaNome={turmaNome} 
           students={students} 
-          onBack={() => router.push(`/professor/turmas/${turmaId}`)}
+          onBack={() => router.push("/professor/turmas")}
           onSaveSuccess={() => setTimeout(() => router.push("/professor/turmas"), 1500)}
         />
       </main>
