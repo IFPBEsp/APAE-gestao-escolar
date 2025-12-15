@@ -12,7 +12,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { atualizarTurmaAluno } from "@/services/AlunoService"; 
-import { listarTodasTurmas } from "@/services/TurmaService"; 
+import { listarTurmas } from "@/services/TurmaService"; 
 
 interface TurmaDTO {
     id: number;
@@ -52,7 +52,7 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
         const fetchTurmas = async () => {
             setLoadingTurmas(true);
             try {
-                const data = await listarTodasTurmas();
+                const data = await listarTurmas();
                 setTurmasDisponiveis(data);
             } catch (error) {
                 toast.error("Erro ao carregar lista de turmas.");
