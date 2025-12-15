@@ -5,23 +5,23 @@ import Holidays from "date-holidays";
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { isSameDay } from "date-fns";
 
 interface ChamadaCalendarProps {
   selected: Date;
   onSelect: (date: Date | undefined) => void;
+  savedDates?: Date[];
 }
 
 const hd = new Holidays("BR");
 
-export default function ChamadaCalendar({ selected, onSelect }: ChamadaCalendarProps) {
-  const [currentMonth, setCurrentMonth] = useState<Date>(selected);
+export default function ChamadaCalendar({ selected, onSelect, savedDates = [] }: ChamadaCalendarProps) {
+  const [currentMonth, setCurrentMonth] = useState<Date>(selected || new Date());
 
   const isFutureDate = (date: Date): boolean => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const checkDate = new Date(date);
-    checkDate.setHours(0, 0, 0, 0);
-    return checkDate > today;
+    return date > today;
   };
 
   const isWeekend = (date: Date): boolean => {
@@ -29,61 +29,29 @@ export default function ChamadaCalendar({ selected, onSelect }: ChamadaCalendarP
     return day === 0 || day === 6; 
   };
 
-  const isHoliday = (date: Date): boolean => {
-    const holidays = hd.isHoliday(date);
-    return holidays !== false;
-  };
+  const isHoliday = (date: Date): boolean => hd.isHoliday(date) !== false;
+  const isDisabled = (date: Date): boolean => isFutureDate(date) || isWeekend(date) || isHoliday(date);
 
-  const isDisabled = (date: Date): boolean => {
-    return isFutureDate(date) || isWeekend(date) || isHoliday(date);
+  const hasSavedAttendance = (date: Date): boolean => {
+    return savedDates.some(savedDate => isSameDay(savedDate, date));
   };
 
   const modifiers = {
     weekend: (date: Date) => isWeekend(date) && !isFutureDate(date),
     holiday: (date: Date) => isHoliday(date) && !isFutureDate(date),
     future: (date: Date) => isFutureDate(date),
+    saved: (date: Date) => hasSavedAttendance(date),
   };
 
   const modifiersClassNames = {
-    weekend: "!bg-red-50 !text-red-500 hover:!bg-red-50 hover:!text-red-500 !cursor-not-allowed !opacity-60 pointer-events-none",
-    holiday: "!bg-red-100 !text-red-600 hover:!bg-red-100 hover:!text-red-600 !cursor-not-allowed !font-semibold pointer-events-none",
-    future: "!text-gray-300 hover:!bg-transparent hover:!text-gray-300 !cursor-not-allowed !opacity-40 pointer-events-none",
-  };
-
-  const goToPreviousMonth = () => {
-    const newMonth = new Date(currentMonth);
-    newMonth.setMonth(newMonth.getMonth() - 1);
-    setCurrentMonth(newMonth);
-  };
-
-  const goToNextMonth = () => {
-    const newMonth = new Date(currentMonth);
-    newMonth.setMonth(newMonth.getMonth() + 1);
-    setCurrentMonth(newMonth);
+    weekend: "!text-red-400 !bg-red-50/30 opacity-60 pointer-events-none",
+    holiday: "!text-red-600 !bg-red-100/50 pointer-events-none",
+    future: "!text-gray-300 opacity-30 pointer-events-none",
+    saved: "!bg-[#86efac] !text-[#0D4F97] !font-bold !opacity-100 hover:!bg-[#4ade80] border-2 border-white shadow-sm",
   };
 
   return (
-    <div className="rounded-xl p-3 bg-white border border-gray-200 shadow-sm">
-      <div className="flex items-center justify-between mb-4 px-2">
-        <button
-          onClick={goToPreviousMonth}
-          className="h-7 w-7 bg-transparent p-0 text-[#0D4F97] hover:bg-[#B2D7EC]/20 rounded-md transition-colors flex items-center justify-center"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        
-        <span className="text-[#0D4F97] text-base font-medium capitalize">
-          {currentMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
-        </span>
-        
-        <button
-          onClick={goToNextMonth}
-          className="h-7 w-7 bg-transparent p-0 text-[#0D4F97] hover:bg-[#B2D7EC]/20 rounded-md transition-colors flex items-center justify-center"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-      </div>
-
+    <div className="rounded-xl p-3 bg-white border border-gray-200 shadow-lg">
       <Calendar
         mode="single"
         selected={selected}
@@ -94,37 +62,33 @@ export default function ChamadaCalendar({ selected, onSelect }: ChamadaCalendarP
         modifiersClassNames={modifiersClassNames}
         month={currentMonth}
         onMonthChange={setCurrentMonth}
-        initialFocus
-        className="p-0 bg-transparent"
+        className="p-0"
         classNames={{
-          months: "flex flex-col sm:flex-row gap-2 w-full",
-          month: "flex flex-col gap-2 w-full",
+          months: "w-full",
+          table: "w-full border-collapse",
+          head_row: "flex justify-between mb-2",
+          head_cell: "text-[#0D4F97] w-9 font-bold text-xs uppercase",
+          row: "flex w-full justify-between mt-1",
+          cell: "relative p-0 text-center flex items-center justify-center",
+          day: "h-9 w-9 p-0 font-normal hover:bg-[#B2D7EC]/20 rounded-md transition-all flex items-center justify-center",
+          day_selected: "bg-[#0D4F97] text-white hover:bg-[#0D4F97] !opacity-100 z-10",
+          day_today: "border-2 border-[#0D4F97] text-[#0D4F97] font-black",
+          day_outside: "text-gray-300 opacity-20",
+          day_disabled: "text-gray-200 opacity-20 cursor-not-allowed",
           
-          caption: "hidden",
-          caption_dropdowns: "hidden",
-          caption_label: "hidden",
-          nav: "hidden", 
-          
-          table: "w-full border-collapse space-y-0",
-          
-          head_row: "flex justify-between w-full mb-1",
-          head_cell: "text-[#0D4F97] rounded-md w-9 h-9 font-medium text-[0.8rem] flex items-center justify-center",
-          
-          row: "flex w-full mt-1 justify-between",
-          
-          cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 flex items-center justify-center",
-          
-          day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-[#B2D7EC]/20 hover:text-[#0D4F97] rounded-md transition-colors flex items-center justify-center",
-          day_selected: "bg-[#0D4F97] text-white hover:bg-[#0D4F97] hover:text-white focus:bg-[#0D4F97] focus:text-white",
-          day_today: "bg-[#B2D7EC]/30 text-[#0D4F97] font-semibold",
-          day_outside: "text-gray-300 opacity-50 aria-selected:bg-gray-100 aria-selected:text-gray-300",
-          day_disabled: "text-gray-300 opacity-30 cursor-not-allowed pointer-events-none",
-          day_range_middle: "aria-selected:bg-[#B2D7EC] aria-selected:text-[#0D4F97]",
-          day_hidden: "invisible",
+          caption: "flex justify-between items-center pt-1 mb-4",
+          caption_label: "text-[#0D4F97] font-bold capitalize",
+          nav: "flex items-center gap-1",
+          nav_button: "h-8 w-8 flex items-center justify-center text-[#0D4F97] hover:bg-[#B2D7EC]/20 rounded-full",
         }}
-        showOutsideDays={true}
-        fixedWeeks={true}
+        showOutsideDays={false}
       />
+      
+      {/* Legenda simples */}
+      <div className="mt-4 pt-3 border-t border-gray-100 flex gap-4 text-[10px] justify-center">
+        <div className="flex items-center gap-1"><div className="w-3 h-3 bg-[#86efac] rounded" /> Chamada Feita</div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 bg-[#0D4F97] rounded" /> Selecionado</div>
+      </div>
     </div>
   );
 }

@@ -1,62 +1,41 @@
 'use client'
 
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { BookOpen, Users, Calendar } from "lucide-react";
-import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { useRouter } from "next/navigation";
+import { BookOpen, Users, ClipboardCheck } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 
 export default function TurmasPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("turmas");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  // Mock data para turmas
   const turmas = [
     {
       id: "1",
-      nome: "Alfabetização 2025 - Manhã",
-      alunos: 8,
-      periodo: "Manhã"
+      name: "Alfabetização 2025 - Manhã",
+      students: 8,
+      schedule: "Segunda a Sexta - 07:30 às 13:30",
+      nextClass: "Segunda-feira às 07:30",
     },
     {
       id: "2",
-      nome: "Estimulação 2025 - Tarde",
-      alunos: 6,
-      periodo: "Tarde"
+      name: "Estimulação 2025 - Tarde",
+      students: 6,
+      schedule: "Segunda a Sexta - 13:30 às 17:00",
+      nextClass: "Segunda-feira às 13:30",
     }
   ];
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-  };
-
-  const handleLogout = () => {
-    router.push("/");
-  };
-
-  const handleToggleCollapse = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
-  };
-
-  const handleVerTurma = (turmaId: string) => {
-    router.push(`/professor/turmas/${turmaId}`);
-  };
-
-  const handleFazerChamada = (turmaId: string) => {
-    router.push(`/professor/turmas/${turmaId}/chamada`);
-  };
-
   return (
     <div className="flex min-h-screen bg-[#E5E5E5]">
-      {/* Sidebar */}
       <ProfessorSidebar
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        onLogout={handleLogout}
+        activeTab="turmas"
+        onTabChange={(tab) => router.push(`/professor/${tab === 'inicio' ? '' : tab}`)}
         isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={handleToggleCollapse}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        onLogout={() => router.push("/")}
       />
 
       {/* Main Content */}

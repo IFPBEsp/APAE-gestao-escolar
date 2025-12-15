@@ -1,80 +1,60 @@
 'use client'
-import { useState } from "react";
-import { Card, CardContent } from "@components/ui/card";
-import { UserCircle, Eye } from "lucide-react";
-import router from "next/router";
+import { useState, useEffect, useCallback } from "react"; 
+import { Card, CardContent } from "@/components/ui/card";
+import { UserCircle, Search, Loader2 } from "lucide-react"; 
+import { useRouter } from "next/navigation";
+import { listarAlunos } from "@/services/AlunoService";
 
 interface AvaliacoesAdminProps {
-  onNavigate: (page: string, id?: number) => void;
+  onNavigate?: (page: string, id?: number) => void;
 }
 
-const mockAlunos = [
-  {
-    id: 1,
-    nome: "Ana Silva",
-    turma: "Alfabetização 2025 - Manhã",
-    presenca: 92,
-    ultimaAvaliacao: "05/11/2025",
-  },
-  {
-    id: 2,
-    nome: "Bruno Costa",
-    turma: "Alfabetização 2025 - Manhã",
-    presenca: 88,
-    ultimaAvaliacao: "04/11/2025",
-  },
-  {
-    id: 3,
-    nome: "Carlos Oliveira",
-    turma: "Alfabetização 2025 - Manhã",
-    presenca: 95,
-    ultimaAvaliacao: "05/11/2025",
-  },
-  {
-    id: 4,
-    nome: "Diana Santos",
-    turma: "Alfabetização 2025 - Manhã",
-    presenca: 85,
-    ultimaAvaliacao: "03/11/2025",
-  },
-  {
-    id: 5,
-    nome: "Eduardo Ferreira",
-    turma: "Estimulação 2025 - Tarde",
-    presenca: 90,
-    ultimaAvaliacao: "05/11/2025",
-  },
-  {
-    id: 6,
-    nome: "Fernanda Lima",
-    turma: "Estimulação 2025 - Tarde",
-    presenca: 87,
-    ultimaAvaliacao: "04/11/2025",
-  },
-  {
-    id: 7,
-    nome: "Gustavo Pereira",
-    turma: "Matemática Básica 2025 - Manhã",
-    presenca: 94,
-    ultimaAvaliacao: "05/11/2025",
-  },
-  {
-    id: 8,
-    nome: "Helena Rodrigues",
-    turma: "Matemática Básica 2025 - Manhã",
-    presenca: 91,
-    ultimaAvaliacao: "04/11/2025",
-  },
-];
+interface AlunoResponseDTO {
+    id: number;
+    nome: string;
+    dataNascimento: string; 
+    deficiencia: string;
+    telefoneResponsavel: string;
+    nomeResponsavel: string;
+    nomeTurmaAtual: string | null;
+    turnoTurmaAtual: string | null;
+}
 
 export default function AvaliacoesAdmin({ onNavigate }: AvaliacoesAdminProps) {
-  const [alunos] = useState(mockAlunos);
+  const [alunos, setAlunos] = useState<AlunoResponseDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const router = useRouter();
 
-  const getPresencaColor = (presenca: number) => {
-    if (presenca >= 90) return "text-green-600";
-    if (presenca >= 85) return "text-yellow-600";
-    return "text-orange-600";
-  };
+  const fetchAlunos = useCallback(async (nome: string) => {
+    setLoading(true);
+    try {
+      const data = await listarAlunos(nome);
+      setAlunos(data);
+    } catch (error) {
+      console.error("Falha ao carregar alunos:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      fetchAlunos(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, fetchAlunos]);
+
+
+  if (loading) {
+    return (
+        <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-[#0D4F97]" />
+            <span className="ml-2 text-[#0D4F97]">Carregando alunos...</span>
+        </div>
+    );
+  }
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -82,6 +62,27 @@ export default function AvaliacoesAdmin({ onNavigate }: AvaliacoesAdminProps) {
       <div>
         <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-[#0D4F97] mb-2">Avaliações dos Alunos</h1>
         <p className="text-sm md:text-base text-[#222222]">Visualize e gerencie as avaliações de todos os alunos</p>
+      </div>
+
+      {/* Filtros */}
+      <div className="rounded-lg bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-lg font-semibold text-[#0D4F97]">Filtros de Alunos</h2>
+        <div className="relative">
+          <label htmlFor="search-aluno" className="mb-2 block text-sm font-medium text-gray-700">
+            Buscar Aluno
+          </label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+            <input
+              id="search-aluno"
+              type="text"
+              placeholder="Digite o nome do aluno..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-md border border-gray-300 py-2 pl-10 pr-4 focus:border-[#0D4F97] focus:outline-none focus:ring-1 focus:ring-[#0D4F97]"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Grid de Cards de Alunos */}

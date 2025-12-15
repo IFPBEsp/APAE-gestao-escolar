@@ -1,34 +1,12 @@
 'use client'
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Users, ClipboardCheck, FileText, BookOpen, UserCircle, BarChart3, Eye, Grid3x3, List, ArrowLeft } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BookOpen, Users } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CalendarIcon } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import ChamadaCalendar from "@/components/ChamadaCalendar";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-export default function ProfessorDashboard() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState("inicio");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [searchAluno, setSearchAluno] = useState("");
-  const [selectedPeriodo, setSelectedPeriodo] = useState("mes-atual");
+export default function ProfessorDashboardPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [chamadaData, setChamadaData] = useState<{ turmaId: number; turmaNome: string }>({ turmaId: 0, turmaNome: "" });
-  const [descricaoChamada, setDescricaoChamada] = useState("");
-  const [dataChamada, setDataChamada] = useState<Date>(new Date());
-  const [turmaAlunosSelecionada, setTurmaAlunosSelecionada] = useState<string>("");
 
   const professorData = {
     nome: "Maria Santos",
@@ -37,97 +15,22 @@ export default function ProfessorDashboard() {
         id: 1,
         name: "Alfabetização 2025 - Manhã",
         students: 8,
-        schedule: "Segunda a Sexta - 08:00 às 12:00",
-        nextClass: "Segunda-feira às 08:00",
       },
       {
         id: 2,
         name: "Estimulação 2025 - Tarde",
         students: 6,
-        schedule: "Segunda a Sexta - 14:00 às 18:00",
-        nextClass: "Segunda-feira às 14:00",
       },
     ],
-  };
-
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-  };
-
-  const handleLogout = () => {
-    router.push("/");
   };
 
   const handleToggleCollapse = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
-  const handleOpenChamadaDialog = (turmaId: number, turmaNome: string) => {
-    setChamadaData({ turmaId, turmaNome });
-    setDescricaoChamada("");
-    setDataChamada(new Date());
-    setIsDialogOpen(true);
-  };
-
-  const handleCriarChamada = () => {
-    if (!descricaoChamada.trim()) {
-      toast.error("Por favor, preencha a descrição da aula!");
-      return;
-    }
-    
-    setIsDialogOpen(false);
-    
-    // Redirecionar para página de chamada COM os dados
-    router.push(`/professor/turmas/${chamadaData.turmaId}/chamada?data=${dataChamada.toISOString()}&descricao=${encodeURIComponent(descricaoChamada)}`);
-    
-    toast.success("Chamada criada com sucesso! Redirecionando...");
-  };
-
-  const alunosData = [
-    { id: 1, nome: "Ana Silva", turma: "Alfabetização 2025 - Manhã", presenca: 92, ultimaAvaliacao: "05/11/2025" },
-    { id: 2, nome: "Bruno Costa", turma: "Alfabetização 2025 - Manhã", presenca: 88, ultimaAvaliacao: "04/11/2025" },
-    { id: 3, nome: "Carlos Oliveira", turma: "Alfabetização 2025 - Manhã", presenca: 95, ultimaAvaliacao: "05/11/2025" },
-    { id: 4, nome: "Diana Santos", turma: "Alfabetização 2025 - Manhã", presenca: 85, ultimaAvaliacao: "03/11/2025" },
-    { id: 5, nome: "Eduardo Ferreira", turma: "Alfabetização 2025 - Manhã", presenca: 90, ultimaAvaliacao: "05/11/2025" },
-    { id: 6, nome: "Fernanda Lima", turma: "Alfabetização 2025 - Manhã", presenca: 87, ultimaAvaliacao: "04/11/2025" },
-    { id: 7, nome: "Gustavo Pereira", turma: "Alfabetização 2025 - Manhã", presenca: 94, ultimaAvaliacao: "05/11/2025" },
-    { id: 8, nome: "Helena Rodrigues", turma: "Alfabetização 2025 - Manhã", presenca: 91, ultimaAvaliacao: "04/11/2025" },
-    { id: 9, nome: "Igor Martins", turma: "Estimulação 2025 - Tarde", presenca: 93, ultimaAvaliacao: "04/11/2025" },
-    { id: 10, nome: "Julia Almeida", turma: "Estimulação 2025 - Tarde", presenca: 89, ultimaAvaliacao: "03/11/2025" },
-    { id: 11, nome: "Lucas Mendes", turma: "Estimulação 2025 - Tarde", presenca: 92, ultimaAvaliacao: "05/11/2025" },
-    { id: 12, nome: "Marina Souza", turma: "Estimulação 2025 - Tarde", presenca: 86, ultimaAvaliacao: "04/11/2025" },
-    { id: 13, nome: "Nicolas Cardoso", turma: "Estimulação 2025 - Tarde", presenca: 95, ultimaAvaliacao: "05/11/2025" },
-    { id: 14, nome: "Olivia Barbosa", turma: "Estimulação 2025 - Tarde", presenca: 88, ultimaAvaliacao: "03/11/2025" },
-  ];
-
-  const getPresencaColor = (presenca: number) => {
-    if (presenca >= 90) return "text-green-600";
-    if (presenca >= 85) return "text-yellow-600";
-    return "text-orange-600";
-  };
-
-  const handleVerAlunos = (turmaNome: string) => {
-    setTurmaAlunosSelecionada(turmaNome);
-    setActiveTab("alunos");
-  };
-
-  const handleVerAvaliacoes = (alunoId: number) => {
-    const aluno = alunosData.find(a => a.id === alunoId);
-    if (aluno) {
-      const turma = professorData.turmas.find(t => t.name === aluno.turma);
-      if (turma) {
-        router.push(`/professor/alunos/${alunoId}/avaliacoes?turmaId=${turma.id}`);
-      }
-    }
-  };
-
   return (
     <div className="flex min-h-screen bg-[#E5E5E5]">
-      {/* Sidebar */}
       <ProfessorSidebar
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        onLogout={handleLogout}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={handleToggleCollapse}
       />
@@ -209,8 +112,8 @@ export default function ProfessorDashboard() {
               </div>
             )}
 
-            {/* Tab: Turmas */}
-            {activeTab === "turmas" && (
+            {/* Cards de Resumo */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
                 <CardHeader className="p-4 md:p-6">
                   <div className="flex items-center gap-2 md:gap-3">
@@ -267,7 +170,6 @@ export default function ProfessorDashboard() {
                   </div>
                 </CardContent>
               </Card>
-            )}
 
             {/* Tab: Alunos */}
             {activeTab === "alunos" && (
@@ -497,6 +399,10 @@ export default function ProfessorDashboard() {
                         Visualize dados e estatísticas
                       </CardDescription>
                     </div>
+                    <p className="text-[#222222] mb-2">Total de Alunos</p>
+                    <p className="text-[#0D4F97] text-3xl font-bold">
+                      {professorData.turmas.reduce((sum, t) => sum + t.students, 0)}
+                    </p>
                   </div>
                 </CardHeader>
                 <CardContent className="p-4 md:p-6 pt-0">
@@ -516,7 +422,7 @@ export default function ProfessorDashboard() {
                   </button>
                 </CardContent>
               </Card>
-            )}
+            </div>
           </div>
         </div>
       </main>
