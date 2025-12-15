@@ -49,18 +49,7 @@ public class RelatorioController {
         return ResponseEntity.ok(relatorio);
     }
 
-    @GetMapping("/{id}/completo")
-    @Operation(summary = "Buscar relatório completo com dados consolidados")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Relatório encontrado", content = @Content(schema = @Schema(implementation = RelatorioResponseDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Relatório não encontrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
-    })
-    public ResponseEntity<RelatorioResponseDTO> buscarCompletoPorId(
-            @Parameter(description = "Identificador do relatório", example = "1", in = ParameterIn.PATH) @PathVariable Long id) {
-        RelatorioResponseDTO relatorio = relatorioService.buscarCompletoPorId(id);
-        return ResponseEntity.ok(relatorio);
-    }
-
+    
     @PostMapping
     @Operation(summary = "Criar um novo relatório")
     @ApiResponses({
