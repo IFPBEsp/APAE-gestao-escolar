@@ -53,9 +53,6 @@ public class AlunoResponseDTO {
             Turma turma = turmaAtual.get();
             this.nomeTurmaAtual = turma.getNome();
             this.turnoTurmaAtual = turma.getTurno();
-        } else {
-            this.nomeTurmaAtual = null; 
-            this.turnoTurmaAtual = null;
         }
     }
 }
