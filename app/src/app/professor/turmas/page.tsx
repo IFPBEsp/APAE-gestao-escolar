@@ -38,61 +38,61 @@ export default function TurmasPage() {
         onLogout={() => router.push("/")}
       />
 
-      <main className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
-        <div className="p-8">
-          <div className="mb-8">
-            <h1 className="text-[#0D4F97] text-3xl font-bold">Minhas Turmas</h1>
-            <p className="text-[#222222] mt-1 text-lg">Gerencie suas turmas e alunos</p>
+      {/* Main Content */}
+      <main className={`flex-1 overflow-y-auto transition-all duration-300 pt-16 md:pt-0 ${
+        isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
+      }`}>
+        <div className="p-4 md:p-8">
+          <div className="mb-6 md:mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97]">Minhas Turmas</h1>
+            <p className="text-sm md:text-base text-[#222222] mt-2">Gerencie suas turmas e alunos</p>
           </div>
 
-          <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
-            <CardHeader className="border-b border-[#B2D7EC]/30 pb-6">
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#B2D7EC]/20 text-[#0D4F97]">
-                  <BookOpen className="h-8 w-8" />
-                </div>
-                <div>
-                  <CardTitle className="text-[#0D4F97] text-2xl font-bold">Minhas Turmas</CardTitle>
-                  <CardDescription className="text-[#222222] font-medium">
-                    {turmas.length} turmas ativas
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {turmas.map((turma) => (
-                  <div key={turma.id} className="rounded-xl border-2 border-[#B2D7EC] bg-white p-6 transition-all hover:border-[#0D4F97] hover:shadow-lg">
-                    <div className="mb-4 flex items-center justify-between">
-                      <h3 className="text-[#0D4F97] font-bold text-xl">{turma.name}</h3>
-                      <span className="rounded-full bg-[#B2D7EC] px-4 py-1 text-[#0D4F97] font-bold text-xs uppercase">
-                        {turma.students} alunos
-                      </span>
-                    </div>
-                    <div className="mb-6 space-y-2 text-[#222222] text-sm">
-                      <p><strong>Horário:</strong> {turma.schedule}</p>
-                      <p><strong>Próxima aula:</strong> {turma.nextClass}</p>
-                    </div>
-                    <div className="flex gap-3">
-                      <Button
-                        onClick={() => router.push(`/professor/turmas/${turma.id}/alunos`)}
-                        variant="outline"
-                        className="h-12 flex-1 border-2 border-[#0D4F97] text-[#0D4F97] font-bold hover:bg-[#0D4F97] hover:text-white"
-                      >
-                        <Users className="mr-2 h-5 w-5" /> Ver Alunos
-                      </Button>
-                      <Button
-                        onClick={() => router.push(`/professor/turmas/${turma.id}/chamada`)}
-                        className="h-12 flex-1 bg-[#0D4F97] text-white font-bold hover:bg-[#FFD000] hover:text-[#0D4F97]"
-                      >
-                        <ClipboardCheck className="mr-2 h-5 w-5" /> Fazer Chamada
-                      </Button>
+          {/* Lista de Turmas */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+            {turmas.map((turma) => (
+              <Card key={turma.id} className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex items-start justify-between mb-3 md:mb-4">
+                    <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+                      <div className="flex h-10 w-10 md:h-12 md:w-12 flex-shrink-0 items-center justify-center rounded-xl bg-[#0D4F97]/10">
+                        <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-[#0D4F97]" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-[#0D4F97] font-semibold text-base md:text-lg truncate">{turma.nome}</h3>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1">
+                          <div className="flex items-center gap-1 text-[#222222] text-xs md:text-sm">
+                            <Users className="h-3 w-3 md:h-4 md:w-4" />
+                            <span>{turma.alunos} alunos</span>
+                          </div>
+                          <div className="flex items-center gap-1 text-[#222222] text-xs md:text-sm">
+                            <Calendar className="h-3 w-3 md:h-4 md:w-4" />
+                            <span>{turma.periodo}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button
+                      onClick={() => handleVerTurma(turma.id)}
+                      variant="outline"
+                      className="flex-1 h-10 border-2 border-[#B2D7EC] text-[#0D4F97] hover:bg-[#B2D7EC]/20 text-sm md:text-base"
+                    >
+                      Ver Turma
+                    </Button>
+                    <Button
+                      onClick={() => handleFazerChamada(turma.id)}
+                      className="flex-1 h-10 bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97] text-sm md:text-base"
+                    >
+                      Fazer Chamada
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </main>
     </div>

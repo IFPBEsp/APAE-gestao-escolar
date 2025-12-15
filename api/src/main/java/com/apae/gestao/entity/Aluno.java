@@ -1,6 +1,7 @@
 package com.apae.gestao.entity;
 
 import java.time.LocalDate;
+import java.time.Period; 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -10,7 +11,6 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
 
-//Trocar para a entidade Paciente do outro repo depois...
 @Entity
 @Table(name = "alunos")
 @Data
@@ -28,6 +28,7 @@ public class Aluno {
     @Column(nullable = false)
     private LocalDate dataNascimento;
 
+
     @Column(nullable = false)
     private String deficiencia;
 
@@ -43,13 +44,26 @@ public class Aluno {
     @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL)
     private Set<Avaliacao> avaliacoes = new HashSet<>();
 
+    @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL)
+    private Set<Presenca> presencas = new HashSet<>();
+
+    @OneToMany(mappedBy = "aluno")
+    private Set<TurmaAluno> turmaAlunos = new HashSet<>();
+
+    public Integer getIdade() {
+        if (this.dataNascimento == null) {
+            return null;
+        }
+        return Period.between(this.dataNascimento, LocalDate.now()).getYears();
+    }
+
     public Aluno(
-        Long id, 
-        String nome, 
-        String deficiencia, 
-        LocalDate dataNascimento, 
+        Long id,
+        String nome,
+        String deficiencia,
+        LocalDate dataNascimento,
         String telefoneResponsavel,
-        String nomeResponsavel 
+        String nomeResponsavel
     ) {
         this.id = id;
         this.nome = nome;
