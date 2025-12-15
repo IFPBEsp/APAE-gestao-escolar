@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import {
   Users, 
   UserCircle, 
   Search,
-  Filter,
   Grid3x3,
   List,
   FileText,
@@ -20,6 +19,7 @@ import {
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { useRouter, useParams } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
 export default function TurmaDetalhesPage() {
   const params = useParams();
@@ -75,7 +75,7 @@ export default function TurmaDetalhesPage() {
               onClick={() => router.push("/professor/turmas")}
               className="h-12 bg-[#0D4F97] px-6 text-white hover:bg-[#FFD000] hover:text-[#0D4F97]"
             >
-              Voltar para Turmas
+              Voltar
             </Button>
           </CardContent>
         </Card>
@@ -115,15 +115,13 @@ export default function TurmaDetalhesPage() {
   };
 
   const handleAvaliacoes = (alunoId: number) => {
+    // Navega para a página de avaliações do aluno
     router.push(`/professor/alunos/${alunoId}/avaliacoes?turmaId=${turmaId}`);
   };
 
   const handleRelatorios = (alunoId: number) => {
+    // Navega para a página de relatórios do aluno (passa turmaId como query parameter)
     router.push(`/professor/alunos/${alunoId}/relatorios?turmaId=${turmaId}`);
-  };
-
-  const handleFazerChamada = () => {
-    router.push(`/professor/turmas/${turmaId}/chamada`);
   };
 
   return (
@@ -143,22 +141,15 @@ export default function TurmaDetalhesPage() {
       }`}>
         <div className="p-4 md:p-8">
           <div className="mx-auto max-w-7xl">
-            {/* Header com Botões */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            {/* Botão Voltar - ÚNICO botão no header */}
+            <div className="mb-6">
               <Button
                 onClick={() => router.push("/professor/turmas")}
                 variant="outline"
-                className="h-12 justify-center border-2 border-[#B2D7EC] px-4 text-[#0D4F97] hover:bg-[#B2D7EC]/20 w-full md:w-auto"
+                className="h-12 justify-center border-2 border-[#B2D7EC] px-4 text-[#0D4F97] hover:bg-[#B2D7EC]/20"
               >
                 <ArrowLeft className="mr-2 h-5 w-5" />
-                Voltar para Turmas
-              </Button>
-
-              <Button
-                onClick={handleFazerChamada}
-                className="h-12 bg-[#0D4F97] px-6 text-white hover:bg-[#FFD000] hover:text-[#0D4F97] w-full md:w-auto"
-              >
-                Fazer Chamada
+                Voltar
               </Button>
             </div>
 
