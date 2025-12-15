@@ -110,7 +110,7 @@ export async function atribuirProfessor(professorId, turmaId){
 
 export async function adicionarAlunosATurma(turmaId, alunosIds){
     try {
-        await api.post(`/turmas/${turmaId}/alunos`, { alunosIds });
+        await api.post(`/turmas/${turmaId}/alunos`,  alunosIds );
     } catch (error) {
         const apiMessage = error.response?.data?.message;
         const errorMessage = apiMessage
