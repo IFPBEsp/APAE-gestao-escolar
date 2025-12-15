@@ -82,7 +82,6 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     function formatTurno(val: string) {
         if (val === 'MANHA' || val === 'manha') return 'Manhã';
         if (val === 'TARDE' || val === 'tarde') return 'Tarde';
-        if (val === 'INTEGRAL' || val === 'integral') return 'Integral';
         return val;
     }
 
@@ -264,7 +263,6 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                                     <SelectContent className="bg-white">
                                         <SelectItem value="MANHA">Manhã</SelectItem>
                                         <SelectItem value="TARDE">Tarde</SelectItem>
-                                        <SelectItem value="INTEGRAL">Integral</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
