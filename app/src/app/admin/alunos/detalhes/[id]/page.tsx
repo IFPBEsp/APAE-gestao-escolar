@@ -1,4 +1,4 @@
-"use client"
+'use client'
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, User, Calendar, BookOpen, Heart, Phone, Eye, PenSquare, Loader2 } from "lucide-react";
@@ -81,7 +81,7 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
         try {
             if (alunoId) {
                 const data = await buscarAvaliacoesPorAlunoId(alunoId);
-                console.log("Dados de Avaliações Recebidos:", data); // <-- Adicione isto
+                console.log("Dados de Avaliações Recebidos:", data); 
                 setAvaliacoes(data);
             }
         } catch (error) {
@@ -157,167 +157,186 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
 
 
   return (
-    <div className="w-full">
-      {/* Topo azul */}
-      <div className="bg-[#0D4F97] text-white px-8 py-4 shadow-sm">
-        <h1 className="text-xl font-bold">Detalhes do Aluno</h1>
+    <div className="w-full min-h-screen bg-[#E5E5E5]">
+      {/* Topo azul - Responsivo com padding adequado */}
+      <div className="bg-[#0D4F97] text-white px-4 md:px-8 py-4 shadow-md">
+        <h1 className="text-lg md:text-xl font-bold">Detalhes do Aluno</h1>
       </div>
 
-      {/* Conteúdo */}
-      <div className="px-[50px] py-[30px] space-y-8">
+      {/* Conteúdo - Padding responsivo */}
+      <div className="p-4 md:p-8 space-y-6 md:space-y-8">
+        
+        {/* Botão Voltar */}
         <Button
           variant="outline"
           onClick={() => router.push("/admin/alunos")}
-          className="flex items-center gap-2 border-[#B2D7EC] text-[#0D4F97] hover:bg-blue-50"
+          className="flex items-center gap-2 border-[#B2D7EC] text-[#0D4F97] hover:bg-blue-50 text-sm md:text-base h-9 md:h-10"
         >
           <ArrowLeft size={18} /> Voltar para Alunos
         </Button>
 
-        {/* Card principal */}
-        <Card className="border border-blue-200 shadow-md rounded-2xl">
-          <CardContent className="p-8">
-            <div className="flex justify-between items-start">
-              <div className="flex items-center gap-4">
-                <div className="bg-blue-100 p-4 rounded-full">
-                  <User size={40} className="text-blue-700" />
+        {/* Card principal do Aluno */}
+        <Card className="border border-blue-200 shadow-lg rounded-xl">
+          <CardContent className="p-4 md:p-8">
+            {/* Flex container para Título/Info e Botão */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              
+              {/* Informações de Nome e Avatar */}
+              <div className="flex items-center gap-3 md:gap-4">
+                <div className="bg-blue-100 p-3 md:p-4 rounded-full flex-shrink-0">
+                  <User size={30} className="text-blue-700 md:size-8" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-[#0D4F97] mt-8">{alunoData.nome}</h2>
-                  <p className="text-gray-600 text-lg">{calcularIdade(alunoData.dataNascimento)} anos</p>
+                  <h2 className="text-xl md:text-2xl font-bold text-[#0D4F97]">{alunoData.nome}</h2>
+                  <p className="text-gray-600 text-sm md:text-lg">{calcularIdade(alunoData.dataNascimento)} anos</p>
                 </div>
               </div>
 
+              {/* Botão Editar Aluno - Ajustado para mobile */}
               <Button
                 onClick={() => setIsEditModalOpen(true)}
-                className="flex items-center gap-2 bg-[#0D4F97] hover:bg-[#0A4080] text-white px-6 mt-8"
+                className="w-full sm:w-auto flex items-center gap-2 bg-[#0D4F97] hover:bg-[#0A4080] text-white text-sm md:text-base h-10 px-4 md:px-6"
               >
-                <PenSquare size={18} />
+                <PenSquare size={16} />
                 Editar Aluno
               </Button>
             </div>
 
-            {/* Informações */}
-            <div className="grid grid-cols-2 gap-y-6 mt-10 text-gray-800">
-              <div className="flex gap-3">
-                <Calendar className="text-[#0D4F97]" />
+            {/* Informações em Grade Responsiva: 1 coluna no mobile, 2 em telas maiores */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-y-6 mt-6 md:mt-10 text-gray-800">
+              
+              {/* Data de Nascimento */}
+              <div className="flex gap-3 items-center">
+                <Calendar className="text-[#0D4F97] flex-shrink-0" size={20} />
                 <div>
-                  <p className="font-semibold text-[#0D4F97]">Data de Nascimento</p>
-                  <p>{alunoData.dataNascimento}</p>
+                  <p className="font-semibold text-[#0D4F97] text-sm md:text-base">Data de Nascimento</p>
+                  <p className="text-sm md:text-base">{alunoData.dataNascimento}</p>
                 </div>
               </div>
 
-              <div className="flex gap-3">
-                <BookOpen className="text-[#0D4F97]" />
+              {/* Turma Atual */}
+              <div className="flex gap-3 items-center">
+                <BookOpen className="text-[#0D4F97] flex-shrink-0" size={20} />
                 <div>
-                  <p className="font-semibold text-[#0D4F97]">Turma Atual</p>
-                  <p className="font-medium text-[#0D4F97]">{turmaCompleta}</p>
+                  <p className="font-semibold text-[#0D4F97] text-sm md:text-base">Turma Atual</p>
+                  <p className="font-medium text-[#0D4F97] text-sm md:text-base">{turmaCompleta}</p>
                 </div>
               </div>
 
-              <div className="flex gap-3">
-                <Heart className="text-[#0D4F97]" />
+              {/* Deficiência */}
+              <div className="flex gap-3 items-center">
+                <Heart className="text-[#0D4F97] flex-shrink-0" size={20} />
                 <div>
-                  <p className="font-semibold text-[#0D4F97]">Deficiência</p>
-                  <p>{alunoData.deficiencia}</p>
+                  <p className="font-semibold text-[#0D4F97] text-sm md:text-base">Deficiência</p>
+                  <p className="text-sm md:text-base">{alunoData.deficiencia}</p>
                 </div>
               </div>
 
-              <div className="flex gap-3">
-                <Calendar className="text-[#0D4F97]" />
+              {/* Data de Matrícula */}
+              <div className="flex gap-3 items-center">
+                <Calendar className="text-[#0D4F97] flex-shrink-0" size={20} />
                 <div>
-                  <p className="font-semibold text-[#0D4F97]">Data de Matrícula</p>
-                  <p>N/A (Não fornecido)</p>
+                  <p className="font-semibold text-[#0D4F97] text-sm md:text-base">Data de Matrícula</p>
+                  <p className="text-sm md:text-base">N/A (Não fornecido)</p>
                 </div>
               </div>
 
-              <div className="flex gap-3 col-span-2">
-                <Phone className="text-[#0D4F97]" />
+              {/* Responsável - Ocupa 1 coluna inteira no mobile e 2 no desktop, para dar espaço ao telefone */}
+              <div className="flex gap-3 col-span-1 md:col-span-2 items-start">
+                <Phone className="text-[#0D4F97] flex-shrink-0 mt-1" size={20} />
                 <div>
-                  <p className="font-semibold text-[#0D4F97]">Responsável</p>
-                  <p>{alunoData.nomeResponsavel}</p>
-                  <p>{alunoData.telefoneResponsavel}</p>
+                  <p className="font-semibold text-[#0D4F97] text-sm md:text-base">Responsável</p>
+                  <p className="text-sm md:text-base">{alunoData.nomeResponsavel}</p>
+                  <p className="text-sm md:text-base">{alunoData.telefoneResponsavel}</p>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border border-blue-200 shadow-md rounded-2xl">
-          <CardContent className="p-8">
-            <h2 className="text-2xl font-bold text-[#0D4F97] mb-2 mt-8">Histórico de Avaliações</h2>
-            <p className="text-gray-600 mb-6">Avaliações realizadas pelos professores ({avaliacoes.length} registros)</p>
+        {/* Histórico de Avaliações */}
+        <Card className="border border-blue-200 shadow-lg rounded-xl">
+          <CardContent className="p-4 md:p-8">
+            <h2 className="text-xl md:text-2xl font-bold text-[#0D4F97] mb-2">Histórico de Avaliações</h2>
+            <p className="text-gray-600 mb-4 md:mb-6 text-sm md:text-base">Avaliações realizadas pelos professores ({avaliacoes.length} registros)</p>
 
             {loadingAvaliacoes ? (
                 <div className="flex justify-center py-4">
                     <Loader2 className="h-6 w-6 animate-spin text-[#0D4F97]" />
                 </div>
             ) : avaliacoes.length === 0 ? (
-                <p className="text-center text-gray-500 py-4">Nenhuma avaliação encontrada para este aluno.</p>
+                <p className="text-center text-gray-500 py-4 text-sm md:text-base">Nenhuma avaliação encontrada para este aluno.</p>
             ) : (
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="border-b border-gray-200">
-                        <th className="pb-3 font-bold text-[#0D4F97]">Data</th>
-                        <th className="pb-3 font-bold text-[#0D4F97]">Professor</th>
-                        <th className="pb-3 font-bold text-[#0D4F97]">Turma</th>
-                        <th className="pb-3 font-bold text-[#0D4F97]">Descrição</th>
-                        <th className="pb-3 font-bold text-[#0D4F97]">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody className="text-gray-600">
-                        {avaliacoes.map((avaliacao: any, index: number) => (
-                        <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                            <td className="py-4 font-medium text-gray-900">{formatarData(avaliacao.dataAvaliacao)}</td> 
-                            <td className="font-medium text-gray-900">{avaliacao.professorNome}</td>
-                            <td className="text-gray-600">{avaliacao.turmaNomeCompleto}</td>
-                            <td className="text-gray-600 max-w-md truncate" title={avaliacao.descricao}>{avaliacao.descricao}</td>
-                            <td>
-                            <Eye
-                                className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]"
-                                onClick={() => setSelectedAvaliacao(avaliacao)}
-                            />
-                            </td>
-                        </tr>
-                        ))}
-                    </tbody>
-                </table>
+                /* Contêiner com overflow-x-auto para responsividade de tabela */
+                <div className="overflow-x-auto">
+                    <table className="w-full min-w-[700px] text-left border-collapse">
+                        <thead>
+                            <tr className="border-b border-gray-200 text-sm md:text-base">
+                                <th className="pb-3 pr-3 font-bold text-[#0D4F97] w-[120px]">Data</th>
+                                <th className="pb-3 pr-3 font-bold text-[#0D4F97] w-[150px]">Professor</th>
+                                <th className="pb-3 pr-3 font-bold text-[#0D4F97] w-[180px]">Turma</th>
+                                <th className="pb-3 pr-3 font-bold text-[#0D4F97]">Descrição</th>
+                                <th className="pb-3 font-bold text-[#0D4F97] w-[80px]">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody className="text-gray-600 text-sm md:text-base">
+                            {avaliacoes.map((avaliacao: any, index: number) => (
+                            <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                                <td className="py-3 font-medium text-gray-900 pr-3">{formatarData(avaliacao.dataAvaliacao)}</td> 
+                                <td className="font-medium text-gray-900 pr-3">{avaliacao.professorNome}</td>
+                                <td className="text-gray-600 pr-3">{avaliacao.turmaNomeCompleto}</td>
+                                <td className="text-gray-600 truncate max-w-[200px]" title={avaliacao.descricao}>{avaliacao.descricao}</td>
+                                <td className="py-3">
+                                <Eye
+                                    className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]"
+                                    onClick={() => setSelectedAvaliacao(avaliacao)}
+                                />
+                                </td>
+                            </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             )}
           </CardContent>
         </Card>
 
         {/* Histórico de Relatórios Individuais (MANTIDO COM MOCK TEMPORARIAMENTE) */}
-        <Card className="border border-blue-200 shadow-md rounded-2xl">
-          <CardContent className="p-8">
-            <h2 className="text-2xl font-bold text-[#0D4F97] mb-2 mt-8">Histórico de Relatórios Individuais</h2>
-            <p className="text-gray-600 mb-6">Relatórios individuais realizados pelos professores ({mockRelatorios.length} registros - MOCK)</p>
+        <Card className="border border-blue-200 shadow-lg rounded-xl">
+          <CardContent className="p-4 md:p-8">
+            <h2 className="text-xl md:text-2xl font-bold text-[#0D4F97] mb-2">Histórico de Relatórios Individuais</h2>
+            <p className="text-gray-600 mb-4 md:mb-6 text-sm md:text-base">Relatórios individuais realizados pelos professores ({mockRelatorios.length} registros - MOCK)</p>
 
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="pb-3 font-bold text-[#0D4F97]">Data</th>
-                  <th className="pb-3 font-bold text-[#0D4F97]">Professor</th>
-                  <th className="pb-3 font-bold text-[#0D4F97]">Turma</th>
-                  <th className="pb-3 font-bold text-[#0D4F97]">Atividades</th>
-                  <th className="pb-3 font-bold text-[#0D4F97]">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="text-gray-600">
-                {mockRelatorios.map((relatorio: any, index: number) => (
-                  <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-4 font-medium text-gray-900">{relatorio.data}</td>
-                    <td className="font-medium text-gray-900">{relatorio.professor}</td>
-                    <td className="text-gray-600">{relatorio.turma}</td>
-                    <td className="text-gray-600 max-w-md truncate" title={relatorio.atividade}>{relatorio.atividade}</td>
-                    <td>
-                      <Eye
-                        className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]"
-                        onClick={() => setSelectedRelatorio(relatorio)}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {/* Contêiner com overflow-x-auto para responsividade de tabela */}
+            <div className="overflow-x-auto">
+                <table className="w-full min-w-[700px] text-left border-collapse">
+                <thead>
+                    <tr className="border-b border-gray-200 text-sm md:text-base">
+                      <th className="pb-3 pr-3 font-bold text-[#0D4F97] w-[120px]">Data</th>
+                      <th className="pb-3 pr-3 font-bold text-[#0D4F97] w-[150px]">Professor</th>
+                      <th className="pb-3 pr-3 font-bold text-[#0D4F97] w-[180px]">Turma</th>
+                      <th className="pb-3 pr-3 font-bold text-[#0D4F97]">Atividades</th>
+                      <th className="pb-3 font-bold text-[#0D4F97] w-[80px]">Ações</th>
+                    </tr>
+                </thead>
+                <tbody className="text-gray-600 text-sm md:text-base">
+                    {mockRelatorios.map((relatorio: any, index: number) => (
+                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-3 font-medium text-gray-900 pr-3">{relatorio.data}</td>
+                        <td className="font-medium text-gray-900 pr-3">{relatorio.professor}</td>
+                        <td className="text-gray-600 pr-3">{relatorio.turma}</td>
+                        <td className="text-gray-600 truncate max-w-[200px]" title={relatorio.atividade}>{relatorio.atividade}</td>
+                        <td className="py-3">
+                          <Eye
+                              className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]"
+                              onClick={() => setSelectedRelatorio(relatorio)}
+                          />
+                        </td>
+                    </tr>
+                    ))}
+                </tbody>
+                </table>
+            </div>
           </CardContent>
         </Card>
 

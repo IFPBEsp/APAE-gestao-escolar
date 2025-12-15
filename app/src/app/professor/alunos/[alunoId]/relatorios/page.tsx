@@ -61,11 +61,15 @@ export default function RelatoriosAlunoListaPage() {
     },
   };
 
-  const aluno = alunoId ? alunosData[alunoId] : { 
-    nome: "Aluno não encontrado", 
-    dataNascimento: "00/00/0000",
-    turmaNome: "Turma não encontrada" 
+  const alunoNaoEncontrado = { 
+  nome: "Aluno não encontrado", 
+  dataNascimento: "00/00/0000",
+  turmaNome: "Turma não encontrada" 
   };
+
+  const aluno = alunoId 
+  ? (alunosData[alunoId] || alunoNaoEncontrado)
+  : alunoNaoEncontrado;
 
   const [isExcluirDialogOpen, setIsExcluirDialogOpen] = useState(false);
   const [relatorioExcluindo, setRelatorioExcluindo] = useState<Relatorio | null>(null);
