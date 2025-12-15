@@ -16,7 +16,7 @@ interface ProfessorSidebarProps {
 }
 
 export default function ProfessorSidebar({ 
-  activeTab,
+  activeTab, // Mantido, mas a ativação usa a rota
   onTabChange,
   onLogout, 
   showMobileMenu = true, 
@@ -50,13 +50,23 @@ export default function ProfessorSidebar({
     } else {
       router.push("/");
     }
+    // Fecha o menu móvel se estiver aberto
+    setSidebarOpen(false); 
   };
 
-  const handleNavigation = (id: string, href: string) => {
+  // Esta função é usada no desktop (Link)
+  const handleNavigation = (id: string) => {
     if (onTabChange) onTabChange(id);
-    setSidebarOpen(false);
+    // Não fecha o sidebar desktop (pois ele sempre está visível)
+  };
+  
+  // Esta função é usada no mobile (Link)
+  const handleMobileNavigation = (id: string) => {
+    if (onTabChange) onTabChange(id);
+    setSidebarOpen(false); // Fecha o sidebar mobile após a navegação
   };
 
+  // Lógica de ativação baseada na rota
   const isActive = (href: string) => {
       if (href === "/professor") {
           return activePath === href || activePath === `${href}/`;
@@ -67,7 +77,7 @@ export default function ProfessorSidebar({
 
   return (
     <>
-      {/* Mobile Menu Button - AGORA FIXO NO CANTO SUPERIOR ESQUERDO (igual Admin) */}
+      {/* Mobile Menu Button - FIXO NO CANTO SUPERIOR ESQUERDO */}
       {showMobileMenu && (
         <button
           onClick={() => setSidebarOpen(true)}
@@ -134,7 +144,7 @@ export default function ProfessorSidebar({
               <Link
                 key={item.id}
                 href={item.href}
-                onClick={() => handleNavigation(item.id, item.href)}
+                onClick={() => handleNavigation(item.id)} // Desktop navigation
                 className={`flex w-full items-center ${
                   isCollapsed ? 'justify-center' : 'gap-3'
                 } rounded-3xl px-4 py-3 transition-all ${
@@ -180,7 +190,7 @@ export default function ProfessorSidebar({
       {/* Sidebar Mobile */}
       <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-[#B2D7EC] rounded-r-3xl md:hidden overflow-y-auto">
         <div className="flex h-full flex-col">
-          {/* Header Mobile - AGORA COM "X" NO CANTO SUPERIOR DIREITO (igual Admin) */}
+          {/* Header Mobile - COM "X" NO CANTO SUPERIOR DIREITO */}
           <div className="relative border-b-2 border-[#0D4F97]/20 p-4 mt-8">
             {/* Botão de fechar no canto superior direito */}
             <button
@@ -204,28 +214,26 @@ export default function ProfessorSidebar({
             </div>
           </div>
 
-          {/* Menu Items Mobile */}
+          {/* Menu Items Mobile (AGORA USANDO LINK PARA NAVEGAÇÃO CORRETA) */}
           <div className="flex-1 space-y-2 p-4">
             {menuItems.map((item) => {
               const Icon = item.icon;
-              const isActive = activeTab === item.id;
+              const active = isActive(item.href); 
               
               return (
-                <button
+                <Link
                   key={item.id}
-                  onClick={() => {
-                    onTabChange(item.id);
-                    setSidebarOpen(false);
-                  }}
+                  href={item.href}
+                  onClick={() => handleMobileNavigation(item.id)} 
                   className={`flex w-full items-center gap-3 rounded-3xl px-4 py-3 text-left transition-all ${
-                    isActive
+                    active
                       ? "bg-[#0D4F97] text-white shadow-md"
                       : "bg-transparent text-[#0D4F97] hover:bg-[#0D4F97] hover:text-white"
                   }`}
                 >
                   <Icon className="h-5 w-5" />
                   <span className="font-medium">{item.label}</span>
-                </button>
+                </Link>
               );
             })}
           </div>
@@ -233,10 +241,7 @@ export default function ProfessorSidebar({
           {/* Logout Mobile */}
           <div className="border-t-2 border-[#0D4F97]/20 p-4">
             <button
-              onClick={() => {
-                onLogout();
-                setSidebarOpen(false);
-              }}
+              onClick={handleLogout} 
               className="flex w-full items-center gap-3 rounded-3xl bg-transparent px-4 py-3 text-[#0D4F97] transition-all hover:bg-white/40"
             >
               <LogOut className="h-5 w-5" />

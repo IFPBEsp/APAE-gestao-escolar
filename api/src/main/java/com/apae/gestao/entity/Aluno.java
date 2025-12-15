@@ -44,12 +44,6 @@ public class Aluno {
     @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL)
     private Set<Avaliacao> avaliacoes = new HashSet<>();
 
-    @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL)
-    private Set<Presenca> presencas = new HashSet<>();
-
-    @OneToMany(mappedBy = "aluno")
-    private Set<TurmaAluno> turmaAlunos = new HashSet<>();
-
     public Integer getIdade() {
         if (this.dataNascimento == null) {
             return null;

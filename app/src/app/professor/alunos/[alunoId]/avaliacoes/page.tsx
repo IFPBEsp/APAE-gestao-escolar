@@ -28,7 +28,6 @@ export default function AvaliacoesAlunoPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  // Obter IDs da URL - funciona agora!
   const alunoId = parseInt(params.alunoId as string);
   const turmaId = searchParams.get('turmaId');
   
