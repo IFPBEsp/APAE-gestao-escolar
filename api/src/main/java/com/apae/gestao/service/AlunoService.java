@@ -103,9 +103,13 @@ public class AlunoService {
         Aluno aluno = alunoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado com ID: " + id));
         
+        String turmaAtualCompleta = aluno.getTurmaAtual()
+            .map(t -> t.getNome() + " - " + t.getTurno()) 
+            .orElse("Sem Turma Ativa"); 
+        
         return avaliacaoRepository.findByAlunoOrderByDataAvaliacaoDesc(aluno)
                 .stream()
-                .map(AvaliacaoHistoricoResponseDTO::fromEntity)
+                .map(avaliacao -> AvaliacaoHistoricoResponseDTO.fromEntity(avaliacao, turmaAtualCompleta))
                 .collect(Collectors.toList());
     }
 }

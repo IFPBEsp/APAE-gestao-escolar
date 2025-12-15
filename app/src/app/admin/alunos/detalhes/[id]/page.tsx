@@ -81,6 +81,7 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
         try {
             if (alunoId) {
                 const data = await buscarAvaliacoesPorAlunoId(alunoId);
+                console.log("Dados de Avaliações Recebidos:", data); // <-- Adicione isto
                 setAvaliacoes(data);
             }
         } catch (error) {
