@@ -5,12 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { useEffect, useState } from "react";
 import { buscarProfessorPorId } from "@/services/ProfessorService";
+import { listarTurmasDeProfessor } from "@/services/ProfessorService";
+
 
 export default function ProfessorDashboardPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [professor, setProfessor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [turmas, setTurmas] = useState([]);
 
   const handleToggleCollapse = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
@@ -31,6 +34,20 @@ export default function ProfessorDashboardPage() {
 
     carregarProfessor();
   }, []);
+
+  useEffect(() => {
+  async function carregarTurmas() {
+    try {
+      const response = await listarTurmasDeProfessor(1); 
+      setTurmas(response);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  carregarTurmas();
+}, []);
+
 
   if (loading) {
     return (
@@ -82,7 +99,7 @@ export default function ProfessorDashboardPage() {
                     </div>
                     <p className="text-[#222222] mb-2">Turmas Ativas</p>
                     <p className="text-[#0D4F97] text-3xl font-bold">
-                      {professor.turmas?.length ?? 0}
+                      {turmas.length}
                     </p>
                   </div>
                 </CardContent>
@@ -96,9 +113,8 @@ export default function ProfessorDashboardPage() {
                     </div>
                     <p className="text-[#222222] mb-2">Total de Alunos</p>
                     <p className="text-[#0D4F97] text-3xl font-bold">
-                      {professor.turmas?.reduce(
-                        (total, turma) => total + (turma.totalAlunos ?? 0),
-                        0
+                      {turmas.reduce(
+                        (total, turma) => total + (turma.alunosIds?.length ?? 0), 0
                       )}
                     </p>
                   </div>
