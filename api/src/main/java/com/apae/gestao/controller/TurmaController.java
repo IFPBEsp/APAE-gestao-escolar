@@ -63,7 +63,7 @@ public class TurmaController {
         @ApiResponse(responseCode = "400", description = "Dados inválidos", content = @Content(
                 schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<TurmaResponseDTO> criar(@Valid @RequestBody TurmaRequestDTO dto){ //ok
+    public ResponseEntity<TurmaResponseDTO> criar(@Valid @RequestBody TurmaRequestDTO dto){
         TurmaResponseDTO response = service.criar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

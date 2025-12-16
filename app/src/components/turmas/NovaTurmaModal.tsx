@@ -71,7 +71,6 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
     function formatTurno(val: string) {
         if (val === 'manha') return 'Manhã';
         if (val === 'tarde') return 'Tarde';
-        if (val === 'integral') return 'Integral';
         return val;
     }
 
@@ -215,8 +214,17 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                                 <SelectValue placeholder="Selecione o tipo de turma" />
                             </SelectTrigger>
                             <SelectContent className="bg-white">
-                                <SelectItem value="alfabetizacao">Alfabetização</SelectItem>
-                                <SelectItem value="estimulacao">Estimulação</SelectItem>
+                                <SelectItem 
+                                    value="alfabetizacao"
+                                    className="cursor-pointer hover:bg-[#D0E7FA] focus:bg-[#D0E7FA] transition-colors"
+                                >
+                                    Alfabetização</SelectItem>
+                                <SelectItem 
+                                    value="estimulacao"
+                                    className="cursor-pointer hover:bg-[#D0E7FA] focus:bg-[#D0E7FA] transition-colors"
+                                >
+                                    Estimulação
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -238,9 +246,18 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                                     <SelectValue placeholder="Selecione o turno" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-white">
-                                    <SelectItem value="manha">Manhã</SelectItem>
-                                    <SelectItem value="tarde">Tarde</SelectItem>
-                                    <SelectItem value="integral">Integral</SelectItem>
+                                    <SelectItem
+                                        value="manha"
+                                        className="cursor-pointer hover:bg-[#D0E7FA] focus:bg-[#D0E7FA] transition-colors"
+                                    >
+                                        Manhã
+                                    </SelectItem>
+                                    <SelectItem 
+                                        value="tarde"
+                                        className="cursor-pointer hover:bg-[#D0E7FA] focus:bg-[#D0E7FA] transition-colors"
+                                    >
+                                        Tarde
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

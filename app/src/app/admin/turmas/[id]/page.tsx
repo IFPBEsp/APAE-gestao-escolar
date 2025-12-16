@@ -98,16 +98,6 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
 
   const alunosAtivos = alunos.filter(a => a.isAtivo).length;
 
-  /*
-  FUTURO — quando existir API de chamada/frequência
-
-  const mediaPresenca =
-    alunos.reduce((acc, aluno) => acc + aluno.presenca, 0) / alunos.length;
-
-  const totalFaltas =
-    alunos.reduce((acc, aluno) => acc + aluno.faltas, 0);
-  */
-
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-[#E5E5E5] p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
@@ -182,32 +172,6 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
             </CardContent>
           </Card>
 
-          {/*
-          <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <TrendingUp className="h-6 w-6 text-green-600" />
-                <div>
-                  <p>Média de Presença</p>
-                  <p className="text-green-600">{mediaPresenca.toFixed(1)}%</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <TrendingDown className="h-6 w-6 text-red-600" />
-                <div>
-                  <p>Total de Faltas</p>
-                  <p className="text-red-600">{totalFaltas}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          */}
-
         </div>
 
         {/* Tabela de alunos */}
@@ -221,12 +185,6 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
               <thead>
                 <tr className="border-b-2 border-[#B2D7EC]">
                   <th className="p-3 text-left text-[#0D4F97]">Aluno</th>
-
-                  {/*
-                  <th className="p-3 text-center text-[#0D4F97]">Faltas</th>
-                  <th className="p-3 text-center text-[#0D4F97]">Presença (%)</th>
-                  */}
-
                   <th className="p-3 text-center text-[#0D4F97]">Status</th>
                 </tr>
               </thead>
@@ -235,11 +193,6 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
                 {alunos.map((aluno) => (
                   <tr key={aluno.id} className="border-b border-[#B2D7EC]">
                     <td className="p-3">{aluno.nome}</td>
-
-                    {/*
-                    <td className="p-3 text-center">{aluno.faltas}</td>
-                    <td className="p-3 text-center">{aluno.presenca}%</td>
-                    */}
 
                     <td className="p-3 text-center">
                       {aluno.isAtivo ? (
