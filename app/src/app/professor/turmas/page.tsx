@@ -15,7 +15,7 @@ export default function TurmasPage() {
   const [turmas, setTurmas] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const professorId = 1; //depois substituir pelo id que receber pelo login(quando tiver login)
+  const professorId = 1; //depois substituir pelo id que receber pelo login de prof(quando tiver login)
 
   async function carregarTurmas() {
     try {
