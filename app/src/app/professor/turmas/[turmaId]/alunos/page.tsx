@@ -21,6 +21,8 @@ import { toast } from "sonner";
 import { listarAvaliacoesPorAluno } from "@/services/AvaliacaoService";
 import { getAlunosDaTurma } from "@/services/ChamadaService";
 import { buscarTurmaPorId } from "@/services/TurmaService";
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 export default function TurmaDetalhesPage() {
   const params = useParams();
@@ -40,18 +42,15 @@ export default function TurmaDetalhesPage() {
     if (!alunoId) {
       return { ultimaAvaliacao: "—" };
     }
-
     const avaliacoes = await listarAvaliacoesPorAluno(alunoId);
-
     if (!avaliacoes || avaliacoes.length === 0) {
       return { ultimaAvaliacao: "—" };
     }
-
     const ultima = avaliacoes.reduce((maisRecente: any, atual: any) =>
-      new Date(atual.data) > new Date(maisRecente.data) ? atual : maisRecente
+      new Date(atual.dataAvaliacao) > new Date(maisRecente.dataAvaliacao) ? atual : maisRecente
     );
-
-    return { ultimaAvaliacao: ultima.tipo || ultima.descricao || "Avaliação" };
+    // Retorna a data formatada no padrão brasileiro
+    return { ultimaAvaliacao: format(new Date(ultima.dataAvaliacao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) };
   }
 
   useEffect(() => {
