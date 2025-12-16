@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useMemo } from "react";
-import { Checkbox } from "@/components/ui/checkbox"; 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -25,27 +24,30 @@ import {
 interface StudentAttendance {
     id: number;
     name: string; 
-    isAbsent: boolean; 
+    isAbsent: boolean;
 }
 
 interface ChamadaProps {
-  turmaNome?: string; 
-  students?: { id: number; name: string }[]; 
   onBack: () => void;
   initialClass?: string; 
   onLogout?: () => void;
   onNavigateToDashboard?: (tab: string) => void;
   data?: Date; 
   descricao?: string; 
+  
+  turmaIdProp?: number | string;
+  turmaNomeProp?: string;
+  onSaveSuccess?: () => void;
 }
 
 export default function Chamada({ 
   onBack, 
   initialClass, 
-  onLogout, 
-  onNavigateToDashboard,
   data: selectedDateProp,
-  descricao: initialDescription
+  descricao: initialDescription,
+  turmaIdProp,
+  turmaNomeProp,
+  onSaveSuccess,
 }: ChamadaProps) {
   
   const [students, setStudents] = useState<StudentAttendance[]>([]);
@@ -53,11 +55,7 @@ export default function Chamada({
   const [isSaving, setIsSaving] = useState(false);
   
   const [selectedDate, setSelectedDate] = useState<Date>(selectedDateProp || new Date());
-  
   const [descricaoAula, setDescricaoAula] = useState(initialDescription || "");
-  
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState("turmas");
   
   const today = startOfDay(new Date());
   const isEditingPastDate = isPast(startOfDay(selectedDate)) && !isSameDay(selectedDate, today);
@@ -72,15 +70,27 @@ export default function Chamada({
 
 
   const { turmaId, turmaNome } = useMemo(() => {
-    if (!initialClass) return { turmaId: undefined, turmaNome: "Turma Inválida" };
-    const parts = initialClass.split('-');
-    const id = parseInt(parts[0], 10);
-    const name = parts.slice(1).join('-').trim();
-    return { 
-      turmaId: isNaN(id) ? undefined : id, 
-      turmaNome: name || "Turma Selecionada" 
-    };
-  }, [initialClass]);
+      if (turmaIdProp && turmaNomeProp) {
+          const id = typeof turmaIdProp === 'string' ? parseInt(turmaIdProp, 10) : turmaIdProp;
+          return { 
+              turmaId: isNaN(id as number) ? undefined : id as number, 
+              turmaNome: turmaNomeProp 
+          };
+      }
+      
+      if (initialClass) {
+          const parts = initialClass.split('-');
+          const id = parseInt(parts[0], 10);
+          const name = parts.slice(1).join('-').trim();
+          return { 
+              turmaId: isNaN(id) ? undefined : id, 
+              turmaNome: name || "Turma Selecionada" 
+          };
+      }
+
+      return { turmaId: undefined, turmaNome: "Turma Inválida" };
+  }, [turmaIdProp, turmaNomeProp, initialClass]);
+
 
   const dateFormatted = format(selectedDate, "yyyy-MM-dd"); 
 
@@ -101,6 +111,7 @@ export default function Chamada({
       studentsFromApi = chamadaResponse.listaPresencas.map((p: any) => ({
         id: p.alunoId,
         name: p.alunoNome,
+        // isAbsent é TRUE se o status for 'FALTA' (ou qualquer coisa que não seja 'PRESENTE')
         isAbsent: p.status !== 'PRESENTE', 
       }));
       isFound = true;
@@ -108,7 +119,7 @@ export default function Chamada({
       setDescricaoAula(chamadaResponse.descricao || initialDescription || "");
 
     } catch (error: any) {
-      if (error.response?.status === 404 || error.response?.status === 204) {
+      if (error.response?.status === 404 || error.response?.status === 204 || error.message?.includes("404")) {
           console.log("Chamada não encontrada. Carregando lista de alunos da turma.");
           isFound = false;
           setDescricaoAula(initialDescription || ""); 
@@ -127,7 +138,7 @@ export default function Chamada({
             studentsFromApi = alunosResponse.map((aluno: any) => ({
               id: aluno.id,
               name: aluno.nome || aluno.name, 
-              isAbsent: false, 
+              isAbsent: false, // Define como PRESENTE por padrão (Switch ON)
             }));
             
         } catch (listError: any) {
@@ -146,10 +157,12 @@ export default function Chamada({
   }, [turmaId, dateFormatted]);
 
 
-  const handleAttendanceChange = (studentId: number, checked: boolean) => {
+  const handleAttendanceChange = (studentId: number, isPresent: boolean) => {
+    const newIsAbsent = !isPresent; 
+
     setStudents(prevStudents => 
         prevStudents.map(student => 
-            student.id === studentId ? { ...student, isAbsent: checked } : student
+            student.id === studentId ? { ...student, isAbsent: newIsAbsent } : student
         )
     );
   };
@@ -168,7 +181,7 @@ export default function Chamada({
       descricao: descricaoAula, 
       presencas: students.map(student => ({
         alunoId: student.id,
-        status: student.isAbsent ? 'AUSENTE' : 'PRESENTE', 
+        status: student.isAbsent ? 'FALTA' : 'PRESENTE', 
       }))
     };
 
@@ -177,9 +190,13 @@ export default function Chamada({
       
       toast.success("Chamada salva com sucesso!");
       
-      setTimeout(() => {
-        onBack(); 
-      }, 1500);
+      if (onSaveSuccess) {
+        onSaveSuccess(); 
+      } else {
+        setTimeout(() => {
+          onBack(); 
+        }, 1500);
+      }
 
     } catch (error: any) {
       console.error("Erro ao salvar chamada:", error);
@@ -193,27 +210,15 @@ export default function Chamada({
   const absentCount = students.filter(s => s.isAbsent).length;
   const presentCount = totalCount - absentCount;
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    if (onNavigateToDashboard) {
-      onNavigateToDashboard(tab);
-    }
-  };
-
-  const handleLogout = () => {
-    if (onLogout) {
-      onLogout();
-    }
-  };
-
-  const handleToggleCollapse = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
-  };
   
   if (!turmaId) {
     return (
       <div className="flex min-h-screen bg-[#E5E5E5] items-center justify-center">
-        <div className="text-red-500">Erro: ID da Turma não encontrado.</div>
+        <div className="text-red-500 p-6 rounded-xl bg-white shadow-lg border border-red-200">
+            <AlertCircle className="h-6 w-6 text-red-500 mx-auto mb-2" />
+            <p>Erro Crítico: ID da Turma não encontrado.</p>
+            <p className="text-sm text-gray-500 mt-1">Verifique a rota ou a prop 'initialClass'/'turmaIdProp'.</p>
+        </div>
       </div>
     );
   }
@@ -292,7 +297,7 @@ export default function Chamada({
                 <TableHeader className="bg-[#B2D7EC]/20">
                   <TableRow>
                     <TableHead className="text-[#0D4F97] font-bold text-lg">Nome do Aluno(a)</TableHead>
-                    <TableHead className="text-center text-[#0D4F97] font-bold text-lg w-32">Ausente</TableHead>
+                    <TableHead className="text-center text-[#0D4F97] font-bold text-lg w-32">Presença</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -303,14 +308,14 @@ export default function Chamada({
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex justify-center">
-                          {/* Usando Checkbox do HEAD (true=Ausente) */}
-                          <Checkbox
+                          {/* Switch: ON (checked=true) = PRESENTE. OFF (checked=false) = FALTA/AUSENTE */}
+                          <Switch
                             id={`student-${student.id}`}
-                            checked={student.isAbsent}
-                            onCheckedChange={(checked) =>
-                              handleAttendanceChange(student.id, checked as boolean)
+                            checked={!student.isAbsent} 
+                            onCheckedChange={(isPresent) =>
+                              handleAttendanceChange(student.id, isPresent as boolean)
                             }
-                            className="h-6 w-6 border-2 border-[#0D4F97] data-[state=checked]:bg-[#0D4F97] data-[state=checked]:text-white"
+                            className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-red-500" 
                           />
                         </div>
                       </TableCell>
