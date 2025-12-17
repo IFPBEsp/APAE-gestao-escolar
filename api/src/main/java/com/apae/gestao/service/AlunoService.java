@@ -72,12 +72,16 @@ public class AlunoService {
         Turma novaTurma = turmaRepository.findById(dto.getNovaTurmaId())
             .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + dto.getNovaTurmaId()));
 
-        turmaAlunoRepository.findByAlunoAndIsAlunoAtivoTrue(aluno) 
-            .ifPresent(registroAntigo -> {
-                registroAntigo.setIsAlunoAtivo(false);
-                turmaAlunoRepository.save(registroAntigo); 
-            });
+        // BUSCA UMA LISTA EM VEZ DE UM ÚNICO OBJETO PARA EVITAR O ERRO
+        List<TurmaAluno> registrosAtivos = turmaAlunoRepository.findAllByAlunoAndIsAlunoAtivoTrue(aluno);
+        
+        // Desativa todos os que encontrar (limpeza preventiva)
+        for (TurmaAluno registro : registrosAtivos) {
+            registro.setIsAlunoAtivo(false);
+            turmaAlunoRepository.save(registro);
+        }
 
+        // Cria o novo registro
         TurmaAluno novoRegistro = new TurmaAluno();
         novoRegistro.setAluno(aluno);
         novoRegistro.setTurma(novaTurma);

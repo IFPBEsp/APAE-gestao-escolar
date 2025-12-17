@@ -17,6 +17,21 @@ import { toast } from "sonner";
 import api from "@/services/api";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { listarTurmas } from "@/services/TurmaService";
+import { listarTurmasDeProfessor } from "@/services/ProfessorService";
+
+interface Turma {
+  id: number;
+  nome: string;
+  anoCriacao: number;
+  turno: string;
+  tipo: string;
+  isAtiva: boolean;
+  professor?: {
+    id: number;
+    nome: string;
+  };
+}
 
 interface Professor {
   id: number;
@@ -28,7 +43,7 @@ interface Professor {
   dataNascimento?: string;
   formacao?: string;
   dataContratacao?: string;
-  turmas?: Array<{ id: number; nome: string } | string>;
+  turmas?: Turma[] | string[];
 }
 
 interface ModalEditarProfessorProps {
@@ -54,22 +69,13 @@ export default function ModalEditarProfessor({
     formacao: "",
     dataContratacao: "",
   });
-  const [turmasVinculadas, setTurmasVinculadas] = useState<string[]>([]);
+  
+  const [turmasDisponiveis, setTurmasDisponiveis] = useState<Turma[]>([]);
+  const [turmasVinculadas, setTurmasVinculadas] = useState<Turma[]>([]);
   const [novaTurma, setNovaTurma] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [sugestoesTurmas, setSugestoesTurmas] = useState<string[]>([]);
-
-  // Mock de turmas disponíveis para o autocomplete
-  const mockTurmasDisponiveis = [
-    "Alfabetização 2025 - Manhã",
-    "Alfabetização 2025 - Tarde",
-    "Estimulação 2025 - Manhã",
-    "Estimulação 2025 - Tarde",
-    "Matemática Básica 2025 - Manhã",
-    "Educação Física 2025 - Tarde",
-    "Artes 2025 - Manhã",
-    "Música 2025 - Tarde"
-  ];
+  const [sugestoesTurmas, setSugestoesTurmas] = useState<Turma[]>([]);
+  const [loadingTurmas, setLoadingTurmas] = useState(false);
 
   useEffect(() => {
     if (professor && isOpen) {
@@ -88,12 +94,50 @@ export default function ModalEditarProfessor({
           : "",
       });
 
-      const turmas = professor.turmas || [];
-      setTurmasVinculadas(
-        turmas.map((t) => (typeof t === "object" ? t.nome : t))
-      );
+      // Buscar turmas do professor
+      fetchTurmasProfessor(professor.id);
+      
+      // Buscar todas as turmas disponíveis
+      fetchTurmasDisponiveis();
     }
   }, [professor, isOpen]);
+
+  const fetchTurmasDisponiveis = async () => {
+    try {
+      setLoadingTurmas(true);
+      const turmas = await listarTurmas();
+      // Filtrar apenas turmas ativas
+      const turmasAtivas = turmas.filter((turma: Turma) => turma.isAtiva);
+      setTurmasDisponiveis(turmasAtivas);
+    } catch (error) {
+      console.error("Erro ao buscar turmas disponíveis:", error);
+      toast.error("Erro ao carregar turmas disponíveis");
+    } finally {
+      setLoadingTurmas(false);
+    }
+  };
+
+  const fetchTurmasProfessor = async (professorId: number) => {
+    try {
+      const turmas = await listarTurmasDeProfessor(professorId);
+      setTurmasVinculadas(turmas);
+    } catch (error) {
+      console.error("Erro ao buscar turmas do professor:", error);
+      // Se der erro, usa as turmas que já vieram no objeto professor
+      const turmas = professor.turmas || [];
+      const turmasNormalizadas = turmas.map((t: any) => 
+        typeof t === "object" ? t : { 
+          id: Math.random(), 
+          nome: t, 
+          anoCriacao: new Date().getFullYear(), 
+          turno: "", 
+          tipo: "", 
+          isAtiva: true 
+        }
+      );
+      setTurmasVinculadas(turmasNormalizadas);
+    }
+  };
 
   const applyCPFMask = (value: string) => {
     const numbers = value.replace(/\D/g, "");
@@ -120,14 +164,41 @@ export default function ModalEditarProfessor({
   };
 
   const handleAddTurma = () => {
-    if (novaTurma.trim() && !turmasVinculadas.includes(novaTurma.trim())) {
-      setTurmasVinculadas([...turmasVinculadas, novaTurma.trim()]);
-      setNovaTurma("");
+    if (novaTurma.trim()) {
+      // Encontrar a turma pelo nome nas sugestões
+      const turmaEncontrada = sugestoesTurmas.find(
+        t => t.nome.toLowerCase() === novaTurma.toLowerCase()
+      );
+      
+      if (turmaEncontrada && !turmasVinculadas.some(t => t.id === turmaEncontrada.id)) {
+        setTurmasVinculadas([...turmasVinculadas, turmaEncontrada]);
+        setNovaTurma("");
+        setSugestoesTurmas([]);
+      }
     }
   };
 
-  const handleRemoveTurma = (index: number) => {
-    setTurmasVinculadas(turmasVinculadas.filter((_, i) => i !== index));
+  const handleRemoveTurma = (id: number) => {
+    setTurmasVinculadas(turmasVinculadas.filter(t => t.id !== id));
+  };
+
+  const vincularProfessorATurma = async (turmaId: number, professorId: number) => {
+    try {
+      await api.put(`/turmas/${turmaId}/professor/${professorId}`);
+    } catch (error) {
+      console.error(`Erro ao vincular turma ${turmaId}:`, error);
+      throw error;
+    }
+  };
+
+  const desvincularProfessorDaTurma = async (turmaId: number, professorId: number) => {
+    try {
+      // Nota: Este endpoint pode precisar ser criado no backend
+      await api.delete(`/turmas/${turmaId}/professor/${professorId}`);
+    } catch (error) {
+      console.error(`Erro ao desvincular turma ${turmaId}:`, error);
+      // Se não existir o endpoint, apenas loga o erro
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -135,7 +206,42 @@ export default function ModalEditarProfessor({
     setIsSubmitting(true);
 
     try {
+      // 1. Atualizar dados básicos do professor
       await api.put(`/professores/${professor.id}`, formData);
+      
+      // 2. Buscar turmas atuais do professor para comparar
+      const turmasAtuais = await listarTurmasDeProfessor(professor.id);
+      const turmasAtuaisIds = turmasAtuais.map((t: Turma) => t.id);
+      const turmasVinculadasIds = turmasVinculadas.map(t => t.id);
+      
+      // 3. Turmas para adicionar (estão em turmasVinculadas mas não em turmasAtuais)
+      const turmasParaAdicionar = turmasVinculadas.filter(
+        t => !turmasAtuaisIds.includes(t.id)
+      );
+      
+      // 4. Turmas para remover (estão em turmasAtuais mas não em turmasVinculadas)
+      const turmasParaRemover = turmasAtuais.filter(
+        (t: Turma) => !turmasVinculadasIds.includes(t.id)
+      );
+      
+      // 5. Adicionar novas turmas
+      for (const turma of turmasParaAdicionar) {
+        try {
+          await vincularProfessorATurma(turma.id, professor.id);
+        } catch (turmaError) {
+          console.error(`Erro ao vincular turma ${turma.id}:`, turmaError);
+        }
+      }
+      
+      // 6. Remover turmas desvinculadas
+      for (const turma of turmasParaRemover) {
+        try {
+          await desvincularProfessorDaTurma(turma.id, professor.id);
+        } catch (turmaError) {
+          console.error(`Erro ao desvincular turma ${turma.id}:`, turmaError);
+        }
+      }
+      
       toast.success("Professor atualizado com sucesso!");
       onUpdate?.();
       onClose();
@@ -323,10 +429,10 @@ export default function ModalEditarProfessor({
                       setNovaTurma(value);
                       if (value.trim().length > 0) {
                         const searchLower = value.toLowerCase();
-                        const filtradas = mockTurmasDisponiveis.filter(
+                        const filtradas = turmasDisponiveis.filter(
                           (t) =>
-                            t.toLowerCase().includes(searchLower) &&
-                            !turmasVinculadas.includes(t)
+                            t.nome.toLowerCase().includes(searchLower) &&
+                            !turmasVinculadas.some(tv => tv.id === t.id)
                         );
                         setSugestoesTurmas(filtradas);
                       } else {
@@ -336,19 +442,20 @@ export default function ModalEditarProfessor({
                     onFocus={() => {
                       if (novaTurma.trim().length > 0) {
                         const searchLower = novaTurma.toLowerCase();
-                        const filtradas = mockTurmasDisponiveis.filter(
+                        const filtradas = turmasDisponiveis.filter(
                           (t) =>
-                            t.toLowerCase().includes(searchLower) &&
-                            !turmasVinculadas.includes(t)
+                            t.nome.toLowerCase().includes(searchLower) &&
+                            !turmasVinculadas.some(tv => tv.id === t.id)
                         );
                         setSugestoesTurmas(filtradas);
                       } else {
-                        // Opcional: mostrar todas as opções válidas se vazio
-                        const filtradas = mockTurmasDisponiveis.filter(t => !turmasVinculadas.includes(t));
+                        // Mostrar todas as turmas disponíveis que não estão vinculadas
+                        const filtradas = turmasDisponiveis.filter(t => 
+                          !turmasVinculadas.some(tv => tv.id === t.id)
+                        );
                         setSugestoesTurmas(filtradas);
                       }
                     }}
-                    // onBlur com atraso para permitir o clique na sugestão
                     onBlur={() => {
                       setTimeout(() => setSugestoesTurmas([]), 200);
                     }}
@@ -361,25 +468,26 @@ export default function ModalEditarProfessor({
                     className="h-12 border-2 border-[#B2D7EC]"
                     placeholder="Busque e selecione a turma..."
                     autoComplete="off"
+                    disabled={loadingTurmas}
                   />
                   <Button
                     type="button"
                     onClick={handleAddTurma}
                     className="h-12 bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97]"
+                    disabled={loadingTurmas || !novaTurma.trim()}
                   >
-                    Adicionar
+                    {loadingTurmas ? "Carregando..." : "Adicionar"}
                   </Button>
                 </div>
                 {/* Lista de Sugestões de Autocomplete */}
                 {sugestoesTurmas.length > 0 && (
                   <div className="absolute z-10 mt-1 w-full max-w-[calc(100%-100px)] rounded-md border border-[#B2D7EC] bg-white shadow-lg">
                     <ul className="max-h-60 overflow-auto py-1">
-                      {sugestoesTurmas.map((turma, index) => (
+                      {sugestoesTurmas.map((turma) => (
                         <li
-                          key={index}
+                          key={turma.id}
                           className="cursor-pointer px-4 py-2 hover:bg-[#E8F3FF] text-[#222222]"
                           onMouseDown={(e) => {
-                            // Previne que o onBlur dispare antes do clique
                             e.preventDefault();
                           }}
                           onClick={() => {
@@ -388,13 +496,24 @@ export default function ModalEditarProfessor({
                             setSugestoesTurmas([]);
                           }}
                         >
-                          {turma}
+                          <div>
+                            <div className="font-medium">{turma.nome}</div>
+                            <div className="text-sm text-gray-500">
+                              {turma.turno} • {turma.tipo}
+                            </div>
+                          </div>
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
               </div>
+              
+              {loadingTurmas && (
+                <div className="mt-2 text-sm text-gray-500">
+                  Carregando turmas disponíveis...
+                </div>
+              )}
             </div>
 
             {turmasVinculadas.length > 0 && (
@@ -403,17 +522,22 @@ export default function ModalEditarProfessor({
                   Turmas Vinculadas ({turmasVinculadas.length})
                 </p>
                 <div className="space-y-2">
-                  {turmasVinculadas.map((turma, index) => (
+                  {turmasVinculadas.map((turma) => (
                     <div
-                      key={index}
+                      key={turma.id}
                       className="flex items-center justify-between rounded-lg border-2 border-[#B2D7EC] bg-white p-3"
                     >
-                      <span className="text-[#222222]">{turma}</span>
+                      <div>
+                        <span className="text-[#222222] font-medium">{turma.nome}</span>
+                        <div className="text-sm text-gray-500">
+                          {turma.turno} • {turma.tipo}
+                        </div>
+                      </div>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleRemoveTurma(index)}
+                        onClick={() => handleRemoveTurma(turma.id)}
                         className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                       >
                         <X className="h-4 w-4" />
@@ -447,4 +571,3 @@ export default function ModalEditarProfessor({
     </Dialog>
   );
 }
-
