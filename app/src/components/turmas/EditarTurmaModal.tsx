@@ -23,12 +23,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Search, X } from "lucide-react";
+import { Search, UserRound, X } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface Aluno {
-    id: number;
+    alunoId: number;
     nome: string;
+    isAtivo?: boolean;
 }
 
 interface Professor {
@@ -94,7 +95,13 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             setTurno(turmaData.turno);
             
             setProfessorSelecionado(turmaData.professor);
-            setAlunosNaTurma(turmaData.alunos || []);
+            setAlunosNaTurma(
+                (turmaData.alunos || []).map(a => ({
+                    alunoId: a.alunoId,
+                    nome: a.nome,
+                    isAtivo: a.isAtivo,
+                }))
+            );
             
             setBuscaProfessor("");
             setBuscaAluno("");
@@ -164,7 +171,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     }
 
     function removerAluno(id: number) {
-        setAlunosNaTurma(alunosNaTurma.filter(a => a.id !== id));
+        setAlunosNaTurma(alunosNaTurma.filter(a => a.alunoId !== id));
     }
 
     async function handleSave() {
@@ -189,7 +196,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
 
             // 2️⃣ Atualiza a lista de alunos da turma
             // Passa apenas os IDs dos alunos selecionados
-            await adicionarAlunosATurma(idTurma, alunosNaTurma.map(a => a.id));
+            await adicionarAlunosATurma(idTurma, alunosNaTurma.map(a => a.alunoId));
 
             toast.success(`Turma ${turmaData.nome} atualizada com sucesso!`);
 
@@ -339,22 +346,20 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                             <div className="max-h-60 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
                                 {alunosNaTurma.length === 0 && <p className="text-sm text-gray-400 italic text-center py-4">Nenhum aluno vinculado.</p>}
                                 {alunosNaTurma.map(aluno => (
-                                    <div key={aluno.id} className="flex justify-between items-center bg-white p-3 rounded-lg border border-[#B2D7EC] shadow-sm hover:shadow transition-shadow">
+                                    <div key={aluno.alunoId} className="flex justify-between items-center bg-white p-3 rounded-lg border border-[#B2D7EC] shadow-sm hover:shadow transition-shadow">
                                         <div className="flex items-center gap-3">
                                             <div className="h-8 w-8 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97]">
-                                                {/* Ícone de Usuário Simples */}
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 0 0 0-4-4H9a4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                                                <UserRound size={18} />
                                             </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-[#0D4F97]">{aluno.nome}</p>
-                                                <p className="text-xs text-gray-500">Matrícula: {2025000 + aluno.id}</p>
                                             </div>
                                         </div>
                                         <Button
                                             variant="ghost"
                                             size="sm"
                                             className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 h-8 w-8 rounded-full"
-                                            onClick={() => removerAluno(aluno.id)}
+                                            onClick={() => removerAluno(aluno.alunoId)}
                                         >
                                             <X size={16} />
                                         </Button>

@@ -20,11 +20,4 @@ public class PresencaAlunoDTO {
         PRESENTE,
         FALTA
     }
-
-    public static StatusPresenca getStatusFromFaltou(Boolean faltou) {
-        if (faltou == null || !faltou) {
-            return StatusPresenca.PRESENTE;
-        }
-        return StatusPresenca.FALTA;
-    }
 }

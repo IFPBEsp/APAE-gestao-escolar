@@ -220,9 +220,10 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                                     value="alfabetizacao"
                                     className="cursor-pointer hover:bg-[#D0E7FA] focus:bg-[#D0E7FA] transition-colors"
                                 >
-                                    Alfabetização</SelectItem>
-                                <SelectItem 
-                                    value="estimulacao"
+                                    Alfabetização
+                                </SelectItem>
+                                <SelectItem
+                                    value="Estimulação"
                                     className="cursor-pointer hover:bg-[#D0E7FA] focus:bg-[#D0E7FA] transition-colors"
                                 >
                                     Estimulação
@@ -350,7 +351,6 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                                             </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-[#0D4F97]">{aluno.nome}</p>
-                                                <p className="text-xs text-gray-500">Matrícula: {2025000 + aluno.id}</p>
                                             </div>
                                         </div>
                                         <Button

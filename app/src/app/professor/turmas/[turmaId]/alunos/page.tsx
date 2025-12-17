@@ -78,7 +78,6 @@ export default function TurmaDetalhesPage() {
             return {
               id: alunoId,
               nome: aluno.nome,
-              matricula: aluno.matricula,
               ultimaAvaliacao: avaliacao.ultimaAvaliacao
             };
           })
@@ -106,8 +105,7 @@ export default function TurmaDetalhesPage() {
   }
 
   const filteredAlunos = alunos.filter((aluno: any) =>
-    aluno.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    aluno.matricula?.includes(searchTerm)
+    aluno.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAvaliacoes = (alunoId: number) => {
@@ -303,7 +301,6 @@ export default function TurmaDetalhesPage() {
                             </div>
                             <div>
                               <h3 className="text-[#0D4F97] font-semibold">{aluno.nome}</h3>
-                              <p className="text-[#222222] text-sm">Matrícula: {aluno.matricula}</p>
                               <div className="flex gap-4 mt-1">
                                 <span className="text-sm text-green-600">
                                   Última avaliação: {aluno.ultimaAvaliacao}
