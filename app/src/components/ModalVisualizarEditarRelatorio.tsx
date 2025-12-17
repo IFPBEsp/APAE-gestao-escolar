@@ -503,7 +503,14 @@ export default function ModalVisualizarEditarRelatorio({
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleCancelar()}>
+    <Dialog open={isOpen}
+    onOpenChange={(open) => {
+      if (!open) {
+        handleCancelar();
+        onClose();
+      }
+    }}
+  >
       <div className="fixed inset-0 z-40 bg-black/80" />
       
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -516,20 +523,10 @@ export default function ModalVisualizarEditarRelatorio({
               {isEditando ? "Edite e salve o relatório de" : "Detalhes do relatório de"} <span className="font-semibold">{nomeAluno}</span>
             </DialogDescription>
           </div>
-          
-          <div className="flex gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+        
         </DialogHeader>
 
-        <div className="py-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+        <div className="py-6">
           <div className="px-4 sm:px-6">
             {isEditando ? edicaoContent : visualizationContent}
           </div>
