@@ -1,13 +1,11 @@
 package com.apae.gestao.entity;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
-
 
 
 @Entity
@@ -21,11 +19,17 @@ public class Relatorio {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String descricao;
+    @Column(length = 1000)
+    private String atividades;
 
-    @Column(name = "link_relatorio", length = 500)
-    private String linkRelatorio;
+    @Column(length = 1000)
+    private String habilidades;
+
+    @Column(length = 1000)
+    private String estrategias;
+
+    @Column(length = 1000)
+    private String recursos;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -38,21 +42,13 @@ public class Relatorio {
     @JoinColumn(name = "professor_id", nullable = false)
     private Professor professor;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "turma_id", nullable = false)
+    private Turma turma;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Relatorio relatorio = (Relatorio) o;
-        return id != null && Objects.equals(id, relatorio.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return id != null ? Objects.hash(id) : getClass().hashCode();
-    }
 }

@@ -28,7 +28,6 @@ export default function AvaliacoesAlunoPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  // Obter IDs da URL - funciona agora!
   const alunoId = parseInt(params.alunoId as string);
   const turmaId = searchParams.get('turmaId');
   
@@ -107,8 +106,6 @@ export default function AvaliacoesAlunoPage() {
       router.push("/professor");
     } else if (tab === "turmas") {
       router.push("/professor/turmas");
-    } else if (tab === "relatorios") {
-      router.push("/professor/relatorios");
     }
   };
 
@@ -259,7 +256,7 @@ export default function AvaliacoesAlunoPage() {
           <div className="mx-auto max-w-6xl">
             {/* Botão Voltar */}
             <Button
-              onClick={() => router.push(turmaId ? `/professor/turmas/${turmaId}` : "/professor/turmas")}
+              onClick={() => router.push(turmaId ? `/professor/turmas/${turmaId}/alunos` : "/professor/turmas")}
               variant="outline"
               className="mb-6 h-12 justify-center border-2 border-[#B2D7EC] px-4 text-[#0D4F97] hover:bg-[#B2D7EC]/20"
             >

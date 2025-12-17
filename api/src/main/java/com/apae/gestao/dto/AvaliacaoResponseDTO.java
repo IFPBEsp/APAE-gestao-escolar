@@ -21,9 +21,10 @@ public class AvaliacaoResponseDTO {
     private Long professorId;
     private String professorNome;
     private LocalDateTime dataAvaliacao;
+    private String turmaNomeCompleto;
 
 
-    public static AvaliacaoResponseDTO fromEntity(Avaliacao avaliacao) {
+    public static AvaliacaoResponseDTO fromEntity(Avaliacao avaliacao, String turmaCompleto) {
         return AvaliacaoResponseDTO.builder()
                 .id(avaliacao.getId())
                 .descricao(avaliacao.getDescricao())
@@ -32,6 +33,7 @@ public class AvaliacaoResponseDTO {
                 .professorId(avaliacao.getProfessor().getId())
                 .professorNome(avaliacao.getProfessor().getNome())
                 .dataAvaliacao(avaliacao.getDataAvaliacao())
+                .turmaNomeCompleto(turmaCompleto)
                 .build();
     }
 }
