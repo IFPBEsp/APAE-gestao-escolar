@@ -2,7 +2,10 @@ package com.apae.gestao.service;
 
 import com.apae.gestao.dto.ProfessorRequestDTO;
 import com.apae.gestao.dto.ProfessorResponseDTO;
+import com.apae.gestao.dto.TurmaAlunoResponseDTO;
+import com.apae.gestao.dto.TurmaResponseDTO;
 import com.apae.gestao.entity.Professor;
+import com.apae.gestao.entity.Turma;
 import com.apae.gestao.repository.ProfessorRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,7 @@ import com.apae.gestao.exception.RecursoNaoEncontradoException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -199,5 +203,15 @@ public List<ProfessorResponseDTO> listarPorNomeEStatus(String nome, Boolean ativ
         professor.setAtivo(true);
         Professor salvo = professorRepository.save(professor);
         return new ProfessorResponseDTO(salvo);
+    }
+
+    @Transactional
+    public List<TurmaResponseDTO> getTurmasDeProfessor(Long id){
+        Professor professor = professorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: "+id));
+        return professor.getTurmas()
+                .stream()
+                .map(TurmaResponseDTO::new)
+                .toList();
     }
 }
