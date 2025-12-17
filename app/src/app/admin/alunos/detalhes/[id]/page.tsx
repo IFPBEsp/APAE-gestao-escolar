@@ -10,6 +10,7 @@ import ModalVisualizarRelatorio from "@/components/alunos/ModalVisualizarRelator
 import { buscarAlunoPorId, buscarAvaliacoesPorAlunoId } from "@/services/AlunoService"; 
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale"; 
+import { buscarRelatorioPorAluno } from "@/services/RelatorioService";
 
 interface AlunoDetailDTO {
     id: number;
@@ -89,6 +90,24 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
     }
     loadAvaliacoes();
   }, [alunoId]);
+
+  useEffect(() => {
+  async function loadRelatorios() {
+    setLoadingRelatorios(true);
+    try {
+      if (alunoId) {
+        const data = await buscarRelatorioPorAluno(alunoId);
+        console.log("Dados de Relatórios Recebidos:", data);
+        setRelatorios(data);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar relatórios:", error);
+    } finally {
+      setLoadingRelatorios(false);
+    }
+  }
+  loadRelatorios();
+}, [alunoId]);
 
 
   const turmaCompleta = useMemo(() => {

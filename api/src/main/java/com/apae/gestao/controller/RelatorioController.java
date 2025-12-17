@@ -60,6 +60,13 @@ public class RelatorioController {
         return ResponseEntity.ok(relatorio);
     }
 
+    @GetMapping("/alunos/{alunoId}")
+    @Operation(summary = "Listar relatórios de um aluno específico")
+    public ResponseEntity<List<RelatorioResponseDTO>> listarPorAluno(@PathVariable Long alunoId) {
+        List<RelatorioResponseDTO> relatorios = relatorioService.buscarPorAluno(alunoId);
+        return ResponseEntity.ok(relatorios);
+    }
+
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar um relatório")
     @ApiResponses({

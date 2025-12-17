@@ -117,4 +117,12 @@ public class RelatorioService {
                 relatorio.getCreatedAt()
         );
     }
+
+    @Transactional(readOnly = true)
+        public List<RelatorioResponseDTO> buscarPorAluno(Long alunoId) {
+        return relatorioRepository.findByAlunoId(alunoId)
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+        }
 }
