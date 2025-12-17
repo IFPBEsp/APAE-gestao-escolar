@@ -8,67 +8,59 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, CalendarIcon, AlertCircle, Users } from "lucide-react";
+
+import { Loader2, Users, ArrowLeft, CalendarIcon, AlertCircle } from "lucide-react";
 import { format, isPast, startOfDay, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import ChamadaCalendar from "./ChamadaCalendar";
 
-interface ChamadaProps {
-  turmaNome: string; 
-  students: { id: number; name: string }[];
-  onBack: () => void;
-  onSaveSuccess: () => void;
+import { 
+  getChamadaPorTurmaEData, 
+  registrarChamada, 
+  getAlunosDaTurma 
+} from "@/services/ChamadaService"; 
+
+interface StudentAttendance {
+    id: number;
+    name: string; 
+    isAbsent: boolean;
 }
 
-export default function Chamada({ turmaNome, students, onBack, onSaveSuccess }: ChamadaProps) {
-  const [attendance, setAttendance] = useState<Record<number, boolean>>({});
+interface ChamadaProps {
+  onBack: () => void;
+  initialClass?: string; 
+  onLogout?: () => void;
+  onNavigateToDashboard?: (tab: string) => void;
+  data?: Date; 
+  descricao?: string; 
+  
+  turmaIdProp?: number | string;
+  turmaNomeProp?: string;
+  onSaveSuccess?: () => void;
+}
+
+export default function Chamada({ 
+  onBack, 
+  initialClass, 
+  data: selectedDateProp,
+  descricao: initialDescription,
+  turmaIdProp,
+  turmaNomeProp,
+  onSaveSuccess,
+}: ChamadaProps) {
+  
+  const [students, setStudents] = useState<StudentAttendance[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [descricaoAula, setDescricaoAula] = useState("");
-  const [isEditingPastDate, setIsEditingPastDate] = useState(false);
+  
+  const [selectedDate, setSelectedDate] = useState<Date>(selectedDateProp || new Date());
+  const [descricaoAula, setDescricaoAula] = useState(initialDescription || "");
+  
+  const today = startOfDay(new Date());
+  const isEditingPastDate = isPast(startOfDay(selectedDate)) && !isSameDay(selectedDate, today);
+  
   const [savedAttendanceDates, setSavedAttendanceDates] = useState<string[]>([]);
-
-  const storageKey = `chamadas_${turmaNome}`;
-
-  useEffect(() => {
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      const parsedData = JSON.parse(saved);
-      setSavedAttendanceDates(Object.keys(parsedData));
-    }
-  }, [storageKey]);
-
-  useEffect(() => {
-    const dateKey = format(selectedDate, 'yyyy-MM-dd');
-    const saved = localStorage.getItem(storageKey);
-    
-    if (saved) {
-      const parsedData = JSON.parse(saved);
-      const dataForThisDay = parsedData[dateKey];
-
-      if (dataForThisDay) {
-        setAttendance(dataForThisDay.attendance);
-        setDescricaoAula(dataForThisDay.descricao || "");
-        toast.info(`Dados do dia ${format(selectedDate, 'dd/MM')} carregados.`);
-      } else {
-        resetFields();
-      }
-    } else {
-      resetFields();
-    }
-
-    const today = startOfDay(new Date());
-    setIsEditingPastDate(isPast(startOfDay(selectedDate)) && !isSameDay(selectedDate, today));
-  }, [selectedDate, storageKey]);
-
-  const resetFields = () => {
-    const initial: Record<number, boolean> = {};
-    students.forEach(s => { initial[s.id] = true; }); 
-    setAttendance(initial);
-    setDescricaoAula("");
-  };
-
   const savedDatesAsObjects = useMemo(() => {
     return savedAttendanceDates.map(dateStr => {
       const [year, month, day] = dateStr.split('-').map(Number);
@@ -76,7 +68,108 @@ export default function Chamada({ turmaNome, students, onBack, onSaveSuccess }: 
     });
   }, [savedAttendanceDates]);
 
-  const handleSave = async () => {
+
+  const { turmaId, turmaNome } = useMemo(() => {
+      if (turmaIdProp && turmaNomeProp) {
+          const id = typeof turmaIdProp === 'string' ? parseInt(turmaIdProp, 10) : turmaIdProp;
+          return { 
+              turmaId: isNaN(id as number) ? undefined : id as number, 
+              turmaNome: turmaNomeProp 
+          };
+      }
+      
+      if (initialClass) {
+          const parts = initialClass.split('-');
+          const id = parseInt(parts[0], 10);
+          const name = parts.slice(1).join('-').trim();
+          return { 
+              turmaId: isNaN(id) ? undefined : id, 
+              turmaNome: name || "Turma Selecionada" 
+          };
+      }
+
+      return { turmaId: undefined, turmaNome: "Turma Inválida" };
+  }, [turmaIdProp, turmaNomeProp, initialClass]);
+
+
+  const dateFormatted = format(selectedDate, "yyyy-MM-dd"); 
+
+
+  const loadAttendanceData = async () => {
+    if (!turmaId) {
+      setIsLoading(false);
+      return; 
+    }
+
+    setIsLoading(true);
+    let isFound = false;
+    let studentsFromApi: StudentAttendance[] = [];
+    
+    try {
+      const chamadaResponse: any = await getChamadaPorTurmaEData(turmaId, dateFormatted);
+      
+      studentsFromApi = chamadaResponse.listaPresencas.map((p: any) => ({
+        id: p.alunoId,
+        name: p.alunoNome,
+        // isAbsent é TRUE se o status for 'FALTA' (ou qualquer coisa que não seja 'PRESENTE')
+        isAbsent: p.status !== 'PRESENTE', 
+      }));
+      isFound = true;
+
+      setDescricaoAula(chamadaResponse.descricao || initialDescription || "");
+
+    } catch (error: any) {
+      if (error.response?.status === 404 || error.response?.status === 204 || error.message?.includes("404")) {
+          console.log("Chamada não encontrada. Carregando lista de alunos da turma.");
+          isFound = false;
+          setDescricaoAula(initialDescription || ""); 
+      } else {
+        console.error("Erro ao carregar chamada existente:", error);
+        toast.error("Erro ao carregar a chamada: " + (error.message || "Verifique a conexão."));
+        setIsLoading(false);
+        return; 
+      }
+    }
+
+    if (!isFound) {
+        try {
+            const alunosResponse: any[] = await getAlunosDaTurma(turmaId);
+            
+            studentsFromApi = alunosResponse.map((aluno: any) => ({
+              id: aluno.id,
+              name: aluno.nome || aluno.name, 
+              isAbsent: false, // Define como PRESENTE por padrão (Switch ON)
+            }));
+            
+        } catch (listError: any) {
+            console.error("Erro ao buscar lista de alunos:", listError);
+            toast.error("Erro ao carregar a lista de alunos: " + (listError.message || "Verifique a Turma."));
+            studentsFromApi = [];
+        }
+    }
+
+    setStudents(studentsFromApi);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    loadAttendanceData();
+  }, [turmaId, dateFormatted]);
+
+
+  const handleAttendanceChange = (studentId: number, isPresent: boolean) => {
+    const newIsAbsent = !isPresent; 
+
+    setStudents(prevStudents => 
+        prevStudents.map(student => 
+            student.id === studentId ? { ...student, isAbsent: newIsAbsent } : student
+        )
+    );
+  };
+
+
+  const handleSaveChamada = async () => {
+    if (!turmaId) return;
     if (!descricaoAula.trim()) {
       toast.error("Por favor, adicione uma descrição para a aula.");
       return;
@@ -84,31 +177,61 @@ export default function Chamada({ turmaNome, students, onBack, onSaveSuccess }: 
 
     setIsSaving(true);
     
+    const requestBody = {
+      descricao: descricaoAula, 
+      presencas: students.map(student => ({
+        alunoId: student.id,
+        status: student.isAbsent ? 'FALTA' : 'PRESENTE', 
+      }))
+    };
+
     try {
-      await new Promise(r => setTimeout(r, 800));
-
-      const dateKey = format(selectedDate, 'yyyy-MM-dd');
-      const existingData = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      await registrarChamada(turmaId, dateFormatted, requestBody);
       
-      existingData[dateKey] = {
-        attendance,
-        descricao: descricaoAula,
-        lastUpdate: new Date().toISOString()
-      };
-
-      localStorage.setItem(storageKey, JSON.stringify(existingData));
-      
-      setSavedAttendanceDates(Object.keys(existingData));
-
       toast.success("Chamada salva com sucesso!");
-    } catch (error) {
-      toast.error("Erro ao salvar.");
+      
+      if (onSaveSuccess) {
+        onSaveSuccess(); 
+      } else {
+        setTimeout(() => {
+          onBack(); 
+        }, 1500);
+      }
+
+    } catch (error: any) {
+      console.error("Erro ao salvar chamada:", error);
+      toast.error(error.message || "Falha ao salvar a chamada. Tente novamente.");
     } finally {
       setIsSaving(false);
     }
   };
 
-  const presentCount = Object.values(attendance).filter(v => v).length;
+  const totalCount = students.length;
+  const absentCount = students.filter(s => s.isAbsent).length;
+  const presentCount = totalCount - absentCount;
+
+  
+  if (!turmaId) {
+    return (
+      <div className="flex min-h-screen bg-[#E5E5E5] items-center justify-center">
+        <div className="text-red-500 p-6 rounded-xl bg-white shadow-lg border border-red-200">
+            <AlertCircle className="h-6 w-6 text-red-500 mx-auto mb-2" />
+            <p>Erro Crítico: ID da Turma não encontrado.</p>
+            <p className="text-sm text-gray-500 mt-1">Verifique a rota ou a prop 'initialClass'/'turmaIdProp'.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-[#E5E5E5] items-center justify-center">
+        <Loader2 className="mr-2 h-8 w-8 animate-spin text-[#0D4F97]" />
+        <div className="text-[#0D4F97] text-xl">Carregando Chamada...</div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="max-w-5xl mx-auto p-4">
@@ -126,7 +249,7 @@ export default function Chamada({ turmaNome, students, onBack, onSaveSuccess }: 
           {isEditingPastDate && (
             <div className="rounded-xl border-2 border-[#FFD000] bg-[#FFD000]/10 p-4 flex gap-3 items-center">
               <AlertCircle className="text-[#0D4F97] h-5 w-5 flex-shrink-0" />
-              <p className="text-[#0D4F97] text-sm">Visualizando/Editando chamada de: <strong>{format(selectedDate, "dd/MM/yyyy")}</strong></p>
+              <p className="text-[#0D4F97] text-sm">Visualizando/Editando chamada de: <strong>{format(selectedDate, "dd/MM/yyyy", { locale: ptBR })}</strong></p>
             </div>
           )}
 
@@ -162,40 +285,66 @@ export default function Chamada({ turmaNome, students, onBack, onSaveSuccess }: 
             </div>
           </div>
 
+          {/* Contador de Presença */}
           <div className="bg-[#B2D7EC]/20 rounded-xl p-3 flex justify-center items-center gap-2 text-[#0D4F97] font-semibold border border-[#B2D7EC]">
-            <Users className="h-5 w-5" /> {presentCount} de {students.length} presentes
+            <Users className="h-5 w-5" /> <strong>{presentCount}</strong> de <strong>{totalCount}</strong> presentes
           </div>
 
-          <div className="rounded-xl border-2 border-[#B2D7EC] overflow-hidden bg-white">
-            <Table>
-              <TableHeader className="bg-[#B2D7EC]/20">
-                <TableRow>
-                  <TableHead className="text-[#0D4F97] font-bold">Aluno</TableHead>
-                  <TableHead className="text-center text-[#0D4F97] font-bold w-32">Presença</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {students.map((s) => (
-                  <TableRow key={s.id} className="hover:bg-[#B2D7EC]/5 border-b border-[#B2D7EC]/30">
-                    <TableCell className="text-[#222222] font-medium">{s.name}</TableCell>
-                    <TableCell>
-                      <div className="flex justify-center">
-                        <Switch 
-                          checked={attendance[s.id] ?? true} 
-                          onCheckedChange={(v) => setAttendance(p => ({...p, [s.id]: v}))} 
-                          className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-red-500"
-                        />
-                      </div>
-                    </TableCell>
+          {/* Tabela de Alunos */}
+          {students.length > 0 ? (
+            <div className="rounded-xl border-2 border-[#B2D7EC] overflow-hidden bg-white">
+              <Table>
+                <TableHeader className="bg-[#B2D7EC]/20">
+                  <TableRow>
+                    <TableHead className="text-[#0D4F97] font-bold text-lg">Nome do Aluno(a)</TableHead>
+                    <TableHead className="text-center text-[#0D4F97] font-bold text-lg w-32">Presença</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {students.map((student) => (
+                    <TableRow key={student.id} className="hover:bg-[#B2D7EC]/5 border-b border-[#B2D7EC]/30">
+                      <TableCell className="text-[#222222] font-medium text-lg">
+                        {student.name}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center">
+                          {/* Switch: ON (checked=true) = PRESENTE. OFF (checked=false) = FALTA/AUSENTE */}
+                          <Switch
+                            id={`student-${student.id}`}
+                            checked={!student.isAbsent} 
+                            onCheckedChange={(isPresent) =>
+                              handleAttendanceChange(student.id, isPresent as boolean)
+                            }
+                            className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-red-500" 
+                          />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-[#222222]">
+              Nenhum aluno encontrado para esta turma.
+            </div>
+          )}
 
+          {/* Save Button */}
           <div className="flex justify-end pt-4">
-            <Button onClick={handleSave} disabled={isSaving} className="bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97] h-12 px-10 font-bold">
-              {isSaving ? <Loader2 className="animate-spin mr-2" /> : "Salvar Chamada"}
+            <Button
+              onClick={handleSaveChamada}
+              disabled={isSaving || students.length === 0 || !descricaoAula.trim()}
+              className="h-12 min-w-[200px] justify-center bg-[#0D4F97] px-6 text-white hover:bg-[#FFD000] hover:text-[#0D4F97] font-semibold text-lg"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                "Salvar Chamada"
+              )}
             </Button>
           </div>
         </CardContent>

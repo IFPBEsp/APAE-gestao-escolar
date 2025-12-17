@@ -82,3 +82,18 @@ export async function atualizarProfessor(id, professorData) {
         throw new Error("Erro ao atualizar professor");
     }
 }
+
+export async function listarTurmasDeProfessor(id) {
+    try {
+        const response = await api.get(`/professores/${id}/turmas`);
+        return response.data;
+    } catch (error) {
+        const apiMessage = error.response?.data?.message;
+        const errorMessage = apiMessage 
+                             || error.message 
+                             || "Erro ao buscar turmas do professor.";
+        console.error("ProfessorService Error:", error.response || error);
+        throw new Error(errorMessage);
+    }
+    
+}

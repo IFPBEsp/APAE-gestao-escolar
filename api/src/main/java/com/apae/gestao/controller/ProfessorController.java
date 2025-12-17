@@ -5,6 +5,7 @@ import java.util.List;
 import com.apae.gestao.dto.ApiErrorResponse;
 import com.apae.gestao.dto.ProfessorRequestDTO;
 import com.apae.gestao.dto.ProfessorResponseDTO;
+import com.apae.gestao.dto.TurmaResponseDTO;
 import com.apae.gestao.service.ProfessorService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -150,6 +151,11 @@ public class ProfessorController {
         ProfessorResponseDTO response = professorService.reativarProfessor(id);
         return ResponseEntity.ok(response);
     }
-    
+
+    @GetMapping("/{id}/turmas")
+    public ResponseEntity<List<TurmaResponseDTO>> getTurmasDeProfessor(@PathVariable Long id){
+        List<TurmaResponseDTO> response = professorService.getTurmasDeProfessor(id);
+        return ResponseEntity.ok(response);
+    }
 }
 
