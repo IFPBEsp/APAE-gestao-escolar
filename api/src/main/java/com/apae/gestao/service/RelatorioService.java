@@ -22,8 +22,7 @@ public class RelatorioService {
     public RelatorioService(RelatorioRepository relatorioRepository,
                             AlunoRepository alunoRepository,
                             ProfessorRepository professorRepository,
-                            TurmaRepository turmaRepository,
-                            TurmaAlunoRepository turmaAlunoRepository) {
+                            TurmaRepository turmaRepository) {
         this.relatorioRepository = relatorioRepository;
         this.alunoRepository = alunoRepository;
         this.professorRepository = professorRepository;
@@ -99,29 +98,6 @@ public class RelatorioService {
         relatorioRepository.deleteById(id);
     }
 
-    @Transactional(readOnly = true)
-    public RelatorioResponseDTO buscarCompletoPorId(Long id) {
-        Relatorio relatorio = relatorioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Relatório não encontrado com ID: " + id));
-
-        Aluno aluno = relatorio.getAluno();
-        Professor professor = relatorio.getProfessor();
-        Turma turma = relatorio.getTurma(); 
-
-        return new RelatorioResponseDTO(
-                relatorio.getId(),
-                relatorio.getAtividades(),
-                relatorio.getHabilidades(),
-                relatorio.getEstrategias(),
-                relatorio.getRecursos(),
-                aluno.getNome(),
-                aluno.getDataNascimento(),
-                turma != null ? turma.getNome() : null,
-                professor.getNome(),
-                relatorio.getCreatedAt()
-        );
-    }
-    
     private RelatorioResponseDTO toResponseDTO(Relatorio relatorio) {
         Aluno aluno = relatorio.getAluno();
         Professor professor = relatorio.getProfessor();
@@ -129,6 +105,7 @@ public class RelatorioService {
 
         return new RelatorioResponseDTO(
                 relatorio.getId(),
+                aluno.getId(),
                 relatorio.getAtividades(),
                 relatorio.getHabilidades(),
                 relatorio.getEstrategias(),
