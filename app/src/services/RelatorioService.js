@@ -42,6 +42,20 @@ export async function buscarRelatorioPorAluno(alunoId) {
   }
 }
 
+export async function listarRelatorios() {
+  try{
+    const response = await api.get('/relatorios');
+    return response.data;
+  } catch (error) {
+    const apiMessage = error.response?.data?.message;
+    const errorMessage = apiMessage
+                || error.message 
+                || "Erro ao listar Relatorios.";
+    console.error("RelatorioService Error:", error.response || error);
+    throw new Error(errorMessage);
+  }
+}   
+
 export async function deletarRelatorio(id) {
   try{
     await api.delete(`/relatorios/${id}`);
