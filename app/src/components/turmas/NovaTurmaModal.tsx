@@ -4,7 +4,7 @@ import {
   criarTurma,
 } from "@/services/TurmaService";
 import { toast } from "sonner";
-
+import { listarAlunos } from "@/services/AlunoService";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,7 +48,6 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
     const [ano, setAno] = useState("2025");
     const [turno, setTurno] = useState("");
 
-    // Estados do Professor
     const [buscaProfessor, setBuscaProfessor] = useState("");
     const [professoresEncontrados, setProfessoresEncontrados] = useState<Professor[]>([]);
     const [professorSelecionado, setProfessorSelecionado] = useState<Professor | null>(null);
@@ -63,7 +62,6 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
 
     function formatTipo(val: string) {
         if (val === 'alfabetizacao') return 'Alfabetização';
-        if (val === 'estimulacao') return 'Estimulação';
         if (val === 'matematica') return 'Matemática';
         return val;
     }
@@ -73,14 +71,6 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
         if (val === 'tarde') return 'Tarde';
         return val;
     }
-
-    const mockAlunos: Aluno[] = [ //quando criar o service de alunos, remover isso aqui!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        { id: 1, nome: "Ana Silva", deficiencia: "Nenhuma" },
-        { id: 2, nome: "Beatriz Costa", deficiencia: "Auditiva" },
-        { id: 3, nome: "Carlos Oliveira", deficiencia: "Visual" },
-        { id: 4, nome: "Daniela Souza", deficiencia: "Nenhuma" },
-        { id: 5, nome: "Eduardo Lima", deficiencia: "Motora" },
-    ]; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     useEffect(() => {
         if (buscaProfessor.length > 0 && !professorSelecionado) {
@@ -121,21 +111,15 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
         }
     }, [buscaAluno]);
 
-    async function fetchAlunos(nome: string) {  //alterar isso aqui pós criar service de alunos!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        const response = await fetch(`http://localhost:8080/api/alunos?nome=${nome}`); 
+    async function fetchAlunos(nome: string) {
         try {
-            if (response.ok) {
-                const data = await response.json();
-                setAlunosEncontrados(data);
-                return;
-            }
-            throw new Error("Failed to fetch");
+            const data = await listarAlunos(nome); // chama a API via service
+            setAlunosEncontrados(data);
         } catch (error) {
-            console.log("Backend offline, using mock data for students");
-            const filtered = mockAlunos.filter(a => a.nome.toLowerCase().includes(nome.toLowerCase()));
-            setAlunosEncontrados(filtered);
+            console.log("Erro ao buscar alunos, usando lista vazia");
+            setAlunosEncontrados([]); // fallback vazio
         }
-    } //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    }
 
     function adicionarAluno(aluno: Aluno) {
         if (!alunosSelecionados.find(a => a.id === aluno.id)) {

@@ -6,7 +6,7 @@ import {
 } from "@/services/TurmaService"; 
 import { listarProfessores } from "@/services/ProfessorService";
 import { toast } from "sonner";
-
+import { listarAlunos } from "@/services/AlunoService";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -154,16 +154,11 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     
     async function fetchAlunos(nome: string) {
         try {
-            const response = await fetch(`http://localhost:8080/api/alunos?nome=${nome}`); 
-            if (response.ok) {
-                const data = await response.json();
-                setAlunosEncontrados(data.filter((a: Aluno) => !alunosNaTurma.some(naTurma => naTurma.id === a.id)));
-                return;
-            }
-            throw new Error("Failed to fetch");
-        } catch (error) {
-            const filtered = mockAlunos.filter(a => a.nome.toLowerCase().includes(nome.toLowerCase()));
-            setAlunosEncontrados(filtered.filter(a => !alunosNaTurma.some(naTurma => naTurma.id === a.id)));
+            const data = await listarAlunos(nome); 
+            setAlunosEncontrados(data.filter(a => !alunosNaTurma.some(naTurma => naTurma.id === a.id)));
+        } catch (error: any) {
+            toast.error("Erro ao buscar alunos: " + (error.message || ""));
+            setAlunosEncontrados([]);
         }
     }
     
