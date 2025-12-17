@@ -54,7 +54,7 @@ export async function listarRelatorios() {
     console.error("RelatorioService Error:", error.response || error);
     throw new Error(errorMessage);
   }
-}   
+}
 
 export async function deletarRelatorio(id) {
   try{
