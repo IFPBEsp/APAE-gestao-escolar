@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  criarTurma,
+  adicionarAlunosATurma
+} from "@/services/TurmaService";
+import { toast } from "sonner";
+import { listarAlunos } from "@/services/AlunoService";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +24,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Search, X } from "lucide-react";
+import { listarProfessores } from "@/services/ProfessorService";
+
 
 interface Aluno {
     id: number;
@@ -41,12 +49,11 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
     const [ano, setAno] = useState("2025");
     const [turno, setTurno] = useState("");
 
-    // Estados do Professor
     const [buscaProfessor, setBuscaProfessor] = useState("");
     const [professoresEncontrados, setProfessoresEncontrados] = useState<Professor[]>([]);
     const [professorSelecionado, setProfessorSelecionado] = useState<Professor | null>(null);
 
-    // Estados dos Alunos
+    // Estados dos Alunos - mecher depois que criar o service de alunos!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     const [buscaAluno, setBuscaAluno] = useState("");
     const [alunosEncontrados, setAlunosEncontrados] = useState<Aluno[]>([]);
     const [alunosSelecionados, setAlunosSelecionados] = useState<Aluno[]>([]);
@@ -56,7 +63,6 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
 
     function formatTipo(val: string) {
         if (val === 'alfabetizacao') return 'Alfabetização';
-        if (val === 'estimulacao') return 'Estimulação';
         if (val === 'matematica') return 'Matemática';
         return val;
     }
@@ -64,33 +70,14 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
     function formatTurno(val: string) {
         if (val === 'manha') return 'Manhã';
         if (val === 'tarde') return 'Tarde';
-        if (val === 'integral') return 'Integral';
         return val;
     }
 
-    // Dados Mock para Fallback
-    const mockProfessores: Professor[] = [
-        { id: 91, nome: "Prof. Maria Silva" },
-        { id: 92, nome: "Prof. João Santos" },
-        { id: 93, nome: "Prof. Ana Costa" },
-        { id: 94, nome: "Prof. Carlos Lima" }
-    ];
-
-    const mockAlunos: Aluno[] = [
-        { id: 101, nome: "Ana Silva", deficiencia: "Nenhuma" },
-        { id: 102, nome: "Beatriz Costa", deficiencia: "Auditiva" },
-        { id: 103, nome: "Carlos Oliveira", deficiencia: "Visual" },
-        { id: 104, nome: "Daniela Souza", deficiencia: "Nenhuma" },
-        { id: 105, nome: "Eduardo Lima", deficiencia: "Motora" },
-    ];
-
-    // Buscar Professores
     useEffect(() => {
         if (buscaProfessor.length > 0 && !professorSelecionado) {
-            // Removendo atraso para melhor UX com dados mock
             const delayDebounceFn = setTimeout(() => {
                 fetchProfessores(buscaProfessor);
-            }, 300); // Atraso reduzido
+            }, 300); 
             return () => clearTimeout(delayDebounceFn);
         } else {
             setProfessoresEncontrados([]);
@@ -99,19 +86,14 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
 
     async function fetchProfessores(nome: string) {
         try {
-            const response = await fetch(`http://localhost:8080/api/professores?nome=${nome}`);
-            if (response.ok) {
-                const data = await response.json();
-                setProfessoresEncontrados(data);
-                return;
-            }
-            throw new Error("Failed to fetch");
-        } catch (error) {
-            console.log("Backend offline, using mock data for professors");
-            const filtered = mockProfessores.filter(p => p.nome.toLowerCase().includes(nome.toLowerCase()));
-            setProfessoresEncontrados(filtered);
+            const data = await listarProfessores(nome, true);
+            setProfessoresEncontrados(data);
+        } catch (error: any) {
+            toast.error(error.message || "Erro ao buscar professores");
+            setProfessoresEncontrados([]);
         }
     }
+
 
     function selecionarProfessor(prof: Professor) {
         setProfessorSelecionado(prof);
@@ -119,9 +101,8 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
         setProfessoresEncontrados([]);
     }
 
-    // Buscar Alunos
     useEffect(() => {
-        if (buscaAluno.length > 0) { // Permitir busca com apenas 1 caractere para teste fácil
+        if (buscaAluno.length > 0) { 
             const delayDebounceFn = setTimeout(() => {
                 fetchAlunos(buscaAluno);
             }, 300);
@@ -133,17 +114,11 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
 
     async function fetchAlunos(nome: string) {
         try {
-            const response = await fetch(`http://localhost:8080/api/alunos?nome=${nome}`);
-            if (response.ok) {
-                const data = await response.json();
-                setAlunosEncontrados(data);
-                return;
-            }
-            throw new Error("Failed to fetch");
+            const data = await listarAlunos(nome); // chama a API via service
+            setAlunosEncontrados(data);
         } catch (error) {
-            console.log("Backend offline, using mock data for students");
-            const filtered = mockAlunos.filter(a => a.nome.toLowerCase().includes(nome.toLowerCase()));
-            setAlunosEncontrados(filtered);
+            console.log("Erro ao buscar alunos, usando lista vazia");
+            setAlunosEncontrados([]); // fallback vazio
         }
     }
 
@@ -159,30 +134,67 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
         setAlunosSelecionados(alunosSelecionados.filter(a => a.id !== id));
     }
 
-    function handleSave() {
-        const newTurma = {
-            id: Math.floor(Math.random() * 1000) + 10,
-            name: nomeTurma,
-            students: alunosSelecionados.length,
-            teacher: professorSelecionado?.nome || "Sem Professor",
-            schedule: turno === 'manha' ? "Segunda a Sexta - 07:30 às 11:00" : "Segunda a Sexta - 13:30 às 17:00",
-            turno: formatTurno(turno),
-            status: "Ativa",
-            ano,
-            alunos: alunosSelecionados
+    async function handleSave() {
+        if (!tipo || !ano || !turno) {
+            toast.error("Preencha todos os campos obrigatórios");
+            return;
+        }
+
+        if (!professorSelecionado) {
+            toast.error("Selecione um professor responsável");
+            return;
+        }
+
+        // Dados básicos da turma (sem alunos)
+        const dadosNovaTurma = {
+            tipo: tipo.toUpperCase(),
+            anoCriacao: Number(ano),
+            turno: turno.toUpperCase(),
+            professorId: professorSelecionado.id,
+            isAtiva: true,
         };
 
-        if (onSave) {
-            onSave(newTurma);
-        }
-        onClose();
+        try {
+            // 1️⃣ Cria a turma
+            const turmaCriada = await criarTurma(dadosNovaTurma);
 
-        // Resetar formulário
+            // 2️⃣ Se houver alunos selecionados, adiciona eles à turma
+            if (alunosSelecionados.length > 0) {
+                await adicionarAlunosATurma(
+                    turmaCriada.id,
+                    alunosSelecionados.map(a => a.id)
+                );
+            }
+
+            toast.success("Turma criada com sucesso!");
+
+            if (onSave) {
+                onSave({
+                    ...turmaCriada,
+                    professor: professorSelecionado,
+                    alunos: alunosSelecionados,
+                });
+            }
+
+            onClose();
+            resetForm();
+
+        } catch (error: any) {
+            toast.error(error.message || "Erro ao criar turma");
+        }
+    }
+
+
+
+    function resetForm() {
         setTipo("");
         setAno("2025");
         setTurno("");
-        setProfessorSelecionado(null);
         setBuscaProfessor("");
+        setProfessorSelecionado(null);
+        setProfessoresEncontrados([]);
+        setBuscaAluno("");
+        setAlunosEncontrados([]);
         setAlunosSelecionados([]);
     }
 
@@ -204,8 +216,18 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                                 <SelectValue placeholder="Selecione o tipo de turma" />
                             </SelectTrigger>
                             <SelectContent className="bg-white">
-                                <SelectItem value="alfabetizacao">Alfabetização</SelectItem>
-                                <SelectItem value="estimulacao">Estimulação</SelectItem>
+                                <SelectItem 
+                                    value="alfabetizacao"
+                                    className="cursor-pointer hover:bg-[#D0E7FA] focus:bg-[#D0E7FA] transition-colors"
+                                >
+                                    Alfabetização
+                                </SelectItem>
+                                <SelectItem
+                                    value="Estimulação"
+                                    className="cursor-pointer hover:bg-[#D0E7FA] focus:bg-[#D0E7FA] transition-colors"
+                                >
+                                    Estimulação
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -227,9 +249,18 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                                     <SelectValue placeholder="Selecione o turno" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-white">
-                                    <SelectItem value="manha">Manhã</SelectItem>
-                                    <SelectItem value="tarde">Tarde</SelectItem>
-                                    <SelectItem value="integral">Integral</SelectItem>
+                                    <SelectItem
+                                        value="manha"
+                                        className="cursor-pointer hover:bg-[#D0E7FA] focus:bg-[#D0E7FA] transition-colors"
+                                    >
+                                        Manhã
+                                    </SelectItem>
+                                    <SelectItem 
+                                        value="tarde"
+                                        className="cursor-pointer hover:bg-[#D0E7FA] focus:bg-[#D0E7FA] transition-colors"
+                                    >
+                                        Tarde
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -320,7 +351,6 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                                             </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-[#0D4F97]">{aluno.nome}</p>
-                                                <p className="text-xs text-gray-500">Matrícula: {2025000 + aluno.id}</p>
                                             </div>
                                         </div>
                                         <Button

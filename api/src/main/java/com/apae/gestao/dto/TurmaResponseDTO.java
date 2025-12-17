@@ -31,8 +31,9 @@ public class TurmaResponseDTO {
     private Boolean isAtiva;
     @Schema(description = "Professor responsável", implementation = ProfessorResponseDTO.class)
     private ProfessorResponseDTO professor;
-    @ArraySchema(schema = @Schema(implementation = Long.class, description = "ID do aluno vinculado"))
-    private List<Long> alunosIds;
+    @ArraySchema(schema = @Schema(implementation = TurmaAlunoResponseDTO.class))
+    private List<TurmaAlunoResponseDTO> alunos;
+
     @Schema(description = "Horário de aula baseado no turno", example = "Segunda a Sexta - 8h as 12h")
     private String horario;
 
@@ -48,12 +49,12 @@ public class TurmaResponseDTO {
             this.professor = new ProfessorResponseDTO(turma.getProfessor());
         }
 
-        if(turma.getTurmaAlunos() != null) {
-            this.alunosIds = turma.getTurmaAlunos().stream()
-                    .filter(TurmaAluno::getIsAlunoAtivo)
-                    .map(ta -> ta.getAluno().getId())
-                    .collect(Collectors.toList());
+        if (turma.getTurmaAlunos() != null) {
+            this.alunos = turma.getTurmaAlunos().stream()
+                .map(TurmaAlunoResponseDTO::new)
+                .collect(Collectors.toList());
         }
+
 
         this.horario = getHorarioPorTurno(turma.getTurno());
     }

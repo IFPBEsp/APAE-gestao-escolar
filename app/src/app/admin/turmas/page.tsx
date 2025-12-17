@@ -1,66 +1,61 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NovaTurmaModal } from "@/components/turmas/NovaTurmaModal";
 import { DetalhesTurma } from "@/components/turmas/DetalhesTurma";
 import { EditarTurmaModal } from "@/components/turmas/EditarTurmaModal";
-
-const mockTurmasInitial = [
-  {
-    id: 1,
-    name: "Alfabetização 2025 - Manhã",
-    students: 8,
-    teacher: "Prof. Maria Silva",
-    schedule: "Segunda a Sexta - 08:00 às 12:00",
-    turno: "Manhã",
-    status: "Ativa",
-    ano: "2025"
-  },
-  {
-    id: 2,
-    name: "Estimulação 2025 - Tarde",
-    students: 6,
-    teacher: "Prof. João Santos",
-    schedule: "Segunda a Sexta - 14:00 às 18:00",
-    turno: "Tarde",
-    status: "Ativa",
-    ano: "2025"
-  },
-  {
-    id: 3,
-    name: "Matemática Básica 2025 - Manhã",
-    students: 10,
-    teacher: "Prof. Ana Costa",
-    schedule: "Segunda a Sexta - 09:00 às 11:00",
-    turno: "Manhã",
-    status: "Ativa",
-    ano: "2025"
-  },
-  {
-    id: 4,
-    name: "Educação Física 2025 - Tarde",
-    students: 12,
-    teacher: "Prof. Carlos Lima",
-    schedule: "Terça e Quinta - 15:00 às 17:00",
-    turno: "Tarde",
-    status: "Ativa",
-    ano: "2025"
-  },
-];
+import { listarTurmas, listarAlunosAtivos } from "@/services/TurmaService";
+import { toast } from "sonner";
 
 export default function GerenciarTurmasPage() {
-  const [turmas, setTurmas] = useState(mockTurmasInitial);
+  const [turmas, setTurmas] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState("");
   const [isNovaTurmaOpen, setIsNovaTurmaOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<"listar-turmas" | "detalhes-turma">("listar-turmas");
   const [selectedTurma, setSelectedTurma] = useState<any>(null);
   const [isEditarTurmaOpen, setIsEditarTurmaOpen] = useState(false);
 
+  useEffect(() => {
+    async function carregarTurmasComAlunos() {
+      try {
+        setLoading(true);
+
+        // Buscar todas as turmas
+        const turmasData = await listarTurmas();
+
+        // Para cada turma, buscar os alunos ativos e adicionar contagem
+        const turmasComContador = await Promise.all(
+          turmasData.map(async (turma: any) => {
+            try {
+              const alunosAtivos = await listarAlunosAtivos(turma.id);
+              return {
+                ...turma,
+                alunosCount: alunosAtivos.length, // contador de alunos ativos
+              };
+            } catch (err) {
+              console.error(`Erro ao contar alunos da turma ${turma.id}`, err);
+              return { ...turma, alunosCount: 0 };
+            }
+          })
+        );
+
+        setTurmas(turmasComContador);
+      } catch (error: any) {
+        toast.error(error.message || "Erro ao carregar turmas");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    carregarTurmasComAlunos();
+  }, []);
+
   const turmasFiltradas = turmas.filter((t) =>
-    t.name.toLowerCase().includes(busca.toLowerCase())
+    t.nome?.toLowerCase().includes(busca.toLowerCase())
   );
 
   const handleCardClick = (turma: any) => {
@@ -74,7 +69,6 @@ export default function GerenciarTurmasPage() {
   };
 
   const handleNavigate = (screen: string) => {
-    // Placeholder para navegação futura se necessário
     console.log("Navigate to:", screen);
   };
 
@@ -82,8 +76,9 @@ export default function GerenciarTurmasPage() {
     setIsEditarTurmaOpen(true);
   };
 
-  const handleSaveNovaTurma = (novaTurma: any) => {
-    setTurmas([...turmas, novaTurma]);
+  const handleSaveNovaTurma = async () => {
+    const data = await listarTurmas();
+    setTurmas(data);
   };
 
   const handleUpdateTurma = (updatedTurma: any) => {
@@ -147,30 +142,29 @@ export default function GerenciarTurmasPage() {
                 className="border border-[#B2D7EC] bg-white rounded-xl shadow-sm p-4 md:p-6 relative cursor-pointer hover:shadow-md transition-shadow group"
               >
                 <div className="absolute right-3 md:right-4 top-3 md:top-4 flex flex-wrap gap-2 justify-end">
-                  <div className={`px-2 md:px-3 py-1 rounded-full text-xs font-medium ${turma.status === "Ativa"
+                  <div className={`px-2 md:px-3 py-1 rounded-full text-xs font-medium ${
+                    turma.isAtiva
                       ? "bg-green-100 text-green-700 border border-green-200"
                       : "bg-gray-100 text-gray-700 border border-gray-200"
-                    }`}>
-                    {turma.status}
+                  }`}>
+                    {turma.isAtiva ? "Ativa" : "Inativa"}
                   </div>
+
                   <div className="bg-[#E8F3FF] text-[#0D4F97] px-2 md:px-3 py-1 rounded-full text-xs font-medium border border-[#B2D7EC]">
-                    {turma.students} alunos
+                    {turma.alunosCount ?? 0} alunos
                   </div>
                 </div>
 
                 <h2 className="text-base md:text-lg font-semibold text-[#0D4F97] mb-3 pr-32 group-hover:text-[#0B3E78]">
-                  {turma.name}
+                  {turma.nome}
                 </h2>
 
                 <div className="text-gray-700 space-y-1 text-sm md:text-base">
                   <p>
-                    <strong>Professor:</strong> {turma.teacher}
+                    <strong>Professor:</strong> {turma.professor?.nome}
                   </p>
                   <p>
                     <strong>Turno:</strong> {turma.turno}
-                  </p>
-                  <p className="break-words">
-                    <strong>Horário:</strong> {turma.schedule}
                   </p>
                 </div>
               </div>
@@ -183,7 +177,6 @@ export default function GerenciarTurmasPage() {
         <>
           <DetalhesTurma
             turmaId={selectedTurma.id}
-            turmaData={selectedTurma}
             onBack={handleBackToGerenciarTurmas}
             onNavigate={handleNavigate}
             onEdit={handleEditClick}

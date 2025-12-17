@@ -43,7 +43,7 @@ public class TurmaController {
     @Autowired
     private TurmaService service;
 
-    @PostMapping
+    @PostMapping 
     @Operation(summary = "Criar turma", description = "Cria uma nova turma vinculando professor e alunos por ID.")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Turma criada", content = @Content(
@@ -68,29 +68,29 @@ public class TurmaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{turmaId}")
+    @GetMapping("/{turmaId}") 
     @Operation(summary = "Buscar turma por ID")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Turma encontrada", content = @Content(schema = @Schema(implementation = TurmaResponseDTO.class))),
         @ApiResponse(responseCode = "404", description = "Turma não encontrada", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<TurmaResponseDTO> listarPorId(
+    public ResponseEntity<TurmaResponseDTO> listarPorId( 
             @Parameter(description = "Identificador da turma", example = "5", in = ParameterIn.PATH)
             @PathVariable long turmaId){
         TurmaResponseDTO response = service.buscarPorId(turmaId);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping 
     @Operation(summary = "Listar todas as turmas")
-    public ResponseEntity<List<TurmaResponseDTO>> listarTodas(){
+    public ResponseEntity<List<TurmaResponseDTO>> listarTodas(){ 
         List<TurmaResponseDTO> response = service.listarTodas();
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{turmaId}")
+    @PutMapping("/{turmaId}") 
     @Operation(summary = "Atualizar turma existente")
-    public ResponseEntity<TurmaResponseDTO> atualizar(
+    public ResponseEntity<TurmaResponseDTO> atualizar( 
             @Parameter(description = "Identificador da turma", example = "5", in = ParameterIn.PATH)
             @PathVariable Long turmaId,
             @Valid @RequestBody TurmaRequestDTO dto){
@@ -107,7 +107,7 @@ public class TurmaController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{turmaId}/professor/{professorId}")
+    @PutMapping("/{turmaId}/professor/{professorId}") 
     @Operation(summary = "Vincular professor a uma turma específica")
     public ResponseEntity<TurmaResponseDTO> atribuirProfessor(
             @Parameter(description = "Identificador da turma", example = "5", in = ParameterIn.PATH)
@@ -128,7 +128,7 @@ public class TurmaController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{turmaId}/desativar")
+    @PatchMapping("/{turmaId}/desativar") 
     @Operation(summary = "Desativar turma")
     public ResponseEntity<TurmaResponseDTO> desativarTurma(
             @Parameter(description = "Identificador da turma", example = "5", in = ParameterIn.PATH)
@@ -137,7 +137,7 @@ public class TurmaController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{turmaId}/alunos")
+    @PostMapping("/{turmaId}/alunos") 
     public ResponseEntity<TurmaResponseDTO> adicionarAlunos(@RequestBody List<Long> alunosId, @PathVariable Long turmaId){
         TurmaResponseDTO response = service.adicionarAlunos(turmaId, alunosId);
         return ResponseEntity.ok(response);
@@ -149,25 +149,25 @@ public class TurmaController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{turmaId}/alunos/ativos")
+    @GetMapping("/{turmaId}/alunos/ativos") 
     public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosAtivosNaTurma(@PathVariable Long turmaId){
         List<TurmaAlunoResponseDTO> response = service.listarAlunosAtivos(turmaId);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{turmaId}/alunos/inativos")
+    @GetMapping("/{turmaId}/alunos/inativos") 
     public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosInativosNaTurma(@PathVariable Long turmaId){
         List<TurmaAlunoResponseDTO> response = service.listarAlunosInativos(turmaId);
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{turmaId}/alunos/{alunoId}/ativar")
+    @PatchMapping("/{turmaId}/alunos/{alunoId}/ativar") 
     public ResponseEntity<TurmaAlunoResponseDTO> ativarAlunoNaTurma(@PathVariable Long turmaId, @PathVariable Long alunoId){
         service.ativarAluno(alunoId, turmaId);
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{turmaId}/alunos/{alunoId}/inativar")
+    @PatchMapping("/{turmaId}/alunos/{alunoId}/inativar") 
     public ResponseEntity<TurmaAlunoResponseDTO> desativarAlunoNaTurma(@PathVariable Long turmaId, @PathVariable Long alunoId){
         service.desativarAluno(alunoId, turmaId);
         return ResponseEntity.ok().build();

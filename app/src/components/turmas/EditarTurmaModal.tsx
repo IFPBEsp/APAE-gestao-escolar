@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  atualizarTurma,
+  adicionarAlunosATurma, 
+} from "@/services/TurmaService"; 
+import { listarProfessores } from "@/services/ProfessorService";
+import { toast } from "sonner";
+import { listarAlunos } from "@/services/AlunoService";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -11,16 +18,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
     Select,
+    SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Search, X } from "lucide-react";
+import { Search, UserRound, X } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface Aluno {
-    id: number;
+    alunoId: number;
     nome: string;
+    isAtivo?: boolean;
 }
 
 interface Professor {
@@ -28,55 +37,111 @@ interface Professor {
     nome: string;
 }
 
+interface TurmaAPIData {
+    id: number;
+    tipo: string;
+    anoCriacao: number;
+    turno: string;
+    nome: string;
+    professor: Professor;
+    alunos: Aluno[];
+    isAtiva: boolean;
+}
+
 interface EditarTurmaModalProps {
     isOpen: boolean;
     onClose: () => void;
-    turmaData?: any; // Em um caso real, tipar corretamente
-    onSave?: (turma: any) => void;
+    turmaData?: TurmaAPIData;
+    onSave?: (turma: TurmaAPIData) => void;
 }
 
 export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarTurmaModalProps) {
+    // --- Dados do Formulário (Valores Mutáveis) ---
+    const [tipo, setTipo] = useState("");
+    const [turno, setTurno] = useState("");
+    
+    // --- Gerenciamento de Professor ---
+    const [buscaProfessor, setBuscaProfessor] = useState("");
+    const [professoresEncontrados, setProfessoresEncontrados] = useState<Professor[]>([]);
+    const [professorSelecionado, setProfessorSelecionado] = useState<Professor | null>(null); 
+    
+    // --- Gerenciamento de Alunos ---
     const [buscaAluno, setBuscaAluno] = useState("");
     const [alunosEncontrados, setAlunosEncontrados] = useState<Aluno[]>([]);
     const [alunosNaTurma, setAlunosNaTurma] = useState<Aluno[]>([]);
 
-    // Estados do Professor
-    const [buscaProfessor, setBuscaProfessor] = useState("");
-    const [professoresEncontrados, setProfessoresEncontrados] = useState<Professor[]>([]);
-    const [professorAtual, setProfessorAtual] = useState<string>("");
+    // Gerar nome automaticamente (para exibição)
+    const nomeTurma = `${tipo ? formatTipo(tipo) : ""} ${turmaData?.anoCriacao || ""} - ${turno ? formatTurno(turno) : ""}`;
 
+    // Funções auxiliares (reutilizadas)
+    function formatTipo(val: string) {
+        if (val === 'ALFABETIZACAO' || val === 'alfabetizacao') return 'Alfabetização';
+        if (val === 'ESTIMULACAO' || val === 'estimulacao') return 'Estimulação';
+        return val;
+    }
+
+    function formatTurno(val: string) {
+        if (val === 'MANHA' || val === 'manha') return 'Manhã';
+        if (val === 'TARDE' || val === 'tarde') return 'Tarde';
+        return val;
+    }
+
+    // --- Hooks de Inicialização ---
+
+    // Inicializa o estado do modal com os dados da turmaData
     useEffect(() => {
-        if (turmaData) {
-            setProfessorAtual(turmaData.teacher);
-            // Inicializar alunos se existirem
-            if (turmaData.alunos) {
-                setAlunosNaTurma(turmaData.alunos);
-            } else {
-                setAlunosNaTurma([]);
-            }
+        if (turmaData && isOpen) {
+            setTipo(turmaData.tipo);
+            setTurno(turmaData.turno);
+            
+            setProfessorSelecionado(turmaData.professor);
+            setAlunosNaTurma(
+                (turmaData.alunos || []).map(a => ({
+                    alunoId: a.alunoId,
+                    nome: a.nome,
+                    isAtivo: a.isAtivo,
+                }))
+            );
+            
             setBuscaProfessor("");
+            setBuscaAluno("");
         }
     }, [turmaData, isOpen]);
 
-    // Dados Mock para Fallback
-    const mockProfessores: Professor[] = [
-        { id: 91, nome: "Prof. Maria Silva" },
-        { id: 92, nome: "Prof. João Santos" },
-        { id: 93, nome: "Prof. Ana Costa" },
-        { id: 94, nome: "Prof. Carlos Lima" }
-    ];
 
-    const mockAlunos: Aluno[] = [
-        { id: 101, nome: "Ana Silva" },
-        { id: 102, nome: "Beatriz Costa" },
-        { id: 103, nome: "Carlos Oliveira" },
-        { id: 104, nome: "Daniela Souza" },
-        { id: 105, nome: "Eduardo Lima" },
-    ];
+    // --- Lógica de Busca de Professor ---
 
-    // Buscar Alunos
     useEffect(() => {
-        if (buscaAluno.length > 0) {
+        if (buscaProfessor.length > 0) {
+            const delayDebounceFn = setTimeout(() => {
+                fetchProfessores(buscaProfessor);
+            }, 300); 
+            return () => clearTimeout(delayDebounceFn);
+        } else {
+            setProfessoresEncontrados([]);
+        }
+    }, [buscaProfessor]);
+
+    async function fetchProfessores(nome: string) {
+        try {
+            const data = await listarProfessores(nome, true); 
+            setProfessoresEncontrados(data);
+        } catch (error: any) {
+            toast.error(error.message || "Erro ao buscar professores");
+            setProfessoresEncontrados([]);
+        }
+    }
+
+    function selecionarNovoProfessor(prof: Professor) {
+        setProfessorSelecionado(prof); 
+        setBuscaProfessor(""); 
+        setProfessoresEncontrados([]); 
+    }
+    
+    // --- Lógica de Alunos (Mantida do código anterior) ---
+    
+    useEffect(() => {
+        if (buscaAluno.length > 0) { 
             const delayDebounceFn = setTimeout(() => {
                 fetchAlunos(buscaAluno);
             }, 300);
@@ -85,51 +150,18 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             setAlunosEncontrados([]);
         }
     }, [buscaAluno]);
-
-    // Buscar Professores
-    useEffect(() => {
-        if (buscaProfessor.length > 0) {
-            const delayDebounceFn = setTimeout(() => {
-                fetchProfessores(buscaProfessor);
-            }, 300);
-            return () => clearTimeout(delayDebounceFn);
-        } else {
-            setProfessoresEncontrados([]);
-        }
-    }, [buscaProfessor]);
-
+    
+    
     async function fetchAlunos(nome: string) {
         try {
-            const response = await fetch(`http://localhost:8080/api/alunos?nome=${nome}`);
-            if (response.ok) {
-                const data = await response.json();
-                setAlunosEncontrados(data);
-                return;
-            }
-            throw new Error("Failed to fetch");
-        } catch (error) {
-            console.log("Backend offline, using mock data for students");
-            const filtered = mockAlunos.filter(a => a.nome.toLowerCase().includes(nome.toLowerCase()));
-            setAlunosEncontrados(filtered);
+            const data = await listarAlunos(nome); 
+            setAlunosEncontrados(data.filter(a => !alunosNaTurma.some(naTurma => naTurma.id === a.id)));
+        } catch (error: any) {
+            toast.error("Erro ao buscar alunos: " + (error.message || ""));
+            setAlunosEncontrados([]);
         }
     }
-
-    async function fetchProfessores(nome: string) {
-        try {
-            const response = await fetch(`http://localhost:8080/api/professores?nome=${nome}`);
-            if (response.ok) {
-                const data = await response.json();
-                setProfessoresEncontrados(data);
-                return;
-            }
-            throw new Error("Failed to fetch");
-        } catch (error) {
-            console.log("Backend offline, using mock data for professors");
-            const filtered = mockProfessores.filter(p => p.nome.toLowerCase().includes(nome.toLowerCase()));
-            setProfessoresEncontrados(filtered);
-        }
-    }
-
+    
     function adicionarAluno(aluno: Aluno) {
         if (!alunosNaTurma.find(a => a.id === aluno.id)) {
             setAlunosNaTurma([...alunosNaTurma, aluno]);
@@ -139,26 +171,49 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     }
 
     function removerAluno(id: number) {
-        setAlunosNaTurma(alunosNaTurma.filter(a => a.id !== id));
+        setAlunosNaTurma(alunosNaTurma.filter(a => a.alunoId !== id));
     }
 
-    function selecionarNovoProfessor(prof: Professor) {
-        setProfessorAtual(prof.nome);
-        setBuscaProfessor("");
-        setProfessoresEncontrados([]);
-    }
+    async function handleSave() {
+        if (!turmaData || !professorSelecionado) {
+            toast.error("Erro: Dados da turma ou professor ausentes.");
+            return;
+        }
 
-    function handleSave() {
-        if (!turmaData || !onSave) return;
+        const idTurma = turmaData.id;
 
-        const updated = {
-            ...turmaData,
-            teacher: professorAtual,
-            studentsCount: (turmaData.studentsCount || 0) + alunosNaTurma.length,
-            alunos: alunosNaTurma
+        const dadosAtualizados = {
+            tipo: tipo.toUpperCase(),
+            turno: turno.toUpperCase(),
+            isAtiva: turmaData.isAtiva,
+            professorId: professorSelecionado.id,
+            anoCriacao: turmaData.anoCriacao, // necessário para o backend
         };
-        onSave(updated);
-        onClose();
+
+        try {
+            // 1️⃣ Atualiza os dados básicos da turma (tipo, turno, professor)
+            const turmaAtualizada = await atualizarTurma(idTurma, dadosAtualizados);
+
+            // 2️⃣ Atualiza a lista de alunos da turma
+            // Passa apenas os IDs dos alunos selecionados
+            await adicionarAlunosATurma(idTurma, alunosNaTurma.map(a => a.alunoId));
+
+            toast.success(`Turma ${turmaData.nome} atualizada com sucesso!`);
+
+            // 3️⃣ Atualiza o estado local ou repassa para o componente pai
+            if (onSave) {
+                onSave({
+                    ...turmaAtualizada,
+                    professor: professorSelecionado,
+                    alunos: alunosNaTurma,
+                });
+            }
+
+            onClose();
+
+        } catch (error: any) {
+            toast.error(error.message || "Erro ao salvar alterações da turma");
+        }
     }
 
     if (!turmaData) return null;
@@ -177,25 +232,56 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
 
                     <div className="space-y-4">
                         <h3 className="text-[#0D4F97] font-medium border-b border-[#B2D7EC] pb-2">Informações Básicas</h3>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-[#0D4F97]">Tipo de Turma</Label>
+                                <Select onValueChange={setTipo} defaultValue={turmaData.tipo}>
+                                    <SelectTrigger className="bg-white border-[#B2D7EC]">
+                                        <SelectValue placeholder={formatTipo(tipo)} /> 
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-white">
+                                        <SelectItem value="ALFABETIZACAO">Alfabetização</SelectItem>
+                                        <SelectItem value="ESTIMULACAO">Estimulação</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-[#0D4F97]">Turno</Label>
+                                <Select onValueChange={setTurno} defaultValue={turmaData.turno}>
+                                    <SelectTrigger className="bg-white border-[#B2D7EC]">
+                                        <SelectValue placeholder={formatTurno(turno)} />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-white">
+                                        <SelectItem value="MANHA">Manhã</SelectItem>
+                                        <SelectItem value="TARDE">Tarde</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
 
                         <div className="space-y-2">
                             <Label className="text-[#0D4F97]">Nome da Turma</Label>
                             <Input
-                                defaultValue={turmaData.name}
+                                value={nomeTurma}
                                 disabled
                                 className="bg-gray-50 border-[#B2D7EC]"
                             />
+                            <p className="text-xs text-[#0D4F97]">
+                                O nome da turma é gerado a partir do Tipo, Ano ({turmaData.anoCriacao}) e Turno.
+                            </p>
                         </div>
                     </div>
 
                     <div className="space-y-4">
                         <h3 className="text-[#0D4F97] font-medium border-b border-[#B2D7EC] pb-2 flex items-center gap-2">
-                            Alterar Professor Responsável *
+                            Alterar Professor Responsável
                         </h3>
                         <div className="bg-[#E8F3FF] p-4 rounded-lg border border-[#B2D7EC]">
-                            <Label className="text-[#0D4F97] mb-1 block">Professor Atual:</Label>
+                            <Label className="text-[#0D4F97] mb-1 block">Professor Atual/Selecionado:</Label>
                             <div className="flex items-center gap-2 text-[#0D4F97] font-medium">
-                                <span>{professorAtual}</span>
+                                <span>{professorSelecionado?.nome || "N/A"}</span>
                             </div>
                         </div>
 
@@ -203,7 +289,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                             <Label className="text-[#0D4F97]">Buscar Novo Professor</Label>
                             <div className="relative">
                                 <Input
-                                    placeholder="Digite o nome do professor..."
+                                    placeholder="Digite o nome do professor para buscar..."
                                     value={buscaProfessor}
                                     onChange={(e) => setBuscaProfessor(e.target.value)}
                                     className="bg-white border-[#B2D7EC]"
@@ -260,22 +346,20 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                             <div className="max-h-60 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
                                 {alunosNaTurma.length === 0 && <p className="text-sm text-gray-400 italic text-center py-4">Nenhum aluno vinculado.</p>}
                                 {alunosNaTurma.map(aluno => (
-                                    <div key={aluno.id} className="flex justify-between items-center bg-white p-3 rounded-lg border border-[#B2D7EC] shadow-sm hover:shadow transition-shadow">
+                                    <div key={aluno.alunoId} className="flex justify-between items-center bg-white p-3 rounded-lg border border-[#B2D7EC] shadow-sm hover:shadow transition-shadow">
                                         <div className="flex items-center gap-3">
                                             <div className="h-8 w-8 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97]">
-                                                {/* Ícone de Usuário Simples */}
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                                                <UserRound size={18} />
                                             </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-[#0D4F97]">{aluno.nome}</p>
-                                                <p className="text-xs text-gray-500">Matrícula: {2025000 + aluno.id}</p>
                                             </div>
                                         </div>
                                         <Button
                                             variant="ghost"
                                             size="sm"
                                             className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 h-8 w-8 rounded-full"
-                                            onClick={() => removerAluno(aluno.id)}
+                                            onClick={() => removerAluno(aluno.alunoId)}
                                         >
                                             <X size={16} />
                                         </Button>
@@ -293,6 +377,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                     <Button
                         className="bg-[#0D4F97] hover:bg-[#0B3E78] text-white"
                         onClick={handleSave}
+                        disabled={!professorSelecionado} 
                     >
                         Salvar Alterações
                     </Button>

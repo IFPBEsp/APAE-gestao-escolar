@@ -248,15 +248,6 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
                 </div>
               </div>
 
-              {/* Data de Matrícula */}
-              <div className="flex gap-3 items-center">
-                <Calendar className="text-[#0D4F97] flex-shrink-0" size={20} />
-                <div>
-                  <p className="font-semibold text-[#0D4F97] text-sm md:text-base">Data de Matrícula</p>
-                  <p className="text-sm md:text-base">N/A (Não fornecido)</p>
-                </div>
-              </div>
-
               {/* Responsável - Ocupa 1 coluna inteira no mobile e 2 no desktop, para dar espaço ao telefone */}
               <div className="flex gap-3 col-span-1 md:col-span-2 items-start">
                 <Phone className="text-[#0D4F97] flex-shrink-0 mt-1" size={20} />
