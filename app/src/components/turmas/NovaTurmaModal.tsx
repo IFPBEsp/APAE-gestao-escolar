@@ -2,6 +2,7 @@
 
 import {
   criarTurma,
+  adicionarAlunosATurma
 } from "@/services/TurmaService";
 import { toast } from "sonner";
 import { listarAlunos } from "@/services/AlunoService";
@@ -134,30 +135,45 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
     }
 
     async function handleSave() {
-        try {
-            if (!tipo || !ano || !turno) {
+        if (!tipo || !ano || !turno) {
             toast.error("Preencha todos os campos obrigatórios");
             return;
-            }
+        }
 
-            if (!professorSelecionado) {
-                toast.error("Selecione um professor responsável");
-                return;
-            }
+        if (!professorSelecionado) {
+            toast.error("Selecione um professor responsável");
+            return;
+        }
 
-            const turmaCriada = await criarTurma({
-            tipo: tipo.toUpperCase(),       
+        // Dados básicos da turma (sem alunos)
+        const dadosNovaTurma = {
+            tipo: tipo.toUpperCase(),
             anoCriacao: Number(ano),
             turno: turno.toUpperCase(),
             professorId: professorSelecionado.id,
             isAtiva: true,
-            alunosId: alunosSelecionados.map(a => a.id)
-            });
+        };
 
-            toast.success("Turma criada com sucesso");
+        try {
+            // 1️⃣ Cria a turma
+            const turmaCriada = await criarTurma(dadosNovaTurma);
+
+            // 2️⃣ Se houver alunos selecionados, adiciona eles à turma
+            if (alunosSelecionados.length > 0) {
+                await adicionarAlunosATurma(
+                    turmaCriada.id,
+                    alunosSelecionados.map(a => a.id)
+                );
+            }
+
+            toast.success("Turma criada com sucesso!");
 
             if (onSave) {
-                onSave(turmaCriada);
+                onSave({
+                    ...turmaCriada,
+                    professor: professorSelecionado,
+                    alunos: alunosSelecionados,
+                });
             }
 
             onClose();
@@ -167,6 +183,8 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
             toast.error(error.message || "Erro ao criar turma");
         }
     }
+
+
 
     function resetForm() {
         setTipo("");

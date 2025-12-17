@@ -144,13 +144,6 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
         }
     }, [buscaAluno]);
     
-    const mockAlunos: Aluno[] = [ 
-        { id: 101, nome: "Ana Silva" },
-        { id: 102, nome: "Beatriz Costa" },
-        { id: 103, nome: "Carlos Oliveira" },
-        { id: 104, nome: "Daniela Souza" },
-        { id: 105, nome: "Eduardo Lima" },
-    ]; 
     
     async function fetchAlunos(nome: string) {
         try {
@@ -174,9 +167,6 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
         setAlunosNaTurma(alunosNaTurma.filter(a => a.id !== id));
     }
 
-
-    // --- Lógica de Salvamento (API) ---
-
     async function handleSave() {
         if (!turmaData || !professorSelecionado) {
             toast.error("Erro: Dados da turma ou professor ausentes.");
@@ -185,32 +175,33 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
 
         const idTurma = turmaData.id;
 
-        // CORREÇÃO APLICADA AQUI: INCLUSÃO DE 'anoCriacao' para satisfazer o DTO do Spring Boot.
         const dadosAtualizados = {
-            tipo: tipo.toUpperCase(),       
+            tipo: tipo.toUpperCase(),
             turno: turno.toUpperCase(),
-            isAtiva: turmaData.isAtiva, 
-            professorId: professorSelecionado.id, 
-            // CAMPO CORRIGIDO: Inclui o valor original, que é exigido pelo backend.
-            anoCriacao: turmaData.anoCriacao,
+            isAtiva: turmaData.isAtiva,
+            professorId: professorSelecionado.id,
+            anoCriacao: turmaData.anoCriacao, // necessário para o backend
         };
 
         try {
-            // 1. Atualização dos dados básicos (incluindo o professor e anoCriacao)
+            // 1️⃣ Atualiza os dados básicos da turma (tipo, turno, professor)
             const turmaAtualizada = await atualizarTurma(idTurma, dadosAtualizados);
 
-            // 2. Gerencia Alunos (Substituição da lista completa)
+            // 2️⃣ Atualiza a lista de alunos da turma
+            // Passa apenas os IDs dos alunos selecionados
             await adicionarAlunosATurma(idTurma, alunosNaTurma.map(a => a.id));
 
             toast.success(`Turma ${turmaData.nome} atualizada com sucesso!`);
 
+            // 3️⃣ Atualiza o estado local ou repassa para o componente pai
             if (onSave) {
                 onSave({
-                    ...turmaAtualizada, 
+                    ...turmaAtualizada,
                     professor: professorSelecionado,
                     alunos: alunosNaTurma,
                 });
             }
+
             onClose();
 
         } catch (error: any) {
