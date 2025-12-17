@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -15,6 +14,9 @@ import java.time.LocalDateTime;
 public class RelatorioResponseDTO {
     @Schema(description = "Identificador do relatório", example = "1")
     private Long id;
+
+    @Schema(description = "ID do aluno vinculado", example = "1")
+    private Long alunoId;
 
     @Schema(description = "Atividades realizadas pelo aluno", example = "Participou de atividades lúdicas e educacionais.")
     private String atividades;
@@ -36,7 +38,6 @@ public class RelatorioResponseDTO {
 
     @Schema(description = "Nome da turma ativa do aluno", example = "Turma A")
     private String turmaNome;
-
 
     @Schema(description = "Nome do professor", example = "Maria Silva")
     private String professorNome;

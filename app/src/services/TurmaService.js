@@ -2,7 +2,7 @@ import api from './api';
 
 export async function listarTurmas() {
     try {
-        const response = await api.get('/turmas'); //ok
+        const response = await api.get('/turmas');
         return response.data;
     } catch (error) {
         const apiMessage = error.response?.data?.message;
@@ -14,7 +14,7 @@ export async function listarTurmas() {
     }
 }
 
-export async function buscarTurmaPorId(id) { //ok
+export async function buscarTurmaPorId(id) {
     try {
         const response = await api.get(`/turmas/${id}`);
         return response.data;
@@ -28,7 +28,7 @@ export async function buscarTurmaPorId(id) { //ok
     }
 }
 
-export async function criarTurma(turmaData) { //ok
+export async function criarTurma(turmaData) { 
     try {
         const response = await api.post('/turmas', turmaData);
         return response.data;
@@ -42,7 +42,7 @@ export async function criarTurma(turmaData) { //ok
     }
 }
 
-export async function atualizarTurma(id, turmaData) { //ok
+export async function atualizarTurma(id, turmaData) {
     try {
         const response = await api.put(`/turmas/${id}`, turmaData);
         return response.data;
