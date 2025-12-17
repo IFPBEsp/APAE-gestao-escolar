@@ -29,6 +29,17 @@ public class RelatorioController {
     public RelatorioController(RelatorioService relatorioService) {
         this.relatorioService = relatorioService;
     }
+    
+    @PostMapping
+    @Operation(summary = "Criar um novo relatório")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Relatório criado", content = @Content(schema = @Schema(implementation = RelatorioResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
+    public ResponseEntity<RelatorioResponseDTO> criar(@RequestBody RelatorioRequestDTO request) {
+        RelatorioResponseDTO relatorio = relatorioService.criar(request);
+        return ResponseEntity.ok(relatorio);
+    }
 
     @GetMapping
     @Operation(summary = "Listar todos os relatórios")
@@ -46,18 +57,6 @@ public class RelatorioController {
     public ResponseEntity<RelatorioResponseDTO> buscarPorId(
             @Parameter(description = "Identificador do relatório", example = "1", in = ParameterIn.PATH) @PathVariable Long id) {
         RelatorioResponseDTO relatorio = relatorioService.buscarPorId(id);
-        return ResponseEntity.ok(relatorio);
-    }
-
-    
-    @PostMapping
-    @Operation(summary = "Criar um novo relatório")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Relatório criado", content = @Content(schema = @Schema(implementation = RelatorioResponseDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
-    })
-    public ResponseEntity<RelatorioResponseDTO> criar(@RequestBody RelatorioRequestDTO request) {
-        RelatorioResponseDTO relatorio = relatorioService.criar(request);
         return ResponseEntity.ok(relatorio);
     }
 
