@@ -15,7 +15,8 @@ import { useEffect, useState } from "react";
 import {
     buscarTurmaPorId,
     desativarTurma,
-    ativarTurma
+    ativarTurma,
+    listarAlunosAtivos
 } from "@/services/TurmaService";
 import { toast } from "sonner";
 
@@ -36,6 +37,7 @@ export function DetalhesTurma({
 }: DetalhesTurmaProps) {
 
     const [turma, setTurma] = useState<any>(null);
+    const [alunosAtivosCount, setAlunosAtivosCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -43,8 +45,14 @@ export function DetalhesTurma({
         async function carregarTurma() {
             try {
                 setLoading(true);
+
                 const data = await buscarTurmaPorId(turmaId);
                 setTurma(data);
+
+                // Contador de alunos ativos
+                const ativos = await listarAlunosAtivos(turmaId);
+                setAlunosAtivosCount(ativos.length);
+
             } catch (error: any) {
                 toast.error(error.message || "Erro ao carregar turma");
             } finally {
@@ -175,23 +183,6 @@ export function DetalhesTurma({
                             </div>
                         </div>
 
-                        {/* Campo ainda não existente no backend */}
-                        {/*
-                        <div className="flex items-start gap-3">
-                            <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
-                                <Clock size={20} />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-500 mb-1">
-                                    Horário
-                                </p>
-                                <p className="text-[#0D4F97] font-medium">
-                                    {turma.schedule}
-                                </p>
-                            </div>
-                        </div>
-                        */}
-
                         <div className="flex items-start gap-3">
                             <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
                                 <Users size={20} />
@@ -201,7 +192,7 @@ export function DetalhesTurma({
                                     Quantidade de Alunos
                                 </p>
                                 <p className="text-[#0D4F97] font-medium">
-                                    {turma.studentsCount ?? turma.alunos?.length ?? 0}
+                                    {alunosAtivosCount}
                                 </p>
                             </div>
                         </div>

@@ -1,17 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NovaTurmaModal } from "@/components/turmas/NovaTurmaModal";
 import { DetalhesTurma } from "@/components/turmas/DetalhesTurma";
 import { EditarTurmaModal } from "@/components/turmas/EditarTurmaModal";
-import { useEffect } from "react";
-import { listarTurmas } from "@/services/TurmaService";
+import { listarTurmas, listarAlunosAtivos } from "@/services/TurmaService";
 import { toast } from "sonner";
-
-
 
 export default function GerenciarTurmasPage() {
   const [turmas, setTurmas] = useState<any[]>([]);
@@ -23,11 +20,30 @@ export default function GerenciarTurmasPage() {
   const [isEditarTurmaOpen, setIsEditarTurmaOpen] = useState(false);
 
   useEffect(() => {
-    async function carregarTurmas() {
+    async function carregarTurmasComAlunos() {
       try {
         setLoading(true);
-        const data = await listarTurmas();
-        setTurmas(data);
+
+        // Buscar todas as turmas
+        const turmasData = await listarTurmas();
+
+        // Para cada turma, buscar os alunos ativos e adicionar contagem
+        const turmasComContador = await Promise.all(
+          turmasData.map(async (turma: any) => {
+            try {
+              const alunosAtivos = await listarAlunosAtivos(turma.id);
+              return {
+                ...turma,
+                alunosCount: alunosAtivos.length, // contador de alunos ativos
+              };
+            } catch (err) {
+              console.error(`Erro ao contar alunos da turma ${turma.id}`, err);
+              return { ...turma, alunosCount: 0 };
+            }
+          })
+        );
+
+        setTurmas(turmasComContador);
       } catch (error: any) {
         toast.error(error.message || "Erro ao carregar turmas");
       } finally {
@@ -35,9 +51,8 @@ export default function GerenciarTurmasPage() {
       }
     }
 
-    carregarTurmas();
+    carregarTurmasComAlunos();
   }, []);
-
 
   const turmasFiltradas = turmas.filter((t) =>
     t.nome?.toLowerCase().includes(busca.toLowerCase())
@@ -54,7 +69,6 @@ export default function GerenciarTurmasPage() {
   };
 
   const handleNavigate = (screen: string) => {
-    // Placeholder para navegação futura se necessário
     console.log("Navigate to:", screen);
   };
 
@@ -137,7 +151,7 @@ export default function GerenciarTurmasPage() {
                   </div>
 
                   <div className="bg-[#E8F3FF] text-[#0D4F97] px-2 md:px-3 py-1 rounded-full text-xs font-medium border border-[#B2D7EC]">
-                    {turma.alunos?.length ?? 0} alunos
+                    {turma.alunosCount ?? 0} alunos
                   </div>
                 </div>
 
@@ -152,11 +166,6 @@ export default function GerenciarTurmasPage() {
                   <p>
                     <strong>Turno:</strong> {turma.turno}
                   </p>
-
-                  {/* <p>
-                    <strong>Horário:</strong> {turma.schedule}
-                  </p> */}
-
                 </div>
               </div>
             ))}

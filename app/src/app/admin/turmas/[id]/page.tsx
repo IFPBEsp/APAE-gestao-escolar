@@ -6,7 +6,6 @@ import {
   Pencil,
   Power,
   TrendingUp,
-  TrendingDown
 } from "lucide-react";
 
 import {
@@ -25,6 +24,7 @@ import { EditarTurmaModal } from "@/components/turmas/EditarTurmaModal";
 import {
   buscarTurmaPorId,
   listarAlunos,
+  listarAlunosAtivos,
   desativarTurma
 } from "@/services/TurmaService";
 
@@ -40,6 +40,7 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
 
   const [turma, setTurma] = useState<any>(null);
   const [alunos, setAlunos] = useState<any[]>([]);
+  const [alunosAtivosCount, setAlunosAtivosCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isEditarOpen, setIsEditarOpen] = useState(false);
 
@@ -50,10 +51,11 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
 
         const turmaResponse = await buscarTurmaPorId(turmaId);
         const alunosResponse = await listarAlunos(turmaId);
+        const alunosAtivosResponse = await listarAlunosAtivos(turmaId);
 
         setTurma(turmaResponse);
         setAlunos(alunosResponse);
-
+        setAlunosAtivosCount(alunosAtivosResponse.length); // contador atualizado
       } catch (error) {
         console.error("Erro ao carregar turma:", error);
       } finally {
@@ -95,8 +97,6 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
       </div>
     );
   }
-
-  const alunosAtivos = alunos.filter(a => a.isAtivo).length;
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-[#E5E5E5] p-4 md:p-8">
@@ -166,7 +166,7 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
                 <TrendingUp className="h-6 w-6 text-green-600" />
                 <div>
                   <p>Alunos Ativos</p>
-                  <p className="text-green-600">{alunosAtivos}</p>
+                  <p className="text-green-600">{alunosAtivosCount}</p>
                 </div>
               </div>
             </CardContent>
