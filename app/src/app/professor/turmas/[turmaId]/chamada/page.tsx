@@ -4,14 +4,13 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import Chamada from "@/components/Chamada";
-import {Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
-const studentsByClass = {
-  "1": [{ id: 1, name: "Ana Silva" }, { id: 2, name: "Bruno Costa" }, { id: 3, name: "Carlos Oliveira" }, { id: 4, name: "Diana Santos" }, { id: 5, name: "Eduardo Ferreira" }, { id: 6, name: "Fernanda Lima" }, { id: 7, name: "Gabriel Souza" }, { id: 8, name: "Helena Rodrigues" }],
-  "2": [{ id: 9, name: "Igor Martins" }, { id: 10, name: "Juliana Alves" }, { id: 11, name: "Lucas Pereira" }, { id: 12, name: "Maria Cardoso" }, { id: 13, name: "Nicolas Ribeiro" }, { id: 14, name: "Olivia Gomes" }]
+const turmaNomes = { 
+    "1": "Educação Especial 2025 MANHA", 
+    "2": "Estimulação 2025 - Tarde" 
 };
 
-const turmaNomes = { "1": "Alfabetização 2025 - Manhã", "2": "Estimulação 2025 - Tarde" };
 
 export default function ChamadaPage() {
   const router = useRouter();
@@ -19,8 +18,15 @@ export default function ChamadaPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const turmaId = params?.turmaId ? String(params.turmaId) : null;
+  
   const turmaNome = turmaId ? turmaNomes[turmaId as keyof typeof turmaNomes] : null;
-  const students = turmaId ? studentsByClass[turmaId as keyof typeof studentsByClass] : [];
+  
+  const handleBack = () => router.push("/professor/turmas");
+  
+  const handleSaveSuccess = () => {
+      setTimeout(() => router.push("/professor/turmas"), 1500);
+  };
+
 
   if (!turmaId || !turmaNome) {
     return (
@@ -41,10 +47,12 @@ export default function ChamadaPage() {
       />
       <main className={`flex-1 p-4 md:p-8 transition-all duration-300 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
         <Chamada 
-          turmaNome={turmaNome} 
-          students={students} 
-          onBack={() => router.push("/professor/turmas")}
-          onSaveSuccess={() => setTimeout(() => router.push("/professor/turmas"), 1500)}
+          turmaIdProp={turmaId} 
+          turmaNomeProp={turmaNome} 
+          
+          onBack={handleBack}
+          onSaveSuccess={handleSaveSuccess}
+          
         />
       </main>
     </div>
