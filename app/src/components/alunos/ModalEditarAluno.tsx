@@ -12,7 +12,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { atualizarTurmaAluno } from "@/services/AlunoService"; 
-import { listarTurmas } from "@/services/TurmaService"; 
+import { listarTurmas } from "@/services/TurmaService";
 
 interface TurmaDTO {
     id: number;

@@ -30,33 +30,30 @@ interface AvaliacaoHistoricoDTO {
     desenvolvimentoCognitivo: string;
 }
 
+interface RelatorioHistoricoDTO {
+  dataRelatorio: string;
+  professorNome: string;
+  turmaNomeCompleto: string;
+  atividades: string;
+  habilidades: string;
+  estrategias: string;
+  recursos: string;
+}
 
 export default function DetalhesDoAluno({ params }: { params: { id: string } }) {
   const router = useRouter();
   const alunoId = parseInt(params.id);
   
   const [alunoData, setAlunoData] = useState<AlunoDetailDTO | null>(null);
-  const [avaliacoes, setAvaliacoes] = useState<AvaliacaoHistoricoDTO[]>([]); 
+  const [avaliacoes, setAvaliacoes] = useState<AvaliacaoHistoricoDTO[]>([]);
+  const [relatorios, setRelatorios] = useState<RelatorioHistoricoDTO[]>([]);
   const [loadingAluno, setLoadingAluno] = useState(true);
   const [loadingAvaliacoes, setLoadingAvaliacoes] = useState(true);
+  const [loadingRelatorios, setLoadingRelatorios] = useState(true);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAvaliacao, setSelectedAvaliacao] = useState<any>(null); 
   const [selectedRelatorio, setSelectedRelatorio] = useState<any>(null); 
-
-  const mockRelatorios = [
-    {
-      data: "15/11/2025",
-      professor: "Prof. Maria Silva",
-      turma: "Alfabetização 2025 - Manhã",
-      aluno: "Ana Silva",
-      atividade: "Atividades em grupo com jogos cooperativos e brincadeiras dirigidas.",
-      atividades: "Jogos cooperativos com bola, dança das cadeiras adaptada...",
-      habilidades: "Trabalho em equipe, respeito às regras...",
-      estrategias: "Divisão da turma em pequenos grupos...",
-      recursos: "Bola de borracha, cadeiras..."
-    },
-  ];
 
   useEffect(() => {
     async function loadAlunoData() {
@@ -301,16 +298,29 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
           </CardContent>
         </Card>
 
-        {/* Histórico de Relatórios Individuais (MANTIDO COM MOCK TEMPORARIAMENTE) */}
-        <Card className="border border-blue-200 shadow-lg rounded-xl">
+        {/* Histórico de Relatórios */}
+        <Card className="border border-blue-200 shadow-lg rounded-xl mt-8">
           <CardContent className="p-4 md:p-8">
-            <h2 className="text-xl md:text-2xl font-bold text-[#0D4F97] mb-2">Histórico de Relatórios Individuais</h2>
-            <p className="text-gray-600 mb-4 md:mb-6 text-sm md:text-base">Relatórios individuais realizados pelos professores ({mockRelatorios.length} registros - MOCK)</p>
+            <h2 className="text-xl md:text-2xl font-bold text-[#0D4F97] mb-2">
+              Histórico de Relatórios
+            </h2>
 
-            {/* Contêiner com overflow-x-auto para responsividade de tabela */}
-            <div className="overflow-x-auto">
-                <table className="w-full min-w-[700px] text-left border-collapse">
-                <thead>
+            <p className="text-gray-600 mb-4 md:mb-6 text-sm md:text-base">
+              Relatórios pedagógicos registrados ({relatorios.length} registros)
+            </p>
+
+            {loadingRelatorios ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin text-[#0D4F97]" />
+              </div>
+            ) : relatorios.length === 0 ? (
+              <p className="text-center text-gray-500 py-4 text-sm md:text-base">
+                Nenhum relatório encontrado para este aluno.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[800px] text-left border-collapse">
+                  <thead>
                     <tr className="border-b border-gray-200 text-sm md:text-base">
                       <th className="pb-3 pr-3 font-bold text-[#0D4F97] w-[120px]">Data</th>
                       <th className="pb-3 pr-3 font-bold text-[#0D4F97] w-[150px]">Professor</th>
@@ -318,25 +328,45 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
                       <th className="pb-3 pr-3 font-bold text-[#0D4F97]">Atividades</th>
                       <th className="pb-3 font-bold text-[#0D4F97] w-[80px]">Ações</th>
                     </tr>
-                </thead>
-                <tbody className="text-gray-600 text-sm md:text-base">
-                    {mockRelatorios.map((relatorio: any, index: number) => (
-                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-3 font-medium text-gray-900 pr-3">{relatorio.data}</td>
-                        <td className="font-medium text-gray-900 pr-3">{relatorio.professor}</td>
-                        <td className="text-gray-600 pr-3">{relatorio.turma}</td>
-                        <td className="text-gray-600 truncate max-w-[200px]" title={relatorio.atividade}>{relatorio.atividade}</td>
+                  </thead>
+
+                  <tbody className="text-gray-600 text-sm md:text-base">
+                    {relatorios.map((relatorio, index) => (
+                      <tr
+                        key={index}
+                        className="border-b border-gray-100 hover:bg-gray-50"
+                      >
+                        <td className="py-3 font-medium text-gray-900 pr-3">
+                          {formatarData(relatorio.dataRelatorio)}
+                        </td>
+
+                        <td className="font-medium text-gray-900 pr-3">
+                          {relatorio.professorNome}
+                        </td>
+
+                        <td className="text-gray-600 pr-3">
+                          {relatorio.turmaNomeCompleto}
+                        </td>
+
+                        <td
+                          className="text-gray-600 truncate max-w-[220px]"
+                          title={relatorio.atividades}
+                        >
+                          {relatorio.atividades}
+                        </td>
+
                         <td className="py-3">
                           <Eye
-                              className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]"
-                              onClick={() => setSelectedRelatorio(relatorio)}
+                            className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]"
+                            onClick={() => setSelectedRelatorio(relatorio)}
                           />
                         </td>
-                    </tr>
+                      </tr>
                     ))}
-                </tbody>
+                  </tbody>
                 </table>
-            </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
