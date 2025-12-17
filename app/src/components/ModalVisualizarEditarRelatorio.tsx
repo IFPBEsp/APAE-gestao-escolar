@@ -202,12 +202,7 @@ export default function ModalVisualizarEditarRelatorio({
             .info-label {
               font-weight: bold;
             }
-            .underline {
-              display: inline-block;
-              min-width: 150pt;
-              border-bottom: 1px solid #000;
-              margin-left: 5pt;
-            }
+      
             .section {
               margin-bottom: 10pt;
             }
@@ -275,7 +270,7 @@ export default function ModalVisualizarEditarRelatorio({
               
               <div class="info-line">
                 <span class="info-label">NOME DO ALUNO: </span>
-                <span class="underline" style="font-weight: bold">${nomeAluno}</span>
+                <span class="underline" style="font-weight: normal">${nomeAluno}</span>
               </div>
               
               <div class="info-line">
