@@ -2,10 +2,7 @@ package com.apae.gestao.controller;
 
 import java.util.List;
 
-import com.apae.gestao.dto.ApiErrorResponse;
-import com.apae.gestao.dto.ProfessorRequestDTO;
-import com.apae.gestao.dto.ProfessorResponseDTO;
-import com.apae.gestao.dto.TurmaResponseDTO;
+import com.apae.gestao.dto.*;
 import com.apae.gestao.service.ProfessorService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,7 +10,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -44,84 +40,83 @@ public class ProfessorController {
     @Autowired
     private ProfessorService professorService;
 
-    @PostMapping
-    @Operation(
-        summary = "Cadastrar professor",
-        description = "Registra um novo professor com todas as informações obrigatórias e opcionais."
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Professor criado com sucesso",
-            content = @Content(schema = @Schema(implementation = ProfessorResponseDTO.class),
-                examples = @ExampleObject(name = "ProfessorCriado", value = """
-                        {
-                          "id": 42,
-                          "nome": "Maria da Silva",
-                          "cpf": "12345678901",
-                          "email": "maria.silva@apae.org.br",
-                          "telefone": "(11) 98888-0000",
-                          "dataNascimento": "1990-05-12",
-                          "especialidade": "Educação Especial",
-                          "dataContratacao": "2024-02-01",
-                          "endereco": "Av. Brasil, 1000 - Centro, Recife/PE",
-                          "ativo": true
-                        }
-                        """))),
-        @ApiResponse(responseCode = "400", description = "Dados inválidos",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class),
-                examples = @ExampleObject(name = "ErroValidacao", value = """
-                        {
-                          "timestamp": "2024-11-20T12:20:00",
-                          "status": 400,
-                          "error": "Erro de validação",
-                          "message": "Revise os campos enviados antes de reenviar a requisição.",
-                          "path": "/api/professores",
-                          "errors": {
-                            "cpf": "CPF já cadastrado"
-                          }
-                        }
-                        """)))
-    })
-    public ResponseEntity<ProfessorResponseDTO> criar(@Valid @RequestBody ProfessorRequestDTO dto) {
-        ProfessorResponseDTO response = professorService.criar(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
     @GetMapping
     @Operation(
-        summary = "Listar todos os professores",
-        description = "Retorna TODOS os professores cadastrados (ativos e inativos)."
+            summary = "Listar professores (OTIMIZADO com PostgreSQL)",
+            description = "Usa função PostgreSQL nativa. Retorna dados resumidos: id, nome, cpf, email, ativo, turmas. " +
+                    "Suporta filtros por: id, nome, cpf, email, ativo."
     )
-    public ResponseEntity<List<ProfessorResponseDTO>> listarTodos() {
-        List<ProfessorResponseDTO> professores = professorService.listarTodos();
-        return ResponseEntity.ok(professores);
-    }
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de professores retornada com sucesso")
+    })
+    public ResponseEntity<List<ProfessorResumoDTO>> listarTodos(
+            @Parameter(description = "ID do professor", example = "42", in = ParameterIn.QUERY)
+            @RequestParam(value = "id", required = false) Long id,
 
-    @GetMapping("/buscar")
-    @Operation(
-        summary = "Buscar professores com filtros",
-        description = "Busca professores por nome e/ou status ativo."
-    )
-    public ResponseEntity<List<ProfessorResponseDTO>> listarPorNomeEStatus(
-            @Parameter(example = "Maria", in = ParameterIn.QUERY)
+            @Parameter(description = "Nome do professor para busca", example = "Maria", in = ParameterIn.QUERY)
             @RequestParam(value = "nome", required = false) String nome,
-            @Parameter(example = "true", in = ParameterIn.QUERY)
+
+            @Parameter(description = "CPF do professor", example = "12345678901", in = ParameterIn.QUERY)
+            @RequestParam(value = "cpf", required = false) String cpf,
+
+            @Parameter(description = "Email do professor", example = "maria@escola.com", in = ParameterIn.QUERY)
+            @RequestParam(value = "email", required = false) String email,
+
+            @Parameter(description = "Filtrar por status ativo/inativo", example = "true", in = ParameterIn.QUERY)
             @RequestParam(value = "ativo", required = false) Boolean ativo) {
-        
-        List<ProfessorResponseDTO> professores = professorService.listarPorNomeEStatus(nome, ativo);
+
+        List<ProfessorResumoDTO> professores = professorService
+                .listarProfessores(id, nome, cpf, email, ativo);
+
         return ResponseEntity.ok(professores);
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Buscar professor por ID")
+    @Operation(
+            summary = "Buscar professor por ID (resumido)",
+            description = "Retorna dados resumidos usando função PostgreSQL."
+    )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Professor encontrado", content = @Content(schema = @Schema(implementation = ProfessorResponseDTO.class))),
-        @ApiResponse(responseCode = "404", description = "Professor não encontrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Professor encontrado",
+                    content = @Content(schema = @Schema(implementation = ProfessorResumoDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Professor não encontrado")
     })
-    public ResponseEntity<ProfessorResponseDTO> buscarPorId(
+    public ResponseEntity<ProfessorResumoDTO> buscarPorId(
             @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.PATH)
             @PathVariable Long id) {
+        ProfessorResumoDTO response = professorService.buscarPorIdResumido(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/completo")
+    @Operation(
+            summary = "Buscar professor por ID (completo)",
+            description = "Retorna TODOS os dados do professor para edição."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Professor encontrado",
+                    content = @Content(schema = @Schema(implementation = ProfessorResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Professor não encontrado")
+    })
+    public ResponseEntity<ProfessorResponseDTO> buscarPorIdCompleto(
+            @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.QUERY)
+            @RequestParam("id") Long id) {
         ProfessorResponseDTO response = professorService.buscarPorId(id);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping
+    @Operation(
+            summary = "Cadastrar professor",
+            description = "Registra um novo professor."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Professor criado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos")
+    })
+    public ResponseEntity<ProfessorResponseDTO> criar(@Valid @RequestBody ProfessorRequestDTO dto) {
+        ProfessorResponseDTO response = professorService.criar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
@@ -153,7 +148,10 @@ public class ProfessorController {
     }
 
     @GetMapping("/{id}/turmas")
-    public ResponseEntity<List<TurmaResponseDTO>> getTurmasDeProfessor(@PathVariable Long id){
+    @Operation(summary = "Listar turmas de um professor")
+    public ResponseEntity<List<TurmaResponseDTO>> getTurmasDeProfessor(
+            @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.PATH)
+            @PathVariable Long id) {
         List<TurmaResponseDTO> response = professorService.getTurmasDeProfessor(id);
         return ResponseEntity.ok(response);
     }
