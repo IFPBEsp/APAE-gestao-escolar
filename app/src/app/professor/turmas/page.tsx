@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, Users, ClipboardCheck, Calendar } from "lucide-react"; 
+import { BookOpen, Users, ClipboardCheck, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
@@ -54,11 +54,10 @@ export default function TurmasPage() {
       />
 
       <main
-        className={`flex-1 overflow-y-auto transition-all duration-300 pt-16 md:pt-0 ${
-          isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
-        }`}
+        className={`flex-1 overflow-y-auto transition-all duration-300 pt-16 md:pt-0 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
+          }`}
       >
-        <div className="p-4 md:p-8"> 
+        <div className="p-4 md:p-8">
           {/* Título */}
           <div className="mb-6 md:mb-8">
             <h1 className="text-[#0D4F97] text-2xl md:text-3xl font-bold">
@@ -145,14 +144,13 @@ export default function TurmasPage() {
                         <Button
                           onClick={(e) =>
                             handleNavigation(
-                              `/professor/turmas/${turma.id}/chamada`,
+                              `/professor/turmas/${turma.id}/frequencia`,
                               e
                             )
                           }
                           className="h-10 flex-1 bg-[#0D4F97] text-white font-bold hover:bg-[#FFD000] hover:text-[#0D4F97]"
                         >
-                          <ClipboardCheck className="mr-2 h-4 w-4" /> Fazer
-                          Chamada
+                          <ClipboardCheck className="mr-2 h-4 w-4" /> Frequência
                         </Button>
                       </div>
                     </div>
