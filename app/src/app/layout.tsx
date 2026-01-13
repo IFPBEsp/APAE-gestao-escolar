@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import { ToasterProvider } from "@/components/ToasterProvider";
 import Header from "@/components/Header/Header";
+import "@/components/impressao/impressao.css";
 
 export default function RootLayout({
   children
