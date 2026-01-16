@@ -12,17 +12,20 @@ import java.util.Optional;
 
 @Repository
 public interface ProfessorRepository extends JpaRepository<Professor, Long> {
-    
+
+    @Query(value = "SELECT listar_professores_com_turmas(:id, :nome, :cpf, :email, :ativo)",
+            nativeQuery = true)
+    String listarProfessoresJson(
+            @Param("id") Long id,
+            @Param("nome") String nome,
+            @Param("cpf") String cpf,
+            @Param("email") String email,
+            @Param("ativo") Boolean ativo
+    );
+
     @Query("SELECT p FROM Professor p LEFT JOIN FETCH p.turmas WHERE p.id = :id")
     Optional<Professor> findByIdWithTurmas(@Param("id") Long id);
 
-    @EntityGraph(attributePaths = "turmas")
-    List<Professor> findByAtivoTrue();
-
-    List<Professor> findByAtivoFalse();
-    
-    Optional<Professor> findByIdAndAtivoTrue(Long id);
-    
     boolean existsByCpf(String cpf);
     
     boolean existsByEmail(String email);
@@ -30,8 +33,4 @@ public interface ProfessorRepository extends JpaRepository<Professor, Long> {
     boolean existsByCpfAndIdNot(String cpf, Long id);
     
     boolean existsByEmailAndIdNot(String email, Long id);
-
-    List<Professor> findByNomeContainingIgnoreCase(String nome);
-
-    List<Professor> findByNomeContainingIgnoreCaseAndAtivo(String nome, boolean ativo);
 }
