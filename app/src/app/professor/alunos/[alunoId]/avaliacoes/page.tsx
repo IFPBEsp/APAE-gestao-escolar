@@ -279,7 +279,7 @@ export default function AvaliacoesAlunoPage() {
             <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
               <CardContent className="p-6">
                 <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-start gap-4 mt-4">
                     <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#B2D7EC]/20">
                       <UserCircle className="h-10 w-10 text-[#0D4F97]" />
                     </div>

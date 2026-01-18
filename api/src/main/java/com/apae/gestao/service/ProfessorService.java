@@ -1,22 +1,18 @@
 package com.apae.gestao.service;
 
-import com.apae.gestao.dto.ProfessorRequestDTO;
-import com.apae.gestao.dto.ProfessorResponseDTO;
-import com.apae.gestao.dto.TurmaAlunoResponseDTO;
-import com.apae.gestao.dto.TurmaResponseDTO;
+import com.apae.gestao.dto.*;
 import com.apae.gestao.entity.Professor;
-import com.apae.gestao.entity.Turma;
-import com.apae.gestao.repository.ProfessorRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import com.apae.gestao.exception.ConflitoDeDadosException;
 import com.apae.gestao.exception.RecursoNaoEncontradoException;
+import com.apae.gestao.repository.ProfessorRepository;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ProfessorService {
@@ -24,36 +20,51 @@ public class ProfessorService {
     @Autowired
     private ProfessorRepository professorRepository;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Transactional(readOnly = true)
-public List<ProfessorResponseDTO> listarPorNomeEStatus(String nome, Boolean ativo) {
-    // Prioridade 1: Busca por nome (pode combinar com ativo)
-    if (nome != null && !nome.trim().isEmpty()) {
-        if (ativo != null) {
-            // Busca por nome E status (ativo/inativo)
-            return professorRepository.findByNomeContainingIgnoreCaseAndAtivo(nome.trim(), ativo)
-                    .stream()
-                    .map(ProfessorResponseDTO::new)
-                    .collect(Collectors.toList());
-        } else {
-            // Apenas por nome
-            return buscarPorNome(nome.trim());
-        }
-    }
-    
-    // Prioridade 2: Filtro apenas por status
-    if (ativo != null) {
-        return ativo ? listarAtivos() : listarInativos();
-    }
-        
-        return listarTodos();
+    public List<ProfessorResumoDTO> listarProfessores(
+            Long id,
+            String nome,
+            String cpf,
+            String email,
+            Boolean ativo) {
+
+        String jsonResult = professorRepository.listarProfessoresJson(
+                id, nome, cpf, email, ativo
+        );
+
+        return parseJsonToList(jsonResult);
     }
 
     @Transactional(readOnly = true)
-    public List<ProfessorResponseDTO> listarInativos() {
-        return professorRepository.findByAtivoFalse()
-                .stream()
-                .map(ProfessorResponseDTO::new)
-                .collect(Collectors.toList());
+    public ProfessorResumoDTO buscarPorIdResumido(Long id) {
+        String jsonResult = professorRepository.listarProfessoresJson(
+                id, null, null, null, null
+        );
+
+        List<ProfessorResumoDTO> professores = parseJsonToList(jsonResult);
+
+        if (professores.isEmpty()) {
+            throw new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id);
+        }
+
+        return professores.get(0);
+    }
+
+    private List<ProfessorResumoDTO> parseJsonToList(String json) {
+        try {
+            return objectMapper.readValue(json, new TypeReference<List<ProfessorResumoDTO>>() {});
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Erro ao processar JSON de professores", e);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public ProfessorResponseDTO buscarPorId(Long id) {
+        Professor professor = professorRepository.findByIdWithTurmas(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id));
+        return new ProfessorResponseDTO(professor);
     }
 
     @Transactional
@@ -65,66 +76,10 @@ public List<ProfessorResponseDTO> listarPorNomeEStatus(String nome, Boolean ativ
         mapearDtoParaEntity(dto, professor);
         professor.setAtivo(true);
         Professor salvo = professorRepository.save(professor);
-        return new ProfessorResponseDTO(salvo);
-    }
 
-    @Transactional(readOnly = true)
-    public List<ProfessorResponseDTO> listarTodos() {
-        return professorRepository.findAll()
-                .stream()
+        return professorRepository.findByIdWithTurmas(salvo.getId())
                 .map(ProfessorResponseDTO::new)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<ProfessorResponseDTO> listarAtivos() {
-        return professorRepository.findByAtivoTrue()
-                .stream()
-                .map(ProfessorResponseDTO::new)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Lista professores com filtros opcionais de nome e status.
-     * 
-     * @param nome  Parâmetro opcional para busca por nome (case-insensitive,
-     *              contém)
-     * @param ativo Parâmetro opcional para filtrar por status (true=ativos,
-     *              false=inativos, null=todos)
-     * @return Lista de professores que atendem aos critérios
-     */
-    @Transactional(readOnly = true)
-    public List<ProfessorResponseDTO> listarTodos(String nome, Boolean ativo) {
-        // Normaliza string vazia para null
-        String nomeNormalizado = (nome != null && nome.trim().isEmpty()) ? null : nome;
-
-        // Se ambos os parâmetros forem null, usa o método findAll para melhor
-        // performance
-        if (nomeNormalizado == null && ativo == null) {
-            return listarTodos();
-        }
-
-        List<Professor> professores = professorRepository.findByNomeContainingIgnoreCaseAndAtivo(nomeNormalizado,
-                ativo);
-
-        return professores.stream()
-                .map(ProfessorResponseDTO::new)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public List<ProfessorResponseDTO> buscarPorNome(String nome) {
-        return professorRepository.findByNomeContainingIgnoreCase(nome)
-                .stream()
-                .map(ProfessorResponseDTO::new)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public ProfessorResponseDTO buscarPorId(Long id) {
-        Professor professor = professorRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id));
-        return new ProfessorResponseDTO(professor);
+                .orElse(new ProfessorResponseDTO(salvo));
     }
 
     @Transactional
@@ -138,7 +93,10 @@ public List<ProfessorResponseDTO> listarPorNomeEStatus(String nome, Boolean ativ
         mapearDtoParaEntity(dto, professor);
 
         Professor atualizado = professorRepository.save(professor);
-        return new ProfessorResponseDTO(atualizado);
+
+        return professorRepository.findByIdWithTurmas(atualizado.getId())
+                .map(ProfessorResponseDTO::new)
+                .orElse(new ProfessorResponseDTO(atualizado));
     }
 
     @Transactional
@@ -146,18 +104,32 @@ public List<ProfessorResponseDTO> listarPorNomeEStatus(String nome, Boolean ativ
         Professor professor = professorRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id));
 
-        // Desativação lógica
         professor.setAtivo(false);
+        Professor salvo = professorRepository.save(professor);
+
+        return professorRepository.findByIdWithTurmas(salvo.getId())
+                .map(ProfessorResponseDTO::new)
+                .orElse(new ProfessorResponseDTO(salvo));
+    }
+
+    @Transactional
+    public ProfessorResponseDTO reativarProfessor(Long id) {
+        Professor professor = professorRepository.findByIdWithTurmas(id)
+                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
+
+        professor.setAtivo(true);
         Professor salvo = professorRepository.save(professor);
         return new ProfessorResponseDTO(salvo);
     }
 
-    @Transactional
-    public void deletarFisicamente(Long id) {
-        if (!professorRepository.existsById(id)) {
-            throw new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id);
-        }
-        professorRepository.deleteById(id);
+    @Transactional(readOnly = true)
+    public List<TurmaResponseDTO> getTurmasDeProfessor(Long id) {
+        Professor professor = professorRepository.findByIdWithTurmas(id)
+                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
+        return professor.getTurmas()
+                .stream()
+                .map(TurmaResponseDTO::new)
+                .toList();
     }
 
     private void mapearDtoParaEntity(ProfessorRequestDTO dto, Professor professor) {
@@ -193,25 +165,5 @@ public List<ProfessorResponseDTO> listarPorNomeEStatus(String nome, Boolean ativ
                 throw new ConflitoDeDadosException("Já existe um professor cadastrado com este e-mail");
             }
         }
-    }
-
-    @Transactional
-    public ProfessorResponseDTO reativarProfessor(Long id) {
-        Professor professor = professorRepository.findByIdWithTurmas(id)
-                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
-
-        professor.setAtivo(true);
-        Professor salvo = professorRepository.save(professor);
-        return new ProfessorResponseDTO(salvo);
-    }
-
-    @Transactional
-    public List<TurmaResponseDTO> getTurmasDeProfessor(Long id){
-        Professor professor = professorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: "+id));
-        return professor.getTurmas()
-                .stream()
-                .map(TurmaResponseDTO::new)
-                .toList();
     }
 }

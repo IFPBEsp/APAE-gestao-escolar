@@ -160,7 +160,7 @@ export default function TurmaDetalhesPage() {
             </div>
 
             <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
-              <CardContent className="p-6">
+              <CardContent className="p-6 mt-4">
                 <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between">
                   <div className="flex items-center gap-4">
                     <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-[#0D4F97]/10">
@@ -186,20 +186,21 @@ export default function TurmaDetalhesPage() {
 
             <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
               <CardContent className="p-6">
-                <h3 className="text-[#0D4F97] font-semibold text-lg mb-4">Filtros</h3>
+                <h3 className="text-[#0D4F97] font-semibold text-lg mb-4 mt-4">Filtros</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-[#0D4F97] font-medium mb-2">Buscar Aluno</label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Input
-                        type="text"
-                        placeholder="Digite o nome do aluno"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 h-12 border-2 border-[#B2D7EC] bg-white"
-                      />
-                    </div>
+                    <div className="relative w-full">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      type="text"
+                      placeholder="Digite o nome do aluno"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 h-12 w-full border-2 border-[#B2D7EC] bg-white"
+                    />
+                  </div>
+
                   </div>
 
                   <div>
@@ -244,7 +245,7 @@ export default function TurmaDetalhesPage() {
                           <UserCircle className="h-6 w-6 text-[#0D4F97]" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-[#0D4F97]">{aluno.nome}</h3>
+                          <h3 className="font-semibold text-[#0D4F97] mt-4">{aluno.nome}</h3>
                           <p className="text-sm text-gray-500">{turma.nome}</p>
                         </div>
                       </div>

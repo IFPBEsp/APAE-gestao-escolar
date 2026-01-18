@@ -62,14 +62,14 @@ public class Professor {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "professor")
-    @JsonIgnoreProperties({"professor", "turmaAlunos", "aulas"}) // Evita referência circular
+    @OneToMany(mappedBy = "professor", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"professor", "turmaAlunos", "aulas"})
     private Set<Turma> turmas = new HashSet<>();
 
-    @OneToMany(mappedBy = "professor", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "professor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Relatorio> relatorios = new HashSet<>();
 
-    @OneToMany(mappedBy = "professor", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "professor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Avaliacao> avaliacoes = new HashSet<>();
 
     @PrePersist

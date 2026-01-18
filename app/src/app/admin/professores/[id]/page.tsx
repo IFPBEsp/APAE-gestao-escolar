@@ -136,7 +136,7 @@ export default function DetalhesProfessor() {
           <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
             <CardContent className="p-8">
               {/* Nome do Professor e Status */}
-              <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+              <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center mt-4">
                 <div className="flex items-center gap-4">
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#B2D7EC]/20">
                     <UserCircle className="h-10 w-10 text-[#0D4F97]" />

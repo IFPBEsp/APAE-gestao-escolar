@@ -1,0 +1,160 @@
+/* ===============================
+   CONFIGURAÇÕES GERAIS DE IMPRESSÃO
+   =============================== */
+
+@page {
+  size: A4;
+  margin: 20mm;
+}
+   
+@media print {
+  body {
+    background: white !important;
+    margin: 0;
+    padding: 0;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 12pt;
+    color: #000;
+  }
+
+  /* Oculta tudo por padrão */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Exibe apenas a área de impressão */
+  .impressao-area,
+  .impressao-area * {
+    visibility: visible;
+  }
+
+  .impressao-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* Elementos que nunca imprimem */
+  .nao-imprimir,
+  aside,
+  nav,
+  header,
+  footer {
+    display: none !important;
+  }
+}
+
+/* ===============================
+   FOLHA A4
+   =============================== */
+.impressao-pagina {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  background: white;
+  box-sizing: border-box;
+}
+
+/* ===============================
+   CABEÇALHO INSTITUCIONAL
+   =============================== */
+.impressao-cabecalho {
+  text-align: center;
+  padding-bottom: 6px;
+  margin-bottom: 14px;
+}
+
+.impressao-cabecalho h1 {
+  font-size: 14pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.impressao-cabecalho p {
+  font-size: 10pt;
+  margin: 2px 0;
+}
+
+.impressao-titulo-documento {
+  margin-top: 16px;
+  font-size: 14pt;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* ===============================
+   DADOS DO ALUNO / IDENTIFICAÇÃO
+   =============================== */
+.impressao-dados {
+  margin: 20px 0 30px 0;
+  font-size: 11pt;
+  text-transform: uppercase;
+}
+
+.impressao-dados p {
+  margin-bottom: 10px;
+}
+
+/* ===============================
+   SEÇÕES DO RELATÓRIO
+   =============================== */
+.impressao-secao {
+  margin-top: 14px;
+  page-break-inside: avoid;
+}
+
+.impressao-secao-titulo {
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.impressao-secao-conteudo {
+  text-align: justify;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* ===============================
+   ASSINATURAS
+   =============================== */
+.impressao-assinaturas {
+  margin-top: 80px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  page-break-inside: avoid;
+}
+
+.impressao-assinatura {
+  text-align: center;
+}
+
+.impressao-assinatura-linha {
+  border-top: 2px solid #000;
+  padding-top: 6px;
+  margin: 0 20px;
+}
+
+.impressao-assinatura-nome {
+  font-weight: bold;
+  font-size: 11pt;
+}
+
+.impressao-assinatura-cargo {
+  font-size: 10pt;
+}
+
+/* ===============================
+   QUEBRAS DE PÁGINA
+   =============================== */
+.quebra-pagina {
+  page-break-before: always;
+}
+
+/* Evita cortes ruins */
+.evitar-quebra {
+  page-break-inside: avoid;
+}
