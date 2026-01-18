@@ -114,11 +114,13 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
 
     async function fetchAlunos(nome: string) {
         try {
-            const data = await listarAlunos(nome); // chama a API via service
-            setAlunosEncontrados(data);
+            const page = await listarAlunos(nome);
+
+            // 🔑 correção mínima: usar o content da Page
+            setAlunosEncontrados(page.content ?? []);
         } catch (error) {
             console.log("Erro ao buscar alunos, usando lista vazia");
-            setAlunosEncontrados([]); // fallback vazio
+            setAlunosEncontrados([]);
         }
     }
 
