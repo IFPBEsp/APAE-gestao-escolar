@@ -101,7 +101,7 @@ export default function AvaliacoesAdmin({ onNavigate }: AvaliacoesAdminProps) {
                         onClick={() => router.push(`/admin/alunos/detalhes/${aluno.id}`)}
                         className="cursor-pointer rounded-xl border-2 border-[#B2D7EC] shadow-md transition-all hover:border-[#0D4F97] hover:shadow-lg"
                     >
-                        <CardContent className="p-6">
+                        <CardContent className="p-6 mt-3">
                             {/* Header do Card com Avatar e Nome */}
                             <div className="mb-4 flex items-start gap-3">
                                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#B2D7EC]/20">
