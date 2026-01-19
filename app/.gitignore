@@ -1,0 +1,58 @@
+
+# Dependências
+node_modules/
+
+# Build do Next.js
+.next/
+out/
+
+# Arquivos temporários do TypeScript
+*.tsbuildinfo
+
+
+#  Variáveis de ambiente
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+#  Logs
+*.log
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Editor de código
+.vscode/
+.idea/
+
+# Cache (se usar alguma lib que cria)
+.cache/
+
+# Build manual (caso use dist/)
+dist/
+build/
+
+# Next/Vercel/Turbo
+.vercel/
+.turbo/
+
+# Cobertura de testes
+coverage/
+
+# Caches e artefatos de ferramentas
+.eslintcache
+
+# Logs de gerenciadores de pacotes
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Windows/OneDrive
+desktop.ini
+
+# Resíduos de merge
+*.orig
+*.swp
