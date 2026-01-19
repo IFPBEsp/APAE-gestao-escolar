@@ -16,9 +16,6 @@ import java.util.List;
 @Repository
 public interface AvaliacaoRepository extends JpaRepository<Avaliacao, Long> {
 
-    // =========================
-    // USO EXISTENTE (DETALHES)
-    // =========================
     List<Avaliacao> findByAlunoOrderByDataAvaliacaoDesc(Aluno aluno);
 
     List<Avaliacao> findByProfessorOrderByDataAvaliacaoDesc(Professor professor);
@@ -30,9 +27,6 @@ public interface AvaliacaoRepository extends JpaRepository<Avaliacao, Long> {
 
     List<Avaliacao> findAllByOrderByDataAvaliacaoDesc();
 
-    // =========================
-    // 🚀 QUERY OTIMIZADA PARA CARDS
-    // =========================
    @Query("""
         SELECT MAX(a.dataAvaliacao)
         FROM Avaliacao a

@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -28,9 +27,6 @@ public class AlunoService {
     private final TurmaAlunoRepository turmaAlunoRepository;
     private final PresencaRepository presencaRepository;
     private final AvaliacaoRepository avaliacaoRepository;
-
-    private static final DateTimeFormatter DATA_BR =
-            DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public AlunoService(
             AlunoRepository alunoRepository,
@@ -52,40 +48,21 @@ public class AlunoService {
     @Transactional(readOnly = true)
     public Page<AlunoResumoDTO> listarAlunosPorNome(String nome, Pageable pageable) {
 
-        Page<Aluno> alunos = (nome == null || nome.isBlank())
-                ? alunoRepository.findAlunosComTurmaAtual(pageable)
-                : alunoRepository.findAlunosComTurmaAtualPorNome(nome, pageable);
+        Page<AlunoResumoDTO> page =
+                (nome == null || nome.isBlank())
+                        ? alunoRepository.listarResumo(pageable)
+                        : alunoRepository.listarResumoPorNome(nome, pageable);
 
-        return alunos.map(aluno -> {
-
-            String nomeTurma = null;
-            String turnoTurma = null;
-
-            if (aluno.getTurmaAtual().isPresent()) {
-                nomeTurma = aluno.getTurmaAtual().get().getNome();
-                turnoTurma = aluno.getTurmaAtual().get().getTurno();
-            }
-
-            Double percentualPresenca =
-                    presencaRepository.calcularPercentualPresenca(aluno.getId());
-
-            String dataUltimaAvaliacao =
-                    avaliacaoRepository.findDataUltimaAvaliacao(aluno.getId()) != null
-                            ? avaliacaoRepository.findDataUltimaAvaliacao(aluno.getId())
-                                    .format(DATA_BR)
-                            : null;
-
-            return new AlunoResumoDTO(
-                    aluno.getId(),
-                    aluno.getNome(),
-                    aluno.getIdade(),
-                    aluno.getNomeResponsavel(),
-                    nomeTurma,
-                    turnoTurma,
-                    percentualPresenca,
-                    dataUltimaAvaliacao
-            );
-        });
+        // Não precisa formatar, DTO já usa LocalDateTime
+        return page.map(dto -> new AlunoResumoDTO(
+                dto.getId(),
+                dto.getNome(),
+                dto.getNomeResponsavel(),
+                dto.getNomeTurma(),
+                dto.getTurnoTurma(),
+                dto.getPercentualPresenca(),
+                dto.getDataUltimaAvaliacao() // LocalDateTime direto
+        ));
     }
 
     // =========================
