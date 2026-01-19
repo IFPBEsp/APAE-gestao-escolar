@@ -16,8 +16,8 @@ interface AlunoResponseDTO {
   deficiencia: string;
   telefoneResponsavel: string;
   nomeResponsavel: string;
-  nomeTurmaAtual: string | null;
-  turnoTurmaAtual: string | null;
+  nomeTurma: string | null;
+  turnoTurma: string | null;
 }
 
 export default function AvaliacoesAdmin({ onNavigate }: AvaliacoesAdminProps) {
@@ -31,8 +31,7 @@ export default function AvaliacoesAdmin({ onNavigate }: AvaliacoesAdminProps) {
     try {
       const data = await listarAlunos(nome);
 
-      // ✅ CORREÇÃO MÍNIMA:
-      // backend agora retorna Page<AlunoResumoDTO>
+      // ✅ Ajuste: pegar content do Page
       setAlunos(data.content ?? []);
 
     } catch (error) {
@@ -108,8 +107,11 @@ export default function AvaliacoesAdmin({ onNavigate }: AvaliacoesAdminProps) {
           </p>
         ) : (
           alunos.map((aluno) => {
-            const turmaCompleta = aluno.nomeTurmaAtual
-              ? `${aluno.nomeTurmaAtual} - ${aluno.turnoTurmaAtual}`
+            // ✅ Corrigido: fallback para "Sem Turma Ativa" se qualquer valor for null ou vazio
+            const turmaNome = aluno.nomeTurma ?? "";
+            const turmaTurno = aluno.turnoTurma ?? "";
+            const turmaCompleta = turmaNome && turmaTurno
+              ? `${turmaNome} - ${turmaTurno}`
               : "Sem Turma Ativa";
 
             return (

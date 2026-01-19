@@ -27,10 +27,4 @@ public interface AvaliacaoRepository extends JpaRepository<Avaliacao, Long> {
 
     List<Avaliacao> findAllByOrderByDataAvaliacaoDesc();
 
-   @Query("""
-        SELECT MAX(a.dataAvaliacao)
-        FROM Avaliacao a
-        WHERE a.aluno.id = :alunoId
-    """)
-    LocalDateTime findDataUltimaAvaliacao(@Param("alunoId") Long alunoId);
 }

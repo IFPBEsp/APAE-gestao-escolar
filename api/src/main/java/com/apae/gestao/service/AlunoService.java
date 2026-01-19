@@ -25,26 +25,20 @@ public class AlunoService {
     private final AlunoRepository alunoRepository;
     private final TurmaRepository turmaRepository;
     private final TurmaAlunoRepository turmaAlunoRepository;
-    private final PresencaRepository presencaRepository;
     private final AvaliacaoRepository avaliacaoRepository;
 
     public AlunoService(
             AlunoRepository alunoRepository,
             TurmaRepository turmaRepository,
             TurmaAlunoRepository turmaAlunoRepository,
-            PresencaRepository presencaRepository,
             AvaliacaoRepository avaliacaoRepository
     ) {
         this.alunoRepository = alunoRepository;
         this.turmaRepository = turmaRepository;
         this.turmaAlunoRepository = turmaAlunoRepository;
-        this.presencaRepository = presencaRepository;
         this.avaliacaoRepository = avaliacaoRepository;
     }
 
-    // =========================
-    // LISTAGEM (CARDS)
-    // =========================
     @Transactional(readOnly = true)
     public Page<AlunoResumoDTO> listarAlunosPorNome(String nome, Pageable pageable) {
 
@@ -53,7 +47,6 @@ public class AlunoService {
                         ? alunoRepository.listarResumo(pageable)
                         : alunoRepository.listarResumoPorNome(nome, pageable);
 
-        // Não precisa formatar, DTO já usa LocalDateTime
         return page.map(dto -> new AlunoResumoDTO(
                 dto.getId(),
                 dto.getNome(),
@@ -61,13 +54,10 @@ public class AlunoService {
                 dto.getNomeTurma(),
                 dto.getTurnoTurma(),
                 dto.getPercentualPresenca(),
-                dto.getDataUltimaAvaliacao() // LocalDateTime direto
+                dto.getDataUltimaAvaliacao() 
         ));
     }
 
-    // =========================
-    // DETALHES
-    // =========================
     @Transactional(readOnly = true)
     public AlunoDetalhesDTO buscarPorId(Long id) {
         Aluno aluno = alunoRepository.findById(id)
@@ -75,9 +65,6 @@ public class AlunoService {
         return new AlunoDetalhesDTO(aluno);
     }
 
-    // =========================
-    // ATUALIZAR TURMA
-    // =========================
     @Transactional
     public AlunoDetalhesDTO atualizarTurma(Long alunoId, AlunoTurmaRequestDTO dto) {
 
@@ -102,9 +89,6 @@ public class AlunoService {
         return new AlunoDetalhesDTO(aluno);
     }
 
-    // =========================
-    // HISTÓRICO DE AVALIAÇÕES
-    // =========================
     @Transactional(readOnly = true)
     public List<AvaliacaoHistoricoResponseDTO> buscarAvaliacoesPorAlunoId(Long id) {
 
