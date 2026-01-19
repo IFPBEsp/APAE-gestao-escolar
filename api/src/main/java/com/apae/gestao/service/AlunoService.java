@@ -9,7 +9,6 @@ import com.apae.gestao.entity.Turma;
 import com.apae.gestao.entity.TurmaAluno;
 import com.apae.gestao.repository.AlunoRepository;
 import com.apae.gestao.repository.AvaliacaoRepository;
-import com.apae.gestao.repository.PresencaRepository;
 import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.TurmaRepository;
 import org.springframework.data.domain.Page;
@@ -44,8 +43,8 @@ public class AlunoService {
 
         Page<AlunoResumoDTO> page =
                 (nome == null || nome.isBlank())
-                        ? alunoRepository.listarResumo(pageable)
-                        : alunoRepository.listarResumoPorNome(nome, pageable);
+                        ? alunoRepository.listarAlunosResumido(pageable)
+                        : alunoRepository.listarAlunosPorNomeResumido(nome, pageable);
 
         return page.map(dto -> new AlunoResumoDTO(
                 dto.getId(),

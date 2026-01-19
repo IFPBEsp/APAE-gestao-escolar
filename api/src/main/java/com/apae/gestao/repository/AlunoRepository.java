@@ -32,7 +32,7 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
         LEFT JOIN a.avaliacoes av
         GROUP BY a.id, a.nome, a.nomeResponsavel, t.nome, t.turno
     """)
-    Page<AlunoResumoDTO> listarResumo(Pageable pageable);
+    Page<AlunoResumoDTO> listarAlunosResumido(Pageable pageable);
 
     @Query("""
         SELECT new com.apae.gestao.dto.aluno.AlunoResumoDTO(
@@ -56,7 +56,7 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
         WHERE LOWER(a.nome) LIKE LOWER(CONCAT('%', :nome, '%'))
         GROUP BY a.id, a.nome, a.nomeResponsavel, t.nome, t.turno
     """)
-    Page<AlunoResumoDTO> listarResumoPorNome(String nome, Pageable pageable);
+    Page<AlunoResumoDTO> listarAlunosPorNomeResumido(String nome, Pageable pageable);
 
 }
  

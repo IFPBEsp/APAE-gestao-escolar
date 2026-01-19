@@ -34,9 +34,6 @@ public class AlunoController {
         this.alunoService = alunoService;
     }
 
-    // =========================
-    // LISTAGEM (CARDS) — PAGINADA
-    // =========================
     @GetMapping
     @Operation(
         summary = "Listar alunos",
@@ -55,9 +52,6 @@ public class AlunoController {
         return ResponseEntity.ok(alunos);
     }
 
-    // =========================
-    // DETALHES
-    // =========================
     @GetMapping("/{id}")
     @Operation(summary = "Buscar aluno por ID")
     @ApiResponses({
@@ -69,9 +63,6 @@ public class AlunoController {
         return ResponseEntity.ok(aluno);
     }
 
-    // =========================
-    // ATUALIZAR TURMA
-    // =========================
     @PatchMapping("/{alunoId}/turma")
     @Operation(
         summary = "Atualizar a turma atual do aluno",
@@ -92,9 +83,6 @@ public class AlunoController {
         return ResponseEntity.ok(alunoAtualizado);
     }
 
-    // =========================
-    // HISTÓRICO DE AVALIAÇÕES
-    // =========================
     @GetMapping("/{id}/avaliacoes")
     @Operation(summary = "Buscar histórico de avaliações do aluno")
     public ResponseEntity<List<AvaliacaoHistoricoResponseDTO>> buscarAvaliacoesPorAlunoId(
