@@ -5,6 +5,7 @@ import { UserCircle, Loader2 } from "lucide-react";
 interface EstudanteCardProps {
     nome: string;
     turma: string;
+    turno?: string;
     turmaId?: string | number | null;
     alunoId?: string | number | null;
     loading?: boolean;
@@ -14,6 +15,7 @@ interface EstudanteCardProps {
 export function EstudanteCard({
     nome,
     turma,
+    turno,
     turmaId,
     alunoId,
     loading = false,
@@ -36,14 +38,11 @@ export function EstudanteCard({
                             ) : (
                                 <>
                                     <h2 className="text-[#0D4F97] text-xl font-bold">{nome}</h2>
-                                    <p className="text-[#222222]">{turma}</p>
-                                    {(turmaId || alunoId) && (
-                                        <p className="text-sm text-gray-500 mt-1">
-                                            {turmaId && `Turma ID: ${turmaId}`}
-                                            {turmaId && alunoId && " | "}
-                                            {alunoId && `Aluno ID: ${alunoId}`}
-                                        </p>
-                                    )}
+                                    <p className="text-[#222222]">
+                                        {turma}
+                                        {turno && !turma.includes(turno) && ` - ${turno}`}
+                                    </p>
+                                    {/* IDs removidos conforme solicitado */}
                                 </>
                             )}
                         </div>

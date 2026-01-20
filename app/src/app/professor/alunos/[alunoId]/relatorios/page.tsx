@@ -26,6 +26,7 @@ import {
   atualizarRelatorio,
   deletarRelatorio
 } from "@/services/RelatorioService";
+import { buscarTurmaPorId } from "@/services/TurmaService";
 
 export default function RelatoriosAlunoListaPage() {
   const router = useRouter();
@@ -44,6 +45,7 @@ export default function RelatoriosAlunoListaPage() {
 
   const [alunoData, setAlunoData] = useState<any>(null);
   const [loadingAluno, setLoadingAluno] = useState(true);
+  const [turmaData, setTurmaData] = useState<any>(null);
 
   // Carregar dados do aluno
   useEffect(() => {
@@ -63,7 +65,23 @@ export default function RelatoriosAlunoListaPage() {
     };
 
     carregarAluno();
+    carregarAluno();
   }, [alunoIdFromUrl]);
+
+  // Carregar dados da turma
+  useEffect(() => {
+    const carregarTurma = async () => {
+      if (!turmaId) return;
+      try {
+        const data = await buscarTurmaPorId(Number(turmaId));
+        setTurmaData(data);
+      } catch (error) {
+        console.error("Erro ao carregar turma:", error);
+      }
+    };
+
+    carregarTurma();
+  }, [turmaId]);
 
   const carregarRelatorios = useCallback(async () => {
     if (!alunoIdFromUrl) return;
@@ -179,7 +197,8 @@ export default function RelatoriosAlunoListaPage() {
               {/* CARD DO ALUNO */}
               <EstudanteCard
                 nome={alunoData?.nome || "Nome não encontrado"}
-                turma={alunoData?.turma?.nome || "Turma não encontrada"}
+                turma={turmaData?.nome || alunoData?.turma?.nome || "Turma não encontrada"}
+                turno={turmaData?.turno || alunoData?.turma?.turno}
                 turmaId={turmaId}
                 alunoId={alunoIdFromUrl}
                 loading={loadingAluno}

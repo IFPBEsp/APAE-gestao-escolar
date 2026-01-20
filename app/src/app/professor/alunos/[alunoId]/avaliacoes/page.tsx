@@ -11,6 +11,7 @@ import { ptBR } from "date-fns/locale";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
+import { buscarTurmaPorId } from "@/services/TurmaService";
 import * as AvaliacaoService from "@/services/AvaliacaoService";
 import { buscarAlunoPorId } from "@/services/AlunoService";
 import { EstudanteCard } from "@/components/alunos/EstudanteCard";
@@ -49,6 +50,7 @@ export default function AvaliacoesAlunoPage() {
 
   const [alunoData, setAlunoData] = useState<any>(null);
   const [loadingAluno, setLoadingAluno] = useState(true);
+  const [turmaData, setTurmaData] = useState<any>(null);
 
   // ID do professor logado (substituir por auth context depois)
   const professorId = 1;
@@ -71,7 +73,23 @@ export default function AvaliacoesAlunoPage() {
     };
 
     carregarAluno();
+    carregarAluno();
   }, [alunoId]);
+
+  // Carregar dados da turma se houver turmaId
+  useEffect(() => {
+    const carregarTurma = async () => {
+      if (!turmaId) return;
+      try {
+        const data = await buscarTurmaPorId(Number(turmaId));
+        setTurmaData(data);
+      } catch (error) {
+        console.error("Erro ao carregar turma:", error);
+      }
+    };
+
+    carregarTurma();
+  }, [turmaId]);
 
 
 
@@ -282,7 +300,8 @@ export default function AvaliacoesAlunoPage() {
             {/* Card de Informações do Aluno */}
             <EstudanteCard
               nome={alunoData?.nome || "Nome não encontrado"}
-              turma={alunoData?.turma?.nome || "Turma não encontrada"}
+              turma={turmaData?.nome || alunoData?.turma?.nome || "Turma não encontrada"}
+              turno={turmaData?.turno || alunoData?.turma?.turno}
               turmaId={turmaId}
               alunoId={alunoId}
               loading={loadingAluno}
