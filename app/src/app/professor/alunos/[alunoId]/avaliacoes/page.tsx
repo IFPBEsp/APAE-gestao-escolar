@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import * as AvaliacaoService from "@/services/AvaliacaoService";
+import { buscarAlunoPorId } from "@/services/AlunoService";
+import { EstudanteCard } from "@/components/alunos/EstudanteCard";
 
 interface Avaliacao {
   id: number;
@@ -27,49 +29,51 @@ export default function AvaliacoesAlunoPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
-  
-  const alunoId = parseInt(params.alunoId as string);
-  const turmaId = searchParams.get('turmaId');
-  
+
+  const alunoId = params?.alunoId ? parseInt(params.alunoId as string) : 0;
+  const turmaId = searchParams?.get('turmaId');
+
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+
   const [isAdicionarDialogOpen, setIsAdicionarDialogOpen] = useState(false);
   const [isEditarDialogOpen, setIsEditarDialogOpen] = useState(false);
   const [isExcluirDialogOpen, setIsExcluirDialogOpen] = useState(false);
   const [avaliacaoEditando, setAvaliacaoEditando] = useState<Avaliacao | null>(null);
   const [avaliacaoExcluindo, setAvaliacaoExcluindo] = useState<Avaliacao | null>(null);
-  
+
   const [descricaoAvaliacao, setDescricaoAvaliacao] = useState("");
   const [activeTab, setActiveTab] = useState("turmas");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  // Mock data para aluno (temporário - depois buscar da API)
-  const mockAlunoData: Record<number, any> = {
-    1: { name: "Ana Silva", turma: "Alfabetização 2025 - Manhã" },
-    2: { name: "Bruno Costa", turma: "Alfabetização 2025 - Manhã" },
-    3: { name: "Carlos Oliveira", turma: "Alfabetização 2025 - Manhã" },
-    4: { name: "Diana Santos", turma: "Alfabetização 2025 - Manhã" },
-    5: { name: "Eduardo Ferreira", turma: "Alfabetização 2025 - Manhã" },
-    6: { name: "Fernanda Lima", turma: "Alfabetização 2025 - Manhã" },
-    7: { name: "Gustavo Pereira", turma: "Alfabetização 2025 - Manhã" },
-    8: { name: "Helena Rodrigues", turma: "Alfabetização 2025 - Manhã" },
-    9: { name: "Igor Martins", turma: "Estimulação 2025 - Tarde" },
-    10: { name: "Julia Almeida", turma: "Estimulação 2025 - Tarde" },
-    11: { name: "Lucas Mendes", turma: "Estimulação 2025 - Tarde" },
-    12: { name: "Marina Souza", turma: "Estimulação 2025 - Tarde" },
-    13: { name: "Nicolas Cardoso", turma: "Estimulação 2025 - Tarde" },
-    14: { name: "Olivia Barbosa", turma: "Estimulação 2025 - Tarde" },
-  };
-
-  const alunoData = mockAlunoData[alunoId] || {
-    name: `Aluno ${alunoId}`,
-    turma: "Turma não especificada",
-  };
+  const [alunoData, setAlunoData] = useState<any>(null);
+  const [loadingAluno, setLoadingAluno] = useState(true);
 
   // ID do professor logado (substituir por auth context depois)
   const professorId = 1;
+
+  // Carregar dados do aluno
+  useEffect(() => {
+    const carregarAluno = async () => {
+      if (!alunoId || isNaN(alunoId)) return;
+
+      try {
+        setLoadingAluno(true);
+        const data = await buscarAlunoPorId(alunoId);
+        setAlunoData(data);
+      } catch (error) {
+        console.error("Erro ao carregar aluno:", error);
+        toast.error("Erro ao carregar dados do aluno");
+      } finally {
+        setLoadingAluno(false);
+      }
+    };
+
+    carregarAluno();
+  }, [alunoId]);
+
+
 
   // Validação do alunoId
   useEffect(() => {
@@ -146,7 +150,7 @@ export default function AvaliacoesAlunoPage() {
 
     try {
       setSaving(true);
-      
+
       const avaliacaoData = {
         descricao: descricaoAvaliacao,
         alunoId: alunoId,
@@ -154,16 +158,16 @@ export default function AvaliacoesAlunoPage() {
       };
 
       console.log("Enviando para API:", avaliacaoData);
-      
+
       await AvaliacaoService.criarAvaliacao(avaliacaoData);
-      
+
       toast.success("Avaliação adicionada com sucesso!");
       setIsAdicionarDialogOpen(false);
       setDescricaoAvaliacao("");
-      
+
       // Recarregar lista
       await carregarAvaliacoes();
-      
+
     } catch (error: any) {
       toast.error(error.message || "Erro ao adicionar avaliação");
       console.error("Erro detalhado:", error);
@@ -182,7 +186,7 @@ export default function AvaliacoesAlunoPage() {
 
     try {
       setSaving(true);
-      
+
       const avaliacaoData = {
         descricao: descricaoAvaliacao,
         alunoId: alunoId,
@@ -190,14 +194,14 @@ export default function AvaliacoesAlunoPage() {
       };
 
       await AvaliacaoService.atualizarAvaliacao(avaliacaoEditando.id, avaliacaoData);
-      
+
       toast.success("Avaliação atualizada com sucesso!");
       setIsEditarDialogOpen(false);
       setAvaliacaoEditando(null);
-      
+
       // Recarregar lista
       await carregarAvaliacoes();
-      
+
     } catch (error: any) {
       toast.error(error.message || "Erro ao atualizar avaliação");
       console.error(error);
@@ -211,16 +215,16 @@ export default function AvaliacoesAlunoPage() {
 
     try {
       setSaving(true);
-      
+
       await AvaliacaoService.deletarAvaliacao(avaliacaoExcluindo.id);
-      
+
       toast.success("Avaliação excluída com sucesso!");
       setIsExcluirDialogOpen(false);
       setAvaliacaoExcluindo(null);
-      
+
       // Recarregar lista
       await carregarAvaliacoes();
-      
+
     } catch (error: any) {
       toast.error(error.message || "Erro ao excluir avaliação");
       console.error(error);
@@ -249,9 +253,8 @@ export default function AvaliacoesAlunoPage() {
       />
 
       {/* Main Content */}
-      <main className={`flex-1 overflow-y-auto transition-all duration-300 ${
-        isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
-      }`}>
+      <main className={`flex-1 overflow-y-auto transition-all duration-300 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
+        }`}>
         <div className="p-4 md:p-8">
           <div className="mx-auto max-w-6xl">
             {/* Botão Voltar */}
@@ -271,39 +274,29 @@ export default function AvaliacoesAlunoPage() {
               </div>
               <div>
                 <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho do Aluno</h2>
-                <p className="text-[#222222]">Acompanhe o progresso e histórico de avaliações de {alunoData.name}</p>
+                <p className="text-[#222222]">Acompanhe o progresso e histórico de avaliações de {alunoData?.nome || "..."}</p>
               </div>
             </div>
 
             {/* Card de Informações do Aluno */}
-            <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
-              <CardContent className="p-6">
-                <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-start gap-4 mt-4">
-                    <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#B2D7EC]/20">
-                      <UserCircle className="h-10 w-10 text-[#0D4F97]" />
-                    </div>
-                    <div>
-                      <h2 className="text-[#0D4F97] text-xl font-bold">{alunoData.name}</h2>
-                      <p className="text-[#222222]">{alunoData.turma}</p>
-                      {turmaId && (
-                        <p className="text-sm text-gray-500 mt-1">
-                          Turma ID: {turmaId} | Aluno ID: {alunoId}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <Button
-                    onClick={handleOpenAdicionarDialog}
-                    className="h-12 justify-center bg-[#0D4F97] px-6 text-white hover:bg-[#FFD000] hover:text-[#0D4F97] font-semibold"
-                    disabled={loading || saving}
-                  >
-                    <Plus className="mr-2 h-5 w-5" />
-                    Adicionar Avaliação
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Card de Informações do Aluno */}
+            <EstudanteCard
+              nome={alunoData?.nome || "Nome não encontrado"}
+              turma={alunoData?.turma?.nome || "Turma não encontrada"}
+              turmaId={turmaId}
+              alunoId={alunoId}
+              loading={loadingAluno}
+              action={
+                <Button
+                  onClick={handleOpenAdicionarDialog}
+                  className="h-12 justify-center bg-[#0D4F97] px-6 text-white hover:bg-[#FFD000] hover:text-[#0D4F97] font-semibold"
+                  disabled={loading || saving}
+                >
+                  <Plus className="mr-2 h-5 w-5" />
+                  Adicionar Avaliação
+                </Button>
+              }
+            />
 
             {/* Lista de Avaliações */}
             <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
@@ -392,7 +385,7 @@ export default function AvaliacoesAlunoPage() {
                 <DialogHeader>
                   <DialogTitle className="text-[#0D4F97]">Adicionar Avaliação</DialogTitle>
                   <DialogDescription>
-                    Registre uma nova avaliação para {alunoData.name}
+                    Registre uma nova avaliação para {alunoData?.nome}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
@@ -447,7 +440,7 @@ export default function AvaliacoesAlunoPage() {
                 <DialogHeader>
                   <DialogTitle className="text-[#0D4F97]">Editar Avaliação</DialogTitle>
                   <DialogDescription>
-                    Atualize as informações da avaliação de {alunoData.name}
+                    Atualize as informações da avaliação de {alunoData?.nome}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
