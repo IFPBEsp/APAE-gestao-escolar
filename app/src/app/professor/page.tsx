@@ -133,35 +133,6 @@ export default function ProfessorDashboardPage() {
                 </CardContent>
               </Card>
             </div>
-
-            {/* Lista de Turmas (opcional - para visualização) */}
-            {turmas.length > 0 && (
-              <div className="mt-8">
-                <h2 className="text-[#0D4F97] text-xl font-bold mb-4">Suas Turmas</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {turmas.map((turma) => (
-                    <Card key={turma.id} className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
-                      <CardContent className="p-4">
-                        <h3 className="text-[#0D4F97] font-semibold mb-2">{turma.nome}</h3>
-                        <p className="text-sm text-[#222222] mb-1">Turno: {turma.turno}</p>
-                        <p className="text-sm text-[#222222] mb-1">Tipo: {turma.tipo}</p>
-                        <p className="text-sm text-[#222222] mb-1">Horário: {turma.horario}</p>
-                        <p className="text-sm text-[#0D4F97] font-medium mt-2">
-                          Alunos ativos: {turma.alunos?.filter(a => a.isAtivo).length || 0}
-                        </p>
-                        <div className={`inline-block px-2 py-1 rounded-full text-xs mt-2 ${
-                          turma.isAtiva 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {turma.isAtiva ? 'Ativa' : 'Inativa'}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </main>
