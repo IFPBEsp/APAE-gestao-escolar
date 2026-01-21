@@ -19,7 +19,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { listarTurmas } from "@/services/TurmaService";
 import { listarTurmasDeProfessor } from "@/services/ProfessorService";
-import { Professor, Turma } from "@/types/professor";
+import { Professor } from "@/types/professor";
+import { Turma } from "@/types/turma";
 
 
 interface ModalEditarProfessorProps {

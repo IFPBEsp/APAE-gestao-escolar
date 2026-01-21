@@ -1,40 +1,24 @@
-export interface Turma {
-  id: number;
-  nome: string;
-  anoCriacao?: number;
-  turno?: string;
-  tipo?: string;
-  isAtiva?: boolean;
-  professor?: {
-    id: number;
-    nome: string;
-  };
-}
-
 export interface Professor {
   id: number;
   nome: string;
-  cpf?: string;
+  cpf: string;
   email: string;
   telefone?: string;
-  endereco?: string;
   dataNascimento?: string;
   formacao?: string;
-  dataContratacao: string; 
-  turmas?: Turma[] | string[]; 
+  dataContratacao: string;
+  endereco?: string;
   ativo: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  turmas: string[];
 }
 
-export interface ProfessorModalProps {
+export interface ProfessorResumo {
   id: number;
   nome: string;
-  cpf?: string;
+  cpf: string;
   email: string;
-  telefone?: string;
-  endereco?: string;
-  dataNascimento?: string;
-  formacao?: string;
-  dataContratacao?: string; 
-  turmas?: Turma[] | string[];
   ativo: boolean;
+  turmas: string[];
 }

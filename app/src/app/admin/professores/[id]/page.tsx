@@ -207,15 +207,13 @@ export default function DetalhesProfessor() {
                 </div>
                 {professor.turmas && professor.turmas.length > 0 ? (
                   <div className="space-y-2">
-                    {professor.turmas.map((turma, index) => {
-                      const turmaNome =
-                        typeof turma === "object" ? turma.nome : turma;
+                    {professor.turmas.map((turmaNome, index) => { // turmaNome já é string
                       return (
                         <div
                           key={index}
                           className="rounded-lg border-2 border-[#B2D7EC] bg-white p-3 text-[#222222]"
                         >
-                          {turmaNome}
+                          {turmaNome} {/* Use diretamente */}
                         </div>
                       );
                     })}

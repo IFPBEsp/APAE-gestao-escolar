@@ -6,14 +6,16 @@ import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { useEffect, useState } from "react";
 import { buscarProfessorPorId } from "@/services/ProfessorService";
 import { listarTurmasDeProfessor } from "@/services/ProfessorService";
+import { Turma }from "@/types/turma";
+import { Professor } from "@/types/professor"; 
 
 
 export default function ProfessorDashboardPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [professor, setProfessor] = useState(null);
+  const [professor, setProfessor] = useState<Professor | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [turmas, setTurmas] = useState([]);
+  const [error, setError] = useState<string | null>(null);
+  const [turmas, setTurmas] = useState<Turma[]>([]);
 
   const handleToggleCollapse = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
@@ -22,10 +24,9 @@ export default function ProfessorDashboardPage() {
   useEffect(() => {
     async function carregarProfessor() {
       try {
-        // 🔹 solução temporária: professor fixo ID = 1
         const response = await buscarProfessorPorId(1);
         setProfessor(response);
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
@@ -36,18 +37,19 @@ export default function ProfessorDashboardPage() {
   }, []);
 
   useEffect(() => {
-  async function carregarTurmas() {
-    try {
-      const response = await listarTurmasDeProfessor(1); 
-      setTurmas(response);
-    } catch (err) {
-      console.error(err);
+    async function carregarTurmas() {
+      try {
+        const response = await listarTurmasDeProfessor(1);
+        console.log("Turmas retornadas:", response); // Para debug
+        setTurmas(response || []);
+      } catch (err) {
+        console.error(err);
+        setTurmas([]);
+      }
     }
-  }
 
-  carregarTurmas();
-}, []);
-
+    carregarTurmas();
+  }, []);
 
   if (loading) {
     return (
@@ -64,6 +66,16 @@ export default function ProfessorDashboardPage() {
       </div>
     );
   }
+
+  const calcularTotalAlunos = () => {
+    return turmas.reduce((total, turma) => {
+      if (turma.alunos && Array.isArray(turma.alunos)) {
+        const alunosAtivos = turma.alunos.filter(aluno => aluno.isAtivo);
+        return total + alunosAtivos.length;
+      }
+      return total;
+    }, 0);
+  };
 
   return (
     <div className="flex min-h-screen bg-[#E5E5E5]">
@@ -84,9 +96,11 @@ export default function ProfessorDashboardPage() {
               <h1 className="text-[#0D4F97] text-2xl font-bold">
                 Painel do Professor
               </h1>
-              <p className="text-[#222222]">
-                Bem-vindo, {professor.nome}!
-              </p>
+              {professor ? (
+                <p className="text-[#222222]">Bem-vindo, {professor.nome}!</p>
+              ) : (
+                <p className="text-[#222222]">Carregando informações...</p>
+              )}
             </div>
 
             {/* Cards de Resumo */}
@@ -99,7 +113,7 @@ export default function ProfessorDashboardPage() {
                     </div>
                     <p className="text-[#222222] mb-2">Turmas Ativas</p>
                     <p className="text-[#0D4F97] text-3xl font-bold">
-                      {turmas.length}
+                      {turmas.filter(t => t.isAtiva).length}
                     </p>
                   </div>
                 </CardContent>
@@ -111,17 +125,43 @@ export default function ProfessorDashboardPage() {
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#B2D7EC]/20 mb-4">
                       <Users className="h-7 w-7 text-[#0D4F97]" />
                     </div>
-                    <p className="text-[#222222] mb-2">Total de Alunos</p>
+                    <p className="text-[#222222] mb-2">Total de Alunos (Ativos)</p>
                     <p className="text-[#0D4F97] text-3xl font-bold">
-                      {turmas.reduce(
-                        (total, turma) => total + (turma.alunosIds?.length ?? 0), 0
-                      )}
+                      {calcularTotalAlunos()}
                     </p>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
+            {/* Lista de Turmas (opcional - para visualização) */}
+            {turmas.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-[#0D4F97] text-xl font-bold mb-4">Suas Turmas</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {turmas.map((turma) => (
+                    <Card key={turma.id} className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
+                      <CardContent className="p-4">
+                        <h3 className="text-[#0D4F97] font-semibold mb-2">{turma.nome}</h3>
+                        <p className="text-sm text-[#222222] mb-1">Turno: {turma.turno}</p>
+                        <p className="text-sm text-[#222222] mb-1">Tipo: {turma.tipo}</p>
+                        <p className="text-sm text-[#222222] mb-1">Horário: {turma.horario}</p>
+                        <p className="text-sm text-[#0D4F97] font-medium mt-2">
+                          Alunos ativos: {turma.alunos?.filter(a => a.isAtivo).length || 0}
+                        </p>
+                        <div className={`inline-block px-2 py-1 rounded-full text-xs mt-2 ${
+                          turma.isAtiva 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {turma.isAtiva ? 'Ativa' : 'Inativa'}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>
