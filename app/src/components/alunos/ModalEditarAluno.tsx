@@ -48,6 +48,7 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
             try {
                 const data = await listarTurmas();
                 setTurmasDisponiveis(data);
+                setTurmaIdSelecionada("");
 
                 // Encontrar a turma atual pelo nome e turno
                 if (aluno?.nomeTurmaAtual && aluno?.turnoTurmaAtual) {
