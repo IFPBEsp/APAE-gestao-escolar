@@ -19,7 +19,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/professores")
 @Tag(name = "Professores", description = "Operações de cadastro e manutenção de professores.")
 @SecurityRequirement(name = "bearerAuth")
-@CrossOrigin(origins = "*")
 public class ProfessorController {
 
     @Autowired
