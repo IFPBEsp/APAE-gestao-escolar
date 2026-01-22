@@ -126,14 +126,14 @@ export default function HistoricoAlunoPage() {
                         <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
                             <div className="p-6 border-b border-[#B2D7EC]/30">
                                 <h3 className="text-[#0D4F97] font-bold text-lg">Histórico de Chamadas</h3>
-                                <p className="text-[#222222] text-sm">Registros completos de presença</p>
+                                <p className="text-[#222222] text-sm">Registros completos da frequência individual</p>
                             </div>
                             <CardContent className="p-0">
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="bg-[#B2D7EC]/20 hover:bg-[#B2D7EC]/20">
                                             <TableHead className="text-[#0D4F97] font-semibold pl-6">Data</TableHead>
-                                            <TableHead className="text-[#0D4F97] font-semibold w-full">Descrição da Aula</TableHead>
+                                            <TableHead className="text-[#0D4F97] font-semibold">Descrição da Aula</TableHead>
                                             <TableHead className="text-[#0D4F97] font-semibold text-right pr-6">Status</TableHead>
                                         </TableRow>
                                     </TableHeader>

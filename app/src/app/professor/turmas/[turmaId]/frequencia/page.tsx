@@ -429,14 +429,14 @@ function HistoricoContent({
                     <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
                         <CardContent className="p-6 pt-12 text-center flex flex-col items-center justify-start h-full">
                             <p className="text-[#0D4F97] text-2xl font-bold">{mediaFrequencia}%</p>
-                            <p className="text-[#222222] text-sm mt-1">Média de presença anual</p>
+                            <p className="text-[#222222] text-sm mt-1">Frequência média anual da turma</p>
                         </CardContent>
                     </Card>
 
                     <Card className="rounded-xl border-2 border-orange-200 shadow-md">
                         <CardContent className="p-6 pt-12 text-center flex flex-col items-center justify-start h-full">
                             <p className="text-orange-600 text-2xl font-bold">{alunosEmAlerta} Alunos</p>
-                            <p className="text-[#222222] text-sm mt-1">Frequência abaixo de 75%</p>
+                            <p className="text-[#222222] text-sm mt-1">Com frequência abaixo de 75%</p>
                         </CardContent>
                     </Card>
 
@@ -464,14 +464,23 @@ function HistoricoContent({
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
+                                <Button
+                                    variant={showAlertsOnly ? "secondary" : "ghost"}
+                                    size="sm"
+                                    onClick={() => setShowAlertsOnly(!showAlertsOnly)}
+                                    className={`text-sm flex items-center gap-2 cursor-pointer transition-colors ${showAlertsOnly
+                                        ? "bg-orange-100 text-orange-700 hover:bg-orange-200 border border-orange-200"
+                                        : "text-[#222222] hover:bg-gray-100"
+                                        }`}
+                                >
+                                    <AlertTriangle className={`h-4 w-4 ${showAlertsOnly ? "text-orange-700" : "text-orange-600"}`} />
+                                    Apenas Alertas
+                                </Button>
                                 <Switch
                                     checked={showAlertsOnly}
                                     onCheckedChange={setShowAlertsOnly}
+                                    className="data-[state=checked]:bg-orange-600"
                                 />
-                                <label className="text-sm text-[#222222] flex items-center cursor-pointer" onClick={() => setShowAlertsOnly(!showAlertsOnly)}>
-                                    <AlertTriangle className="inline h-4 w-4 text-orange-600 mr-1" />
-                                    Apenas Alertas
-                                </label>
                             </div>
                         </div>
                     </div>

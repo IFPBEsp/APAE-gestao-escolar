@@ -36,17 +36,17 @@ export default function ProfessorDashboardPage() {
   }, []);
 
   useEffect(() => {
-  async function carregarTurmas() {
-    try {
-      const response = await listarTurmasDeProfessor(1); 
-      setTurmas(response);
-    } catch (err) {
-      console.error(err);
+    async function carregarTurmas() {
+      try {
+        const response = await listarTurmasDeProfessor(1);
+        setTurmas(response);
+      } catch (err) {
+        console.error(err);
+      }
     }
-  }
 
-  carregarTurmas();
-}, []);
+    carregarTurmas();
+  }, []);
 
 
   if (loading) {
@@ -73,9 +73,8 @@ export default function ProfessorDashboardPage() {
       />
 
       <main
-        className={`flex-1 overflow-y-auto transition-all duration-300 ${
-          isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
-        }`}
+        className={`flex-1 overflow-y-auto transition-all duration-300 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
+          }`}
       >
         <div className="p-4 md:p-8">
           <div className="mx-auto max-w-6xl">
