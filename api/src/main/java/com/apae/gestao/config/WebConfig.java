@@ -9,10 +9,15 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") 
-                .allowedOrigins("https://apae-gestao-escolar.vercel.app", "http://localhost:3000")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+    registry.addMapping("/**") 
+                .allowedOrigins(
+                    "https://apae-gestao-escolar.vercel.app", 
+                    "https://apae-gestao-escolar.onrender.com", 
+                    "http://localhost:3000"
+                )
+                .allowedMethods("*")
                 .allowedHeaders("*")
+                .exposedHeaders("Authorization") 
                 .allowCredentials(true);
     }
 }
