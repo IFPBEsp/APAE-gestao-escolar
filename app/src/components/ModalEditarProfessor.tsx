@@ -19,32 +19,9 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { listarTurmas } from "@/services/TurmaService";
 import { listarTurmasDeProfessor } from "@/services/ProfessorService";
+import { Professor } from "@/types/professor";
+import { Turma } from "@/types/turma";
 
-interface Turma {
-  id: number;
-  nome: string;
-  anoCriacao: number;
-  turno: string;
-  tipo: string;
-  isAtiva: boolean;
-  professor?: {
-    id: number;
-    nome: string;
-  };
-}
-
-interface Professor {
-  id: number;
-  nome: string;
-  cpf?: string;
-  email: string;
-  telefone?: string;
-  endereco?: string;
-  dataNascimento?: string;
-  formacao?: string;
-  dataContratacao?: string;
-  turmas?: Turma[] | string[];
-}
 
 interface ModalEditarProfessorProps {
   isOpen: boolean;
@@ -94,10 +71,8 @@ export default function ModalEditarProfessor({
           : "",
       });
 
-      // Buscar turmas do professor
       fetchTurmasProfessor(professor.id);
       
-      // Buscar todas as turmas disponíveis
       fetchTurmasDisponiveis();
     }
   }, [professor, isOpen]);
@@ -106,7 +81,6 @@ export default function ModalEditarProfessor({
     try {
       setLoadingTurmas(true);
       const turmas = await listarTurmas();
-      // Filtrar apenas turmas ativas
       const turmasAtivas = turmas.filter((turma: Turma) => turma.isAtiva);
       setTurmasDisponiveis(turmasAtivas);
     } catch (error) {
@@ -123,7 +97,6 @@ export default function ModalEditarProfessor({
       setTurmasVinculadas(turmas);
     } catch (error) {
       console.error("Erro ao buscar turmas do professor:", error);
-      // Se der erro, usa as turmas que já vieram no objeto professor
       const turmas = professor.turmas || [];
       const turmasNormalizadas = turmas.map((t: any) => 
         typeof t === "object" ? t : { 
