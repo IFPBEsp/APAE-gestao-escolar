@@ -15,7 +15,7 @@ public class WebConfig implements WebMvcConfigurer {
                     "https://apae-gestao-escolar.onrender.com", 
                     "http://localhost:3000"
                 )
-                .allowedMethods("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders("*")
                 .exposedHeaders("Authorization") 
                 .allowCredentials(true);
