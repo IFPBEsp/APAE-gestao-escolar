@@ -18,13 +18,16 @@ public interface TurmaRepository extends JpaRepository<Turma, Long> {
                 WHEN COUNT(p) = 0 THEN 0
                 ELSE SUM(CASE WHEN p.faltou = false THEN 1 ELSE 0 END) * 100.0 / COUNT(p)
             END,
-            SUM(
-                CASE 
-                    WHEN (
-                        SUM(CASE WHEN p.faltou = false THEN 1 ELSE 0 END) * 100.0 / COUNT(p)
-                    ) < 75 THEN 1 ELSE 0
-                END
-            ),
+
+            COUNT(DISTINCT CASE 
+                WHEN (
+                    SELECT 
+                        SUM(CASE WHEN p2.faltou = false THEN 1 ELSE 0 END) * 100.0 / COUNT(p2)
+                    FROM Presenca p2
+                    WHERE p2.aluno = a
+                ) < 75 THEN a.id
+            END),
+
             CONCAT(COUNT(DISTINCT a.id), ' / ', COUNT(p))
         )
         FROM Turma t
