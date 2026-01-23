@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/professores")
 @Tag(name = "Professores", description = "Operações de cadastro e manutenção de professores.")
 @SecurityRequirement(name = "bearerAuth")
-@CrossOrigin(origins = "*")
+// @CrossOrigin(origins = "*")
 public class ProfessorController {
 
     @Autowired
