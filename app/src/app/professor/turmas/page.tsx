@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { listarTurmasDeProfessor } from "@/services/ProfessorService";
 import { toast } from "sonner";
+import { Turma } from "@/types/turma"; 
 
 export default function TurmasPage() {
   const router = useRouter();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [turmas, setTurmas] = useState([]);
+  const [turmas, setTurmas] = useState<Turma[]>([]);
   const [loading, setLoading] = useState(true);
 
   const professorId = 1; //depois substituir pelo id que receber pelo login de prof(quando tiver login)
@@ -22,10 +23,10 @@ export default function TurmasPage() {
       const data = await listarTurmasDeProfessor(professorId);
 
       // opcional: filtrar apenas turmas ativas
-      const turmasAtivas = data.filter((turma) => turma.isAtiva);
+      const turmasAtivas = data.filter((turma: Turma) => turma.isAtiva);
 
       setTurmas(turmasAtivas);
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.message || "Erro ao carregar turmas");
     } finally {
       setLoading(false);
@@ -96,7 +97,7 @@ export default function TurmasPage() {
                 </p>
               ) : (
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  {turmas.map((turma) => (
+                  {turmas.map((turma: Turma) => (
                     <div
                       key={turma.id}
                       className="rounded-xl border-2 border-[#B2D7EC] bg-white p-4 md:p-6 transition-all hover:border-[#0D4F97] hover:shadow-lg cursor-pointer"
@@ -110,7 +111,7 @@ export default function TurmasPage() {
                         </h3>
 
                         <span className="flex-shrink-0 rounded-full bg-[#B2D7EC] px-3 py-1 text-[#0D4F97] font-bold text-xs uppercase">
-                          {turma.alunosIds?.length || 0} ALUNOS
+                          {turma.alunos?.filter(aluno => aluno.isAtivo).length || 0} ALUNOS
                         </span>
                       </div>
 

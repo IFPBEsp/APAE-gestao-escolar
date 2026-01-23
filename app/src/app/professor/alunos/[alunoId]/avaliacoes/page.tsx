@@ -28,8 +28,9 @@ export default function AvaliacoesAlunoPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  const alunoId = parseInt(params.alunoId as string);
-  const turmaId = searchParams.get('turmaId');
+  const alunoId = params?.alunoId ? parseInt(params.alunoId as string) : 0;
+  const turmaId = searchParams ? searchParams.get('turmaId') : null;
+
   
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
   const [loading, setLoading] = useState(true);
