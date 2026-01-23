@@ -2,14 +2,11 @@ package com.apae.gestao.controller;
 
 import java.util.List;
 
+import com.apae.gestao.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.apae.gestao.dto.TurmaAlunoResponseDTO;
-import com.apae.gestao.dto.ApiErrorResponse;
-import com.apae.gestao.dto.TurmaRequestDTO;
-import com.apae.gestao.dto.TurmaResponseDTO;
 import com.apae.gestao.service.TurmaService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,15 +21,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/turmas")
@@ -68,25 +57,62 @@ public class TurmaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{turmaId}") 
-    @Operation(summary = "Buscar turma por ID")
+    @GetMapping("/{id}")
+    @Operation(
+            summary = "Buscar turma por ID (resumida)",
+            description = "Retorna dados resumidos usando função PostgreSQL."
+    )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Turma encontrada", content = @Content(schema = @Schema(implementation = TurmaResponseDTO.class))),
-        @ApiResponse(responseCode = "404", description = "Turma não encontrada", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Turma encontrada",
+                    content = @Content(schema = @Schema(implementation = TurmaResumoDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Turma não encontrada")
     })
-    public ResponseEntity<TurmaResponseDTO> listarPorId( 
-            @Parameter(description = "Identificador da turma", example = "5", in = ParameterIn.PATH)
-            @PathVariable long turmaId){
-        TurmaResponseDTO response = service.buscarPorId(turmaId);
+    public ResponseEntity<TurmaResumoDTO> buscarPorId(
+            @Parameter(description = "Identificador da turma", example = "7", in = ParameterIn.PATH)
+            @PathVariable Long id) {
+        TurmaResumoDTO response = service.buscarTurmaResumidaPorId(id);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping 
-    @Operation(summary = "Listar todas as turmas")
-    public ResponseEntity<List<TurmaResponseDTO>> listarTodas(){ 
-        List<TurmaResponseDTO> response = service.listarTodas();
-        return ResponseEntity.ok(response);
+    @GetMapping
+    @Operation(
+            summary = "Listar turmas (OTIMIZADO com PostgreSQL)",
+            description = "Usa função PostgreSQL nativa. Retorna dados resumidos: id, nome, turno, professorNome, totalAlunos. " +
+                    "Suporta filtros por: id, nome, anoCriacao, turno, tipo, isAtiva, professorId."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de turmas retornada com sucesso")
+    })
+    public ResponseEntity<List<TurmaResumoDTO>> listarTodas(
+            @Parameter(description = "ID da turma", example = "7", in = ParameterIn.QUERY)
+            @RequestParam(value = "id", required = false) Long id,
+
+            @Parameter(description = "Nome da turma para busca", example = "Alfabetização", in = ParameterIn.QUERY)
+            @RequestParam(value = "nome", required = false) String nome,
+
+            @Parameter(description = "Ano de criação", example = "2025", in = ParameterIn.QUERY)
+            @RequestParam(value = "anoCriacao", required = false) Integer anoCriacao,
+
+            @Parameter(description = "Turno (MANHA, TARDE, NOITE)", example = "MANHA", in = ParameterIn.QUERY)
+            @RequestParam(value = "turno", required = false) String turno,
+
+            @Parameter(description = "Tipo pedagógico", example = "Educação Especial", in = ParameterIn.QUERY)
+            @RequestParam(value = "tipo", required = false) String tipo,
+
+            @Parameter(description = "Filtrar por status ativo/inativo", example = "true", in = ParameterIn.QUERY)
+            @RequestParam(value = "isAtiva", required = false) Boolean isAtiva,
+
+            @Parameter(description = "ID do professor", example = "12", in = ParameterIn.QUERY)
+            @RequestParam(value = "professorId", required = false) Long professorId) {
+
+        List<TurmaResumoDTO> turmas = service.listarTurmas(
+                id, nome, anoCriacao, turno, tipo, isAtiva, professorId
+        );
+
+        return ResponseEntity.ok(turmas);
     }
+
+
 
     @PutMapping("/{turmaId}") 
     @Operation(summary = "Atualizar turma existente")

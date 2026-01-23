@@ -3,13 +3,13 @@ package com.apae.gestao.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.apae.gestao.dto.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.apae.gestao.dto.ProfessorResponseDTO;
-import com.apae.gestao.dto.TurmaAlunoResponseDTO;
-import com.apae.gestao.dto.TurmaRequestDTO;
-import com.apae.gestao.dto.TurmaResponseDTO;
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Turma;
@@ -33,6 +33,48 @@ public class TurmaService {
 
     @Autowired
     private TurmaAlunoRepository turmaAlunoDAO;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Transactional(readOnly = true)
+    public List<TurmaResumoDTO> listarTurmas(
+            Long id,
+            String nome,
+            Integer anoCriacao,
+            String turno,
+            String tipo,
+            Boolean isAtiva,
+            Long professorId) {
+
+        String jsonResult = turmaDAO.listarTurmasJson(
+                id, nome, anoCriacao, turno, tipo, isAtiva, professorId
+        );
+
+        return parseJsonToList(jsonResult);
+    }
+
+    @Transactional(readOnly = true)
+    public TurmaResumoDTO buscarTurmaResumidaPorId(Long id) {
+        String jsonResult = turmaDAO.listarTurmasJson(
+                id, null, null, null, null, null, null
+        );
+
+        List<TurmaResumoDTO> turmas = parseJsonToList(jsonResult);
+
+        if (turmas.isEmpty()) {
+            throw new RuntimeException("Turma não encontrada com ID: " + id);
+        }
+
+        return turmas.get(0);
+    }
+
+    private List<TurmaResumoDTO> parseJsonToList(String json) {
+        try {
+            return objectMapper.readValue(json, new TypeReference<List<TurmaResumoDTO>>() {});
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Erro ao processar JSON de turmas", e);
+        }
+    }
 
     @Transactional
     public TurmaResponseDTO criar(TurmaRequestDTO dto) {
@@ -86,13 +128,6 @@ public class TurmaService {
         return new TurmaResponseDTO(atualizado);
     }
 
-    @Transactional(readOnly = true)
-    public ProfessorResponseDTO buscarProfessorDaTurma(Long turmaId) {
-        Turma turma = turmaDAO.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
-        return new ProfessorResponseDTO(turma.getProfessor());
-    }
-
     @Transactional
     public TurmaResponseDTO ativarTurma(Long turmaId) {
         Turma turma = turmaDAO.findById(turmaId)
@@ -117,23 +152,27 @@ public class TurmaService {
     public TurmaResponseDTO adicionarAlunos(Long turmaId, List<Long> alunoIds) {
         Turma turma = turmaDAO.findById(turmaId)
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
+
         List<Aluno> alunos = alunoDAO.findAllById(alunoIds);
+
         if (alunos.size() != alunoIds.size()) {
             throw new RuntimeException("Um ou mais IDs de aluno não foram encontrados.");
         }
+
         for (Aluno aluno : alunos) {
             turma.addAluno(aluno, true);
         }
+
         Turma atualizada = turmaDAO.save(turma);
-        return new TurmaResponseDTO(atualizada);
+
+        return turmaDAO.findByIdWithDetails(atualizada.getId())
+                .map(TurmaResponseDTO::new)
+                .orElse(new TurmaResponseDTO(atualizada));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<TurmaAlunoResponseDTO> listarAlunos(Long turmaId) {
-        Turma turma = turmaDAO.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada."));
-
-        return turma.getTurmaAlunos()
+        return turmaAlunoDAO.findByTurmaId(turmaId)
                 .stream()
                 .map(TurmaAlunoResponseDTO::new)
                 .toList();
@@ -203,11 +242,11 @@ public class TurmaService {
         }
 
         if (dto.getAlunosIds() != null && !dto.getAlunosIds().isEmpty()) {
-            for (Long alunoId : dto.getAlunosIds()) {
-                Aluno aluno = alunoDAO.findById(alunoId)
-                        .orElseThrow(() -> new RuntimeException("Aluno não encontrado com ID: " + alunoId));
+            List<Aluno> alunos = alunoDAO.findAllById(dto.getAlunosIds());
+
+            for (Aluno aluno : alunos) {
                 boolean alunoJaExiste = turma.getTurmaAlunos().stream()
-                        .anyMatch(ta -> ta.getAluno().getId().equals(alunoId));
+                        .anyMatch(ta -> ta.getAluno().getId().equals(aluno.getId()));
                 if (!alunoJaExiste) {
                     turma.addAluno(aluno, true);
                 }

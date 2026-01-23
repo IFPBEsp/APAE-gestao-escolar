@@ -111,7 +111,7 @@ export default function TurmasPage() {
                         </h3>
 
                         <span className="flex-shrink-0 rounded-full bg-[#B2D7EC] px-3 py-1 text-[#0D4F97] font-bold text-xs uppercase">
-                          {turma.alunosIds?.length || 0} ALUNOS
+                          {turma.totalAlunosAtivos ?? 0} ALUNOS
                         </span>
                       </div>
 

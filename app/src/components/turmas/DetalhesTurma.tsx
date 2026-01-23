@@ -16,7 +16,6 @@ import {
     buscarTurmaPorId,
     desativarTurma,
     ativarTurma,
-    listarAlunosAtivos
 } from "@/services/TurmaService";
 import { toast } from "sonner";
 
@@ -37,28 +36,23 @@ export function DetalhesTurma({
 }: DetalhesTurmaProps) {
 
     const [turma, setTurma] = useState<any>(null);
-    const [alunosAtivosCount, setAlunosAtivosCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     useEffect(() => {
         async function carregarTurma() {
             try {
-                setLoading(true);
+              setLoading(true);
 
-                const data = await buscarTurmaPorId(turmaId);
-                setTurma(data);
-
-                // Contador de alunos ativos
-                const ativos = await listarAlunosAtivos(turmaId);
-                setAlunosAtivosCount(ativos.length);
+              const data = await buscarTurmaPorId(turmaId);
+              setTurma(data);
 
             } catch (error: any) {
-                toast.error(error.message || "Erro ao carregar turma");
+              toast.error(error.message || "Erro ao carregar turma");
             } finally {
-                setLoading(false);
+              setLoading(false);
             }
-        }
+          }
 
         carregarTurma();
     }, [turmaId]);
@@ -150,7 +144,7 @@ export function DetalhesTurma({
                                     Professor Responsável
                                 </p>
                                 <p className="text-[#0D4F97] font-medium">
-                                    {turma.professor?.nome || "Não informado"}
+                                    {turma.professorNome || "Não informado"}
                                 </p>
                             </div>
                         </div>
@@ -192,7 +186,7 @@ export function DetalhesTurma({
                                     Quantidade de Alunos
                                 </p>
                                 <p className="text-[#0D4F97] font-medium">
-                                    {alunosAtivosCount}
+                                    {turma.totalAlunosAtivos} ativos de {turma.totalAlunos}
                                 </p>
                             </div>
                         </div>
