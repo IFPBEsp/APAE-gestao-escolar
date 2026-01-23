@@ -1,8 +1,10 @@
-package com.apae.gestao.dto;
+package com.apae.gestao.dto.turma;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.apae.gestao.dto.ProfessorResponseDTO;
+import com.apae.gestao.dto.turmaAluno.TurmaAlunoResponseDTO;
 import com.apae.gestao.entity.Turma;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
