@@ -5,10 +5,6 @@ import { UserCircle, Search, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { listarAlunos } from "@/services/AlunoService";
 
-interface AvaliacoesAdminProps {
-  onNavigate?: (page: string, id?: number) => void;
-}
-
 interface AlunoResponseDTO {
   id: number;
   nome: string;
@@ -20,7 +16,7 @@ interface AlunoResponseDTO {
   turnoTurma: string | null;
 }
 
-export default function AvaliacoesAdmin({ onNavigate }: AvaliacoesAdminProps) {
+export default function AlunosPage() {
   const [alunos, setAlunos] = useState<AlunoResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,7 +27,6 @@ export default function AvaliacoesAdmin({ onNavigate }: AvaliacoesAdminProps) {
     try {
       const data = await listarAlunos(nome);
 
-      // ✅ Ajuste: pegar content do Page
       setAlunos(data.content ?? []);
 
     } catch (error) {
