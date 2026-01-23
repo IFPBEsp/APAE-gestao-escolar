@@ -8,12 +8,17 @@ import { Button } from "@/components/ui/button";
 import { buscarTurmaPorId } from "@/services/TurmaService";
 import { toast } from "sonner";
 
+interface Turma {
+  id: number; 
+  nome: string;
+}
+
 export default function ChamadaPage() {
   const router = useRouter();
   const params = useParams();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [turma, setTurma] = useState(null);
+  const [turma, setTurma] = useState<Turma | null>(null);
   const [loading, setLoading] = useState(true);
 
   const turmaId = params?.turmaId ? String(params.turmaId) : null;
