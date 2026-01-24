@@ -31,9 +31,11 @@ export default function AvaliacoesAlunoPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const alunoId = params?.alunoId ? parseInt(params.alunoId as string) : 0;
-  const turmaId = searchParams?.get('turmaId');
-
+  // Versão mais robusta para obter o alunoId
+  const alunoId = params?.alunoId ? parseInt(Array.isArray(params.alunoId) ? params.alunoId[0] : params.alunoId) : 0;
+  
+  // Versão segura para obter o turmaId
+  const turmaId = searchParams?.get('turmaId') || '';
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
