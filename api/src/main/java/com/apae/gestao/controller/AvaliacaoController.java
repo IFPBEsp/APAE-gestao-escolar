@@ -25,6 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/avaliacoes")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 @Tag(name = "Avaliações", description = "Criação e gerenciamento de avaliações dos alunos.")
 public class AvaliacaoController {
 
