@@ -28,9 +28,18 @@ export default function AvaliacoesAlunoPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  const alunoId = params?.alunoId ? parseInt(params.alunoId as string) : 0;
-  const turmaId = searchParams ? searchParams.get('turmaId') : null;
-
+  // Verifica se params ou params.alunoId são nulos/undefined
+  if (!params?.alunoId) {
+    router.push('/professor/turmas');
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-[#0D4F97]" />
+      </div>
+    );
+  }
+  
+  const alunoId = parseInt(Array.isArray(params.alunoId) ? params.alunoId[0] : params.alunoId);
+  const turmaId = searchParams?.get('turmaId') || '';
   
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
   const [loading, setLoading] = useState(true);

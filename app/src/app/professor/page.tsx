@@ -7,8 +7,7 @@ import { useEffect, useState } from "react";
 import { buscarProfessorPorId } from "@/services/ProfessorService";
 import { listarTurmasDeProfessor } from "@/services/ProfessorService";
 import { Turma }from "@/types/turma";
-import { Professor } from "@/types/professor"; 
-
+import { Professor } from "@/types/professor";
 
 export default function ProfessorDashboardPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);

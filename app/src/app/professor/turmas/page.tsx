@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { listarTurmasDeProfessor } from "@/services/ProfessorService";
 import { toast } from "sonner";
-import { Turma } from "@/types/turma"; 
+import { Turma } from "@/types/turma";
 
 export default function TurmasPage() {
   const router = useRouter();
