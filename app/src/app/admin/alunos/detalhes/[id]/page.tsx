@@ -168,25 +168,31 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
 
   return (
     <div className="w-full min-h-screen bg-[#E5E5E5]">
-      <div className="bg-[#0D4F97] text-white px-4 md:px-8 py-4 shadow-md">
-        <h1 className="text-lg md:text-xl font-bold">Detalhes do Aluno</h1>
-      </div>
+      {/* Conteúdo - Padronizado com Detalhes da Turma */}
+      <div className="p-4 md:p-8 space-y-6">
+        
+        {/* Cabeçalho de Navegação */}
+        <div>
+            <Button
+                variant="ghost"
+                onClick={() => router.push("/admin/alunos")}
+                className="text-[#0D4F97] hover:bg-[#E8F3FF] pl-0 gap-2 mb-4"
+            >
+                <ArrowLeft size={20} />
+                Voltar
+            </Button>
 
-      <div className="p-4 md:p-8 space-y-6 md:space-y-8">
-        <Button
-          variant="outline"
-          onClick={() => router.push("/admin/alunos")}
-          className="flex items-center gap-2 border-[#B2D7EC] text-[#0D4F97] hover:bg-blue-50 text-sm md:text-base h-9 md:h-10"
-        >
-          <ArrowLeft size={18} /> Voltar para Alunos
-        </Button>
+            <h1 className="text-2xl font-bold text-[#0D4F97]">Detalhes do Aluno</h1>
+            <p className="text-gray-500">Visualize e gerencie as informações do aluno</p>
+        </div>
 
-        <Card className="border border-blue-200 shadow-lg rounded-xl">
+        {/* Card principal do Aluno */}
+        <Card className="border border-[#E2E8F0] shadow-sm rounded-xl overflow-hidden">
           <CardContent className="p-4 md:p-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="flex items-center gap-3 md:gap-4">
-                <div className="bg-blue-100 p-3 md:p-4 rounded-full flex-shrink-0">
-                  <User size={30} className="text-blue-700 md:size-8" />
+                <div className="h-12 w-12 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97]">
+                  <User size={24} />
                 </div>
                 <div>
                   <h2 className="text-xl md:text-2xl font-bold text-[#0D4F97]">{alunoData.nome}</h2>
@@ -203,77 +209,87 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-y-6 mt-6 md:mt-10 text-gray-800">
-              <div className="flex gap-3 items-center">
-                <Calendar className="text-[#0D4F97] flex-shrink-0" size={20} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-y-8 gap-x-12 mt-6 md:mt-10">
+              
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <Calendar size={20} />
+                </div>
                 <div>
-                  <p className="font-semibold text-[#0D4F97] text-sm md:text-base">Data de Nascimento</p>
-                  <p className="text-sm md:text-base">{formatarData(alunoData.dataNascimento)}</p>
+                  <p className="text-sm font-medium text-gray-500 mb-1">Data de Nascimento</p>
+                  <p className="text-[#0D4F97] font-medium">{formatarData(alunoData.dataNascimento)}</p>
                 </div>
               </div>
 
-              <div className="flex gap-3 items-center">
-                <BookOpen className="text-[#0D4F97] flex-shrink-0" size={20} />
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <BookOpen size={20} />
+                </div>
                 <div>
-                  <p className="font-semibold text-[#0D4F97] text-sm md:text-base">Turma Atual</p>
-                  <p className="font-medium text-[#0D4F97] text-sm md:text-base">{turmaCompleta}</p>
+                  <p className="text-sm font-medium text-gray-500 mb-1">Turma Atual</p>
+                  <p className="text-[#0D4F97] font-medium">{turmaCompleta}</p>
                 </div>
               </div>
 
-              <div className="flex gap-3 items-center">
-                <Heart className="text-[#0D4F97] flex-shrink-0" size={20} />
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <Heart size={20} />
+                </div>
                 <div>
-                  <p className="font-semibold text-[#0D4F97] text-sm md:text-base">Deficiência</p>
-                  <p className="text-sm md:text-base">{alunoData.deficiencia}</p>
+                  <p className="text-sm font-medium text-gray-500 mb-1">Deficiência</p>
+                  <p className="text-[#0D4F97] font-medium">{alunoData.deficiencia}</p>
                 </div>
               </div>
 
-              <div className="flex gap-3 col-span-1 md:col-span-2 items-start">
-                <Phone className="text-[#0D4F97] flex-shrink-0 mt-1" size={20} />
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <Phone size={20} />
+                </div>
                 <div>
-                  <p className="font-semibold text-[#0D4F97] text-sm md:text-base">Responsável</p>
-                  <p className="text-sm md:text-base">{alunoData.nomeResponsavel}</p>
-                  <p className="text-sm md:text-base">{alunoData.telefoneResponsavel}</p>
+                  <p className="text-sm font-medium text-gray-500 mb-1">Responsável</p>
+                  <p className="text-[#0D4F97] font-medium">{alunoData.nomeResponsavel}</p>
+                  <p className="text-gray-500 text-sm">{alunoData.telefoneResponsavel}</p>
                 </div>
               </div>
+
             </div>
           </CardContent>
         </Card>
 
         {/* Histórico de Avaliações */}
-        <Card className="border border-blue-200 shadow-lg rounded-xl">
+        <Card className="border border-[#E2E8F0] shadow-sm rounded-xl overflow-hidden">
           <CardContent className="p-4 md:p-8">
-            <h2 className="text-xl md:text-2xl font-bold text-[#0D4F97] mb-2">Histórico de Avaliações</h2>
-            <p className="text-gray-600 mb-4 md:mb-6 text-sm md:text-base">Avaliações realizadas pelos professores ({avaliacoes.length} registros)</p>
+            <h2 className="text-xl font-bold text-[#0D4F97] mb-2">Histórico de Avaliações</h2>
+            <p className="text-gray-500 mb-6">Avaliações realizadas pelos professores ({avaliacoes.length} registros)</p>
 
             {loadingAvaliacoes ? (
                 <div className="flex justify-center py-4">
                     <Loader2 className="h-6 w-6 animate-spin text-[#0D4F97]" />
                 </div>
             ) : avaliacoes.length === 0 ? (
-                <p className="text-center text-gray-500 py-4 text-sm md:text-base">Nenhuma avaliação encontrada para este aluno.</p>
+                <p className="text-center text-gray-500 py-4">Nenhuma avaliação encontrada para este aluno.</p>
             ) : (
                 <div className="overflow-x-auto">
                     <table className="w-full min-w-[700px] text-left border-collapse">
                         <thead>
-                            <tr className="border-b border-gray-200 text-sm md:text-base">
-                                <th className="pb-3 pr-3 font-bold text-[#0D4F97] w-[120px]">Data</th>
-                                <th className="pb-3 pr-3 font-bold text-[#0D4F97] w-[150px]">Professor</th>
-                                <th className="pb-3 pr-3 font-bold text-[#0D4F97] w-[180px]">Turma</th>
-                                <th className="pb-3 pr-3 font-bold text-[#0D4F97]">Descrição</th>
-                                <th className="pb-3 font-bold text-[#0D4F97] w-[80px]">Ações</th>
+                            <tr className="border-b border-gray-100">
+                                <th className="pb-3 pr-3 font-semibold text-[#0D4F97] w-[120px]">Data</th>
+                                <th className="pb-3 pr-3 font-semibold text-[#0D4F97] w-[150px]">Professor</th>
+                                <th className="pb-3 pr-3 font-semibold text-[#0D4F97] w-[180px]">Turma</th>
+                                <th className="pb-3 pr-3 font-semibold text-[#0D4F97]">Descrição</th>
+                                <th className="pb-3 font-semibold text-[#0D4F97] w-[80px]">Ações</th>
                             </tr>
                         </thead>
-                        <tbody className="text-gray-600 text-sm md:text-base">
+                        <tbody className="text-gray-600">
                             {avaliacoes.map((avaliacao: any, index: number) => (
-                            <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                                <td className="py-3 font-medium text-gray-900 pr-3">{formatarData(avaliacao.dataAvaliacao)}</td> 
-                                <td className="font-medium text-gray-900 pr-3">{avaliacao.professorNome}</td>
-                                <td className="text-gray-600 pr-3">{avaliacao.turmaNomeCompleto}</td>
-                                <td className="text-gray-600 truncate max-w-[200px]" title={avaliacao.descricao}>{avaliacao.descricao}</td>
-                                <td className="py-3">
+                            <tr key={index} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                                <td className="py-4 font-medium text-gray-900 pr-3">{formatarData(avaliacao.dataAvaliacao)}</td> 
+                                <td className="py-4 pr-3">{avaliacao.professorNome}</td>
+                                <td className="py-4 pr-3">{avaliacao.turmaNomeCompleto}</td>
+                                <td className="py-4 pr-3 truncate max-w-[200px]" title={avaliacao.descricao}>{avaliacao.descricao}</td>
+                                <td className="py-4">
                                 <Eye
-                                    className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]"
+                                    className="h-5 w-5 text-gray-400 cursor-pointer hover:text-[#0D4F97]"
                                     onClick={() => setSelectedAvaliacao(avaliacao)}
                                 />
                                 </td>
@@ -287,39 +303,39 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
         </Card>
 
         {/* Histórico de Relatórios */}
-        <Card className="border border-blue-200 shadow-lg rounded-xl mt-8">
+        <Card className="border border-[#E2E8F0] shadow-sm rounded-xl overflow-hidden mt-8">
           <CardContent className="p-4 md:p-8">
-            <h2 className="text-xl md:text-2xl font-bold text-[#0D4F97] mb-2">Histórico de Relatórios</h2>
-            <p className="text-gray-600 mb-4 md:mb-6 text-sm md:text-base">Relatórios pedagógicos registrados ({relatorios.length} registros)</p>
+            <h2 className="text-xl font-bold text-[#0D4F97] mb-2">Histórico de Relatórios</h2>
+            <p className="text-gray-500 mb-6">Relatórios pedagógicos registrados ({relatorios.length} registros)</p>
 
             {loadingRelatorios ? (
               <div className="flex justify-center py-4">
                 <Loader2 className="h-6 w-6 animate-spin text-[#0D4F97]" />
               </div>
             ) : relatorios.length === 0 ? (
-              <p className="text-center text-gray-500 py-4 text-sm md:text-base">Nenhum relatório encontrado para este aluno.</p>
+              <p className="text-center text-gray-500 py-4">Nenhum relatório encontrado para este aluno.</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[800px] text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-gray-200 text-sm md:text-base">
-                      <th className="pb-3 pr-3 font-bold text-[#0D4F97] w-[120px]">Data</th>
-                      <th className="pb-3 pr-3 font-bold text-[#0D4F97] w-[150px]">Professor</th>
-                      <th className="pb-3 pr-3 font-bold text-[#0D4F97] w-[180px]">Turma</th>
-                      <th className="pb-3 pr-3 font-bold text-[#0D4F97]">Atividades</th>
-                      <th className="pb-3 font-bold text-[#0D4F97] w-[80px]">Ações</th>
+                    <tr className="border-b border-gray-100">
+                      <th className="pb-3 pr-3 font-semibold text-[#0D4F97] w-[120px]">Data</th>
+                      <th className="pb-3 pr-3 font-semibold text-[#0D4F97] w-[150px]">Professor</th>
+                      <th className="pb-3 pr-3 font-semibold text-[#0D4F97] w-[180px]">Turma</th>
+                      <th className="pb-3 pr-3 font-semibold text-[#0D4F97]">Atividades</th>
+                      <th className="pb-3 font-semibold text-[#0D4F97] w-[80px]">Ações</th>
                     </tr>
                   </thead>
-                  <tbody className="text-gray-600 text-sm md:text-base">
+                  <tbody className="text-gray-600">
                     {relatorios.map((relatorio, index) => (
-                      <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-3 font-medium text-gray-900 pr-3">{formatarData(relatorio.createdAt)}</td>
-                        <td className="font-medium text-gray-900 pr-3">{relatorio.professorNome}</td>
-                        <td className="text-gray-600 pr-3">{relatorio.turmaNome || "Sem Turma"}</td>
-                        <td className="text-gray-600 truncate max-w-[220px]" title={relatorio.atividades}>{relatorio.atividades}</td>
-                        <td className="py-3">
+                      <tr key={index} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                        <td className="py-4 font-medium text-gray-900 pr-3">{formatarData(relatorio.createdAt)}</td>
+                        <td className="py-4 pr-3">{relatorio.professorNome}</td>
+                        <td className="py-4 pr-3">{relatorio.turmaNome || "Sem Turma"}</td>
+                        <td className="py-4 pr-3 truncate max-w-[220px]" title={relatorio.atividades}>{relatorio.atividades}</td>
+                        <td className="py-4">
                           <Eye
-                            className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]"
+                            className="h-5 w-5 text-gray-400 cursor-pointer hover:text-[#0D4F97]"
                             onClick={() => setSelectedRelatorio(relatorio)}
                           />
                         </td>
