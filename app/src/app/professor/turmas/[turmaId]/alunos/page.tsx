@@ -94,16 +94,6 @@ export default function TurmaDetalhesPage() {
     carregarDados();
   }, [turmaId]);
 
-  if (!turmaId || !turma) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#E5E5E5]">
-        <Card className="p-8">
-          <CardContent>Turma não encontrada</CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   const filteredAlunos = alunos.filter((aluno: any) =>
     aluno.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
