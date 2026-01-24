@@ -38,8 +38,6 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
     
     const [turmasDisponiveis, setTurmasDisponiveis] = useState<TurmaDTO[]>([]);
     const [loadingTurmas, setLoadingTurmas] = useState(true);
-
-    // Estado para armazenar o ID da turma selecionada
     const [turmaIdSelecionada, setTurmaIdSelecionada] = useState<string>("");
 
     useEffect(() => {
@@ -50,7 +48,6 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                 setTurmasDisponiveis(data);
                 setTurmaIdSelecionada("");
 
-                // Encontrar a turma atual pelo nome e turno
                 if (aluno?.nomeTurmaAtual && aluno?.turnoTurmaAtual) {
                     const turmaAtual = data.find(
                         turma => 
@@ -75,6 +72,16 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
         }
     }, [isOpen, aluno]);
 
+    const formatarNomeTurma = (nome: string, turno: string) => {
+        const nomeLimpo = nome.trim();
+        const turnoLimpo = turno?.trim();
+
+        if (turnoLimpo && nomeLimpo.toUpperCase().endsWith(turnoLimpo.toUpperCase())) {
+            return nomeLimpo;
+        }
+        return turnoLimpo ? `${nomeLimpo} - ${turnoLimpo}` : nomeLimpo;
+    };
+
     const handleSalvar = async () => {
         if (!turmaIdSelecionada) {
             toast.error("Selecione uma turma!");
@@ -85,13 +92,11 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
         
         try {
             const alunoAtualizado = await atualizarTurmaAluno(aluno!.id, novaTurmaId);
-            
             onSave(alunoAtualizado); 
-            toast.success(`Turma alterada para ${alunoAtualizado.nomeTurmaAtual} com sucesso!`);
+            toast.success(`Turma alterada com sucesso!`);
             onClose();
-
         } catch (error) {
-            toast.error("Falha ao atualizar a turma do aluno. Verifique o console.");
+            toast.error("Falha ao atualizar a turma do aluno.");
             console.error(error);
         }
     };
@@ -107,11 +112,10 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                 </DialogHeader>
 
                 <div className="space-y-6">
-                    {/* Informações Acadêmicas */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-2">
                             <BookOpen className="h-5 w-5 text-[#0D4F97]" />
-                            <h3 className="text-[#0D4F97]">Informações Acadêmicas</h3>
+                            <h3 className="text-[#0D4F97] font-semibold">Informações Acadêmicas</h3>
                         </div>
 
                         <div className="space-y-2">
@@ -131,8 +135,12 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                                     </SelectTrigger>
                                     <SelectContent className="bg-white">
                                         {turmasDisponiveis.map((turma) => (
-                                            <SelectItem key={turma.id} value={turma.id.toString()} className="cursor-pointer">
-                                                {turma.nome} - {turma.turno}
+                                            <SelectItem 
+                                                key={turma.id} 
+                                                value={turma.id.toString()} 
+                                                className="cursor-pointer"
+                                            >
+                                                {formatarNomeTurma(turma.nome, turma.turno)}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -145,7 +153,6 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                         </div>
                     </div>
 
-                    {/* Botões de Ação */}
                     <div className="flex flex-col gap-3 border-t-2 border-[#B2D7EC] pt-6 md:flex-row md:justify-end">
                         <Button
                             variant="outline"
@@ -157,7 +164,7 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                         <Button
                             onClick={handleSalvar}
                             disabled={loadingTurmas}
-                            className="h-12 justify-center bg-[#0D4F97] px-8 text-white hover:bg-[#FFD000] hover:text-[#0D4F97] disabled:opacity-50"
+                            className="h-12 justify-center bg-[#0D4F97] px-8 text-white hover:bg-[#0A4080] disabled:opacity-50"
                         >
                             Salvar Alterações
                         </Button>
