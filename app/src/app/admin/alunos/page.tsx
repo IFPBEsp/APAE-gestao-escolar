@@ -26,9 +26,7 @@ export default function AlunosPage() {
     setLoading(true);
     try {
       const data = await listarAlunos(nome);
-
       setAlunos(data.content ?? []);
-
     } catch (error) {
       console.error("Falha ao carregar alunos:", error);
       setAlunos([]);
@@ -44,6 +42,19 @@ export default function AlunosPage() {
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm, fetchAlunos]);
+
+  const formatarTurma = (nome: string | null, turno: string | null) => {
+    if (!nome) return "Sem Turma Ativa";
+    
+    const nomeLimpo = nome.trim();
+    const turnoLimpo = turno?.trim();
+
+    if (turnoLimpo && nomeLimpo.toUpperCase().endsWith(turnoLimpo.toUpperCase())) {
+      return nomeLimpo;
+    }
+
+    return turnoLimpo ? `${nomeLimpo} - ${turnoLimpo}` : nomeLimpo;
+  };
 
   if (loading) {
     return (
@@ -102,12 +113,7 @@ export default function AlunosPage() {
           </p>
         ) : (
           alunos.map((aluno) => {
-            // ✅ Corrigido: fallback para "Sem Turma Ativa" se qualquer valor for null ou vazio
-            const turmaNome = aluno.nomeTurma ?? "";
-            const turmaTurno = aluno.turnoTurma ?? "";
-            const turmaCompleta = turmaNome && turmaTurno
-              ? `${turmaNome} - ${turmaTurno}`
-              : "Sem Turma Ativa";
+            const turmaExibicao = formatarTurma(aluno.nomeTurma, aluno.turnoTurma);
 
             return (
               <Card
@@ -142,17 +148,17 @@ export default function AlunosPage() {
 
                   {/* Infos */}
                   <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Turma Atual:</span>
-                      <span className="font-bold text-[#0D4F97]">
-                        {turmaCompleta}
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="shrink-0">Turma Atual:</span>
+                      <span className="font-bold text-[#0D4F97] text-right">
+                        {turmaExibicao}
                       </span>
                     </div>
 
-                    <div className="flex justify-between">
-                      <span>Responsável:</span>
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="shrink-0">Responsável:</span>
                       <span
-                        className="truncate font-medium"
+                        className="truncate font-medium text-right"
                         title={aluno.nomeResponsavel}
                       >
                         {aluno.nomeResponsavel}
