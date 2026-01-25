@@ -1,5 +1,7 @@
 'use client';
 
+import { Button } from "@/components/ui/button";
+
 export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col items-center justify-center p-4">
@@ -19,12 +21,13 @@ export default function LoginPage() {
           <h2 className="text-2xl md:text-3xl font-bold text-center text-[#0D4F97] mb-4">Login</h2>
           <p className="text-gray-600 text-center mb-8 text-sm md:text-base">Essa página ainda está em construção.</p>
           <div className="text-center">
-            <button
-              onClick={() => window.history.back()} 
-              className="w-full md:w-auto bg-[#0D4F97] hover:bg-[#FFD000] hover:text-[#0D4F97] text-white font-semibold py-3 px-8 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+            <Button
+              onClick={() => window.history.back()}
+              variant="primary"
+              className="w-full md:w-auto px-8"
             >
               Voltar
-            </button>
+            </Button>
           </div>
         </div>
       </div>

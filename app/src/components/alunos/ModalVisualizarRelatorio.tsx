@@ -54,15 +54,6 @@ export default function ModalVisualizarRelatorio({
               Detalhes do relatório de <strong>{nomeAluno}</strong>
             </DialogDescription>
           </div>
-
-          <Button
-            onClick={imprimir}
-            variant="outline"
-            className="text-[#0D4F97] border-[#0D4F97]"
-          >
-            <Printer className="mr-2 h-4 w-4" />
-            Imprimir
-          </Button>
         </DialogHeader>
 
         {/* ===== VISUALIZAÇÃO EM TELA (mantida como está) ===== */}
@@ -100,6 +91,16 @@ export default function ModalVisualizarRelatorio({
               </div>
             </div>
           )}
+        </div>
+
+        <div className="flex justify-end gap-3 border-t pt-4">
+          <Button
+            onClick={imprimir}
+            variant="primary"
+          >
+            <Printer className="mr-2 h-4 w-4" />
+            Imprimir
+          </Button>
         </div>
 
         {/* ===== ÁREA DE IMPRESSÃO (PADRÃO ÚNICO DO SISTEMA) ===== */}

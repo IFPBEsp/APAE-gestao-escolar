@@ -97,7 +97,7 @@ export default function ModalVisualizarEditarRelatorio({
 
   const handleSalvar = async () => {
     if (!formData.atividades.trim() || !formData.habilidades.trim() ||
-        !formData.estrategias.trim() || !formData.recursos.trim()) {
+      !formData.estrategias.trim() || !formData.recursos.trim()) {
       toast.error("Por favor, preencha todos os campos!");
       return;
     }
@@ -167,7 +167,7 @@ export default function ModalVisualizarEditarRelatorio({
         <h4 className="font-semibold text-[#0D4F97] mb-3 text-base">{titulo}</h4>
         <Textarea
           value={valor}
-          onChange={(e) => setFormData({...formData, [campo]: e.target.value})}
+          onChange={(e) => setFormData({ ...formData, [campo]: e.target.value })}
           className="min-h-[120px] resize-y border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus-visible:ring-0 text-sm leading-relaxed"
           disabled={isLoading}
           placeholder={placeholder}
@@ -216,18 +216,37 @@ export default function ModalVisualizarEditarRelatorio({
         <div className="flex justify-end gap-4 pt-6 border-t px-6 pb-6">
           {!isEditando ? (
             <>
-              <Button onClick={() => setIsEditando(true)} variant="outline" className="text-[#0D4F97] border-[#0D4F97] hover:bg-[#0D4F97] hover:text-white text-base px-6">
-                <Edit className="mr-2 h-4 w-4" /> Editar
+              <Button 
+                onClick={() => setIsEditando(true)}  
+                variant="outline"
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                  Editar
               </Button>
-              <Button onClick={imprimir} className="bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97] text-base px-6">
-                <Printer className="mr-2 h-4 w-4" /> Imprimir
+
+              <Button 
+                onClick={imprimir}  
+                variant="primary"
+              >
+                <Printer className="mr-2 h-4 w-4" />
+                  Imprimir
               </Button>
             </>
           ) : (
             <>
-              <Button onClick={handleCancelar} variant="outline" className="border-gray-300 text-base px-6">Cancelar</Button>
-              <Button onClick={handleSalvar} className="bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97] text-base px-6">
-                <Save className="mr-2 h-4 w-4" /> Salvar
+              <Button 
+                onClick={handleCancelar}  
+                variant="outline" 
+              >
+                Cancelar
+              </Button>
+
+              <Button 
+                onClick={handleSalvar} 
+                variant="primary"
+              >
+                <Save className="mr-2 h-4 w-4" /> 
+                  Salvar
               </Button>
             </>
           )}
@@ -235,31 +254,31 @@ export default function ModalVisualizarEditarRelatorio({
 
         {/* Área de impressão usando TemplateImpressao */}
         <div style={{ display: "none" }}>
-        <TemplateImpressao
-          ref={refImpressao}
-          titulo="Relatório Individual das Aulas Presenciais"
-          assinaturas={{
-            esquerda: { nome: formData.professor, cargo: "PROFESSOR(A)" },
-            direita: { nome: "COORDENADORA", cargo: "COORDENADORA PEDAGÓGICA" },
-          }}
-        >
-          <DadosAlunoImpressao
-            cidade="Esperança"
-            dataRelatorio={format(formData.data, "dd/MM/yyyy")}
-            nome={nomeAluno}
-            nascimento={alunoDataNascimento || "—"}
-            turma={turmaDisplay}
-            ano={format(formData.data, "yyyy")}
-          />
+          <TemplateImpressao
+            ref={refImpressao}
+            titulo="Relatório Individual das Aulas Presenciais"
+            assinaturas={{
+              esquerda: { nome: formData.professor, cargo: "PROFESSOR(A)" },
+              direita: { nome: "COORDENADORA", cargo: "COORDENADORA PEDAGÓGICA" },
+            }}
+          >
+            <DadosAlunoImpressao
+              cidade="Esperança"
+              dataRelatorio={format(formData.data, "dd/MM/yyyy")}
+              nome={nomeAluno}
+              nascimento={alunoDataNascimento || "—"}
+              turma={turmaDisplay}
+              ano={format(formData.data, "yyyy")}
+            />
 
-          <RelatorioIndividualConteudo
-            atividades={formData.atividades}
-            habilidades={formData.habilidades}
-            estrategias={formData.estrategias}
-            recursos={formData.recursos}
-          />
-        </TemplateImpressao>
-      </div>
+            <RelatorioIndividualConteudo
+              atividades={formData.atividades}
+              habilidades={formData.habilidades}
+              estrategias={formData.estrategias}
+              recursos={formData.recursos}
+            />
+          </TemplateImpressao>
+        </div>
 
       </DialogContent>
     </Dialog>

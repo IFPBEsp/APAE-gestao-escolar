@@ -2,23 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import Chamada from "@/components/Chamada";
 import { Button } from "@/components/ui/button";
 import { buscarTurmaPorId } from "@/services/TurmaService";
 import { toast } from "sonner";
 
-interface Turma {
-  id: number; 
-  nome: string;
-}
-
 export default function ChamadaPage() {
   const router = useRouter();
   const params = useParams();
 
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [turma, setTurma] = useState<Turma | null>(null);
+  const [turma, setTurma] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const turmaId = params?.turmaId ? String(params.turmaId) : null;
@@ -68,8 +61,8 @@ export default function ChamadaPage() {
             Turma não identificada
           </h2>
           <Button
+            variant="outline"
             onClick={() => router.push("/professor/turmas")}
-            className="bg-[#0D4F97]"
           >
             Voltar
           </Button>
@@ -79,26 +72,13 @@ export default function ChamadaPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#E5E5E5]">
-      <ProfessorSidebar
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={() =>
-          setIsSidebarCollapsed(!isSidebarCollapsed)
-        }
+    <div className="container mx-auto">
+      <Chamada
+        turmaIdProp={turma.id}
+        turmaNomeProp={turma.nome}
+        onBack={handleBack}
+        onSaveSuccess={handleSaveSuccess}
       />
-
-      <main
-        className={`flex-1 p-4 md:p-8 transition-all duration-300 ${
-          isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
-        }`}
-      >
-        <Chamada
-          turmaIdProp={turma.id}
-          turmaNomeProp={turma.nome}
-          onBack={handleBack}
-          onSaveSuccess={handleSaveSuccess}
-        />
-      </main>
     </div>
   );
 }

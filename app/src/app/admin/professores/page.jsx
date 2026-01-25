@@ -27,15 +27,15 @@ export default function Professores() {
       if (searchTerm.trim()) {
         params.append('nome', searchTerm.trim());
       }
-  
-      
+
+
       const url = `/professores${params.toString() ? `?${params.toString()}` : ''}`;
       console.log('🔍 Buscando professores:', url);
-      
+
       const response = await api.get(url);
       console.log('✅ Resposta da API:', response.data);
       console.log('📊 Total de professores:', response.data?.length || 0);
-      
+
       setProfessores(response.data || []);
     } catch (error) {
       console.error("❌ Erro ao carregar professores:", error);
@@ -47,9 +47,9 @@ export default function Professores() {
         url: error.config?.url,
         baseURL: error.config?.baseURL
       });
-      
+
       setProfessores([]);
-      
+
       // Determinar tipo de erro
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
         setError('Backend não está acessível. Verifique se está rodando na porta 8080.');
@@ -68,7 +68,7 @@ export default function Professores() {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       loadProfessores();
-    }, 300); 
+    }, 300);
 
     return () => clearTimeout(timeoutId);
   }, [searchTerm]);
@@ -89,8 +89,9 @@ export default function Professores() {
           </div>
 
           <Button
+            variant="primary"
             onClick={() => router.push("/admin/professores/cadastrar")}
-            className="h-11 md:h-12 w-full md:w-auto justify-center bg-[#0D4F97] px-6 text-white hover:bg-[#FFD000] hover:text-[#0D4F97]"
+            className="w-full md:w-auto justify-center"
           >
             <UserPlus className="mr-2 h-5 w-5" />
             Cadastrar Professor
@@ -148,51 +149,50 @@ export default function Professores() {
                 onClick={() => handleCardClick(professor.id)}
                 className="rounded-xl border-2 border-[#B2D7EC] bg-white shadow-md transition-all hover:border-[#0D4F97] hover:shadow-lg cursor-pointer"
               >
-              <CardContent className="p-4 md:p-6">
-                <div className="mb-3 md:mb-4 flex items-start gap-2 md:gap-3">
-                  <div className="flex h-10 w-10 md:h-12 md:w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#B2D7EC]/20">
-                    <UserCircle className="h-6 w-6 md:h-7 md:w-7 text-[#0D4F97]" />
+                <CardContent className="p-4 md:p-6">
+                  <div className="mb-3 md:mb-4 flex items-start gap-2 md:gap-3">
+                    <div className="flex h-10 w-10 md:h-12 md:w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#B2D7EC]/20">
+                      <UserCircle className="h-6 w-6 md:h-7 md:w-7 text-[#0D4F97]" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-base md:text-lg font-semibold text-[#0D4F97] mb-1 truncate">
+                        {professor.nome}
+                      </h3>
+                      <span className={`inline-block rounded-full px-2 md:px-3 py-1 text-xs md:text-sm font-medium ${professor.ativo
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-700"
+                        }`}>
+                        {professor.ativo ? "Ativo" : "Inativo"}
+                      </span>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-base md:text-lg font-semibold text-[#0D4F97] mb-1 truncate">
-                      {professor.nome}
-                    </h3>
-                    <span className={`inline-block rounded-full px-2 md:px-3 py-1 text-xs md:text-sm font-medium ${
-                      professor.ativo 
-                        ? "bg-green-100 text-green-700" 
-                        : "bg-gray-100 text-gray-700"
-                    }`}>
-                      {professor.ativo ? "Ativo" : "Inativo"}
-                    </span>
-                  </div>
-                </div>
 
-                <div className="mt-3 md:mt-4">
-                  <div className="mb-2 flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-[#0D4F97]" />
-                    <span className="text-xs md:text-sm font-medium text-[#0D4F97]">Turmas</span>
+                  <div className="mt-3 md:mt-4">
+                    <div className="mb-2 flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 text-[#0D4F97]" />
+                      <span className="text-xs md:text-sm font-medium text-[#0D4F97]">Turmas</span>
+                    </div>
+                    {professor.turmas && professor.turmas.length > 0 ? (
+                      <ul className="space-y-1">
+                        {professor.turmas.slice(0, 2).map((turma, index) => (
+                          <li key={index} className="text-xs md:text-sm text-[#222222] truncate">
+                            • {typeof turma === 'object' ? turma.nome || turma.name : turma}
+                          </li>
+                        ))}
+                        {professor.turmas.length > 2 && (
+                          <li className="text-xs md:text-sm text-[#0D4F97] font-medium">
+                            +{professor.turmas.length - 2} mais
+                          </li>
+                        )}
+                      </ul>
+                    ) : (
+                      <p className="text-xs md:text-sm text-gray-400">Nenhuma turma vinculada</p>
+                    )}
                   </div>
-                  {professor.turmas && professor.turmas.length > 0 ? (
-                    <ul className="space-y-1">
-                      {professor.turmas.slice(0, 2).map((turma, index) => (
-                        <li key={index} className="text-xs md:text-sm text-[#222222] truncate">
-                          • {typeof turma === 'object' ? turma.nome || turma.name : turma}
-                        </li>
-                      ))}
-                      {professor.turmas.length > 2 && (
-                        <li className="text-xs md:text-sm text-[#0D4F97] font-medium">
-                          +{professor.turmas.length - 2} mais
-                        </li>
-                      )}
-                    </ul>
-                  ) : (
-                    <p className="text-xs md:text-sm text-gray-400">Nenhuma turma vinculada</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         )}
       </div>
     </main>

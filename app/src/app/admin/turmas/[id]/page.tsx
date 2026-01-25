@@ -3,7 +3,7 @@
 import {
   ArrowLeft,
   Users,
-  Pencil,
+  Edit,
   Power,
   TrendingUp,
 } from "lucide-react";
@@ -102,42 +102,46 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
     <div className="min-h-[calc(100vh-5rem)] bg-[#E5E5E5] p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
 
-        <button
+        <Button
+          variant="outline"
           onClick={() => router.back()}
-          className="mb-6 flex items-center gap-2 text-[#0D4F97] hover:text-[#FFD000]"
+          className="mb-6 justify-center"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="mr-2 h-5 w-5" />
           Voltar
-        </button>
+        </Button>
 
-        {/* Cabeçalho */}
-        <div className="mb-6 flex flex-col md:flex-row justify-between gap-4">
-          <div>
-            <h1 className="mb-2 text-[#0D4F97] text-2xl font-bold">
-              {`${turma.tipo} ${turma.anoCriacao} - ${turma.turno}`}
-            </h1>
-            <p className="text-[#222222]">Informações detalhadas da turma</p>
-          </div>
+        {/* Cabeçalho + Ações dentro de Card (igual Professores) */}
+        <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
+          <CardContent className="p-8">
+            <div>
+              <h1 className="mb-2 text-[#0D4F97] text-2xl font-bold">
+                {`${turma.tipo} ${turma.anoCriacao} - ${turma.turno}`}
+              </h1>
+              <p className="text-[#222222]">Informações detalhadas da turma</p>
+            </div>
 
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              className="border-red-200 text-red-600 hover:bg-red-50 gap-2"
-              onClick={handleDesativarTurma}
-            >
-              <Power className="h-4 w-4" />
-              Inativar Turma
-            </Button>
+            <div className="mt-8 flex flex-col gap-3 border-t-2 border-[#B2D7EC] pt-6 md:flex-row">
+              <Button
+                variant="primary"
+                onClick={() => setIsEditarOpen(true)}
+                className="w-full flex-1"
+              >
+                <Edit className="mr-2 h-5 w-5" />
+                Editar Turma
+              </Button>
 
-            <Button
-              className="bg-[#0D4F97] hover:bg-[#0B3E78] text-white gap-2"
-              onClick={() => setIsEditarOpen(true)}
-            >
-              <Pencil className="h-4 w-4" />
-              Editar Turma
-            </Button>
-          </div>
-        </div>
+              <Button
+                variant={turma?.isAtiva ? "danger" : "primary"}
+                onClick={handleDesativarTurma}
+                className="w-full flex-1"
+              >
+                <Power className="mr-2 h-5 w-5" />
+                {turma?.isAtiva ? "Inativar Turma" : "Ativar Turma"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         <EditarTurmaModal
           isOpen={isEditarOpen}

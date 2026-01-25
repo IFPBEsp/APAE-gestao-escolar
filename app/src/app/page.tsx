@@ -3,6 +3,8 @@
 import { UserCog, GraduationCap } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
+
 export default function RoleSelectionPage() {
   const router = useRouter();
 
@@ -17,9 +19,9 @@ export default function RoleSelectionPage() {
     {
       id: "professor",
       icon: GraduationCap,
-      title: "Sou Professor", 
+      title: "Sou Professor",
       description: "Acessar minhas turmas e fazer chamadas",
-      route: "/professor", 
+      route: "/professor",
     },
   ];
 
@@ -47,12 +49,13 @@ export default function RoleSelectionPage() {
                   <p className="text-[#222222]">{role.description}</p>
                 </div>
                 <div className="p-6 pt-0">
-                  <button
-                    onClick={() => router.push(role.route)} 
-                    className="flex h-12 w-full items-center justify-center rounded-lg bg-[#0D4F97] px-4 text-center text-white transition-all hover:bg-[#FFD000] hover:text-[#0D4F97]"
+                  <Button
+                    onClick={() => router.push(role.route)}
+                    className="w-full"
+                    variant="primary"
                   >
                     Acessar
-                  </button>
+                  </Button>
                 </div>
               </div>
             );

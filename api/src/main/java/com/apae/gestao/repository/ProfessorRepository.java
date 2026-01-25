@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface ProfessorRepository extends JpaRepository<Professor, Long> {
 
-    @Query(value = "SELECT listar_professores_com_turmas(:id, :nome, :cpf, :email, :ativo)",
+    @Query(value = "SELECT COALESCE(listar_professores_com_turmas(:id, :nome, :cpf, :email, :ativo), '[]')",
             nativeQuery = true)
     String listarProfessoresJson(
             @Param("id") Long id,

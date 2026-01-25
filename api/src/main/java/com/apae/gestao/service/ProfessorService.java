@@ -54,6 +54,9 @@ public class ProfessorService {
 
     private List<ProfessorResumoDTO> parseJsonToList(String json) {
         try {
+            if (json == null || json.isBlank()) {
+                return List.of();
+            }
             return objectMapper.readValue(json, new TypeReference<List<ProfessorResumoDTO>>() {});
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Erro ao processar JSON de professores", e);
@@ -115,7 +118,7 @@ public class ProfessorService {
     @Transactional
     public ProfessorResponseDTO reativarProfessor(Long id) {
         Professor professor = professorRepository.findByIdWithTurmas(id)
-                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id));
 
         professor.setAtivo(true);
         Professor salvo = professorRepository.save(professor);
@@ -125,7 +128,7 @@ public class ProfessorService {
     @Transactional(readOnly = true)
     public List<TurmaResponseDTO> getTurmasDeProfessor(Long id) {
         Professor professor = professorRepository.findByIdWithTurmas(id)
-                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id));
         return professor.getTurmas()
                 .stream()
                 .map(TurmaResponseDTO::new)

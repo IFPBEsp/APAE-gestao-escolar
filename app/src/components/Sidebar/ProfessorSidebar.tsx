@@ -7,40 +7,40 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 interface ProfessorSidebarProps {
-  activeTab?: string; 
-  onTabChange?: (tab: string) => void; 
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
   onLogout?: () => void;
   showMobileMenu?: boolean;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
 }
 
-export default function ProfessorSidebar({ 
+export default function ProfessorSidebar({
   activeTab, // Mantido, mas a ativação usa a rota
   onTabChange,
-  onLogout, 
-  showMobileMenu = true, 
-  isCollapsed = false, 
-  onToggleCollapse 
+  onLogout,
+  showMobileMenu = true,
+  isCollapsed = false,
+  onToggleCollapse
 }: ProfessorSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  
-  const activePath = pathname ?? ""; 
+
+  const activePath = pathname ?? "";
 
   const menuItems = [
-    { 
-      id: "inicio", 
-      label: "Início", 
-      icon: Home, 
-      href: "/professor" 
+    {
+      id: "inicio",
+      label: "Início",
+      icon: Home,
+      href: "/professor"
     },
-    { 
-      id: "turmas", 
-      label: "Turmas", 
-      icon: BookOpen, 
-      href: "/professor/turmas" 
+    {
+      id: "turmas",
+      label: "Turmas",
+      icon: BookOpen,
+      href: "/professor/turmas"
     },
   ];
 
@@ -51,7 +51,7 @@ export default function ProfessorSidebar({
       router.push("/");
     }
     // Fecha o menu móvel se estiver aberto
-    setSidebarOpen(false); 
+    setSidebarOpen(false);
   };
 
   // Esta função é usada no desktop (Link)
@@ -59,7 +59,7 @@ export default function ProfessorSidebar({
     if (onTabChange) onTabChange(id);
     // Não fecha o sidebar desktop (pois ele sempre está visível)
   };
-  
+
   // Esta função é usada no mobile (Link)
   const handleMobileNavigation = (id: string) => {
     if (onTabChange) onTabChange(id);
@@ -68,11 +68,11 @@ export default function ProfessorSidebar({
 
   // Lógica de ativação baseada na rota
   const isActive = (href: string) => {
-      if (href === "/professor") {
-          return activePath === href || activePath === `${href}/`;
-      }
-      
-      return activePath === href || activePath.startsWith(`${href}/`);
+    if (href === "/professor") {
+      return activePath === href || activePath === `${href}/`;
+    }
+
+    return activePath === href || activePath.startsWith(`${href}/`);
   };
 
   return (
@@ -88,10 +88,9 @@ export default function ProfessorSidebar({
       )}
 
       {/* Sidebar Desktop */}
-      <aside 
-        className={`hidden md:flex md:flex-col bg-[#B2D7EC] rounded-r-3xl fixed left-0 top-0 bottom-0 z-30 overflow-y-auto transition-all duration-300 ${
-          isCollapsed ? 'w-20' : 'w-64'
-        }`}
+      <aside
+        className={`hidden md:flex md:flex-col bg-[#B2D7EC] rounded-r-3xl fixed left-0 top-0 bottom-0 z-30 overflow-y-auto transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'
+          }`}
       >
         {/* Toggle Button - NO CANTO SUPERIOR ESQUERDO */}
         <div className="absolute left-4 top-4 z-40">
@@ -108,9 +107,9 @@ export default function ProfessorSidebar({
           {!isCollapsed ? (
             <div className="flex flex-col items-center gap-3 mb-2">
               <div className="flex items-center justify-center">
-                <Image 
-                  src="/apae-logo.png" 
-                  alt="Logo APAE" 
+                <Image
+                  src="/apae-logo.png"
+                  alt="Logo APAE"
                   width={60}
                   height={60}
                   className="object-contain"
@@ -123,9 +122,9 @@ export default function ProfessorSidebar({
             </div>
           ) : (
             <div className="flex justify-center">
-              <Image 
-                src="/apae-logo.png" 
-                alt="Logo APAE" 
+              <Image
+                src="/apae-logo.png"
+                alt="Logo APAE"
                 width={40}
                 height={40}
                 className="object-contain"
@@ -139,19 +138,17 @@ export default function ProfessorSidebar({
           {menuItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
-            
+
             return (
               <Link
                 key={item.id}
                 href={item.href}
                 onClick={() => handleNavigation(item.id)} // Desktop navigation
-                className={`flex w-full items-center ${
-                  isCollapsed ? 'justify-center' : 'gap-3'
-                } rounded-3xl px-4 py-3 transition-all ${
-                  active
+                className={`flex w-full items-center ${isCollapsed ? 'justify-center' : 'gap-3'
+                  } rounded-3xl px-4 py-3 transition-all ${active
                     ? "bg-[#0D4F97] text-white shadow-md"
                     : "bg-transparent text-[#0D4F97] hover:bg-[#0D4F97] hover:text-white"
-                }`}
+                  }`}
                 title={isCollapsed ? item.label : undefined}
               >
                 <Icon className="h-5 w-5 flex-shrink-0" />
@@ -162,14 +159,13 @@ export default function ProfessorSidebar({
             );
           })}
         </nav>
-        
+
         {/* Logout Button */}
         <div className="border-t-2 border-[#0D4F97]/20 p-4">
           <button
             onClick={handleLogout}
-            className={`flex w-full items-center ${
-              isCollapsed ? 'justify-center' : 'gap-3'
-            } rounded-3xl bg-transparent px-4 py-3 text-[#0D4F97] transition-all hover:bg-white/40`}
+            className={`flex w-full items-center ${isCollapsed ? 'justify-center' : 'gap-3'
+              } rounded-3xl bg-transparent px-4 py-3 text-[#0D4F97] transition-all hover:bg-white/40`}
             title={isCollapsed ? "Sair" : undefined}
           >
             <LogOut className="h-5 w-5 flex-shrink-0" />
@@ -180,78 +176,77 @@ export default function ProfessorSidebar({
 
       {/* Sidebar Mobile */}
       {sidebarOpen && (
-    <>
-      {/* Overlay */}
-      <div
-        className="fixed inset-0 z-40 bg-black/50 md:hidden"
-        onClick={() => setSidebarOpen(false)}
-      />
-      
-      {/* Sidebar Mobile */}
-      <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-[#B2D7EC] rounded-r-3xl md:hidden overflow-y-auto">
-        <div className="flex h-full flex-col">
-          {/* Header Mobile - COM "X" NO CANTO SUPERIOR DIREITO */}
-          <div className="relative border-b-2 border-[#0D4F97]/20 p-4 mt-8">
-            {/* Botão de fechar no canto superior direito */}
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="absolute right-4 top-4 text-[#0D4F97]"
-            >
-              <X className="h-6 w-6" />
-            </button>
-            
-            {/* Logo e título centralizados */}
-            <div className="flex flex-col items-center gap-3 pt-4">
-              <Image 
-                src="/apae-logo.png" 
-                alt="Logo APAE" 
-                width={60}
-                height={60}
-                className="object-contain"
-              />
-              <h2 className="text-[#0D4F97] font-bold">APAE Esperança</h2>
-              <p className="text-[#0D4F97]/70 text-sm">Painel do Professor</p>
-            </div>
-          </div>
+        <>
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
 
-          {/* Menu Items Mobile (AGORA USANDO LINK PARA NAVEGAÇÃO CORRETA) */}
-          <div className="flex-1 space-y-2 p-4">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href); 
-              
-              return (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  onClick={() => handleMobileNavigation(item.id)} 
-                  className={`flex w-full items-center gap-3 rounded-3xl px-4 py-3 text-left transition-all ${
-                    active
-                      ? "bg-[#0D4F97] text-white shadow-md"
-                      : "bg-transparent text-[#0D4F97] hover:bg-[#0D4F97] hover:text-white"
-                  }`}
+          {/* Sidebar Mobile */}
+          <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-[#B2D7EC] rounded-r-3xl md:hidden overflow-y-auto">
+            <div className="flex h-full flex-col">
+              {/* Header Mobile - COM "X" NO CANTO SUPERIOR DIREITO */}
+              <div className="relative border-b-2 border-[#0D4F97]/20 p-4 mt-8">
+                {/* Botão de fechar no canto superior direito */}
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="absolute right-4 top-4 text-[#0D4F97]"
                 >
-                  <Icon className="h-5 w-5" />
-                  <span className="font-medium">{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
+                  <X className="h-6 w-6" />
+                </button>
 
-          {/* Logout Mobile */}
-          <div className="border-t-2 border-[#0D4F97]/20 p-4">
-            <button
-              onClick={handleLogout} 
-              className="flex w-full items-center gap-3 rounded-3xl bg-transparent px-4 py-3 text-[#0D4F97] transition-all hover:bg-white/40"
-            >
-              <LogOut className="h-5 w-5" />
-              <span className="font-medium">Sair</span>
-            </button>
-          </div>
-        </div>
-      </aside>
-    </>
-  )}
+                {/* Logo e título centralizados */}
+                <div className="flex flex-col items-center gap-3 pt-4">
+                  <Image
+                    src="/apae-logo.png"
+                    alt="Logo APAE"
+                    width={60}
+                    height={60}
+                    className="object-contain"
+                  />
+                  <h2 className="text-[#0D4F97] font-bold">APAE Esperança</h2>
+                  <p className="text-[#0D4F97]/70 text-sm">Painel do Professor</p>
+                </div>
+              </div>
+
+              {/* Menu Items Mobile (AGORA USANDO LINK PARA NAVEGAÇÃO CORRETA) */}
+              <div className="flex-1 space-y-2 p-4">
+                {menuItems.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.href);
+
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      onClick={() => handleMobileNavigation(item.id)}
+                      className={`flex w-full items-center gap-3 rounded-3xl px-4 py-3 text-left transition-all ${active
+                          ? "bg-[#0D4F97] text-white shadow-md"
+                          : "bg-transparent text-[#0D4F97] hover:bg-[#0D4F97] hover:text-white"
+                        }`}
+                    >
+                      <Icon className="h-5 w-5" />
+                      <span className="font-medium">{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* Logout Mobile */}
+              <div className="border-t-2 border-[#0D4F97]/20 p-4">
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-3 rounded-3xl bg-transparent px-4 py-3 text-[#0D4F97] transition-all hover:bg-white/40"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span className="font-medium">Sair</span>
+                </button>
+              </div>
+            </div>
+          </aside>
+        </>
+      )}
     </>
   );
 }

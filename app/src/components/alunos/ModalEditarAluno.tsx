@@ -150,14 +150,14 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                         <Button
                             variant="outline"
                             onClick={onClose}
-                            className="h-12 justify-center border-2 border-[#B2D7EC] px-8 text-[#0D4F97] hover:bg-[#B2D7EC]/20"
                         >
                             Cancelar
                         </Button>
+
                         <Button
                             onClick={handleSalvar}
                             disabled={loadingTurmas}
-                            className="h-12 justify-center bg-[#0D4F97] px-8 text-white hover:bg-[#FFD000] hover:text-[#0D4F97] disabled:opacity-50"
+                            variant="primary"
                         >
                             Salvar Alterações
                         </Button>
