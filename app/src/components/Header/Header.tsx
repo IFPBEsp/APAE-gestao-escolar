@@ -12,7 +12,7 @@ export default function Header() {
     <header className="flex h-16 md:h-20 items-center justify-center bg-[#0D4F97] px-4 md:px-6 fixed top-0 w-full z-30">
       <div className="flex items-center gap-2 md:gap-3">
         <Image
-          src="/apae-logo.png" 
+          src="/apae-logo.png"
           alt="Logotipo da APAE - Flor e Mãos"
           width={40}
           height={40}
