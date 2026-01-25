@@ -47,7 +47,6 @@ export default function RelatoriosAlunoListaPage() {
   const [loadingAluno, setLoadingAluno] = useState(true);
   const [turmaData, setTurmaData] = useState<any>(null);
 
-  // Carregar dados do aluno
   useEffect(() => {
     const carregarAluno = async () => {
       if (!alunoIdFromUrl || isNaN(Number(alunoIdFromUrl))) return;
@@ -65,10 +64,8 @@ export default function RelatoriosAlunoListaPage() {
     };
 
     carregarAluno();
-    carregarAluno();
   }, [alunoIdFromUrl]);
 
-  // Carregar dados da turma
   useEffect(() => {
     const carregarTurma = async () => {
       if (!turmaId) return;
@@ -167,7 +164,6 @@ export default function RelatoriosAlunoListaPage() {
         <div className="p-4 md:p-8">
           <div className="mx-auto max-w-6xl space-y-6">
 
-            {/* BOTÃO VOLTAR */}
             <Button
               onClick={() => router.back()}
               variant="outline"
@@ -177,7 +173,6 @@ export default function RelatoriosAlunoListaPage() {
               Voltar
             </Button>
 
-            {/* SEÇÃO RELATÓRIOS */}
             <div className="space-y-4">
 
               <div className="flex items-start gap-3">
@@ -194,7 +189,6 @@ export default function RelatoriosAlunoListaPage() {
                 </div>
               </div>
 
-              {/* CARD DO ALUNO */}
               <EstudanteCard
                 nome={alunoData?.nome || "Nome não encontrado"}
                 turma={turmaData?.nome || alunoData?.turma?.nome || "Turma não encontrada"}
@@ -218,7 +212,6 @@ export default function RelatoriosAlunoListaPage() {
 
             </div>
 
-            {/* TABELA */}
             <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
               <CardContent className="p-0">
                 <div className="hidden border-b-2 border-[#B2D7EC] bg-[#B2D7EC]/20 md:grid md:grid-cols-12 md:gap-4 md:p-4">
@@ -241,7 +234,6 @@ export default function RelatoriosAlunoListaPage() {
                         key={rel.id}
                         className="grid grid-cols-1 gap-4 p-4 transition-all hover:bg-[#B2D7EC]/10 md:grid-cols-12 md:items-start"
                       >
-                        {/* Data */}
                         <div className="col-span-1 md:col-span-2">
                           <p className="text-[#0D4F97] md:hidden font-semibold">Data:</p>
                           <p className="text-[#0D4F97] font-medium">
@@ -251,31 +243,26 @@ export default function RelatoriosAlunoListaPage() {
                           </p>
                         </div>
 
-                        {/* Atividades */}
                         <div className="col-span-1 md:col-span-2">
                           <p className="text-[#0D4F97] md:hidden font-semibold">Atividades:</p>
                           <p className="text-sm text-[#222222] line-clamp-3">{rel.atividades}</p>
                         </div>
 
-                        {/* Habilidades */}
                         <div className="col-span-1 md:col-span-2">
                           <p className="text-[#0D4F97] md:hidden font-semibold">Habilidades:</p>
                           <p className="text-sm text-[#222222] line-clamp-3">{rel.habilidades}</p>
                         </div>
 
-                        {/* Estratégias */}
                         <div className="col-span-1 md:col-span-2">
                           <p className="text-[#0D4F97] md:hidden font-semibold">Estratégias:</p>
                           <p className="text-sm text-[#222222] line-clamp-3">{rel.estrategias}</p>
                         </div>
 
-                        {/* Recursos */}
                         <div className="col-span-1 md:col-span-2">
                           <p className="text-[#0D4F97] md:hidden font-semibold">Recursos:</p>
                           <p className="text-sm text-[#222222] line-clamp-3">{rel.recursos}</p>
                         </div>
 
-                        {/* Ações */}
                         <div className="col-span-1 md:col-span-2 flex justify-center gap-2">
                           <Button
                             onClick={() => {
@@ -311,7 +298,6 @@ export default function RelatoriosAlunoListaPage() {
         </div>
       </main>
 
-      {/* MODAIS */}
       {isModalRelatorioOpen && (
         <ModalVisualizarEditarRelatorio
           isOpen={isModalRelatorioOpen}

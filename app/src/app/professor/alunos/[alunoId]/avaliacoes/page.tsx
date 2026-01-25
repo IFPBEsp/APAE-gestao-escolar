@@ -31,10 +31,7 @@ export default function AvaliacoesAlunoPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Versão mais robusta para obter o alunoId
   const alunoId = params?.alunoId ? parseInt(Array.isArray(params.alunoId) ? params.alunoId[0] : params.alunoId) : 0;
-  
-  // Versão segura para obter o turmaId
   const turmaId = searchParams?.get('turmaId') || '';
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,10 +51,8 @@ export default function AvaliacoesAlunoPage() {
   const [loadingAluno, setLoadingAluno] = useState(true);
   const [turmaData, setTurmaData] = useState<any>(null);
 
-  // ID do professor logado (substituir por auth context depois)
-  const professorId = 1;
+  const professorId = 1; // TODO: Substituir por auth context
 
-  // Carregar dados do aluno
   useEffect(() => {
     const carregarAluno = async () => {
       if (!alunoId || isNaN(alunoId)) return;
@@ -75,10 +70,8 @@ export default function AvaliacoesAlunoPage() {
     };
 
     carregarAluno();
-    carregarAluno();
   }, [alunoId]);
 
-  // Carregar dados da turma se houver turmaId
   useEffect(() => {
     const carregarTurma = async () => {
       if (!turmaId) return;
@@ -95,7 +88,6 @@ export default function AvaliacoesAlunoPage() {
 
 
 
-  // Validação do alunoId
   useEffect(() => {
     if (isNaN(alunoId) || alunoId <= 0) {
       console.error("alunoId inválido:", alunoId);
@@ -104,7 +96,6 @@ export default function AvaliacoesAlunoPage() {
     }
   }, [alunoId, router]);
 
-  // Carregar avaliações do backend
   useEffect(() => {
     if (alunoId > 0 && !isNaN(alunoId)) {
       carregarAvaliacoes();
@@ -185,7 +176,6 @@ export default function AvaliacoesAlunoPage() {
       setIsAdicionarDialogOpen(false);
       setDescricaoAvaliacao("");
 
-      // Recarregar lista
       await carregarAvaliacoes();
 
     } catch (error: any) {
@@ -219,7 +209,6 @@ export default function AvaliacoesAlunoPage() {
       setIsEditarDialogOpen(false);
       setAvaliacaoEditando(null);
 
-      // Recarregar lista
       await carregarAvaliacoes();
 
     } catch (error: any) {
@@ -242,7 +231,6 @@ export default function AvaliacoesAlunoPage() {
       setIsExcluirDialogOpen(false);
       setAvaliacaoExcluindo(null);
 
-      // Recarregar lista
       await carregarAvaliacoes();
 
     } catch (error: any) {
@@ -263,7 +251,6 @@ export default function AvaliacoesAlunoPage() {
 
   return (
     <div className="flex min-h-screen bg-[#E5E5E5]">
-      {/* Sidebar */}
       <ProfessorSidebar
         activeTab={activeTab}
         onTabChange={handleTabChange}
@@ -272,12 +259,10 @@ export default function AvaliacoesAlunoPage() {
         onToggleCollapse={handleToggleCollapse}
       />
 
-      {/* Main Content */}
       <main className={`flex-1 overflow-y-auto transition-all duration-300 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
         }`}>
         <div className="p-4 md:p-8">
           <div className="mx-auto max-w-6xl">
-            {/* Botão Voltar */}
             <Button
               onClick={() => router.push(turmaId ? `/professor/turmas/${turmaId}/alunos` : "/professor/turmas")}
               variant="outline"
@@ -287,7 +272,6 @@ export default function AvaliacoesAlunoPage() {
               Voltar
             </Button>
 
-            {/* Título Principal da Página */}
             <div className="flex items-start gap-3 mb-6">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0D4F97]/10">
                 <FileText className="h-6 w-6 text-[#0D4F97]" />
@@ -298,8 +282,6 @@ export default function AvaliacoesAlunoPage() {
               </div>
             </div>
 
-            {/* Card de Informações do Aluno */}
-            {/* Card de Informações do Aluno */}
             <EstudanteCard
               nome={alunoData?.nome || "Nome não encontrado"}
               turma={turmaData?.nome || alunoData?.turma?.nome || "Turma não encontrada"}
@@ -319,17 +301,14 @@ export default function AvaliacoesAlunoPage() {
               }
             />
 
-            {/* Lista de Avaliações */}
             <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
               <CardContent className="p-0">
-                {/* Header da Tabela */}
                 <div className="hidden border-b-2 border-[#B2D7EC] bg-[#B2D7EC]/20 md:grid md:grid-cols-12 md:gap-4 md:p-4">
                   <div className="col-span-2 text-[#0D4F97] font-semibold">Data</div>
                   <div className="col-span-8 text-[#0D4F97] font-semibold">Descrição</div>
                   <div className="col-span-2 text-center text-[#0D4F97] font-semibold">Ações</div>
                 </div>
 
-                {/* Loading State */}
                 {loading ? (
                   <div className="p-8 text-center">
                     <div className="inline-flex items-center justify-center">
@@ -343,177 +322,6 @@ export default function AvaliacoesAlunoPage() {
                     <p className="text-sm text-gray-500 mt-2">Clique em "Adicionar Avaliação" para começar.</p>
                   </div>
                 ) : (
-                  <div className="divide-y-2 divide-[#B2D7EC]">
-                    {avaliacoes.map((avaliacao) => (
-                      <div
-                        key={avaliacao.id}
-                        className="grid grid-cols-1 gap-4 p-4 transition-all hover:bg-[#B2D7EC]/10 md:grid-cols-12 md:items-center"
-                      >
-                        {/* Data */}
-                        <div className="col-span-1 md:col-span-2">
-                          <p className="text-[#0D4F97] md:hidden font-semibold">Data:</p>
-                          <p className="text-[#0D4F97] font-medium">
-                            {formatarData(avaliacao.dataAvaliacao)}
-                          </p>
-                        </div>
-
-                        {/* Descrição */}
-                        <div className="col-span-1 md:col-span-8">
-                          <p className="text-[#0D4F97] md:hidden font-semibold">Descrição:</p>
-                          <p className="text-[#222222]">{avaliacao.descricao}</p>
-                          <div className="flex gap-2 mt-1">
-                            <span className="text-xs text-gray-500">
-                              Professor: {avaliacao.professorNome}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Ações */}
-                        <div className="col-span-1 md:col-span-2">
-                          <div className="flex gap-2 justify-center">
-                            <Button
-                              onClick={() => handleOpenEditarDialog(avaliacao)}
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 text-[#0D4F97] hover:bg-[#B2D7EC]/20 hover:text-[#0D4F97]"
-                              title="Editar"
-                              disabled={saving}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              onClick={() => handleOpenExcluirDialog(avaliacao)}
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 text-red-500 hover:bg-red-50 hover:text-red-600"
-                              title="Excluir"
-                              disabled={saving}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Dialog: Adicionar Avaliação */}
-            <Dialog open={isAdicionarDialogOpen} onOpenChange={setIsAdicionarDialogOpen}>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle className="text-[#0D4F97]">Adicionar Avaliação</DialogTitle>
-                  <DialogDescription>
-                    Registre uma nova avaliação para {alunoData?.nome}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  {/* Descrição */}
-                  <div>
-                    <label className="mb-2 block text-[#0D4F97] font-semibold">
-                      Descrição da Avaliação *
-                    </label>
-                    <Textarea
-                      value={descricaoAvaliacao}
-                      onChange={(e) => setDescricaoAvaliacao(e.target.value)}
-                      placeholder="Descreva a avaliação do aluno..."
-                      className="min-h-[120px] resize-none border-2 border-[#B2D7EC] focus:border-[#0D4F97]"
-                      disabled={saving}
-                    />
-                    <p className="mt-1 text-sm text-gray-500">
-                      Descreva os pontos positivos, negativos, observações gerais...
-                    </p>
-                  </div>
-
-                  <div className="flex justify-end gap-3">
-                    <Button
-                      onClick={() => setIsAdicionarDialogOpen(false)}
-                      variant="outline"
-                      className="border-2 border-[#B2D7EC] hover:bg-[#B2D7EC]/20"
-                      disabled={saving}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      onClick={handleAdicionarAvaliacao}
-                      className="bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97] font-semibold"
-                      disabled={saving}
-                    >
-                      {saving ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Adicionando...
-                        </>
-                      ) : (
-                        "Adicionar Avaliação"
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            {/* Dialog: Editar Avaliação */}
-            <Dialog open={isEditarDialogOpen} onOpenChange={setIsEditarDialogOpen}>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle className="text-[#0D4F97]">Editar Avaliação</DialogTitle>
-                  <DialogDescription>
-                    Atualize as informações da avaliação de {alunoData?.nome}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  {/* Descrição */}
-                  <div>
-                    <label className="mb-2 block text-[#0D4F97] font-semibold">
-                      Descrição da Avaliação *
-                    </label>
-                    <Textarea
-                      value={descricaoAvaliacao}
-                      onChange={(e) => setDescricaoAvaliacao(e.target.value)}
-                      placeholder="Descreva a avaliação do aluno..."
-                      className="min-h-[120px] resize-none border-2 border-[#B2D7EC] focus:border-[#0D4F97]"
-                      disabled={saving}
-                    />
-                  </div>
-
-                  <div className="flex justify-end gap-3">
-                    <Button
-                      onClick={() => setIsEditarDialogOpen(false)}
-                      variant="outline"
-                      className="border-2 border-[#B2D7EC] hover:bg-[#B2D7EC]/20"
-                      disabled={saving}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      onClick={handleEditarAvaliacao}
-                      className="bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97] font-semibold"
-                      disabled={saving}
-                    >
-                      {saving ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Salvando...
-                        </>
-                      ) : (
-                        "Salvar Alterações"
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            {/* Dialog: Excluir Avaliação */}
-            <Dialog open={isExcluirDialogOpen} onOpenChange={setIsExcluirDialogOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle className="text-[#0D4F97]">Excluir Avaliação</DialogTitle>
-                  <DialogDescription>
-                    Tem certeza que deseja excluir esta avaliação? Esta ação não pode ser desfeita.
                   </DialogDescription>
                 </DialogHeader>
                 {avaliacaoExcluindo && (
