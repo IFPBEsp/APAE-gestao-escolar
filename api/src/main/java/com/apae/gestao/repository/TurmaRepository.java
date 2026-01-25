@@ -28,12 +28,13 @@ public interface TurmaRepository extends JpaRepository<Turma, Long> {
                 ) < 75 THEN a.id
             END),
 
-            CONCAT(COUNT(DISTINCT a.id), ' / ', COUNT(p))
+            COUNT(DISTINCT au.id)
         )
         FROM Turma t
         LEFT JOIN t.turmaAlunos ta ON ta.isAlunoAtivo = true
         LEFT JOIN ta.aluno a
         LEFT JOIN a.presencas p
+        LEFT JOIN t.aulas au
         WHERE t.id = :turmaId
         GROUP BY t.id
     """)

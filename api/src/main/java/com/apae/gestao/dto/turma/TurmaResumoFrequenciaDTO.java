@@ -8,5 +8,5 @@ import lombok.Data;
 public class TurmaResumoFrequenciaDTO {
     private Double percentualMedioTurma;
     private Long alunosEmAlerta;
-    private String ratioAulas;
+    private Long totalAulas;
 }
