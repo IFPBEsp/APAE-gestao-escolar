@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 export default function Header() {
   const pathname = usePathname();
 
-  if (pathname === '/') return null;
+  if (pathname === '/' || pathname === '/login') return null;
 
   return (
     <header className="flex h-16 md:h-20 items-center justify-center bg-[#0D4F97] px-4 md:px-6 fixed top-0 w-full z-30">
