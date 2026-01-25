@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ArrowLeft, FileText, UserCircle, Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, FileText, Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { buscarTurmaPorId } from "@/services/TurmaService";
@@ -33,6 +33,7 @@ export default function AvaliacoesAlunoPage() {
 
   const alunoId = params?.alunoId ? parseInt(Array.isArray(params.alunoId) ? params.alunoId[0] : params.alunoId) : 0;
   const turmaId = searchParams?.get('turmaId') || '';
+  
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -54,53 +55,28 @@ export default function AvaliacoesAlunoPage() {
   const professorId = 1; // TODO: Substituir por auth context
 
   useEffect(() => {
-    const carregarAluno = async () => {
+    const carregarDadosIniciais = async () => {
       if (!alunoId || isNaN(alunoId)) return;
 
       try {
         setLoadingAluno(true);
-        const data = await buscarAlunoPorId(alunoId);
-        setAlunoData(data);
+        const [aluno, turma] = await Promise.all([
+          buscarAlunoPorId(alunoId),
+          turmaId ? buscarTurmaPorId(Number(turmaId)) : Promise.resolve(null)
+        ]);
+        setAlunoData(aluno);
+        setTurmaData(turma);
+        await carregarAvaliacoes();
       } catch (error) {
-        console.error("Erro ao carregar aluno:", error);
+        console.error("Erro ao carregar dados:", error);
         toast.error("Erro ao carregar dados do aluno");
       } finally {
         setLoadingAluno(false);
       }
     };
 
-    carregarAluno();
-  }, [alunoId]);
-
-  useEffect(() => {
-    const carregarTurma = async () => {
-      if (!turmaId) return;
-      try {
-        const data = await buscarTurmaPorId(Number(turmaId));
-        setTurmaData(data);
-      } catch (error) {
-        console.error("Erro ao carregar turma:", error);
-      }
-    };
-
-    carregarTurma();
-  }, [turmaId]);
-
-
-
-  useEffect(() => {
-    if (isNaN(alunoId) || alunoId <= 0) {
-      console.error("alunoId inválido:", alunoId);
-      toast.error("ID do aluno inválido!");
-      router.push("/professor/turmas");
-    }
-  }, [alunoId, router]);
-
-  useEffect(() => {
-    if (alunoId > 0 && !isNaN(alunoId)) {
-      carregarAvaliacoes();
-    }
-  }, [alunoId]);
+    carregarDadosIniciais();
+  }, [alunoId, turmaId]);
 
   const carregarAvaliacoes = async () => {
     try {
@@ -108,8 +84,7 @@ export default function AvaliacoesAlunoPage() {
       const data = await AvaliacaoService.listarAvaliacoesPorAluno(alunoId);
       setAvaliacoes(data);
     } catch (error: any) {
-      toast.error(error.message || "Erro ao carregar avaliações");
-      console.error(error);
+      toast.error("Erro ao carregar avaliações");
     } finally {
       setLoading(false);
     }
@@ -117,19 +92,8 @@ export default function AvaliacoesAlunoPage() {
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
-    if (tab === "inicio") {
-      router.push("/professor");
-    } else if (tab === "turmas") {
-      router.push("/professor/turmas");
-    }
-  };
-
-  const handleLogout = () => {
-    router.push("/");
-  };
-
-  const handleToggleCollapse = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
+    if (tab === "inicio") router.push("/professor");
+    else if (tab === "turmas") router.push("/professor/turmas");
   };
 
   const handleOpenAdicionarDialog = () => {
@@ -149,71 +113,38 @@ export default function AvaliacoesAlunoPage() {
   };
 
   const handleAdicionarAvaliacao = async () => {
-    if (!descricaoAvaliacao.trim()) {
-      toast.error("Por favor, preencha a descrição da avaliação!");
-      return;
-    }
-
-    if (alunoId === 0 || isNaN(alunoId)) {
-      toast.error("ID do aluno inválido!");
-      return;
-    }
-
+    if (!descricaoAvaliacao.trim()) return toast.error("Preencha a descrição!");
     try {
       setSaving(true);
-
-      const avaliacaoData = {
+      await AvaliacaoService.criarAvaliacao({
         descricao: descricaoAvaliacao,
-        alunoId: alunoId,
-        professorId: professorId,
-      };
-
-      console.log("Enviando para API:", avaliacaoData);
-
-      await AvaliacaoService.criarAvaliacao(avaliacaoData);
-
-      toast.success("Avaliação adicionada com sucesso!");
+        alunoId,
+        professorId,
+      });
+      toast.success("Avaliação adicionada!");
       setIsAdicionarDialogOpen(false);
-      setDescricaoAvaliacao("");
-
-      await carregarAvaliacoes();
-
-    } catch (error: any) {
-      toast.error(error.message || "Erro ao adicionar avaliação");
-      console.error("Erro detalhado:", error);
+      carregarAvaliacoes();
+    } catch (error) {
+      toast.error("Erro ao adicionar");
     } finally {
       setSaving(false);
     }
   };
 
   const handleEditarAvaliacao = async () => {
-    if (!descricaoAvaliacao.trim()) {
-      toast.error("Por favor, preencha a descrição da avaliação!");
-      return;
-    }
-
-    if (!avaliacaoEditando) return;
-
+    if (!avaliacaoEditando || !descricaoAvaliacao.trim()) return;
     try {
       setSaving(true);
-
-      const avaliacaoData = {
+      await AvaliacaoService.atualizarAvaliacao(avaliacaoEditando.id, {
         descricao: descricaoAvaliacao,
-        alunoId: alunoId,
-        professorId: professorId,
-      };
-
-      await AvaliacaoService.atualizarAvaliacao(avaliacaoEditando.id, avaliacaoData);
-
-      toast.success("Avaliação atualizada com sucesso!");
+        alunoId,
+        professorId,
+      });
+      toast.success("Avaliação atualizada!");
       setIsEditarDialogOpen(false);
-      setAvaliacaoEditando(null);
-
-      await carregarAvaliacoes();
-
-    } catch (error: any) {
-      toast.error(error.message || "Erro ao atualizar avaliação");
-      console.error(error);
+      carregarAvaliacoes();
+    } catch (error) {
+      toast.error("Erro ao atualizar");
     } finally {
       setSaving(false);
     }
@@ -221,21 +152,14 @@ export default function AvaliacoesAlunoPage() {
 
   const handleExcluirAvaliacao = async () => {
     if (!avaliacaoExcluindo) return;
-
     try {
       setSaving(true);
-
       await AvaliacaoService.deletarAvaliacao(avaliacaoExcluindo.id);
-
-      toast.success("Avaliação excluída com sucesso!");
+      toast.success("Avaliação excluída!");
       setIsExcluirDialogOpen(false);
-      setAvaliacaoExcluindo(null);
-
-      await carregarAvaliacoes();
-
-    } catch (error: any) {
-      toast.error(error.message || "Erro ao excluir avaliação");
-      console.error(error);
+      carregarAvaliacoes();
+    } catch (error) {
+      toast.error("Erro ao excluir");
     } finally {
       setSaving(false);
     }
@@ -244,8 +168,8 @@ export default function AvaliacoesAlunoPage() {
   const formatarData = (dataString: string) => {
     try {
       return format(new Date(dataString), "dd/MM/yyyy", { locale: ptBR });
-    } catch (error) {
-      return "Data inválida";
+    } catch {
+      return "---";
     }
   };
 
@@ -254,22 +178,20 @@ export default function AvaliacoesAlunoPage() {
       <ProfessorSidebar
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        onLogout={handleLogout}
+        onLogout={() => router.push("/")}
         isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={handleToggleCollapse}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
-      <main className={`flex-1 overflow-y-auto transition-all duration-300 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
-        }`}>
+      <main className={`flex-1 overflow-y-auto transition-all duration-300 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
         <div className="p-4 md:p-8">
           <div className="mx-auto max-w-6xl">
             <Button
               onClick={() => router.push(turmaId ? `/professor/turmas/${turmaId}/alunos` : "/professor/turmas")}
               variant="outline"
-              className="mb-6 h-12 justify-center border-2 border-[#B2D7EC] px-4 text-[#0D4F97] hover:bg-[#B2D7EC]/20"
+              className="mb-6 h-12 border-2 border-[#B2D7EC] text-[#0D4F97] hover:bg-[#B2D7EC]/20"
             >
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              Voltar
+              <ArrowLeft className="mr-2 h-5 w-5" /> Voltar
             </Button>
 
             <div className="flex items-start gap-3 mb-6">
@@ -277,31 +199,30 @@ export default function AvaliacoesAlunoPage() {
                 <FileText className="h-6 w-6 text-[#0D4F97]" />
               </div>
               <div>
-                <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho do Aluno</h2>
-                <p className="text-[#222222]">Acompanhe o progresso e histórico de avaliações de {alunoData?.nome || "..."}</p>
+                <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho</h2>
+                <p className="text-[#222222]">Histórico de {alunoData?.nome || "..."}</p>
               </div>
             </div>
 
             <EstudanteCard
-              nome={alunoData?.nome || "Nome não encontrado"}
-              turma={turmaData?.nome || alunoData?.turma?.nome || "Turma não encontrada"}
-              turno={turmaData?.turno || alunoData?.turma?.turno}
+              nome={alunoData?.nome || "Carregando..."}
+              turma={turmaData?.nome || "..."}
+              turno={turmaData?.turno}
               turmaId={turmaId}
               alunoId={alunoId}
               loading={loadingAluno}
               action={
                 <Button
                   onClick={handleOpenAdicionarDialog}
-                  className="h-12 justify-center bg-[#0D4F97] px-6 text-white hover:bg-[#FFD000] hover:text-[#0D4F97] font-semibold"
+                  className="h-12 bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97] font-semibold"
                   disabled={loading || saving}
                 >
-                  <Plus className="mr-2 h-5 w-5" />
-                  Adicionar Avaliação
+                  <Plus className="mr-2 h-5 w-5" /> Adicionar Avaliação
                 </Button>
               }
             />
 
-            <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
+            <Card className="mt-6 rounded-xl border-2 border-[#B2D7EC] shadow-md">
               <CardContent className="p-0">
                 <div className="hidden border-b-2 border-[#B2D7EC] bg-[#B2D7EC]/20 md:grid md:grid-cols-12 md:gap-4 md:p-4">
                   <div className="col-span-2 text-[#0D4F97] font-semibold">Data</div>
@@ -310,57 +231,78 @@ export default function AvaliacoesAlunoPage() {
                 </div>
 
                 {loading ? (
-                  <div className="p-8 text-center">
-                    <div className="inline-flex items-center justify-center">
-                      <Loader2 className="h-8 w-8 animate-spin text-[#0D4F97]" />
-                      <span className="ml-3 text-[#222222]">Carregando avaliações...</span>
-                    </div>
+                  <div className="p-8 text-center flex justify-center items-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-[#0D4F97]" />
                   </div>
                 ) : avaliacoes.length === 0 ? (
-                  <div className="p-8 text-center text-[#222222]">
-                    Nenhuma avaliação registrada ainda.
-                    <p className="text-sm text-gray-500 mt-2">Clique em "Adicionar Avaliação" para começar.</p>
-                  </div>
+                  <div className="p-8 text-center text-gray-500">Nenhuma avaliação encontrada.</div>
                 ) : (
-                  </DialogDescription>
-                </DialogHeader>
-                {avaliacaoExcluindo && (
-                  <div className="my-4 p-4 border border-red-200 bg-red-50 rounded-lg">
-                    <p className="font-medium text-gray-800">Avaliação selecionada:</p>
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                      "{avaliacaoExcluindo.descricao.substring(0, 100)}..."
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Data: {formatarData(avaliacaoExcluindo.dataAvaliacao)}
-                    </p>
-                  </div>
+                  avaliacoes.map((av) => (
+                    <div key={av.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border-b border-[#B2D7EC] items-center hover:bg-gray-50">
+                      <div className="md:col-span-2 font-medium">{formatarData(av.dataAvaliacao)}</div>
+                      <div className="md:col-span-8 text-sm text-gray-700">{av.descricao}</div>
+                      <div className="md:col-span-2 flex justify-center gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => handleOpenEditarDialog(av)} className="text-blue-600">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleOpenExcluirDialog(av)} className="text-red-600">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
                 )}
-                <div className="flex justify-end gap-3">
-                  <Button
-                    onClick={() => setIsExcluirDialogOpen(false)}
-                    variant="outline"
-                    className="border-2 border-[#B2D7EC] hover:bg-[#B2D7EC]/20"
-                    disabled={saving}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={handleExcluirAvaliacao}
-                    className="bg-red-500 text-white hover:bg-red-600 font-semibold"
-                    disabled={saving}
-                  >
-                    {saving ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Excluindo...
-                      </>
-                    ) : (
-                      "Excluir Avaliação"
-                    )}
-                  </Button>
+              </CardContent>
+            </Card>
+
+            {/* Dialog Adicionar/Editar */}
+            <Dialog open={isAdicionarDialogOpen || isEditarDialogOpen} onOpenChange={(val) => {
+              if (!val) { setIsAdicionarDialogOpen(false); setIsEditarDialogOpen(false); }
+            }}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{isEditarDialogOpen ? "Editar Avaliação" : "Nova Avaliação"}</DialogTitle>
+                </DialogHeader>
+                <div className="py-4">
+                  <Textarea
+                    placeholder="Descreva o desempenho do aluno..."
+                    value={descricaoAvaliacao}
+                    onChange={(e) => setDescricaoAvaliacao(e.target.value)}
+                    className="min-h-[150px]"
+                  />
                 </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => { setIsAdicionarDialogOpen(false); setIsEditarDialogOpen(false); }}>Cancelar</Button>
+                  <Button 
+                    onClick={isEditarDialogOpen ? handleEditarAvaliacao : handleAdicionarAvaliacao}
+                    disabled={saving}
+                    className="bg-[#0D4F97]"
+                  >
+                    {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Salvar
+                  </Button>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
+
+            {/* Dialog Excluir */}
+            <Dialog open={isExcluirDialogOpen} onOpenChange={setIsExcluirDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="text-red-600">Excluir Avaliação</DialogTitle>
+                  <DialogDescription>
+                    Tem certeza que deseja excluir esta avaliação? Esta ação não pode ser desfeita.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsExcluirDialogOpen(false)}>Cancelar</Button>
+                  <Button variant="destructive" onClick={handleExcluirAvaliacao} disabled={saving}>
+                    {saving ? "Excluindo..." : "Excluir"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
           </div>
         </div>
       </main>
