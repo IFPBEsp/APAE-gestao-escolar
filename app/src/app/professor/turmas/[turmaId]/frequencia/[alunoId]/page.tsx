@@ -132,9 +132,9 @@ export default function HistoricoAlunoPage() {
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="bg-[#B2D7EC]/20 hover:bg-[#B2D7EC]/20">
-                                            <TableHead className="text-[#0D4F97] font-semibold pl-6">Data</TableHead>
-                                            <TableHead className="text-[#0D4F97] font-semibold">Descrição da Aula</TableHead>
-                                            <TableHead className="text-[#0D4F97] font-semibold text-right pr-6">Status</TableHead>
+                                            <TableHead className="w-1/3 text-[#0D4F97] font-semibold text-center">Data</TableHead>
+                                            <TableHead className="w-1/3 text-[#0D4F97] font-semibold text-center">Descrição da Aula</TableHead>
+                                            <TableHead className="w-1/3 text-[#0D4F97] font-semibold text-center">Status</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -147,13 +147,13 @@ export default function HistoricoAlunoPage() {
                                         ) : (
                                             historico.map((registro, index) => (
                                                 <TableRow key={index} className="hover:bg-[#B2D7EC]/10">
-                                                    <TableCell className="pl-6 font-medium text-[#222222] whitespace-nowrap">
+                                                    <TableCell className="text-center font-medium text-[#222222] whitespace-nowrap">
                                                         {registro.data}
                                                     </TableCell>
-                                                    <TableCell className="text-[#222222]">
+                                                    <TableCell className="text-[#222222] text-center">
                                                         {registro.descricao}
                                                     </TableCell>
-                                                    <TableCell className="text-right pr-6">
+                                                    <TableCell className="text-center">
                                                         <Badge
                                                             className={`
                                                                 px-4 py-1.5 font-semibold text-sm border

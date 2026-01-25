@@ -191,7 +191,7 @@ function ChamadaContent({
 
     const handleSave = async () => {
         if (!descricaoAula.trim()) {
-            toast.error("Adicione uma descrição para a aula!");
+            toast.error("Por favor, adicione uma descrição para a aula.");
             return;
         }
 
@@ -289,10 +289,10 @@ function ChamadaContent({
                         <span className="font-medium">Descrição da Aula</span>
                     </div>
                     <Textarea
+                        placeholder="Descrição da aula *"
+                        className="min-h-[100px]"
                         value={descricaoAula}
                         onChange={(e) => setDescricaoAula(e.target.value)}
-                        placeholder="Adicione uma descrição para a aula (opcional)"
-                        className="min-h-[48px] resize-none border-2 border-[#B2D7EC] bg-white"
                     />
                 </div>
             </div>
@@ -310,8 +310,8 @@ function ChamadaContent({
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-[#B2D7EC]/20 hover:bg-[#B2D7EC]/20">
-                            <TableHead className="text-[#0D4F97] font-semibold">Nome do Aluno(a)</TableHead>
-                            <TableHead className="text-center text-[#0D4F97] font-semibold w-32">Presença</TableHead>
+                            <TableHead className="text-[#0D4F97] font-semibold pl-6">Nome do Aluno(a)</TableHead>
+                            <TableHead className="text-center text-[#0D4F97] font-semibold pr-6">Presença</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -324,8 +324,8 @@ function ChamadaContent({
                                     key={studentId}
                                     className="transition-colors hover:bg-[#B2D7EC]/10"
                                 >
-                                    <TableCell className="text-[#222222] font-medium">{student.nome}</TableCell>
-                                    <TableCell className="text-center">
+                                    <TableCell className="text-[#222222] font-medium pl-6">{student.nome}</TableCell>
+                                    <TableCell className="text-center pr-6">
                                         <div className="flex justify-center">
                                             <Switch
                                                 id={`student-${studentId}`}
@@ -412,6 +412,7 @@ function HistoricoContent({
         return matchSearch && matchAlert;
     });
 
+
     return (
         <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
             <CardHeader className="bg-[#F8F9FA] border-b-2 border-[#B2D7EC]">
@@ -462,27 +463,31 @@ function HistoricoContent({
                                 className="border-2 border-[#B2D7EC]"
                             />
                         </div>
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                                <Button
-                                    variant={showAlertsOnly ? "secondary" : "ghost"}
-                                    size="sm"
-                                    onClick={() => setShowAlertsOnly(!showAlertsOnly)}
-                                    className={`text-sm flex items-center gap-2 cursor-pointer transition-colors ${showAlertsOnly
-                                        ? "bg-orange-100 text-orange-700 hover:bg-orange-200 border border-orange-200"
-                                        : "text-[#222222] hover:bg-gray-100"
-                                        }`}
+                        <button
+                            onClick={() => setShowAlertsOnly(!showAlertsOnly)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all duration-200 shadow-sm hover:shadow ${
+                                showAlertsOnly 
+                                    ? 'bg-orange-50 border-orange-200 text-orange-700 shadow-orange-200/50' 
+                                    : 'bg-gray-100 border-gray-300 text-gray-800 hover:bg-gray-200 shadow-gray-300/50'
+                            }`}
+                        >
+                            <span className="text-sm font-medium">Apenas Alertas</span>
+                            <div className="relative inline-flex items-center h-5 rounded-full w-10 bg-gray-200">
+                                <span 
+                                    className={`absolute flex items-center justify-center w-5 h-5 rounded-full transition-all duration-200 ${
+                                        showAlertsOnly 
+                                            ? 'left-5 bg-orange-500' 
+                                            : 'left-0 bg-white'
+                                    }`}
                                 >
-                                    <AlertTriangle className={`h-4 w-4 ${showAlertsOnly ? "text-orange-700" : "text-orange-600"}`} />
-                                    Apenas Alertas
-                                </Button>
-                                <Switch
-                                    checked={showAlertsOnly}
-                                    onCheckedChange={setShowAlertsOnly}
-                                    className="data-[state=checked]:bg-orange-600"
-                                />
+                                    <AlertTriangle 
+                                        className={`h-3 w-3 ${
+                                            showAlertsOnly ? 'text-white' : 'text-gray-400'
+                                        }`} 
+                                    />
+                                </span>
                             </div>
-                        </div>
+                        </button>
                     </div>
                 </div>
 
@@ -490,8 +495,8 @@ function HistoricoContent({
                     <Table>
                         <TableHeader>
                             <TableRow className="bg-[#B2D7EC]/20 hover:bg-[#B2D7EC]/20">
-                                <TableHead className="text-[#0D4F97] font-semibold">Nome do Aluno</TableHead>
-                                <TableHead className="text-[#0D4F97] font-semibold">Frequência Atual (%)</TableHead>
+                                <TableHead className="text-[#0D4F97] font-semibold pl-6">Nome do Aluno</TableHead>
+                                <TableHead className="text-[#0D4F97] font-semibold pl-4">Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -519,20 +524,25 @@ function HistoricoContent({
                                                 }
                                             }}
                                         >
-                                            <TableCell className="font-medium text-[#222222] group">
+                                            <TableCell className="font-medium text-[#222222] pl-6">
                                                 <div className="flex items-center gap-2">
-                                                    {isAlert && <AlertTriangle className="h-4 w-4 text-orange-600" />}
+                                                    {isAlert && <AlertTriangle className="h-4 w-4 text-orange-600 flex-shrink-0" />}
                                                     <Link
                                                         href={studentId ? `/professor/turmas/${turmaId}/frequencia/${studentId}` : "#"}
                                                         onClick={(e) => e.stopPropagation()}
-                                                        className="text-[#0D4F97] underline hover:text-[#0D4F97]/80"
+                                                        className="text-[#0D4F97] underline hover:text-[#0D4F97]/80 whitespace-nowrap overflow-hidden text-ellipsis"
                                                     >
                                                         {aluno.nome}
                                                     </Link>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className={`font-semibold ${isAlert ? "text-orange-600" : "text-[#0D4F97]"}`}>
-                                                {frequencia}%
+                                            <TableCell className="text-center">
+                                                <div className={`font-semibold ${isAlert ? "text-orange-600" : "text-[#0D4F97]"}`}>
+                                                    {frequencia}%
+                                                </div>
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                    {frequencia >= 75 ? 'Presente' : 'Ausente'}
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     );
