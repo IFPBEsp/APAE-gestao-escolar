@@ -12,7 +12,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className="min-h-screen bg-[#E5E5E5]">
         <Header />
-        <main className="min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-5rem)] mt-16 md:mt-20">
+        <main className="min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-5rem)]">
           {children}
         </main>
         <ToasterProvider />
