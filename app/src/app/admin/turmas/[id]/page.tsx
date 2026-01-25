@@ -86,13 +86,14 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
   if (!turma) {
     return (
       <div className="min-h-[calc(100vh-5rem)] bg-[#E5E5E5] p-4 md:p-8">
-        <button
+        <Button
+          variant="outline"
           onClick={() => router.back()}
-          className="mb-6 flex items-center gap-2 text-[#0D4F97]"
+          className="mb-6 justify-center"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="mr-2 h-5 w-5" />
           Voltar
-        </button>
+        </Button>
         <div className="text-center">Turma não encontrada</div>
       </div>
     );

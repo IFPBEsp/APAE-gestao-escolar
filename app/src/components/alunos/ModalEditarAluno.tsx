@@ -4,42 +4,33 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { BookOpen, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { atualizarTurmaAluno } from "@/services/AlunoService"; 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { atualizarTurmaAluno } from "@/services/AlunoService";
 import { listarTurmas } from "@/services/TurmaService";
 
 interface TurmaDTO {
     id: number;
-    nome: string; 
-    turno: string; 
+    nome: string;
+    turno: string;
 }
 
 interface AlunoModalProps {
     id: number;
     nome: string;
-    nomeTurmaAtual: string | null; 
-    turnoTurmaAtual: string | null; 
+    nomeTurmaAtual: string | null;
+    turnoTurmaAtual: string | null;
 }
 
 interface ModalEditarAlunoProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (alunoAtualizado: any) => void; 
-    aluno: AlunoModalProps | null; 
+    onSave: (alunoAtualizado: any) => void;
+    aluno: AlunoModalProps | null;
 }
 
 export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: ModalEditarAlunoProps) {
-    
     const [turmasDisponiveis, setTurmasDisponiveis] = useState<TurmaDTO[]>([]);
     const [loadingTurmas, setLoadingTurmas] = useState(true);
-
-    // Estado para armazenar o ID da turma selecionada
     const [turmaIdSelecionada, setTurmaIdSelecionada] = useState<string>("");
 
     useEffect(() => {
@@ -50,7 +41,6 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                 setTurmasDisponiveis(data);
                 setTurmaIdSelecionada("");
 
-                // Encontrar a turma atual pelo nome e turno
                 if (aluno?.nomeTurmaAtual && aluno?.turnoTurmaAtual) {
                     const turmaAtual = data.find(
                         turma => 
@@ -58,7 +48,9 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                             turma.turno === aluno.turnoTurmaAtual
                     );
                     
-                    if (turmaAtual) {
+                    if (!turmaAtual && aluno?.nomeTurmaAtual) {
+                        // No action needed
+                    } else if (turmaAtual) {
                         setTurmaIdSelecionada(turmaAtual.id.toString());
                     }
                 }
@@ -107,7 +99,6 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                 </DialogHeader>
 
                 <div className="space-y-6">
-                    {/* Informações Acadêmicas */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-2">
                             <BookOpen className="h-5 w-5 text-[#0D4F97]" />
@@ -145,7 +136,6 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                         </div>
                     </div>
 
-                    {/* Botões de Ação */}
                     <div className="flex flex-col gap-3 border-t-2 border-[#B2D7EC] pt-6 md:flex-row md:justify-end">
                         <Button
                             variant="outline"
