@@ -13,6 +13,7 @@ interface ProfessorSidebarProps {
   showMobileMenu?: boolean;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  staticPosition?: boolean;
 }
 
 export default function ProfessorSidebar({
