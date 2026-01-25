@@ -1,5 +1,6 @@
 'use client'
 
+<<<<<<< HEAD
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
@@ -8,43 +9,48 @@ import { Button } from "@/components/ui/button";
 import { buscarTurmaPorId } from "@/services/TurmaService";
 import { toast } from "sonner";
 import { Turma } from "@/types/turma";
+=======
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import ProfessorSidebar from '@/components/Sidebar/ProfessorSidebar';
+import Chamada from '@/components/Chamada';
+import { Button } from '@/components/ui/button';
+import { buscarTurmaPorId } from '@/services/TurmaService';
+import { toast } from 'sonner';
+
+interface Turma {
+  id: number;
+  nome: string;
+}
+>>>>>>> af227ef8d450f9f14ad0abb3348b35831f1b5297
 
 export default function ChamadaPage() {
   const router = useRouter();
   const params = useParams();
-
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [turma, setTurma] = useState<Turma | null>(null);
   const [loading, setLoading] = useState(true);
-
   const turmaId = params?.turmaId ? String(params.turmaId) : null;
 
   useEffect(() => {
     if (!turmaId) return;
 
-    async function carregarTurma() {
+    const carregarTurma = async () => {
       try {
         const data = await buscarTurmaPorId(turmaId);
         setTurma(data);
       } catch (error) {
-        toast.error(error.message || "Erro ao carregar a turma");
+        toast.error(error.message || 'Erro ao carregar a turma');
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     carregarTurma();
   }, [turmaId]);
 
-  const handleBack = () => {
-    router.push("/professor/turmas");
-  };
-
-  const handleSaveSuccess = () => {
-    setTimeout(() => {
-      router.push("/professor/turmas");
-    }, 1500);
-  };
+  const handleBack = () => router.push('/professor/turmas');
+  const handleSaveSuccess = () => setTimeout(() => router.push('/professor/turmas'), 1500);
 
   if (loading) {
     return (
