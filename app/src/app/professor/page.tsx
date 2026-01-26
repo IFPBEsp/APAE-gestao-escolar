@@ -16,13 +16,15 @@ export default function ProfessorDashboardPage() {
   const professorId = 1;
 
   const handleToggleCollapse = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
+      setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
-   const totalAlunosAtivos = turmas.reduce((total, turma) => {
-       const valor = Number(turma.totalAlunosAtivos);
-    return total + (isNaN(valor) ? 0 : valor);
-    }, 0);
+  const turmasAtivas = turmas.filter(turma => turma.isAtiva);
+
+  const totalAlunosAtivos = turmasAtivas.reduce((total, turma) => {
+      const valor = Number(turma.totalAlunosAtivos);
+      return total + (isNaN(valor) ? 0 : valor);
+  }, 0);
 
   useEffect(() => {
     async function carregarProfessor() {
@@ -105,7 +107,7 @@ useEffect(() => {
                     </div>
                     <p className="text-[#222222] mb-2">Turmas Ativas</p>
                     <p className="text-[#0D4F97] text-3xl font-bold">
-                      {turmas.length}
+                      {turmasAtivas.length}
                     </p>
                   </div>
                 </CardContent>
