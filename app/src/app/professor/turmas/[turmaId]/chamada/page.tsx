@@ -6,12 +6,11 @@ import Chamada from '@/components/Chamada';
 import { Button } from '@/components/ui/button';
 import { buscarTurmaPorId } from '@/services/TurmaService';
 import { toast } from 'sonner';
-import { Turma } from "@/types/turma";
 
-const turmaNomes = { 
-    "1": "Educação Especial 2025 MANHA", 
-    "2": "Estimulação 2025 - Tarde" 
-};
+interface Turma {
+  id: number;
+  nome: string;
+}
 
 export default function ChamadaPage() {
   const router = useRouter();
@@ -41,8 +40,17 @@ export default function ChamadaPage() {
   const handleBack = () => router.push('/professor/turmas');
   const handleSaveSuccess = () => setTimeout(() => router.push('/professor/turmas'), 1500);
 
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-[#E5E5E5] items-center justify-center">
+        <p className="text-[#0D4F97] text-lg font-bold">
+          Carregando turma...
+        </p>
+      </div>
+    );
+  }
 
-  if (!turmaId || !turmaNome) {
+  if (!turma) {
     return (
       <div className="flex min-h-screen bg-[#E5E5E5] items-center justify-center p-4">
         <div className="bg-white p-8 rounded-xl border-2 border-[#B2D7EC] text-center shadow-md">
@@ -62,18 +70,23 @@ export default function ChamadaPage() {
 
   return (
     <div className="flex min-h-screen bg-[#E5E5E5]">
-      <ProfessorSidebar 
-        isCollapsed={isSidebarCollapsed} 
-        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+      <ProfessorSidebar
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() =>
+          setIsSidebarCollapsed(!isSidebarCollapsed)
+        }
       />
-      <main className={`flex-1 p-4 md:p-8 transition-all duration-300 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
-        <Chamada 
-          turmaIdProp={turmaId} 
-          turmaNomeProp={turmaNome} 
-          
+
+      <main
+        className={`flex-1 p-4 md:p-8 transition-all duration-300 ${
+          isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
+        }`}
+      >
+        <Chamada
+          turmaIdProp={turma.id}
+          turmaNomeProp={turma.nome}
           onBack={handleBack}
           onSaveSuccess={handleSaveSuccess}
-          
         />
       </main>
     </div>

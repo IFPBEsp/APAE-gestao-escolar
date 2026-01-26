@@ -7,24 +7,34 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { listarTurmasDeProfessor } from "@/services/ProfessorService";
 import { toast } from "sonner";
-import { Turma } from "@/types/turma";
+
+interface Turma {
+  id: number;
+  nome: string;
+  horario: string;
+  turno: string;
+  tipo: string;
+  isAtiva: boolean;
+  totalAlunosAtivos?: number;
+}
 
 export default function TurmasPage() {
   const router = useRouter();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [turmas, setTurmas] = useState<Turma[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const professorId = 1; //depois substituir pelo id que receber pelo login de prof(quando tiver login)
+  const professorId = 1; // depois substituir pelo id vindo do login
 
   async function carregarTurmas() {
     try {
-      const data = await listarTurmasDeProfessor(professorId);
+      const data: Turma[] = await listarTurmasDeProfessor(professorId);
 
-      // opcional: filtrar apenas turmas ativas
-      const turmasAtivas = data.filter((turma) => turma.isAtiva);
+      // 🔹 Filtra apenas turmas ativas
+      const turmasAtivas = data.filter((turma) => turma.isAtiva === true);
 
       setTurmas(turmasAtivas);
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.message || "Erro ao carregar turmas");
     } finally {
       setLoading(false);
@@ -149,3 +159,4 @@ export default function TurmasPage() {
     </div>
   );
 }
+

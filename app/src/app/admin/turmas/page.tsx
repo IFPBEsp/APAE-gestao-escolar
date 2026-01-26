@@ -21,34 +21,17 @@ export default function GerenciarTurmasPage() {
 
   useEffect(() => {
     async function carregarTurmasComAlunos() {
-      try {
-        setLoading(true);
+        try {
+              setLoading(true);
 
-        // Buscar todas as turmas
-        const turmasData = await listarTurmas();
+              const turmasData = await listarTurmas();
 
-        // Para cada turma, buscar os alunos ativos e adicionar contagem
-        const turmasComContador = await Promise.all(
-          turmasData.map(async (turma: any) => {
-            try {
-              const alunosAtivos = await listarAlunosAtivos(turma.id);
-              return {
-                ...turma,
-                alunosCount: alunosAtivos.length, // contador de alunos ativos
-              };
-            } catch (err) {
-              console.error(`Erro ao contar alunos da turma ${turma.id}`, err);
-              return { ...turma, alunosCount: 0 };
+              setTurmas(turmasData);
+            } catch (error: any) {
+              toast.error(error.message || "Erro ao carregar turmas");
+            } finally {
+              setLoading(false);
             }
-          })
-        );
-
-        setTurmas(turmasComContador);
-      } catch (error: any) {
-        toast.error(error.message || "Erro ao carregar turmas");
-      } finally {
-        setLoading(false);
-      }
     }
 
     carregarTurmasComAlunos();
@@ -151,7 +134,7 @@ export default function GerenciarTurmasPage() {
                   </div>
 
                   <div className="bg-[#E8F3FF] text-[#0D4F97] px-2 md:px-3 py-1 rounded-full text-xs font-medium border border-[#B2D7EC]">
-                    {turma.alunosCount ?? 0} alunos
+                    {turma.totalAlunosAtivos ?? 0} alunos
                   </div>
                 </div>
 
@@ -161,7 +144,7 @@ export default function GerenciarTurmasPage() {
 
                 <div className="text-gray-700 space-y-1 text-sm md:text-base">
                   <p>
-                    <strong>Professor:</strong> {turma.professor?.nome}
+                    <strong>Professor:</strong> {turma.professorNome}
                   </p>
                   <p>
                     <strong>Turno:</strong> {turma.turno}

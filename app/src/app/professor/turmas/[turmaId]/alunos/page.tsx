@@ -179,15 +179,15 @@ export default function TurmaDetalhesPage() {
                   <div>
                     <label className="block text-[#0D4F97] font-medium mb-2">Buscar Aluno</label>
                     <div className="relative w-full">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Input
-                        type="text"
-                        placeholder="Digite o nome do aluno"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 h-12 w-full border-2 border-[#B2D7EC] bg-white"
-                      />
-                    </div>
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      type="text"
+                      placeholder="Digite o nome do aluno"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 h-12 w-full border-2 border-[#B2D7EC] bg-white"
+                    />
+                  </div>
 
                 <div>
                   <label className="block text-[#0D4F97] font-medium mb-2">Visualização</label>
@@ -316,7 +316,7 @@ export default function TurmaDetalhesPage() {
                   Nenhum aluno encontrado
                 </h3>
                 <p className="text-gray-500">
-                  {searchTerm
+                  {searchTerm 
                     ? `Nenhum resultado para "${searchTerm}"`
                     : 'Esta turma ainda não tem alunos matriculados'}
                 </p>
