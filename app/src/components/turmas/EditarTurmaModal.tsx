@@ -26,7 +26,12 @@ import {
 import { Search, UserRound, X } from "lucide-react";
 import { useState, useEffect } from "react";
 
-interface Aluno {
+interface AlunoAPI {
+    id: number;
+    nome: string;
+}
+
+interface AlunoNaTurma {
     alunoId: number;
     nome: string;
     isAtivo?: boolean;
@@ -44,7 +49,7 @@ interface TurmaAPIData {
     turno: string;
     nome: string;
     professor: Professor;
-    alunos: Aluno[];
+    alunos: AlunoNaTurma[];
     isAtiva: boolean;
 }
 
@@ -56,24 +61,19 @@ interface EditarTurmaModalProps {
 }
 
 export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarTurmaModalProps) {
-    // --- Dados do Formulário (Valores Mutáveis) ---
     const [tipo, setTipo] = useState("");
     const [turno, setTurno] = useState("");
     
-    // --- Gerenciamento de Professor ---
     const [buscaProfessor, setBuscaProfessor] = useState("");
     const [professoresEncontrados, setProfessoresEncontrados] = useState<Professor[]>([]);
     const [professorSelecionado, setProfessorSelecionado] = useState<Professor | null>(null); 
     
-    // --- Gerenciamento de Alunos ---
     const [buscaAluno, setBuscaAluno] = useState("");
-    const [alunosEncontrados, setAlunosEncontrados] = useState<Aluno[]>([]);
-    const [alunosNaTurma, setAlunosNaTurma] = useState<Aluno[]>([]);
+    const [alunosEncontrados, setAlunosEncontrados] = useState<AlunoAPI[]>([]); 
+    const [alunosNaTurma, setAlunosNaTurma] = useState<AlunoNaTurma[]>([]); 
 
-    // Gerar nome automaticamente (para exibição)
     const nomeTurma = `${tipo ? formatTipo(tipo) : ""} ${turmaData?.anoCriacao || ""} - ${turno ? formatTurno(turno) : ""}`;
 
-    // Funções auxiliares (reutilizadas)
     function formatTipo(val: string) {
         if (val === 'ALFABETIZACAO' || val === 'alfabetizacao') return 'Alfabetização';
         if (val === 'ESTIMULACAO' || val === 'estimulacao') return 'Estimulação';
@@ -86,9 +86,6 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
         return val;
     }
 
-    // --- Hooks de Inicialização ---
-
-    // Inicializa o estado do modal com os dados da turmaData
     useEffect(() => {
         if (turmaData && isOpen) {
             setTipo(turmaData.tipo);
@@ -107,9 +104,6 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             setBuscaAluno("");
         }
     }, [turmaData, isOpen]);
-
-
-    // --- Lógica de Busca de Professor ---
 
     useEffect(() => {
         if (buscaProfessor.length > 0) {
@@ -138,8 +132,6 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
         setProfessoresEncontrados([]); 
     }
     
-    // --- Lógica de Alunos (Mantida do código anterior) ---
-    
     useEffect(() => {
         if (buscaAluno.length > 0) { 
             const delayDebounceFn = setTimeout(() => {
@@ -151,20 +143,25 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
         }
     }, [buscaAluno]);
     
-    
     async function fetchAlunos(nome: string) {
         try {
             const data = await listarAlunos(nome); 
-            setAlunosEncontrados(data.filter(a => !alunosNaTurma.some(naTurma => naTurma.id === a.id)));
+            setAlunosEncontrados(data.filter(a => !alunosNaTurma.some(naTurma => naTurma.alunoId === a.id)));
         } catch (error: any) {
             toast.error("Erro ao buscar alunos: " + (error.message || ""));
             setAlunosEncontrados([]);
         }
     }
     
-    function adicionarAluno(aluno: Aluno) {
-        if (!alunosNaTurma.find(a => a.id === aluno.id)) {
-            setAlunosNaTurma([...alunosNaTurma, aluno]);
+    function adicionarAluno(aluno: AlunoAPI) {
+        const alunoParaTurma: AlunoNaTurma = {
+            alunoId: aluno.id,
+            nome: aluno.nome,
+            isAtivo: true
+        };
+        
+        if (!alunosNaTurma.find(a => a.alunoId === aluno.id)) {
+            setAlunosNaTurma([...alunosNaTurma, alunoParaTurma]);
         }
         setBuscaAluno("");
         setAlunosEncontrados([]);
@@ -187,20 +184,16 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             turno: turno.toUpperCase(),
             isAtiva: turmaData.isAtiva,
             professorId: professorSelecionado.id,
-            anoCriacao: turmaData.anoCriacao, // necessário para o backend
+            anoCriacao: turmaData.anoCriacao, 
         };
 
         try {
-            // 1️⃣ Atualiza os dados básicos da turma (tipo, turno, professor)
             const turmaAtualizada = await atualizarTurma(idTurma, dadosAtualizados);
 
-            // 2️⃣ Atualiza a lista de alunos da turma
-            // Passa apenas os IDs dos alunos selecionados
             await adicionarAlunosATurma(idTurma, alunosNaTurma.map(a => a.alunoId));
 
             toast.success(`Turma ${turmaData.nome} atualizada com sucesso!`);
 
-            // 3️⃣ Atualiza o estado local ou repassa para o componente pai
             if (onSave) {
                 onSave({
                     ...turmaAtualizada,

@@ -21,7 +21,6 @@ interface AlunoDetailDTO {
     telefoneResponsavel: string;
     nomeTurmaAtual: string | null;
     turnoTurmaAtual: string | null;
-    turmaIdAtiva?: number | null;
 }
 
 interface AvaliacaoHistoricoDTO {
