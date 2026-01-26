@@ -512,6 +512,7 @@ export default function ModalEditarProfessor({
                         variant="ghost"
                         size="icon"
                         onClick={() => handleRemoveTurma(turma.id)}
+                        aria-label={`Remover turma ${turma.nome}`}
                       >
                         <X className="h-4 w-4" />
                       </Button>

@@ -348,8 +348,8 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="hover:text-red-600 hover:bg-red-50"
                                             onClick={() => removerAluno(aluno.id)}
+                                            aria-label={`Remover aluno ${aluno.nome}`}
                                         >
                                             <X size={16} />
                                         </Button>
