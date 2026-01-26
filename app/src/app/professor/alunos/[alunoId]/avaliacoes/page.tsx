@@ -30,10 +30,11 @@ export default function AvaliacoesAlunoPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
-<<<<<<< HEAD
   
-  // Verifica se params ou params.alunoId são nulos/undefined
-  if (!params?.alunoId) {
+  const alunoId = params?.alunoId ? parseInt(Array.isArray(params.alunoId) ? params.alunoId[0] : params.alunoId) : 0;
+  
+  // Verifica se o alunoId é inválido
+  if (!alunoId) {
     router.push('/professor/turmas');
     return (
       <div className="flex justify-center items-center h-screen">
@@ -42,11 +43,6 @@ export default function AvaliacoesAlunoPage() {
     );
   }
   
-  const alunoId = parseInt(Array.isArray(params.alunoId) ? params.alunoId[0] : params.alunoId);
-=======
-
-  const alunoId = params?.alunoId ? parseInt(Array.isArray(params.alunoId) ? params.alunoId[0] : params.alunoId) : 0;
->>>>>>> af227ef8d450f9f14ad0abb3348b35831f1b5297
   const turmaId = searchParams?.get('turmaId') || '';
   
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
