@@ -186,7 +186,7 @@ export default function AvaliacoesAlunoPage() {
             </div>
             <div>
               <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho do Aluno</h2>
-              <p className="text-[#222222]">Acompanhe o progresso e histórico de avaliações de {alunoData.name}</p>
+              <p className="text-[#222222]">Acompanhe o progresso e histórico de avaliações de {alunoData.nome}</p>
             </div>
           </div>
 
