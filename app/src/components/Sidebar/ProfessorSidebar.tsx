@@ -22,13 +22,9 @@ export default function ProfessorSidebar({
   onLogout,
   showMobileMenu = true,
   isCollapsed = false,
-<<<<<<< HEAD
   onToggleCollapse,
   staticPosition = false,
   ...arProps
-=======
-  onToggleCollapse
->>>>>>> b841a34b04d436bece5e88245c8cedd7faa4442a
 }: ProfessorSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
@@ -96,14 +92,10 @@ export default function ProfessorSidebar({
 
       {/* Sidebar Desktop */}
       <aside
-<<<<<<< HEAD
         className={`hidden md:flex md:flex-col bg-[#B2D7EC] rounded-r-3xl z-40 transition-all duration-300 ${staticPosition
           ? 'relative min-h-screen h-auto -mt-16 md:-mt-20'
           : 'fixed left-0 top-0 bottom-0 overflow-y-auto'
           } ${isCollapsed ? 'w-20' : 'w-64'
-=======
-        className={`hidden md:flex md:flex-col bg-[#B2D7EC] rounded-r-3xl h-screen fixed top-0 left-0 z-50 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'
->>>>>>> b841a34b04d436bece5e88245c8cedd7faa4442a
           }`}
       >
         {/* Toggle Button - NO CANTO SUPERIOR ESQUERDO */}
@@ -148,46 +140,6 @@ export default function ProfessorSidebar({
         </div>
 
         {/* Menu Items */}
-<<<<<<< HEAD
-        <nav className="flex-1 space-y-2 p-4">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.href);
-
-            return (
-              <Link
-                key={item.id}
-                href={item.href}
-                onClick={() => handleNavigation(item.id)} // Desktop navigation
-                className={`flex w-full items-center ${isCollapsed ? 'justify-center' : 'gap-3'
-                  } rounded-3xl px-4 py-3 transition-all ${active
-                    ? "bg-[#0D4F97] text-white shadow-md"
-                    : "bg-transparent text-[#0D4F97] hover:bg-[#0D4F97] hover:text-white"
-                  }`}
-                title={isCollapsed ? item.label : undefined}
-              >
-                <Icon className="h-5 w-5 flex-shrink-0" />
-                {!isCollapsed && (
-                  <span className="font-medium">{item.label}</span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Logout Button */}
-        <div className="border-t-2 border-[#0D4F97]/20 p-4">
-          <button
-            onClick={handleLogout}
-            className={`flex w-full items-center ${isCollapsed ? 'justify-center' : 'gap-3'
-              } rounded-3xl bg-transparent px-4 py-3 text-[#0D4F97] transition-all hover:bg-white/40`}
-            title={isCollapsed ? "Sair" : undefined}
-          >
-            <LogOut className="h-5 w-5 flex-shrink-0" />
-            {!isCollapsed && <span className="font-medium">Sair</span>}
-          </button>
-        </div>
-=======
         {/* Menu Items */}
         <div className="flex-1 flex flex-col overflow-y-auto">
           <nav className="flex-1 space-y-2 p-4">
@@ -232,7 +184,6 @@ export default function ProfessorSidebar({
 
         {/* Logout Button */}
 
->>>>>>> b841a34b04d436bece5e88245c8cedd7faa4442a
       </aside>
 
       {/* Sidebar Mobile */}
