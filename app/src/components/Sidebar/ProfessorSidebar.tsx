@@ -23,7 +23,8 @@ export default function ProfessorSidebar({
   showMobileMenu = true,
   isCollapsed = false,
   onToggleCollapse,
-  staticPosition = false
+  staticPosition = false,
+  ...arProps
 }: ProfessorSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
@@ -139,44 +140,50 @@ export default function ProfessorSidebar({
         </div>
 
         {/* Menu Items */}
-        <nav className="flex-1 space-y-2 p-4">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.href);
+        {/* Menu Items */}
+        <div className="flex-1 flex flex-col overflow-y-auto">
+          <nav className="flex-1 space-y-2 p-4">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.href);
 
-            return (
-              <Link
-                key={item.id}
-                href={item.href}
-                onClick={() => handleNavigation(item.id)} // Desktop navigation
-                className={`flex w-full items-center ${isCollapsed ? 'justify-center' : 'gap-3'
-                  } rounded-3xl px-4 py-3 transition-all ${active
-                    ? "bg-[#0D4F97] text-white shadow-md"
-                    : "bg-transparent text-[#0D4F97] hover:bg-[#0D4F97] hover:text-white"
-                  }`}
-                title={isCollapsed ? item.label : undefined}
-              >
-                <Icon className="h-5 w-5 flex-shrink-0" />
-                {!isCollapsed && (
-                  <span className="font-medium">{item.label}</span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  onClick={() => handleNavigation(item.id)} // Desktop navigation
+                  className={`flex w-full items-center ${isCollapsed ? 'justify-center' : 'gap-3'
+                    } rounded-3xl px-4 py-3 transition-all ${active
+                      ? "bg-[#0D4F97] text-white shadow-md"
+                      : "bg-transparent text-[#0D4F97] hover:bg-[#0D4F97] hover:text-white"
+                    }`}
+                  title={isCollapsed ? item.label : undefined}
+                >
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  {!isCollapsed && (
+                    <span className="font-medium">{item.label}</span>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Logout Button */}
+          <div className="p-4 bg-[#B2D7EC]">
+            <button
+              onClick={handleLogout}
+              className={`flex w-full items-center ${isCollapsed ? 'justify-center' : 'gap-3'
+                } rounded-3xl bg-transparent px-4 py-3 text-[#0D4F97] transition-all hover:bg-white/40`}
+              title={isCollapsed ? "Sair" : undefined}
+            >
+              <LogOut className="h-5 w-5 flex-shrink-0" />
+              {!isCollapsed && <span className="font-medium">Sair</span>}
+            </button>
+          </div>
+        </div>
 
         {/* Logout Button */}
-        <div className="border-t-2 border-[#0D4F97]/20 p-4">
-          <button
-            onClick={handleLogout}
-            className={`flex w-full items-center ${isCollapsed ? 'justify-center' : 'gap-3'
-              } rounded-3xl bg-transparent px-4 py-3 text-[#0D4F97] transition-all hover:bg-white/40`}
-            title={isCollapsed ? "Sair" : undefined}
-          >
-            <LogOut className="h-5 w-5 flex-shrink-0" />
-            {!isCollapsed && <span className="font-medium">Sair</span>}
-          </button>
-        </div>
+
       </aside>
 
       {/* Sidebar Mobile */}
