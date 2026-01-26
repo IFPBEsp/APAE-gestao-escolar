@@ -191,15 +191,15 @@ export default function TurmaDetalhesPage() {
                   <div>
                     <label className="block text-[#0D4F97] font-medium mb-2">Buscar Aluno</label>
                     <div className="relative w-full">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Input
-                        type="text"
-                        placeholder="Digite o nome do aluno"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 h-12 w-full border-2 border-[#B2D7EC] bg-white"
-                      />
-                    </div>
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      type="text"
+                      placeholder="Digite o nome do aluno"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 h-12 w-full border-2 border-[#B2D7EC] bg-white"
+                    />
+                  </div>
 
                   </div>
 
@@ -208,19 +208,21 @@ export default function TurmaDetalhesPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setViewMode("grid")}
-                        className={`flex h-12 flex-1 items-center justify-center rounded-lg border-2 transition-all ${viewMode === "grid"
-                          ? "border-[#0D4F97] bg-[#0D4F97] text-white"
-                          : "border-[#B2D7EC] bg-white text-[#0D4F97] hover:bg-[#B2D7EC]/20"
-                          }`}
+                        className={`flex h-12 flex-1 items-center justify-center rounded-lg border-2 transition-all ${
+                          viewMode === "grid"
+                            ? "border-[#0D4F97] bg-[#0D4F97] text-white"
+                            : "border-[#B2D7EC] bg-white text-[#0D4F97] hover:bg-[#B2D7EC]/20"
+                        }`}
                       >
                         <Grid3x3 className="h-5 w-5" />
                       </button>
                       <button
                         onClick={() => setViewMode("list")}
-                        className={`flex h-12 flex-1 items-center justify-center rounded-lg border-2 transition-all ${viewMode === "list"
-                          ? "border-[#0D4F97] bg-[#0D4F97] text-white"
-                          : "border-[#B2D7EC] bg-white text-[#0D4F97] hover:bg-[#B2D7EC]/20"
-                          }`}
+                        className={`flex h-12 flex-1 items-center justify-center rounded-lg border-2 transition-all ${
+                          viewMode === "list"
+                            ? "border-[#0D4F97] bg-[#0D4F97] text-white"
+                            : "border-[#B2D7EC] bg-white text-[#0D4F97] hover:bg-[#B2D7EC]/20"
+                        }`}
                       >
                         <List className="h-5 w-5" />
                       </button>
@@ -341,7 +343,7 @@ export default function TurmaDetalhesPage() {
                   Nenhum aluno encontrado
                 </h3>
                 <p className="text-gray-500">
-                  {searchTerm
+                  {searchTerm 
                     ? `Nenhum resultado para "${searchTerm}"`
                     : 'Esta turma ainda não tem alunos matriculados'}
                 </p>
