@@ -95,5 +95,5 @@ export async function listarTurmasDeProfessor(id) {
         console.error("ProfessorService Error:", error.response || error);
         throw new Error(errorMessage);
     }
-
+    
 }

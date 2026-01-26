@@ -12,12 +12,17 @@ import com.apae.gestao.entity.TurmaAluno;
 
 @Repository
 public interface TurmaAlunoRepository extends JpaRepository<TurmaAluno, Long>{
+    boolean existsByTurmaAndAluno(Turma turma, Aluno aluno);
+
+    List<TurmaAluno> findByTurma(Turma turma);
 
     List<TurmaAluno> findByTurmaAndIsAlunoAtivo(Turma turma, Boolean isAlunoAtivo);
 
+    List<TurmaAluno> findByAlunoAndIsAlunoAtivo(Aluno aluno, Boolean isAlunoAtivo);
+
     Optional<TurmaAluno> findByTurmaAndAluno(Turma turma, Aluno aluno);
 
+    Optional<TurmaAluno> findByAlunoAndIsAlunoAtivoTrue(Aluno aluno);
     List<TurmaAluno> findAllByAlunoAndIsAlunoAtivoTrue(Aluno aluno);
 
-    List<TurmaAluno> findByTurmaId(Long turmaId);
 } 
