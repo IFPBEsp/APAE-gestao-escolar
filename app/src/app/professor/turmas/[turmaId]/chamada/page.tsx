@@ -1,17 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import ProfessorSidebar from '@/components/Sidebar/ProfessorSidebar';
-import Chamada from '@/components/Chamada';
-import { Button } from '@/components/ui/button';
-import { buscarTurmaPorId } from '@/services/TurmaService';
-import { toast } from 'sonner';
-
-interface Turma {
-  id: number;
-  nome: string;
-}
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
+import Chamada from "@/components/Chamada";
+import { Button } from "@/components/ui/button";
+import { buscarTurmaPorId } from "@/services/TurmaService";
+import { toast } from "sonner";
+import { Turma } from "@/types/turma";
 
 export default function ChamadaPage() {
   const router = useRouter();

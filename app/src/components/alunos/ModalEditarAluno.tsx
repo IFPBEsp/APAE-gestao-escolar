@@ -17,8 +17,9 @@ interface TurmaDTO {
 interface AlunoModalProps {
     id: number;
     nome: string;
-    nomeTurmaAtual: string | null;
+    nomeTurmaAtual: string | null; 
     turnoTurmaAtual: string | null;
+    turmaIdAtiva?: number | null;
 }
 
 interface ModalEditarAlunoProps {
