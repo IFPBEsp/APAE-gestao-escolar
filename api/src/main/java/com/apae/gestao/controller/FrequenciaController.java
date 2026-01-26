@@ -12,6 +12,7 @@ import com.apae.gestao.dto.aula.AulaPresencaAlunoResponseDTO;
 import com.apae.gestao.dto.turma.TurmaResumoFrequenciaDTO;
 import com.apae.gestao.service.FrequenciaService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/frequencia")
 @Tag(name = "Frequências")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class FrequenciaController {
 
     
