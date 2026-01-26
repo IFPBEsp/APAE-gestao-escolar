@@ -5,6 +5,10 @@ import { UserCircle, Search, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { listarAlunos } from "@/services/AlunoService";
 
+interface AvaliacoesAdminProps {
+  onNavigate?: (page: string, id?: number) => void;
+}
+
 interface AlunoResponseDTO {
     id: number;
     nome: string;
@@ -16,7 +20,7 @@ interface AlunoResponseDTO {
     turnoTurmaAtual: string | null;
 }
 
-export default function AvaliacoesAdmin() {
+export default function AvaliacoesAdmin({ onNavigate }: AvaliacoesAdminProps) {
   const [alunos, setAlunos] = useState<AlunoResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,6 +45,7 @@ export default function AvaliacoesAdmin() {
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm, fetchAlunos]);
+
 
   if (loading) {
     return (
