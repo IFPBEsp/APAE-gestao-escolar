@@ -6,7 +6,12 @@ import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { useEffect, useState } from "react";
 import { buscarProfessorPorId } from "@/services/ProfessorService";
 import { listarTurmasDeProfessor } from "@/services/ProfessorService";
+<<<<<<< HEAD
 
+=======
+import { Turma }from "@/types/turma";
+import { Professor } from "@/types/professor";
+>>>>>>> 26457ec400d8091bebc84bc7a284e7b15a99e492
 
 export default function ProfessorDashboardPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -73,9 +78,8 @@ export default function ProfessorDashboardPage() {
       />
 
       <main
-        className={`flex-1 overflow-y-auto transition-all duration-300 ${
-          isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
-        }`}
+        className={`flex-1 overflow-y-auto transition-all duration-300 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
+          }`}
       >
         <div className="p-4 md:p-8">
           <div className="mx-auto max-w-6xl">

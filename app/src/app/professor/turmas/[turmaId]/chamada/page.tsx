@@ -5,17 +5,24 @@ import { useParams, useRouter } from "next/navigation";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import Chamada from "@/components/Chamada";
 import { Button } from "@/components/ui/button";
+<<<<<<< HEAD
 
 const turmaNomes = { 
     "1": "Educação Especial 2025 MANHA", 
     "2": "Estimulação 2025 - Tarde" 
 };
 
+=======
+import { buscarTurmaPorId } from "@/services/TurmaService";
+import { toast } from "sonner";
+import { Turma } from "@/types/turma";
+>>>>>>> 26457ec400d8091bebc84bc7a284e7b15a99e492
 
 export default function ChamadaPage() {
   const router = useRouter();
   const params = useParams();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+<<<<<<< HEAD
 
   const turmaId = params?.turmaId ? String(params.turmaId) : null;
   
@@ -26,6 +33,31 @@ export default function ChamadaPage() {
   const handleSaveSuccess = () => {
       setTimeout(() => router.push("/professor/turmas"), 1500);
   };
+=======
+  const [turma, setTurma] = useState<Turma | null>(null);
+  const [loading, setLoading] = useState(true);
+  const turmaId = params?.turmaId ? String(params.turmaId) : null;
+
+  useEffect(() => {
+    if (!turmaId) return;
+
+    const carregarTurma = async () => {
+      try {
+        const data = await buscarTurmaPorId(turmaId);
+        setTurma(data);
+      } catch (error) {
+        toast.error(error.message || 'Erro ao carregar a turma');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarTurma();
+  }, [turmaId]);
+
+  const handleBack = () => router.push('/professor/turmas');
+  const handleSaveSuccess = () => setTimeout(() => router.push('/professor/turmas'), 1500);
+>>>>>>> 26457ec400d8091bebc84bc7a284e7b15a99e492
 
 
   if (!turmaId || !turmaNome) {

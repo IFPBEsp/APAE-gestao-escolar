@@ -14,7 +14,6 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api/presencas")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class PresencaController {
 
     private final PresencaService presencaService;
