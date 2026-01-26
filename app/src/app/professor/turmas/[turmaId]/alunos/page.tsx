@@ -169,27 +169,25 @@ export default function TurmaDetalhesPage() {
                     {turma.ativa ? "Ativa" : "Inativa"}
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
-            <CardContent className="p-6">
-              <h3 className="text-[#0D4F97] font-semibold text-lg mb-4 mt-4">Filtros</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-[#0D4F97] font-medium mb-2">Buscar Aluno</label>
-                  <div className="relative w-full">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Input
-                      type="text"
-                      placeholder="Digite o nome do aluno"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 h-12 w-full border-2 border-[#B2D7EC] bg-white"
-                    />
-                  </div>
-                </div>
+            <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
+              <CardContent className="p-6">
+                <h3 className="text-[#0D4F97] font-semibold text-lg mb-4 mt-4">Filtros</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-[#0D4F97] font-medium mb-2">Buscar Aluno</label>
+                    <div className="relative w-full">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Input
+                        type="text"
+                        placeholder="Digite o nome do aluno"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 h-12 w-full border-2 border-[#B2D7EC] bg-white"
+                      />
+                    </div>
 
                 <div>
                   <label className="block text-[#0D4F97] font-medium mb-2">Visualização</label>
@@ -314,28 +312,20 @@ export default function TurmaDetalhesPage() {
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Nenhum aluno encontrado
+                </h3>
+                <p className="text-gray-500">
+                  {searchTerm
+                    ? `Nenhum resultado para "${searchTerm}"`
+                    : 'Esta turma ainda não tem alunos matriculados'}
+                </p>
+              </Card>
+            )}
 
-          {filteredAlunos.length === 0 && (
-            <Card className="p-8 text-center border-2 border-[#B2D7EC]">
-              <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <Search className="h-8 w-8 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Nenhum aluno encontrado
-              </h3>
-              <p className="text-gray-500">
-                {searchTerm
-                  ? `Nenhum resultado para "${searchTerm}"`
-                  : 'Esta turma ainda não tem alunos matriculados'}
-              </p>
-            </Card>
-          )}
-
-          <div className="mt-6 text-center text-gray-500 text-sm">
-            Mostrando {filteredAlunos.length} de {alunos.length} alunos
+            <div className="mt-6 text-center text-gray-500 text-sm">
+              Mostrando {filteredAlunos.length} de {alunos.length} alunos
+            </div>
           </div>
         </div>
       </div>

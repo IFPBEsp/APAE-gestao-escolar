@@ -24,7 +24,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Search, UserRound, X } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 
 interface Aluno {
     alunoId: number;
@@ -56,55 +56,67 @@ interface EditarTurmaModalProps {
 }
 
 export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarTurmaModalProps) {
+    // --- Dados do Formulário (Valores Mutáveis) ---
     const [tipo, setTipo] = useState("");
     const [turno, setTurno] = useState("");
-
+    
+    // --- Gerenciamento de Professor ---
     const [buscaProfessor, setBuscaProfessor] = useState("");
     const [professoresEncontrados, setProfessoresEncontrados] = useState<Professor[]>([]);
-    const [professorSelecionado, setProfessorSelecionado] = useState<Professor | null>(null);
-
+    const [professorSelecionado, setProfessorSelecionado] = useState<Professor | null>(null); 
+    
+    // --- Gerenciamento de Alunos ---
     const [buscaAluno, setBuscaAluno] = useState("");
     const [alunosEncontrados, setAlunosEncontrados] = useState<Aluno[]>([]);
     const [alunosNaTurma, setAlunosNaTurma] = useState<Aluno[]>([]);
 
-    const nomeTurma = useMemo(
-        () => `${tipo ? formatTipo(tipo) : ""} ${turmaData?.anoCriacao || ""} - ${turno ? formatTurno(turno) : ""}`,
-        [tipo, turno, turmaData]
-    );
+    // Gerar nome automaticamente (para exibição)
+    const nomeTurma = `${tipo ? formatTipo(tipo) : ""} ${turmaData?.anoCriacao || ""} - ${turno ? formatTurno(turno) : ""}`;
 
+    // Funções auxiliares (reutilizadas)
     function formatTipo(val: string) {
-        if (val.toUpperCase() === "ALFABETIZACAO") return "Alfabetização";
-        if (val.toUpperCase() === "ESTIMULACAO") return "Estimulação";
+        if (val === 'ALFABETIZACAO' || val === 'alfabetizacao') return 'Alfabetização';
+        if (val === 'ESTIMULACAO' || val === 'estimulacao') return 'Estimulação';
         return val;
     }
 
     function formatTurno(val: string) {
-        if (val.toUpperCase() === "MANHA") return "Manhã";
-        if (val.toUpperCase() === "TARDE") return "Tarde";
+        if (val === 'MANHA' || val === 'manha') return 'Manhã';
+        if (val === 'TARDE' || val === 'tarde') return 'Tarde';
         return val;
     }
 
+    // --- Hooks de Inicialização ---
+
+    // Inicializa o estado do modal com os dados da turmaData
     useEffect(() => {
         if (turmaData && isOpen) {
             setTipo(turmaData.tipo);
             setTurno(turmaData.turno);
+            
             setProfessorSelecionado(turmaData.professor);
             setAlunosNaTurma(
                 (turmaData.alunos || []).map(a => ({
                     alunoId: a.alunoId,
                     nome: a.nome,
-                    isAtivo: a.isAtivo ?? true,
+                    isAtivo: a.isAtivo,
                 }))
             );
+            
             setBuscaProfessor("");
             setBuscaAluno("");
         }
     }, [turmaData, isOpen]);
 
+
+    // --- Lógica de Busca de Professor ---
+
     useEffect(() => {
         if (buscaProfessor.length > 0) {
-            const delay = setTimeout(() => fetchProfessores(buscaProfessor), 300);
-            return () => clearTimeout(delay);
+            const delayDebounceFn = setTimeout(() => {
+                fetchProfessores(buscaProfessor);
+            }, 300); 
+            return () => clearTimeout(delayDebounceFn);
         } else {
             setProfessoresEncontrados([]);
         }
@@ -112,7 +124,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
 
     async function fetchProfessores(nome: string) {
         try {
-            const data = await listarProfessores(nome, true);
+            const data = await listarProfessores(nome, true); 
             setProfessoresEncontrados(data);
         } catch (error: any) {
             toast.error(error.message || "Erro ao buscar professores");
@@ -121,46 +133,45 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     }
 
     function selecionarNovoProfessor(prof: Professor) {
-        setProfessorSelecionado(prof);
-        setBuscaProfessor("");
-        setProfessoresEncontrados([]);
+        setProfessorSelecionado(prof); 
+        setBuscaProfessor(""); 
+        setProfessoresEncontrados([]); 
     }
-
+    
+    // --- Lógica de Alunos (Mantida do código anterior) ---
+    
     useEffect(() => {
-        if (buscaAluno.length > 0) {
-            const delay = setTimeout(() => fetchAlunos(buscaAluno), 300);
-            return () => clearTimeout(delay);
+        if (buscaAluno.length > 0) { 
+            const delayDebounceFn = setTimeout(() => {
+                fetchAlunos(buscaAluno);
+            }, 300);
+            return () => clearTimeout(delayDebounceFn);
         } else {
             setAlunosEncontrados([]);
         }
-    }, [buscaAluno, alunosNaTurma]);
-
+    }, [buscaAluno]);
+    
+    
     async function fetchAlunos(nome: string) {
         try {
-            const response = await listarAlunos(nome);
-            const alunosArray = response.content || []; 
-
-            setAlunosEncontrados(
-                alunosArray
-                    .filter(a => !alunosNaTurma.some(aluno => aluno.alunoId === a.id))
-                    .map(a => ({ alunoId: a.id, nome: a.nome }))
-            );
+            const data = await listarAlunos(nome); 
+            setAlunosEncontrados(data.filter(a => !alunosNaTurma.some(naTurma => naTurma.id === a.id)));
         } catch (error: any) {
             toast.error("Erro ao buscar alunos: " + (error.message || ""));
             setAlunosEncontrados([]);
         }
     }
-
+    
     function adicionarAluno(aluno: Aluno) {
-        if (!alunosNaTurma.find(a => a.alunoId === aluno.alunoId)) {
+        if (!alunosNaTurma.find(a => a.id === aluno.id)) {
             setAlunosNaTurma([...alunosNaTurma, aluno]);
         }
         setBuscaAluno("");
         setAlunosEncontrados([]);
     }
 
-    function removerAluno(alunoId: number) {
-        setAlunosNaTurma(alunosNaTurma.filter(a => a.alunoId !== alunoId));
+    function removerAluno(id: number) {
+        setAlunosNaTurma(alunosNaTurma.filter(a => a.alunoId !== id));
     }
 
     async function handleSave() {
@@ -176,15 +187,20 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             turno: turno.toUpperCase(),
             isAtiva: turmaData.isAtiva,
             professorId: professorSelecionado.id,
-            anoCriacao: turmaData.anoCriacao,
+            anoCriacao: turmaData.anoCriacao, // necessário para o backend
         };
 
         try {
+            // 1️⃣ Atualiza os dados básicos da turma (tipo, turno, professor)
             const turmaAtualizada = await atualizarTurma(idTurma, dadosAtualizados);
+
+            // 2️⃣ Atualiza a lista de alunos da turma
+            // Passa apenas os IDs dos alunos selecionados
             await adicionarAlunosATurma(idTurma, alunosNaTurma.map(a => a.alunoId));
 
             toast.success(`Turma ${turmaData.nome} atualizada com sucesso!`);
 
+            // 3️⃣ Atualiza o estado local ou repassa para o componente pai
             if (onSave) {
                 onSave({
                     ...turmaAtualizada,
@@ -194,6 +210,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             }
 
             onClose();
+
         } catch (error: any) {
             toast.error(error.message || "Erro ao salvar alterações da turma");
         }
@@ -206,19 +223,22 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-[#0D4F97] text-xl">Editar Informações da Turma</DialogTitle>
-                    <p className="text-gray-500 text-sm">Atualize os detalhes da turma conforme necessário.</p>
+                    <p className="text-gray-500 text-sm">
+                        Atualize os detalhes da turma conforme necessário.
+                    </p>
                 </DialogHeader>
 
-                {/* Informações básicas */}
                 <div className="space-y-6 py-4">
+
                     <div className="space-y-4">
                         <h3 className="text-[#0D4F97] font-medium border-b border-[#B2D7EC] pb-2">Informações Básicas</h3>
+                        
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label className="text-[#0D4F97]">Tipo de Turma</Label>
                                 <Select onValueChange={setTipo} defaultValue={turmaData.tipo}>
                                     <SelectTrigger className="bg-white border-[#B2D7EC]">
-                                        <SelectValue placeholder={formatTipo(tipo)} />
+                                        <SelectValue placeholder={formatTipo(tipo)} /> 
                                     </SelectTrigger>
                                     <SelectContent className="bg-white">
                                         <SelectItem value="ALFABETIZACAO">Alfabetização</SelectItem>
@@ -243,14 +263,17 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
 
                         <div className="space-y-2">
                             <Label className="text-[#0D4F97]">Nome da Turma</Label>
-                            <Input value={nomeTurma} disabled className="bg-gray-50 border-[#B2D7EC]" />
+                            <Input
+                                value={nomeTurma}
+                                disabled
+                                className="bg-gray-50 border-[#B2D7EC]"
+                            />
                             <p className="text-xs text-[#0D4F97]">
                                 O nome da turma é gerado a partir do Tipo, Ano ({turmaData.anoCriacao}) e Turno.
                             </p>
                         </div>
                     </div>
 
-                    {/* Alterar professor */}
                     <div className="space-y-4">
                         <h3 className="text-[#0D4F97] font-medium border-b border-[#B2D7EC] pb-2 flex items-center gap-2">
                             Alterar Professor Responsável
@@ -288,7 +311,6 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                         </div>
                     </div>
 
-                    {/* Gerenciar alunos */}
                     <div className="space-y-4">
                         <h3 className="text-[#0D4F97] font-medium border-b border-[#B2D7EC] pb-2">Gerenciar Alunos na Turma</h3>
 
@@ -307,7 +329,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                                 <div className="border rounded-md max-h-40 overflow-y-auto bg-white shadow-sm mt-1">
                                     {alunosEncontrados.map(aluno => (
                                         <div
-                                            key={aluno.alunoId}
+                                            key={aluno.id}
                                             className="p-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center"
                                             onClick={() => adicionarAluno(aluno)}
                                         >
@@ -348,7 +370,6 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                     </div>
                 </div>
 
-                {/* Botões */}
                 <div className="flex justify-end gap-3 pt-4 border-t border-[#E5E5E5]">
                     <Button 
                         variant="outline" 

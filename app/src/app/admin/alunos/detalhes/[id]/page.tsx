@@ -22,6 +22,7 @@ interface AlunoDetailDTO {
     telefoneResponsavel: string;
     nomeTurmaAtual: string | null;
     turnoTurmaAtual: string | null;
+    turmaIdAtiva?: number | null;
 }
 
 interface AvaliacaoHistoricoDTO {
@@ -391,12 +392,7 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
         <ModalEditarAluno
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
-          aluno={{
-            id: alunoData.id,
-            nome: alunoData.nome,
-            nomeTurmaAtual: alunoData.nomeTurmaAtual,
-            turnoTurmaAtual: alunoData.turnoTurmaAtual
-          }}
+          aluno={alunoData}
           onSave={handleSaveAluno}
         />
 

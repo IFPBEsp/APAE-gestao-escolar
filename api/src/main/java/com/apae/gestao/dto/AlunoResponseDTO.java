@@ -1,4 +1,4 @@
-package com.apae.gestao.dto.aluno;
+package com.apae.gestao.dto;
 
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Turma;
@@ -14,7 +14,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Informações básicas apresentadas ao consultar alunos.")
-public class AlunoDetalhesDTO {
+public class AlunoResponseDTO {
     @Schema(description = "Identificador do aluno", example = "5")
     private Long id;
 
@@ -42,7 +42,7 @@ public class AlunoDetalhesDTO {
     @Schema(description = "Turno da turma atual (e.g., 'Manhã')", example = "Manhã")
     private String turnoTurmaAtual;
 
-    public AlunoDetalhesDTO(Aluno aluno) {
+    public AlunoResponseDTO(Aluno aluno) {
         this.id = aluno.getId();
         this.nome = aluno.getNome();
         this.dataNascimento = aluno.getDataNascimento();

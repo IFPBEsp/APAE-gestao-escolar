@@ -21,10 +21,10 @@ export default function TurmasPage() {
       const data = await listarTurmasDeProfessor(professorId);
 
       // opcional: filtrar apenas turmas ativas
-      const turmasAtivas = data.filter((turma: Turma) => turma.isAtiva);
+      const turmasAtivas = data.filter((turma) => turma.isAtiva);
 
       setTurmas(turmasAtivas);
-    } catch (error: any) {
+    } catch (error) {
       toast.error(error.message || "Erro ao carregar turmas");
     } finally {
       setLoading(false);
