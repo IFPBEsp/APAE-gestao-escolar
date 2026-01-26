@@ -31,8 +31,8 @@ export default function TurmasPage() {
     try {
       const data: Turma[] = await listarTurmasDeProfessor(professorId);
 
-      // filtra apenas turmas ativas
-      const turmasAtivas = data.filter((turma) => turma.isAtiva);
+      // 🔹 Filtra apenas turmas ativas
+      const turmasAtivas = data.filter((turma) => turma.isAtiva === true);
 
       setTurmas(turmasAtivas);
     } catch (error: any) {
@@ -92,7 +92,7 @@ export default function TurmasPage() {
                   <CardDescription className="text-[#222222] font-medium text-sm md:text-base">
                     {loading
                       ? "Carregando..."
-                      : `${turmas.length} turmas cadastradas`}
+                      : `${turmas.length} turmas ativas`}
                   </CardDescription>
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default function TurmasPage() {
                         <Button
                           onClick={(e) =>
                             handleNavigation(
-                              `/professor/turmas/${turma.id}/chamada`,
+                              `/professor/turmas/${turma.id}/frequencia`,
                               e
                             )
                           }
@@ -175,3 +175,4 @@ export default function TurmasPage() {
     </div>
   );
 }
+

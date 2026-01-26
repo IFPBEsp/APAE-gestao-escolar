@@ -13,17 +13,19 @@ export default function ProfessorDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [turmas, setTurmas] = useState<any[]>([]);
 
-  const professorId = 1;
+  const professorId = 1; // depois você pode trocar pelo ID do usuário logado
 
   const handleToggleCollapse = () => {
-      setIsSidebarCollapsed(!isSidebarCollapsed);
+    setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
-  const turmasAtivas = turmas.filter(turma => turma.isAtiva);
+  // 🔹 Apenas turmas ativas
+  const turmasAtivas = turmas.filter(turma => turma.isAtiva === true);
 
+  // 🔹 Soma dos alunos ativos das turmas ativas
   const totalAlunosAtivos = turmasAtivas.reduce((total, turma) => {
-      const valor = Number(turma.totalAlunosAtivos);
-      return total + (isNaN(valor) ? 0 : valor);
+    const valor = Number(turma.totalAlunosAtivos);
+    return total + (isNaN(valor) ? 0 : valor);
   }, 0);
 
   useEffect(() => {
@@ -41,18 +43,18 @@ export default function ProfessorDashboardPage() {
     carregarProfessor();
   }, []);
 
-useEffect(() => {
-  async function carregarTurmas() {
-    try {
-      const response = await listarTurmasDeProfessor(professorId);
-      setTurmas(response);
-    } catch (err) {
-      console.error(err);
+  useEffect(() => {
+    async function carregarTurmas() {
+      try {
+        const response = await listarTurmasDeProfessor(professorId);
+        setTurmas(response);
+      } catch (err) {
+        console.error(err);
+      }
     }
-  }
 
-  carregarTurmas();
-}, []);
+    carregarTurmas();
+  }, []);
 
   if (loading) {
     return (
