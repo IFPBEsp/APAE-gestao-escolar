@@ -13,6 +13,7 @@ interface ProfessorSidebarProps {
   showMobileMenu?: boolean;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  staticPosition?: boolean;
 }
 
 export default function ProfessorSidebar({
@@ -21,7 +22,8 @@ export default function ProfessorSidebar({
   onLogout,
   showMobileMenu = true,
   isCollapsed = false,
-  onToggleCollapse
+  onToggleCollapse,
+  staticPosition = false
 }: ProfessorSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
@@ -89,7 +91,10 @@ export default function ProfessorSidebar({
 
       {/* Sidebar Desktop */}
       <aside
-        className={`hidden md:flex md:flex-col bg-[#B2D7EC] rounded-r-3xl fixed left-0 top-0 bottom-0 z-30 overflow-y-auto transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'
+        className={`hidden md:flex md:flex-col bg-[#B2D7EC] rounded-r-3xl z-40 transition-all duration-300 ${staticPosition
+          ? 'relative min-h-screen h-auto -mt-16 md:-mt-20'
+          : 'fixed left-0 top-0 bottom-0 overflow-y-auto'
+          } ${isCollapsed ? 'w-20' : 'w-64'
           }`}
       >
         {/* Toggle Button - NO CANTO SUPERIOR ESQUERDO */}
@@ -222,8 +227,8 @@ export default function ProfessorSidebar({
                       href={item.href}
                       onClick={() => handleMobileNavigation(item.id)}
                       className={`flex w-full items-center gap-3 rounded-3xl px-4 py-3 text-left transition-all ${active
-                          ? "bg-[#0D4F97] text-white shadow-md"
-                          : "bg-transparent text-[#0D4F97] hover:bg-[#0D4F97] hover:text-white"
+                        ? "bg-[#0D4F97] text-white shadow-md"
+                        : "bg-transparent text-[#0D4F97] hover:bg-[#0D4F97] hover:text-white"
                         }`}
                     >
                       <Icon className="h-5 w-5" />
