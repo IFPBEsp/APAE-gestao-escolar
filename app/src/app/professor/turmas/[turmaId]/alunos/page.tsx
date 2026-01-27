@@ -107,10 +107,17 @@ export default function TurmaDetalhesPage() {
     router.push(`/professor/alunos/${alunoId}/relatorios?turmaId=${turmaId}`);
   };
 
-  if (loading || !turma) {
+  if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#0D4F97]" />
+        <Loader2 className="h-8 w-8 animate-spin text-[`#0D4F97`]" />
+      </div>
+    );
+  }
+  if (!turma) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center text-gray-500">
+        Turma não encontrada.
       </div>
     );
   }
