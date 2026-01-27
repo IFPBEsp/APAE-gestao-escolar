@@ -35,6 +35,9 @@ public class Professor {
     @Column(nullable = true, unique = true, length = 100)
     private String email;
 
+    @Column(nullable = true)
+    private String senha;
+
     @Column(length = 15)
     private String telefone;
 
@@ -61,6 +64,9 @@ public class Professor {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(nullable = false)
+    private Boolean primeiroAcesso = true;
 
     @OneToMany(mappedBy = "professor", fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"professor", "turmaAlunos", "aulas"})

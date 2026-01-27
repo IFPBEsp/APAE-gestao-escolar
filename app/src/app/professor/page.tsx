@@ -12,38 +12,46 @@ export default function ProfessorDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [turmas, setTurmas] = useState<any[]>([]);
-
-  const professorId = 1; // depois você pode trocar pelo ID do usuário logado
+  const [professorId, setProfessorId] = useState<number | null>(null);
 
   const handleToggleCollapse = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
-  // 🔹 Apenas turmas ativas
-  const turmasAtivas = turmas.filter(turma => turma.isAtiva === true);
-
-  // 🔹 Soma dos alunos ativos das turmas ativas
-  const totalAlunosAtivos = turmasAtivas.reduce((total, turma) => {
-    const valor = Number(turma.totalAlunosAtivos);
-    return total + (isNaN(valor) ? 0 : valor);
-  }, 0);
-
+  // 🔹 Recupera o professor logado do localStorage
   useEffect(() => {
+    const usuario = localStorage.getItem("usuarioLogado");
+    if (usuario) {
+      const parsed = JSON.parse(usuario);
+      setProfessorId(parsed.id);
+    } else {
+      setError("Usuário não autenticado.");
+      setLoading(false);
+    }
+  }, []);
+
+  // 🔹 Busca os dados do professor pelo ID real
+  useEffect(() => {
+    if (professorId) return;
+
     async function carregarProfessor() {
       try {
         const response = await buscarProfessorPorId(professorId);
         setProfessor(response);
       } catch (err: any) {
-        setError(err.message);
+        setError(err.message || "Erro ao carregar dados do professor.");
       } finally {
         setLoading(false);
       }
     }
 
     carregarProfessor();
-  }, []);
+  }, [professorId]);
 
+  // 🔹 Busca as turmas do professor pelo ID real
   useEffect(() => {
+    if (!professorId) return;
+
     async function carregarTurmas() {
       try {
         const response = await listarTurmasDeProfessor(professorId);
@@ -54,7 +62,16 @@ export default function ProfessorDashboardPage() {
     }
 
     carregarTurmas();
-  }, []);
+  }, [professorId]);
+
+  // 🔹 Apenas turmas ativas
+  const turmasAtivas = turmas.filter(turma => turma.isAtiva === true);
+
+  // 🔹 Soma dos alunos ativos das turmas ativas
+  const totalAlunosAtivos = turmasAtivas.reduce((total, turma) => {
+    const valor = Number(turma.totalAlunosAtivos);
+    return total + (isNaN(valor) ? 0 : valor);
+  }, 0);
 
   if (loading) {
     return (
