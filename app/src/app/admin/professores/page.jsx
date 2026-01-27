@@ -27,7 +27,7 @@ export default function Professores() {
       if (searchTerm.trim()) {
         params.append('nome', searchTerm.trim());
       }
-  
+      // Não filtrar por status por padrão - mostrar todos
       
       const url = `/professores${params.toString() ? `?${params.toString()}` : ''}`;
       console.log('🔍 Buscando professores:', url);
@@ -68,7 +68,7 @@ export default function Professores() {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       loadProfessores();
-    }, 300); 
+    }, 300); // Debounce de 300ms
 
     return () => clearTimeout(timeoutId);
   }, [searchTerm]);

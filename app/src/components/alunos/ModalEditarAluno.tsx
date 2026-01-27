@@ -4,38 +4,31 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { BookOpen, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { atualizarTurmaAluno } from "@/services/AlunoService"; 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { atualizarTurmaAluno } from "@/services/AlunoService";
 import { listarTurmas } from "@/services/TurmaService";
 
 interface TurmaDTO {
     id: number;
-    nome: string; 
-    turno: string; 
+    nome: string;
+    turno: string;
 }
 
 interface AlunoModalProps {
     id: number;
     nome: string;
-    nomeTurmaAtual: string | null; 
-    turnoTurmaAtual: string | null; 
+    nomeTurmaAtual: string | null;
+    turnoTurmaAtual: string | null;
 }
 
 interface ModalEditarAlunoProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (alunoAtualizado: any) => void; 
-    aluno: AlunoModalProps | null; 
+    onSave: (alunoAtualizado: any) => void;
+    aluno: AlunoModalProps | null;
 }
 
 export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: ModalEditarAlunoProps) {
-    
     const [turmasDisponiveis, setTurmasDisponiveis] = useState<TurmaDTO[]>([]);
     const [loadingTurmas, setLoadingTurmas] = useState(true);
     const [turmaIdSelecionada, setTurmaIdSelecionada] = useState<string>("");
@@ -55,7 +48,9 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                             turma.turno === aluno.turnoTurmaAtual
                     );
                     
-                    if (turmaAtual) {
+                    if (!turmaAtual && aluno?.nomeTurmaAtual) {
+                        // No action needed
+                    } else if (turmaAtual) {
                         setTurmaIdSelecionada(turmaAtual.id.toString());
                     }
                 }
