@@ -114,11 +114,11 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
 
     async function fetchAlunos(nome: string) {
         try {
-            const data = await listarAlunos(nome); // chama a API via service
-            setAlunosEncontrados(data);
+            const page = await listarAlunos(nome);
+            setAlunosEncontrados(page.content ?? []);
         } catch (error) {
             console.log("Erro ao buscar alunos, usando lista vazia");
-            setAlunosEncontrados([]); // fallback vazio
+            setAlunosEncontrados([]); 
         }
     }
 
@@ -145,7 +145,6 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
             return;
         }
 
-        // Dados básicos da turma (sem alunos)
         const dadosNovaTurma = {
             tipo: tipo.toUpperCase(),
             anoCriacao: Number(ano),
@@ -155,10 +154,8 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
         };
 
         try {
-            // 1️⃣ Cria a turma
             const turmaCriada = await criarTurma(dadosNovaTurma);
 
-            // 2️⃣ Se houver alunos selecionados, adiciona eles à turma
             if (alunosSelecionados.length > 0) {
                 await adicionarAlunosATurma(
                     turmaCriada.id,
@@ -321,7 +318,6 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                                 />
                             </div>
 
-                            {/* Resultados da Busca */}
                             {alunosEncontrados.length > 0 && (
                                 <div className="border rounded-md max-h-40 overflow-y-auto bg-white shadow-sm mt-1">
                                     {alunosEncontrados.map(aluno => (
@@ -346,7 +342,6 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                                     <div key={aluno.id} className="flex justify-between items-center bg-white p-3 rounded-lg border border-[#B2D7EC] shadow-sm hover:shadow transition-shadow">
                                         <div className="flex items-center gap-3">
                                             <div className="h-8 w-8 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97]">
-                                                {/* Ícone de Usuário Simples */}
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                                             </div>
                                             <div>
