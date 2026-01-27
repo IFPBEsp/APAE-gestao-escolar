@@ -92,7 +92,7 @@ export default function VisualizarAvaliacaoAdmin({
                         <Button
                             onClick={onBack}
                             variant="outline"
-                            className="h-12 justify-center border-2 border-[#B2D7EC] px-4 text-[#0D4F97] hover:bg-[#B2D7EC]/20 no-print"
+                            className="no-print"
                         >
                             <ArrowLeft className="mr-2 h-5 w-5" />
                             Voltar
@@ -227,8 +227,7 @@ export default function VisualizarAvaliacaoAdmin({
                                 <div className="flex justify-end gap-3 border-t-2 border-[#B2D7EC] pt-6 no-print">
                                     <Button
                                         onClick={handleImprimir}
-                                        variant="outline"
-                                        className="h-12 justify-center border-2 border-[#B2D7EC] px-6 text-[#0D4F97] hover:bg-[#B2D7EC]/20"
+                                        variant="primary"
                                     >
                                         <Printer className="mr-2 h-5 w-5" />
                                         Imprimir

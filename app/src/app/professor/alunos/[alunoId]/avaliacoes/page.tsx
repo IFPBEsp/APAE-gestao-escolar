@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ArrowLeft, FileText, Plus, Edit, Trash2, Loader2 } from "lucide-react";
-import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
+import { ArrowLeft, FileText, UserCircle, Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -45,8 +44,6 @@ export default function AvaliacoesAlunoPage() {
   const [avaliacaoExcluindo, setAvaliacaoExcluindo] = useState<Avaliacao | null>(null);
 
   const [descricaoAvaliacao, setDescricaoAvaliacao] = useState("");
-  const [activeTab, setActiveTab] = useState("turmas");
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const [alunoData, setAlunoData] = useState<any>(null);
   const [loadingAluno, setLoadingAluno] = useState(true);
@@ -88,12 +85,6 @@ export default function AvaliacoesAlunoPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    if (tab === "inicio") router.push("/professor");
-    else if (tab === "turmas") router.push("/professor/turmas");
   };
 
   const handleOpenAdicionarDialog = () => {
@@ -174,35 +165,30 @@ export default function AvaliacoesAlunoPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#E5E5E5]">
-      <ProfessorSidebar
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        onLogout={() => router.push("/")}
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-      />
+    <div className="container mx-auto">
+      {/* Main Content */}
+      <div className="p-4 md:p-8">
+        <div className="mx-auto max-w-6xl">
+          {/* Botão Voltar */}
+          <Button
+            onClick={() => router.push(turmaId ? `/professor/turmas/${turmaId}/alunos` : "/professor/turmas")}
+            variant="outline"
+            className="mb-6"
+          >
+            <ArrowLeft className="mr-2 h-5 w-5" />
+            Voltar
+          </Button>
 
-      <main className={`flex-1 overflow-y-auto transition-all duration-300 ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
-        <div className="p-4 md:p-8">
-          <div className="mx-auto max-w-6xl">
-            <Button
-              onClick={() => router.push(turmaId ? `/professor/turmas/${turmaId}/alunos` : "/professor/turmas")}
-              variant="outline"
-              className="mb-6 h-12 border-2 border-[#B2D7EC] text-[#0D4F97] hover:bg-[#B2D7EC]/20"
-            >
-              <ArrowLeft className="mr-2 h-5 w-5" /> Voltar
-            </Button>
-
-            <div className="flex items-start gap-3 mb-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0D4F97]/10">
-                <FileText className="h-6 w-6 text-[#0D4F97]" />
-              </div>
-              <div>
-                <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho</h2>
-                <p className="text-[#222222]">Histórico de {alunoData?.nome || "..."}</p>
-              </div>
+          {/* Título Principal da Página */}
+          <div className="flex items-start gap-3 mb-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0D4F97]/10">
+              <FileText className="h-6 w-6 text-[#0D4F97]" />
             </div>
+            <div>
+              <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho do Aluno</h2>
+              <p className="text-[#222222]">Acompanhe o progresso e histórico de avaliações de {alunoData?.nome || "..."}</p>
+            </div>
+          </div>
 
             <EstudanteCard
               nome={alunoData?.nome || "Carregando..."}
@@ -213,22 +199,26 @@ export default function AvaliacoesAlunoPage() {
               loading={loadingAluno}
               action={
                 <Button
+                  variant="primary"
                   onClick={handleOpenAdicionarDialog}
-                  className="h-12 bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97] font-semibold"
                   disabled={loading || saving}
                 >
-                  <Plus className="mr-2 h-5 w-5" /> Adicionar Avaliação
+                  <Plus className="mr-2 h-5 w-5" /> 
+                  Adicionar Avaliação
                 </Button>
               }
             />
 
-            <Card className="mt-6 rounded-xl border-2 border-[#B2D7EC] shadow-md">
-              <CardContent className="p-0">
-                <div className="hidden border-b-2 border-[#B2D7EC] bg-[#B2D7EC]/20 md:grid md:grid-cols-12 md:gap-4 md:p-4">
-                  <div className="col-span-2 text-[#0D4F97] font-semibold">Data</div>
-                  <div className="col-span-8 text-[#0D4F97] font-semibold">Descrição</div>
-                  <div className="col-span-2 text-center text-[#0D4F97] font-semibold">Ações</div>
-                </div>
+
+          {/* Lista de Avaliações */}
+          <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
+            <CardContent className="p-0">
+              {/* Header da Tabela */}
+              <div className="hidden border-b-2 border-[#B2D7EC] bg-[#B2D7EC]/20 md:grid md:grid-cols-12 md:gap-4 md:p-4">
+                <div className="col-span-2 text-[#0D4F97] font-semibold">Data</div>
+                <div className="col-span-8 text-[#0D4F97] font-semibold">Descrição</div>
+                <div className="col-span-2 text-center text-[#0D4F97] font-semibold">Ações</div>
+              </div>
 
                 {loading ? (
                   <div className="p-8 text-center flex justify-center items-center">
@@ -242,11 +232,19 @@ export default function AvaliacoesAlunoPage() {
                       <div className="md:col-span-2 font-medium">{formatarData(av.dataAvaliacao)}</div>
                       <div className="md:col-span-8 text-sm text-gray-700">{av.descricao}</div>
                       <div className="md:col-span-2 flex justify-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleOpenEditarDialog(av)} className="text-blue-600">
-                          <Edit className="h-4 w-4" />
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          onClick={() => handleOpenEditarDialog(av)} 
+                          className="text-blue-600">
+                          <Edit className="h-5 w-5" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleOpenExcluirDialog(av)} className="text-red-600">
-                          <Trash2 className="h-4 w-4" />
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          onClick={() => handleOpenExcluirDialog(av)} 
+                          className="text-red-600">
+                          <Trash2 className="h-5 w-5" />
                         </Button>
                       </div>
                     </div>
@@ -272,13 +270,20 @@ export default function AvaliacoesAlunoPage() {
                   />
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => { setIsAdicionarDialogOpen(false); setIsEditarDialogOpen(false); }}>Cancelar</Button>
                   <Button 
+                    variant="outline" 
+                    onClick={() => { setIsAdicionarDialogOpen(false); 
+                    setIsEditarDialogOpen(false); }}
+                  >
+                    Cancelar
+                  </Button>
+
+                  <Button 
+                    variant="primary"
                     onClick={isEditarDialogOpen ? handleEditarAvaliacao : handleAdicionarAvaliacao}
                     disabled={saving}
-                    className="bg-[#0D4F97]"
                   >
-                    {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {saving && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
                     Salvar
                   </Button>
                 </DialogFooter>
@@ -295,8 +300,18 @@ export default function AvaliacoesAlunoPage() {
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsExcluirDialogOpen(false)}>Cancelar</Button>
-                  <Button variant="destructive" onClick={handleExcluirAvaliacao} disabled={saving}>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsExcluirDialogOpen(false)}
+                  >
+                    Cancelar
+                  </Button>
+
+                  <Button 
+                    variant="danger" 
+                    onClick={handleExcluirAvaliacao} 
+                    disabled={saving}
+                  >
                     {saving ? "Excluindo..." : "Excluir"}
                   </Button>
                 </DialogFooter>
@@ -305,7 +320,6 @@ export default function AvaliacoesAlunoPage() {
 
           </div>
         </div>
-      </main>
-    </div>
+      </div>
   );
 }

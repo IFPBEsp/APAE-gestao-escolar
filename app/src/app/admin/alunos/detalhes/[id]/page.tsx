@@ -1,4 +1,5 @@
 'use client'
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, User, Calendar, BookOpen, Heart, Phone, Eye, PenSquare, Loader2 } from "lucide-react";
@@ -186,9 +187,9 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
         <Button
           variant="outline"
           onClick={() => router.push("/admin/alunos")}
-          className="flex items-center gap-2 border-[#B2D7EC] text-[#0D4F97] hover:bg-blue-50 text-sm md:text-base h-9 md:h-10"
         >
-          <ArrowLeft size={18} /> Voltar para Alunos
+          <ArrowLeft size={18} />
+           Voltar
         </Button>
 
         {/* Card principal do Aluno */}
@@ -210,8 +211,9 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
 
               {/* Botão Editar Aluno - Ajustado para mobile */}
               <Button
+                variant="primary"
                 onClick={() => setIsEditModalOpen(true)}
-                className="w-full sm:w-auto flex items-center gap-2 bg-[#0D4F97] hover:bg-[#0A4080] text-white text-sm md:text-base h-10 px-4 md:px-6"
+                className="w-full sm:w-auto flex items-center gap-2"
               >
                 <PenSquare size={16} />
                 Editar Aluno
@@ -294,10 +296,13 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
                                 <td className="text-gray-600 pr-3">{avaliacao.turmaNomeCompleto}</td>
                                 <td className="text-gray-600 truncate max-w-[200px]" title={avaliacao.descricao}>{avaliacao.descricao}</td>
                                 <td className="py-3">
-                                <Eye
-                                    className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]"
-                                    onClick={() => setSelectedAvaliacao(avaliacao)}
-                                />
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => setSelectedAvaliacao(avaliacao)}
+                                >
+                                  <Eye size={18} />
+                                </Button>
                                 </td>
                             </tr>
                             ))}
@@ -366,10 +371,13 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
                         </td>
 
                         <td className="py-3">
-                          <Eye
-                            className="h-5 w-5 text-[#B2D7EC] cursor-pointer hover:text-[#0D4F97]"
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setSelectedRelatorio(relatorio)}
-                          />
+                          >
+                            <Eye size={18} />
+                          </Button>
                         </td>
                       </tr>
                     ))}

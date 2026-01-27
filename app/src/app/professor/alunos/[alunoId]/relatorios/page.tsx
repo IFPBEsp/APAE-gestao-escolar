@@ -8,12 +8,10 @@ import {
   Plus,
   Eye,
   Trash2,
-  UserCircle,
   FileText
 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { format } from "date-fns";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import ModalVisualizarEditarRelatorio from "@/components/ModalVisualizarEditarRelatorio";
@@ -41,7 +39,6 @@ export default function RelatoriosAlunoListaPage() {
   const [relatorioExcluindo, setRelatorioExcluindo] = useState<any | null>(null);
   const [isModalRelatorioOpen, setIsModalRelatorioOpen] = useState(false);
   const [relatorioSelecionado, setRelatorioSelecionado] = useState<any | null>(null);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const [alunoData, setAlunoData] = useState<any>(null);
   const [loadingAluno, setLoadingAluno] = useState(true);
@@ -143,77 +140,60 @@ export default function RelatoriosAlunoListaPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#E5E5E5]">
-      <ProfessorSidebar
-        activeTab="alunos"
-        onTabChange={(tab) =>
-          tab === "inicio"
-            ? router.push("/professor")
-            : router.push("/professor/turmas")
-        }
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={() =>
-          setIsSidebarCollapsed(!isSidebarCollapsed)
-        }
-      />
+    <div className="container mx-auto">
+      <div className="p-4 md:p-8">
+        <div className="mx-auto max-w-6xl space-y-6">
 
-      <main
-        className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? "md:ml-20" : "md:ml-64"
-          }`}
-      >
-        <div className="p-4 md:p-8">
-          <div className="mx-auto max-w-6xl space-y-6">
+          {/* BOTÃO VOLTAR */}
+          <Button
+            onClick={() => router.back()}
+            variant="outline"
+          >
+            <ArrowLeft className="mr-2 h-5 w-5" strokeWidth={1.75} />
+            Voltar
+          </Button>
 
-            <Button
-              onClick={() => router.back()}
-              variant="outline"
-              className="border-2 border-[#B2D7EC] text-[#0D4F97]"
-            >
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              Voltar
-            </Button>
-
-            <div className="space-y-4">
-
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#B2D7EC]/40">
-                  <FileText className="h-5 w-5 text-[#0D4F97]" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-[#0D4F97]">
-                    Relatórios do Aluno
-                  </h1>
-                  <p className="text-sm text-gray-600">
-                    Visualize e gerencie os relatórios de aluno
-                  </p>
-                </div>
+          {/* SEÇÃO RELATÓRIOS */}
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#B2D7EC]/40">
+                <FileText className="h-5 w-5 text-[#0D4F97]" />
               </div>
-
-              <EstudanteCard
-                nome={alunoData?.nome || "Nome não encontrado"}
-                turma={turmaData?.nome || alunoData?.turma?.nome || "Turma não encontrada"}
-                turno={turmaData?.turno || alunoData?.turma?.turno}
-                turmaId={turmaId}
-                alunoId={alunoIdFromUrl}
-                loading={loadingAluno}
-                action={
-                  <Button
-                    onClick={() => {
-                      setRelatorioSelecionado({ id: 0 });
-                      setIsModalRelatorioOpen(true);
-                    }}
-                    className="bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97]"
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Adicionar Relatório
-                  </Button>
-                }
-              />
-
+              <div>
+                <h1 className="text-2xl font-bold text-[#0D4F97]">
+                  Relatórios do Aluno
+                </h1>
+                <p className="text-sm text-gray-600">
+                  Visualize e gerencie os relatórios de aluno
+                </p>
+              </div>
             </div>
 
+            <EstudanteCard
+              nome={alunoData?.nome || "Nome não encontrado"}
+              turma={turmaData?.nome || alunoData?.turma?.nome || "Turma não encontrada"}
+              turno={turmaData?.turno || alunoData?.turma?.turno}
+              turmaId={turmaId}
+              alunoId={alunoIdFromUrl}
+              loading={loadingAluno}
+              action={
+                <Button
+                  onClick={() => {
+                    setRelatorioSelecionado({ id: 0 });
+                    setIsModalRelatorioOpen(true);
+                  }}
+                  variant="primary"
+                >
+                  <Plus className="mr-2 h-5 w-5" />
+                  Adicionar Relatório
+                </Button>
+              }
+            />
+
+            {/* TABELA / GRID */}
             <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
               <CardContent className="p-0">
+                {/* Cabeçalho Desktop */}
                 <div className="hidden border-b-2 border-[#B2D7EC] bg-[#B2D7EC]/20 md:grid md:grid-cols-12 md:gap-4 md:p-4">
                   <div className="col-span-2 text-[#0D4F97] font-semibold">Data</div>
                   <div className="col-span-2 text-[#0D4F97] font-semibold">Atividades</div>
@@ -223,6 +203,7 @@ export default function RelatoriosAlunoListaPage() {
                   <div className="col-span-2 text-center text-[#0D4F97] font-semibold">Ações</div>
                 </div>
 
+                {/* Lista de Relatórios */}
                 <div className="divide-y-2 divide-[#B2D7EC]">
                   {relatorios.length === 0 ? (
                     <div className="p-8 text-center text-gray-500">
@@ -270,8 +251,7 @@ export default function RelatoriosAlunoListaPage() {
                               setIsModalRelatorioOpen(true);
                             }}
                             variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-[#0D4F97] hover:bg-[#B2D7EC]/20"
+                            size="icon"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -281,8 +261,7 @@ export default function RelatoriosAlunoListaPage() {
                               setIsExcluirDialogOpen(true);
                             }}
                             variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-red-500 hover:bg-red-50"
+                            size="icon"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -293,10 +272,9 @@ export default function RelatoriosAlunoListaPage() {
                 </div>
               </CardContent>
             </Card>
-
-          </div>
-        </div>
-      </main>
+          </div> 
+        </div> 
+      </div> 
 
       {isModalRelatorioOpen && (
         <ModalVisualizarEditarRelatorio
@@ -328,7 +306,7 @@ export default function RelatoriosAlunoListaPage() {
             </Button>
             <Button
               onClick={handleExcluirRelatorio}
-              className="bg-red-600 text-white"
+              variant="danger"
             >
               Excluir
             </Button>
