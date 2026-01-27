@@ -23,7 +23,7 @@ export default function TurmasPage() {
       const data = await listarTurmasDeProfessor(professorId);
 
       // opcional: filtrar apenas turmas ativas
-      const turmasAtivas = data.filter((turma: Turma) => turma.isAtiva);
+      const turmasAtivas = data.filter((turma: Turma) => turma.isAtiva); // para ver se tá bom
 
       setTurmas(turmasAtivas);
     } catch (error: any) {
