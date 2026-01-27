@@ -1,7 +1,6 @@
 package com.apae.gestao.controller;
 
-import com.apae.gestao.dto.AvaliacaoRequestDTO;
-import com.apae.gestao.dto.AvaliacaoResponseDTO;
+import com.apae.gestao.dto.avaliacao.*;
 import com.apae.gestao.dto.ApiErrorResponse;
 import com.apae.gestao.service.AvaliacaoService;
 import jakarta.validation.Valid;

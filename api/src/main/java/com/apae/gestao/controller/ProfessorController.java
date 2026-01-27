@@ -2,6 +2,10 @@ package com.apae.gestao.controller;
 
 import java.util.List;
 import com.apae.gestao.dto.*;
+import com.apae.gestao.dto.professor.ProfessorRequestDTO;
+import com.apae.gestao.dto.professor.ProfessorResponseDTO;
+import com.apae.gestao.dto.professor.ProfessorResumoDTO;
+import com.apae.gestao.dto.turma.TurmaResponseDTO;
 import com.apae.gestao.service.ProfessorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

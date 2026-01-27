@@ -1,4 +1,4 @@
-package com.apae.gestao.dto;
+package com.apae.gestao.dto.turma;
 
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Turma;

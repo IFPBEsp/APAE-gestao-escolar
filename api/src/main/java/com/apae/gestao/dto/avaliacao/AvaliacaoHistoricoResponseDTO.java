@@ -1,4 +1,4 @@
-package com.apae.gestao.dto;
+package com.apae.gestao.dto.avaliacao;
 
 import com.apae.gestao.entity.Avaliacao;
 import lombok.AllArgsConstructor;

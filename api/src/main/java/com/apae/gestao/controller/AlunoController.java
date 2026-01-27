@@ -2,9 +2,9 @@ package com.apae.gestao.controller;
 
 import java.util.List;
 
-import com.apae.gestao.dto.AlunoResponseDTO;
-import com.apae.gestao.dto.AlunoTurmaRequestDTO; 
-import com.apae.gestao.dto.AvaliacaoHistoricoResponseDTO;
+import com.apae.gestao.dto.avaliacao.AvaliacaoHistoricoResponseDTO;
+import com.apae.gestao.dto.aluno.AlunoResponseDTO;
+import com.apae.gestao.dto.aluno.AlunoTurmaRequestDTO;
 import com.apae.gestao.service.AlunoService;
 
 import io.swagger.v3.oas.annotations.Operation;

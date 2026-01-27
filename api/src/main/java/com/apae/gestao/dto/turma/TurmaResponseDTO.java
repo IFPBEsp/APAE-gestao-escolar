@@ -1,8 +1,9 @@
-package com.apae.gestao.dto;
+package com.apae.gestao.dto.turma;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.apae.gestao.dto.professor.ProfessorResponseDTO;
 import com.apae.gestao.entity.Turma;
 import com.apae.gestao.entity.TurmaAluno;
 

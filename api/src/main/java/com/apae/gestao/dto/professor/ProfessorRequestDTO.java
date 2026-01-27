@@ -1,4 +1,4 @@
-package com.apae.gestao.dto;
+package com.apae.gestao.dto.professor;
 
 import java.time.LocalDate;
 import java.util.Set;

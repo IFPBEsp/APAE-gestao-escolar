@@ -1,4 +1,4 @@
-package com.apae.gestao.dto;
+package com.apae.gestao.dto.professor;
 
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Turma;

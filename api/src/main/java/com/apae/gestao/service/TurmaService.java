@@ -6,10 +6,10 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.apae.gestao.dto.ProfessorResponseDTO;
-import com.apae.gestao.dto.TurmaAlunoResponseDTO;
-import com.apae.gestao.dto.TurmaRequestDTO;
-import com.apae.gestao.dto.TurmaResponseDTO;
+import com.apae.gestao.dto.professor.ProfessorResponseDTO;
+import com.apae.gestao.dto.turma.TurmaAlunoResponseDTO;
+import com.apae.gestao.dto.turma.TurmaRequestDTO;
+import com.apae.gestao.dto.turma.TurmaResponseDTO;
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Turma;

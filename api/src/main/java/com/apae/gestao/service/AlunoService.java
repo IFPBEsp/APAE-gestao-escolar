@@ -1,8 +1,8 @@
 package com.apae.gestao.service;
 
-import com.apae.gestao.dto.AlunoResponseDTO;
-import com.apae.gestao.dto.AlunoTurmaRequestDTO; 
-import com.apae.gestao.dto.AvaliacaoHistoricoResponseDTO;
+import com.apae.gestao.dto.avaliacao.AvaliacaoHistoricoResponseDTO;
+import com.apae.gestao.dto.aluno.AlunoResponseDTO;
+import com.apae.gestao.dto.aluno.AlunoTurmaRequestDTO;
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Turma;
 import com.apae.gestao.entity.TurmaAluno; 

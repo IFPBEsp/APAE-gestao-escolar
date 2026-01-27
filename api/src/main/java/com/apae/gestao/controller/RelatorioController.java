@@ -3,8 +3,7 @@ package com.apae.gestao.controller;
 import java.util.List;
 
 import com.apae.gestao.dto.ApiErrorResponse;
-import com.apae.gestao.dto.RelatorioRequestDTO;
-import com.apae.gestao.dto.RelatorioResponseDTO;
+import com.apae.gestao.dto.relatorio.*;
 import com.apae.gestao.service.RelatorioService;
 
 import io.swagger.v3.oas.annotations.Operation;
