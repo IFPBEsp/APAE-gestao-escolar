@@ -473,7 +473,8 @@ export default function ModalEditarProfessor({
                   <Button
                     type="button"
                     onClick={handleAddTurma}
-                    className="h-12 bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97]"
+                    variant="primary"
+                    className="h-12"
                     disabled={loadingTurmas || !novaTurma.trim()}
                   >
                     {loadingTurmas ? "Carregando..." : "Adicionar"}
@@ -536,9 +537,9 @@ export default function ModalEditarProfessor({
                       <Button
                         type="button"
                         variant="ghost"
-                        size="sm"
+                        size="icon"
                         onClick={() => handleRemoveTurma(turma.id)}
-                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        aria-label={`Remover turma ${turma.nome}`}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -560,8 +561,9 @@ export default function ModalEditarProfessor({
             </Button>
             <Button
               type="submit"
+              variant="primary"
               disabled={isSubmitting}
-              className="h-12 bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97]"
+              className="h-12"
             >
               {isSubmitting ? "Salvando..." : "Salvar Alterações"}
             </Button>

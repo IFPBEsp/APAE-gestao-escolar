@@ -4,27 +4,34 @@ import { BookOpen, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { useEffect, useState } from "react";
-import { buscarProfessorPorId } from "@/services/ProfessorService";
-import { listarTurmasDeProfessor } from "@/services/ProfessorService";
-import { Turma }from "@/types/turma";
-import { Professor } from "@/types/professor"; 
-
+import { buscarProfessorPorId, listarTurmasDeProfessor } from "@/services/ProfessorService";
 
 export default function ProfessorDashboardPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [professor, setProfessor] = useState<Professor | null>(null);
+  const [professor, setProfessor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [turmas, setTurmas] = useState<Turma[]>([]);
+  const [turmas, setTurmas] = useState<any[]>([]);
+
+  const professorId = 1; // depois você pode trocar pelo ID do usuário logado
 
   const handleToggleCollapse = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
+  // 🔹 Apenas turmas ativas
+  const turmasAtivas = turmas.filter(turma => turma.isAtiva === true);
+
+  // 🔹 Soma dos alunos ativos das turmas ativas
+  const totalAlunosAtivos = turmasAtivas.reduce((total, turma) => {
+    const valor = Number(turma.totalAlunosAtivos);
+    return total + (isNaN(valor) ? 0 : valor);
+  }, 0);
+
   useEffect(() => {
     async function carregarProfessor() {
       try {
-        const response = await buscarProfessorPorId(1);
+        const response = await buscarProfessorPorId(professorId);
         setProfessor(response);
       } catch (err: any) {
         setError(err.message);
@@ -39,12 +46,10 @@ export default function ProfessorDashboardPage() {
   useEffect(() => {
     async function carregarTurmas() {
       try {
-        const response = await listarTurmasDeProfessor(1);
-        console.log("Turmas retornadas:", response); // Para debug
-        setTurmas(response || []);
+        const response = await listarTurmasDeProfessor(professorId);
+        setTurmas(response);
       } catch (err) {
         console.error(err);
-        setTurmas([]);
       }
     }
 
@@ -67,16 +72,6 @@ export default function ProfessorDashboardPage() {
     );
   }
 
-  const calcularTotalAlunos = () => {
-    return turmas.reduce((total, turma) => {
-      if (turma.alunos && Array.isArray(turma.alunos)) {
-        const alunosAtivos = turma.alunos.filter(aluno => aluno.isAtivo);
-        return total + alunosAtivos.length;
-      }
-      return total;
-    }, 0);
-  };
-
   return (
     <div className="flex min-h-screen bg-[#E5E5E5]">
       <ProfessorSidebar
@@ -91,20 +86,21 @@ export default function ProfessorDashboardPage() {
       >
         <div className="p-4 md:p-8">
           <div className="mx-auto max-w-6xl">
+
             {/* Header */}
             <div className="mb-8">
               <h1 className="text-[#0D4F97] text-2xl font-bold">
                 Painel do Professor
               </h1>
-              {professor ? (
-                <p className="text-[#222222]">Bem-vindo, {professor.nome}!</p>
-              ) : (
-                <p className="text-[#222222]">Carregando informações...</p>
-              )}
+              <p className="text-[#222222]">
+                Bem-vindo, {professor?.nome}!
+              </p>
             </div>
 
-            {/* Cards de Resumo */}
+            {/* Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              {/* Turmas Ativas */}
               <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
                 <CardContent className="p-6">
                   <div className="flex flex-col items-center text-center">
@@ -113,25 +109,27 @@ export default function ProfessorDashboardPage() {
                     </div>
                     <p className="text-[#222222] mb-2">Turmas Ativas</p>
                     <p className="text-[#0D4F97] text-3xl font-bold">
-                      {turmas.filter(t => t.isAtiva).length}
+                      {turmasAtivas.length}
                     </p>
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Total de Alunos Ativos */}
               <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
                 <CardContent className="p-6">
                   <div className="flex flex-col items-center text-center">
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#B2D7EC]/20 mb-4">
                       <Users className="h-7 w-7 text-[#0D4F97]" />
                     </div>
-                    <p className="text-[#222222] mb-2">Total de Alunos (Ativos)</p>
+                    <p className="text-[#222222] mb-2">Total de Alunos Ativos</p>
                     <p className="text-[#0D4F97] text-3xl font-bold">
-                      {calcularTotalAlunos()}
+                      {totalAlunosAtivos}
                     </p>
                   </div>
                 </CardContent>
               </Card>
+
             </div>
           </div>
         </div>

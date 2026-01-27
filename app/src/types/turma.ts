@@ -17,3 +17,8 @@ export interface Turma {
   alunos: TurmaAluno[];
   horario: string;
 }
+
+export interface TurmaResumo {
+  id: number;
+  nome: string;
+}

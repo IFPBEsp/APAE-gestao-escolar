@@ -1,40 +1,41 @@
 package com.apae.gestao.service;
 
-import com.apae.gestao.dto.AlunoResponseDTO;
-import com.apae.gestao.dto.AlunoTurmaRequestDTO; 
+import com.apae.gestao.dto.AlunoTurmaRequestDTO;
 import com.apae.gestao.dto.AvaliacaoHistoricoResponseDTO;
+import com.apae.gestao.dto.aluno.AlunoDetalhesDTO;
+import com.apae.gestao.dto.aluno.AlunoResumoDTO;
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Turma;
-import com.apae.gestao.entity.TurmaAluno; 
+import com.apae.gestao.entity.TurmaAluno;
 import com.apae.gestao.repository.AlunoRepository;
 import com.apae.gestao.repository.AvaliacaoRepository;
-import com.apae.gestao.repository.TurmaRepository; 
-import com.apae.gestao.repository.TurmaAlunoRepository; 
-
-import org.springframework.transaction.annotation.Transactional;
+import com.apae.gestao.repository.TurmaAlunoRepository;
+import com.apae.gestao.repository.TurmaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AlunoService {
 
     private final AlunoRepository alunoRepository;
-    private final AvaliacaoRepository avaliacaoRepository; 
-    private final TurmaRepository turmaRepository; 
-    private final TurmaAlunoRepository turmaAlunoRepository; 
+    private final TurmaRepository turmaRepository;
+    private final TurmaAlunoRepository turmaAlunoRepository;
+    private final AvaliacaoRepository avaliacaoRepository;
 
     public AlunoService(
-        AlunoRepository alunoRepository, 
-        AvaliacaoRepository avaliacaoRepository,
-        TurmaRepository turmaRepository,
-        TurmaAlunoRepository turmaAlunoRepository 
+            AlunoRepository alunoRepository,
+            TurmaRepository turmaRepository,
+            TurmaAlunoRepository turmaAlunoRepository,
+            AvaliacaoRepository avaliacaoRepository
     ) {
         this.alunoRepository = alunoRepository;
-        this.avaliacaoRepository = avaliacaoRepository;
         this.turmaRepository = turmaRepository;
         this.turmaAlunoRepository = turmaAlunoRepository;
+        this.avaliacaoRepository = avaliacaoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -44,61 +45,55 @@ public class AlunoService {
                         ? alunoRepository.listarAlunosResumido(pageable)
                         : alunoRepository.listarAlunosPorNomeResumido(nome, pageable);
 
-    @Transactional(readOnly = true)
-    public List<AlunoResponseDTO> listarTodos() {
-        return alunoRepository.findAll()
-                .stream()
-                .map(AlunoResponseDTO::new)
-                .collect(Collectors.toList());
+        Page<AlunoResumoDTO> page =
+                (nome == null || nome.isBlank())
+                        ? alunoRepository.listarAlunosResumido(pageable)
+                        : alunoRepository.listarAlunosPorNomeResumido(nome, pageable);
+
+        return page.map(dto -> new AlunoResumoDTO(
+                dto.getId(),
+                dto.getNome(),
+                dto.getNomeResponsavel(),
+                dto.getNomeTurma(),
+                dto.getTurnoTurma(),
+                dto.getPercentualPresenca(),
+                dto.getDataUltimaAvaliacao() 
+        ));
     }
 
     @Transactional(readOnly = true)
-    public AlunoResponseDTO buscarPorId(Long id) {
+    public AlunoDetalhesDTO buscarPorId(Long id) {
         Aluno aluno = alunoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Aluno não encontrado com ID: " + id));
-        return new AlunoResponseDTO(aluno);
+                .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
+        return new AlunoDetalhesDTO(aluno);
     }
-    
+
     @Transactional
     public AlunoDetalhesDTO atualizarTurma(Long alunoId, AlunoTurmaRequestDTO dto) {
         Aluno aluno = alunoRepository.findById(alunoId)
-            .orElseThrow(() -> new RuntimeException("Aluno não encontrado com ID: " + alunoId));
-        
+                .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
+
         Turma novaTurma = turmaRepository.findById(dto.getNovaTurmaId())
-            .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + dto.getNovaTurmaId()));
+                .orElseThrow(() -> new RuntimeException("Turma não encontrada"));
 
-        // BUSCA UMA LISTA EM VEZ DE UM ÚNICO OBJETO PARA EVITAR O ERRO
-        List<TurmaAluno> registrosAtivos = turmaAlunoRepository.findAllByAlunoAndIsAlunoAtivoTrue(aluno);
-        
-        // Desativa todos os que encontrar (limpeza preventiva)
-        for (TurmaAluno registro : registrosAtivos) {
-            registro.setIsAlunoAtivo(false);
-            turmaAlunoRepository.save(registro);
-        }
+        turmaAlunoRepository
+                .findAllByAlunoAndIsAlunoAtivoTrue(aluno)
+                .forEach(ta -> ta.setIsAlunoAtivo(false));
 
-        // Cria o novo registro
-        TurmaAluno novoRegistro = new TurmaAluno();
-        novoRegistro.setAluno(aluno);
-        novoRegistro.setTurma(novaTurma);
-        novoRegistro.setIsAlunoAtivo(true); 
-        
-        turmaAlunoRepository.save(novoRegistro);
-        
-        aluno.getTurmaAlunos().add(novoRegistro);
+        TurmaAluno novoVinculo = new TurmaAluno();
+        novoVinculo.setAluno(aluno);
+        novoVinculo.setTurma(novaTurma);
+        novoVinculo.setIsAlunoAtivo(true);
 
-        return new AlunoResponseDTO(aluno); 
-    }
+        turmaAlunoRepository.save(novoVinculo);
+        aluno.getTurmaAlunos().add(novoVinculo);
 
-    @Transactional
-    public void deletar(Long id) {
-        if (!alunoRepository.existsById(id)) {
-            throw new RuntimeException("Aluno não encontrado com ID: " + id);
-        }
-        alunoRepository.deleteById(id);
+        return new AlunoDetalhesDTO(aluno);
     }
 
     @Transactional(readOnly = true)
     public List<AvaliacaoHistoricoResponseDTO> buscarAvaliacoesPorAlunoId(Long id) {
+
         Aluno aluno = alunoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
 
@@ -109,7 +104,7 @@ public class AlunoService {
         return avaliacaoRepository
                 .findByAlunoOrderByDataAvaliacaoDesc(aluno)
                 .stream()
-                .map(avaliacao -> AvaliacaoHistoricoResponseDTO.fromEntity(avaliacao, turmaAtualCompleta))
-                .collect(Collectors.toList());
+                .map(a -> AvaliacaoHistoricoResponseDTO.fromEntity(a, turmaAtual))
+                .toList();
     }
 }

@@ -152,10 +152,10 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                         <Button
                             variant="outline"
                             onClick={onClose}
-                            className="h-12 justify-center border-2 border-[#B2D7EC] px-8 text-[#0D4F97] hover:bg-[#B2D7EC]/20"
                         >
                             Cancelar
                         </Button>
+
                         <Button
                             onClick={handleSalvar}
                             disabled={loadingTurmas}

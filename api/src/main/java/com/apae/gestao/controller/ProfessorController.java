@@ -2,6 +2,7 @@ package com.apae.gestao.controller;
 
 import java.util.List;
 import com.apae.gestao.dto.*;
+import com.apae.gestao.dto.turma.TurmaResponseDTO;
 import com.apae.gestao.service.ProfessorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -130,10 +131,10 @@ public class ProfessorController {
 
     @GetMapping("/{id}/turmas")
     @Operation(summary = "Listar turmas de um professor")
-    public ResponseEntity<List<TurmaResponseDTO>> getTurmasDeProfessor(
+    public ResponseEntity<List<TurmaResumoDTO>> getTurmasDeProfessor(
             @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.PATH)
             @PathVariable Long id) {
-        List<TurmaResponseDTO> response = professorService.getTurmasDeProfessor(id);
+        List<TurmaResumoDTO> response = professorService.getTurmasDeProfessor(id);
         return ResponseEntity.ok(response);
     }
 }

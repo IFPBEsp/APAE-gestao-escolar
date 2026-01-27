@@ -60,7 +60,6 @@ export default function VisualizarRelatorioAdmin({
           <Button
             onClick={onBack}
             variant="outline"
-            className="mb-6 h-12 border-2 border-[#B2D7EC] text-[#0D4F97] nao-imprimir"
           >
             <ArrowLeft className="mr-2 h-5 w-5" />
             Voltar
@@ -120,7 +119,10 @@ export default function VisualizarRelatorioAdmin({
               </div>
 
               <div className="flex justify-end pt-4 border-t">
-                <Button onClick={imprimir} className="h-12 px-8">
+                <Button 
+                  onClick={imprimir} 
+                  variant="primary"
+                >
                   <Printer className="mr-2 h-5 w-5" />
                   Imprimir Relatório
                 </Button>

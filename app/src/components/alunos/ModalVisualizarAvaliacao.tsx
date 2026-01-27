@@ -213,7 +213,6 @@ export default function ModalVisualizarAvaliacao({
                     <Button
                         onClick={handleImprimir}
                         variant="outline"
-                        className="text-[#0D4F97] border-[#0D4F97] hover:bg-[#0D4F97] hover:text-white"
                     >
                         <Printer className="mr-2 h-4 w-4" />
                         Imprimir
