@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState } from "react";
 import { Eye, EyeOff, LogIn } from "lucide-react";

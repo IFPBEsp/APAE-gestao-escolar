@@ -10,6 +10,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.apae.gestao.dto.ProfessorResponseDTO;
+import com.apae.gestao.dto.turma.TurmaRequestDTO;
+import com.apae.gestao.dto.turma.TurmaResponseDTO;
+import com.apae.gestao.dto.turmaAluno.TurmaAlunoResponseDTO;
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Turma;

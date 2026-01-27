@@ -19,15 +19,20 @@ interface Turma {
   totalAlunosAtivos?: number;
 }
 
+interface Professor {
+  id: number;
+  nome: string;
+  email: string;
+}
+
 export default function TurmasPage() {
   const router = useRouter();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [professorId, setProfessorId] = useState<number | null>(null);
-  const [professor, setProfessor] = useState<any>(null);
+  const [professor, setProfessor] = useState<Professor | null>(null);
   const [turmas, setTurmas] = useState<Turma[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Recupera o professor logado do localStorage
   useEffect(() => {
     const usuario = localStorage.getItem("usuarioLogado");
     if (usuario) {
@@ -35,43 +40,23 @@ export default function TurmasPage() {
       setProfessorId(parsed.id);
     } else {
       toast.error("Usuário não autenticado");
-      router.push("/"); // redireciona para login
+      router.push("/");
     }
   }, []);
 
-  // 🔹 Busca as informações do professor
   useEffect(() => {
-    if (!professorId) return;
+    if (professorId === null) return;
 
-    async function carregarProfessor() {
-      try {
-        const dadosProfessor = await buscarProfessorPorId(professorId);
-        setProfessor(dadosProfessor);
-      } catch (error: any) {
-        toast.error(error.message || "Erro ao carregar dados do professor");
-      }
-    }
+    setLoading(true);
 
-    carregarProfessor();
-  }, [professorId]);
-
-  // 🔹 Busca as turmas do professor
-  useEffect(() => {
-    if (!professorId) return;
-
-    async function carregarTurmas() {
-      try {
-        const data: Turma[] = await listarTurmasDeProfessor(professorId);
-        const turmasAtivas = data.filter((turma) => turma.isAtiva === true);
-        setTurmas(turmasAtivas);
-      } catch (error: any) {
-        toast.error(error.message || "Erro ao carregar turmas");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    carregarTurmas();
+    Promise.all([
+      buscarProfessorPorId(professorId as number).then(setProfessor),
+      listarTurmasDeProfessor(professorId as number).then((data) =>
+        setTurmas(data.filter(t => t.isAtiva))
+      )
+    ])
+      .catch((err: any) => toast.error(err.message || "Erro ao carregar dados"))
+      .finally(() => setLoading(false));
   }, [professorId]);
 
   const handleNavigation = (path: string, e?: React.MouseEvent) => {
@@ -113,7 +98,6 @@ export default function TurmasPage() {
         }`}
       >
         <div className="p-4 md:p-8">
-          {/* Header */}
           <div className="mb-6 md:mb-8">
             <h1 className="text-[#0D4F97] text-2xl md:text-3xl font-bold">
               Minhas Turmas
@@ -126,7 +110,6 @@ export default function TurmasPage() {
             </p>
           </div>
 
-          {/* Card de Turmas */}
           <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
             <CardHeader className="border-b border-[#B2D7EC]/30 pb-4 md:pb-6">
               <div className="flex items-center gap-3 md:gap-4">

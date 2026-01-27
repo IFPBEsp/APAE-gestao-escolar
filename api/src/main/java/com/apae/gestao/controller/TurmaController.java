@@ -7,6 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.apae.gestao.dto.ApiErrorResponse;
+import com.apae.gestao.dto.turma.TurmaRequestDTO;
+import com.apae.gestao.dto.turma.TurmaResponseDTO;
+import com.apae.gestao.dto.turmaAluno.TurmaAlunoResponseDTO;
 import com.apae.gestao.service.TurmaService;
 
 import io.swagger.v3.oas.annotations.Operation;

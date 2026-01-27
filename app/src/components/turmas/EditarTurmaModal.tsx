@@ -24,7 +24,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Search, UserRound, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 interface AlunoAPI {
     id: number;
@@ -72,17 +72,20 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     const [alunosEncontrados, setAlunosEncontrados] = useState<AlunoAPI[]>([]); 
     const [alunosNaTurma, setAlunosNaTurma] = useState<AlunoNaTurma[]>([]); 
 
-    const nomeTurma = `${tipo ? formatTipo(tipo) : ""} ${turmaData?.anoCriacao || ""} - ${turno ? formatTurno(turno) : ""}`;
+    const nomeTurma = useMemo(
+        () => `${tipo ? formatTipo(tipo) : ""} ${turmaData?.anoCriacao || ""} - ${turno ? formatTurno(turno) : ""}`,
+        [tipo, turno, turmaData]
+    );
 
     function formatTipo(val: string) {
-        if (val === 'ALFABETIZACAO' || val === 'alfabetizacao') return 'Alfabetização';
-        if (val === 'ESTIMULACAO' || val === 'estimulacao') return 'Estimulação';
+        if (val.toUpperCase() === "ALFABETIZACAO") return "Alfabetização";
+        if (val.toUpperCase() === "ESTIMULACAO") return "Estimulação";
         return val;
     }
 
     function formatTurno(val: string) {
-        if (val === 'MANHA' || val === 'manha') return 'Manhã';
-        if (val === 'TARDE' || val === 'tarde') return 'Tarde';
+        if (val.toUpperCase() === "MANHA") return "Manhã";
+        if (val.toUpperCase() === "TARDE") return "Tarde";
         return val;
     }
 
@@ -96,7 +99,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                 (turmaData.alunos || []).map(a => ({
                     alunoId: a.alunoId,
                     nome: a.nome,
-                    isAtivo: a.isAtivo,
+                     isAtivo: a.isAtivo ?? true,
                 }))
             );
             
@@ -107,10 +110,8 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
 
     useEffect(() => {
         if (buscaProfessor.length > 0) {
-            const delayDebounceFn = setTimeout(() => {
-                fetchProfessores(buscaProfessor);
-            }, 300); 
-            return () => clearTimeout(delayDebounceFn);
+            const delay = setTimeout(() => fetchProfessores(buscaProfessor), 300);
+            return () => clearTimeout(delay);
         } else {
             setProfessoresEncontrados([]);
         }
@@ -133,20 +134,24 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     }
     
     useEffect(() => {
-        if (buscaAluno.length > 0) { 
-            const delayDebounceFn = setTimeout(() => {
-                fetchAlunos(buscaAluno);
-            }, 300);
-            return () => clearTimeout(delayDebounceFn);
+        if (buscaAluno.length > 0) {
+            const delay = setTimeout(() => fetchAlunos(buscaAluno), 300);
+            return () => clearTimeout(delay);
         } else {
             setAlunosEncontrados([]);
         }
-    }, [buscaAluno]);
+    }, [buscaAluno, alunosNaTurma]);
     
     async function fetchAlunos(nome: string) {
         try {
-            const data = await listarAlunos(nome); 
-            setAlunosEncontrados(data.filter(a => !alunosNaTurma.some(naTurma => naTurma.alunoId === a.id)));
+            const response = await listarAlunos(nome);
+            const alunosArray = response.content || []; 
+
+            setAlunosEncontrados(
+                alunosArray
+                    .filter(a => !alunosNaTurma.some(aluno => aluno.alunoId === a.id))
+                    .map(a => ({ alunoId: a.id, nome: a.nome }))
+            );
         } catch (error: any) {
             toast.error("Erro ao buscar alunos: " + (error.message || ""));
             setAlunosEncontrados([]);
@@ -167,8 +172,8 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
         setAlunosEncontrados([]);
     }
 
-    function removerAluno(id: number) {
-        setAlunosNaTurma(alunosNaTurma.filter(a => a.alunoId !== id));
+     function removerAluno(alunoId: number) {
+        setAlunosNaTurma(alunosNaTurma.filter(a => a.alunoId !== alunoId));
     }
 
     async function handleSave() {

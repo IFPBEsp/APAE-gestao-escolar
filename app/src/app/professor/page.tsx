@@ -1,17 +1,34 @@
 'use client'
 
+import { useEffect, useState } from "react";
 import { BookOpen, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
-import { useEffect, useState } from "react";
 import { buscarProfessorPorId, listarTurmasDeProfessor } from "@/services/ProfessorService";
+
+interface Turma {
+  id: number;
+  nome: string;
+  horario: string;
+  turno: string;
+  tipo: string;
+  isAtiva: boolean;
+  totalAlunosAtivos?: number;
+}
+
+interface Professor {
+  id: number;
+  nome: string;
+  email: string;
+  // outros campos que precisar exibir
+}
 
 export default function ProfessorDashboardPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [professor, setProfessor] = useState<any>(null);
+  const [professor, setProfessor] = useState<Professor | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [turmas, setTurmas] = useState<any[]>([]);
+  const [turmas, setTurmas] = useState<Turma[]>([]);
   const [professorId, setProfessorId] = useState<number | null>(null);
 
   const handleToggleCollapse = () => {
@@ -23,7 +40,7 @@ export default function ProfessorDashboardPage() {
     const usuario = localStorage.getItem("usuarioLogado");
     if (usuario) {
       const parsed = JSON.parse(usuario);
-      setProfessorId(parsed.id);
+      setProfessorId(parsed.id); // número vindo do login
     } else {
       setError("Usuário não autenticado.");
       setLoading(false);
@@ -32,11 +49,12 @@ export default function ProfessorDashboardPage() {
 
   // 🔹 Busca os dados do professor pelo ID real
   useEffect(() => {
-    if (professorId) return;
+    if (professorId === null) return; // ⚠️ evita passar null
 
     async function carregarProfessor() {
       try {
-        const response = await buscarProfessorPorId(professorId);
+        // ✅ Garantindo para o TS que professorId nunca é null
+        const response = await buscarProfessorPorId(professorId as number);
         setProfessor(response);
       } catch (err: any) {
         setError(err.message || "Erro ao carregar dados do professor.");
@@ -50,13 +68,13 @@ export default function ProfessorDashboardPage() {
 
   // 🔹 Busca as turmas do professor pelo ID real
   useEffect(() => {
-    if (!professorId) return;
+    if (professorId === null) return;
 
     async function carregarTurmas() {
       try {
-        const response = await listarTurmasDeProfessor(professorId);
-        setTurmas(response);
-      } catch (err) {
+        const response = await listarTurmasDeProfessor(professorId as number);
+        setTurmas(response.filter(t => t.isAtiva));
+      } catch (err: any) {
         console.error(err);
       }
     }
@@ -64,11 +82,8 @@ export default function ProfessorDashboardPage() {
     carregarTurmas();
   }, [professorId]);
 
-  // 🔹 Apenas turmas ativas
-  const turmasAtivas = turmas.filter(turma => turma.isAtiva === true);
-
   // 🔹 Soma dos alunos ativos das turmas ativas
-  const totalAlunosAtivos = turmasAtivas.reduce((total, turma) => {
+  const totalAlunosAtivos = turmas.reduce((total, turma) => {
     const valor = Number(turma.totalAlunosAtivos);
     return total + (isNaN(valor) ? 0 : valor);
   }, 0);
@@ -126,7 +141,7 @@ export default function ProfessorDashboardPage() {
                     </div>
                     <p className="text-[#222222] mb-2">Turmas Ativas</p>
                     <p className="text-[#0D4F97] text-3xl font-bold">
-                      {turmasAtivas.length}
+                      {turmas.length}
                     </p>
                   </div>
                 </CardContent>

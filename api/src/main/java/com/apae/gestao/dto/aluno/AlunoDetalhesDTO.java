@@ -13,7 +13,7 @@ import java.util.Optional;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Informações básicas apresentadas ao consultar alunos.")
+@Schema(description = "Informações detalhadas apresentadas ao consultar alunos.")
 public class AlunoDetalhesDTO {
     @Schema(description = "Identificador do aluno", example = "5")
     private Long id;
