@@ -186,7 +186,7 @@ export default function AvaliacoesAlunoPage() {
             </div>
             <div>
               <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho do Aluno</h2>
-              <p className="text-[#222222]">Acompanhe o progresso e histórico de avaliações de {alunoData.nome}</p>
+              <p className="text-[#222222]">Acompanhe o progresso e histórico de avaliações de {alunoData?.nome || "..."}</p>
             </div>
           </div>
 
@@ -209,23 +209,6 @@ export default function AvaliacoesAlunoPage() {
               }
             />
 
-            <Card className="mt-6 rounded-xl border-2 border-[#B2D7EC] shadow-md">
-              <CardContent className="p-0">
-                <div className="hidden border-b-2 border-[#B2D7EC] bg-[#B2D7EC]/20 md:grid md:grid-cols-12 md:gap-4 md:p-4">
-                  <div className="col-span-2 text-[#0D4F97] font-semibold">Data</div>
-                  <div className="col-span-8 text-[#0D4F97] font-semibold">Descrição</div>
-                  <div className="col-span-2 text-center text-[#0D4F97] font-semibold">Ações</div>
-                </div>
-                <Button
-                  onClick={handleOpenAdicionarDialog}
-                  variant="primary"
-                  disabled={loading || saving}
-                >
-                  <Plus className="mr-2 h-5 w-5" />
-                  Adicionar Avaliação
-                </Button>
-              </CardContent>
-            </Card>
 
           {/* Lista de Avaliações */}
           <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">

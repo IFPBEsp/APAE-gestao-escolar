@@ -46,7 +46,6 @@ export default function TurmaDetalhesPage() {
     const ultima = avaliacoes.reduce((maisRecente: any, atual: any) =>
       new Date(atual.dataAvaliacao) > new Date(maisRecente.dataAvaliacao) ? atual : maisRecente
     );
-    // Retorna a data formatada no padrão brasileiro
     return { ultimaAvaliacao: format(new Date(ultima.dataAvaliacao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) };
   }
 
@@ -143,7 +142,7 @@ export default function TurmaDetalhesPage() {
           </div>
 
           <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
-            <CardContent className="p-6 mt-4">
+            <CardContent className="p-6">
               <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between">
                 <div className="flex items-center gap-4">
                   <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-[#0D4F97]/10">
@@ -169,16 +168,17 @@ export default function TurmaDetalhesPage() {
                     {turma.ativa ? "Ativa" : "Inativa"}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
 
-            <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
-              <CardContent className="p-6">
-                <h3 className="text-[#0D4F97] font-semibold text-lg mb-4 mt-4">Filtros</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-[#0D4F97] font-medium mb-2">Buscar Aluno</label>
-                    <div className="relative w-full">
+          <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-[#0D4F97] font-semibold text-lg mb-4 mt-4">Filtros</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-[#0D4F97] font-medium mb-2">Buscar Aluno</label>
+                  <div className="relative w-full">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <Input
                       type="text"
@@ -188,6 +188,7 @@ export default function TurmaDetalhesPage() {
                       className="pl-10 h-12 w-full border-2 border-[#B2D7EC] bg-white"
                     />
                   </div>
+                </div>
 
                 <div>
                   <label className="block text-[#0D4F97] font-medium mb-2">Visualização</label>
@@ -246,7 +247,6 @@ export default function TurmaDetalhesPage() {
                     <div className="flex gap-2">
                       <Button
                         onClick={() => handleAvaliacoes(aluno.id)}
-                        variant="primary"
                         className="flex-1"
                       >
                         <FileText className="mr-2 h-4 w-4" />
@@ -268,7 +268,7 @@ export default function TurmaDetalhesPage() {
           )}
 
           {viewMode === "list" && (
-            <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
+            <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
               <CardContent className="p-0">
                 <div className="p-6 border-b-2 border-[#B2D7EC]">
                   <h2 className="text-xl font-semibold text-[#0D4F97]">Alunos da Turma</h2>
@@ -276,56 +276,61 @@ export default function TurmaDetalhesPage() {
                 </div>
 
                 <div className="divide-y-2 divide-[#B2D7EC]">
-                  {filteredAlunos.map((aluno: any) => (
-                    <div key={aluno.id} className="p-6 hover:bg-[#B2D7EC]/10 transition-colors">
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#B2D7EC]/20">
-                            <UserCircle className="h-6 w-6 text-[#0D4F97]" />
-                          </div>
-                          <div>
-                            <h3 className="text-[#0D4F97] font-semibold">{aluno.nome}</h3>
-                            <div className="flex gap-4 mt-1">
-                              <span className="text-sm text-green-600">
-                                Última avaliação: {aluno.ultimaAvaliacao}
-                              </span>
+                  {filteredAlunos.length > 0 ? (
+                    filteredAlunos.map((aluno: any) => (
+                      <div key={aluno.id} className="p-6 hover:bg-[#B2D7EC]/10 transition-colors">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="flex items-center gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#B2D7EC]/20">
+                              <UserCircle className="h-6 w-6 text-[#0D4F97]" />
+                            </div>
+                            <div>
+                              <h3 className="text-[#0D4F97] font-semibold">{aluno.nome}</h3>
+                              <div className="flex gap-4 mt-1">
+                                <span className="text-sm text-green-600">
+                                  Última avaliação: {aluno.ultimaAvaliacao}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => handleAvaliacoes(aluno.id)}
-                            variant="outline"
-                          >
-                            Avaliações
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={() => handleAvaliacoes(aluno.id)}
+                              variant="outline"
+                            >
+                              Avaliações
+                            </Button>
 
-                          <Button
-                            onClick={() => handleRelatorios(aluno.id)}
-                            variant="outline"
-                          >
-                            Relatórios
-                          </Button>
+                            <Button
+                              onClick={() => handleRelatorios(aluno.id)}
+                              variant="outline"
+                            >
+                              Relatórios
+                            </Button>
+                          </div>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="p-10 text-center">
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        Nenhum aluno encontrado
+                      </h3>
+                      <p className="text-gray-500">
+                        {searchTerm 
+                          ? `Nenhum resultado para "${searchTerm}"`
+                          : 'Esta turma ainda não tem alunos matriculados'}
+                      </p>
                     </div>
-                  ))}
+                  )}
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Nenhum aluno encontrado
-                </h3>
-                <p className="text-gray-500">
-                  {searchTerm 
-                    ? `Nenhum resultado para "${searchTerm}"`
-                    : 'Esta turma ainda não tem alunos matriculados'}
-                </p>
-              </Card>
-            )}
+              </CardContent>
+            </Card>
+          )}
 
-            <div className="mt-6 text-center text-gray-500 text-sm">
-              Mostrando {filteredAlunos.length} de {alunos.length} alunos
-            </div>
+          <div className="mt-6 text-center text-gray-500 text-sm">
+            Mostrando {filteredAlunos.length} de {alunos.length} alunos
           </div>
         </div>
       </div>

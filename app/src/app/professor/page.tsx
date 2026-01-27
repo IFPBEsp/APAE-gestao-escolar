@@ -2,6 +2,7 @@
 
 import { BookOpen, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { useEffect, useState } from "react";
 import { buscarProfessorPorId } from "@/services/ProfessorService";
 import { listarTurmasDeProfessor } from "@/services/ProfessorService";
@@ -77,18 +78,11 @@ export default function ProfessorDashboardPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-[#0D4F97] text-2xl font-bold">
-          Painel do Professor
-        </h1>
-        {professor ? (
-          <p className="text-[#222222]">Bem-vindo, {professor.nome}!</p>
-        ) : (
-          <p className="text-[#222222]">Carregando informações...</p>
-        )}
-      </div>
+    <div className="flex min-h-screen bg-[#E5E5E5]">
+      <ProfessorSidebar
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={handleToggleCollapse}
+      />
 
       <main
         className={`flex-1 overflow-y-auto transition-all duration-300 ${
@@ -108,8 +102,6 @@ export default function ProfessorDashboardPage() {
                 <p className="text-[#222222]">Carregando informações...</p>
               )}
             </div>
-          </CardContent>
-        </Card>
 
             {/* Cards de Resumo */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

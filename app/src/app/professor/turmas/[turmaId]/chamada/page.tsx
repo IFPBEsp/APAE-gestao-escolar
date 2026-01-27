@@ -6,7 +6,7 @@ import Chamada from '@/components/Chamada';
 import { Button } from '@/components/ui/button';
 import { buscarTurmaPorId } from '@/services/TurmaService';
 import { toast } from 'sonner';
-
+import ProfessorSidebar from '@/components/Sidebar/ProfessorSidebar';
 interface Turma {
   id: number;
   nome: string;
@@ -27,7 +27,7 @@ export default function ChamadaPage() {
       try {
         const data = await buscarTurmaPorId(turmaId);
         setTurma(data);
-      } catch (error) {
+      } catch (error: any) {
         toast.error(error.message || 'Erro ao carregar a turma');
       } finally {
         setLoading(false);
@@ -71,23 +71,28 @@ export default function ChamadaPage() {
   return (
     <div className="flex min-h-screen bg-[#E5E5E5]">
       <ProfessorSidebar
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={() =>
-          setIsSidebarCollapsed(!isSidebarCollapsed)
+        activeTab="turmas"
+        onTabChange={(tab) =>
+          router.push(`/professor/${tab === 'inicio' ? '' : tab}`)
         }
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        onLogout={() => router.push("/")}
       />
 
       <main
-        className={`flex-1 p-4 md:p-8 transition-all duration-300 ${
+        className={`flex-1 overflow-y-auto transition-all duration-300 pt-16 md:pt-0 ${
           isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
         }`}
       >
-        <Chamada
-          turmaIdProp={turma.id}
-          turmaNomeProp={turma.nome}
-          onBack={handleBack}
-          onSaveSuccess={handleSaveSuccess}
-        />
+        <div className="p-4 md:p-8">
+          <Chamada
+            turmaIdProp={turma.id}
+            turmaNomeProp={turma.nome}
+            onBack={handleBack}
+            onSaveSuccess={handleSaveSuccess}
+          />
+        </div>
       </main>
     </div>
   );
