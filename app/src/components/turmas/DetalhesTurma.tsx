@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Clock, Calendar, Users, Briefcase } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, Users, Briefcase, Edit, Power } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -205,7 +205,7 @@ export function DetalhesTurma({
                             variant="primary"
                             className="flex-1"
                         >
-                            <Briefcase size={16} className="mr-2" />
+                            <Edit className="mr-2 h-5 w-5" />
                             Editar Turma
                         </Button>
 
@@ -214,7 +214,7 @@ export function DetalhesTurma({
                             className="flex-1"
                             onClick={() => setIsDialogOpen(true)}
                         >
-                            <Users size={16} className="mr-2" />
+                            <Power className="mr-2 h-5 w-5"  />
                             {turma.isAtiva ? "Inativar Turma" : "Reativar Turma"}
                         </Button>
                     </div>

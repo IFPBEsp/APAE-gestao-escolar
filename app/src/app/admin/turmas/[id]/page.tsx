@@ -129,7 +129,7 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
                 className="w-full flex-1"
               >
                 <Edit className="mr-2 h-5 w-5" />
-                Editar Turma
+                Editar Turmassssss
               </Button>
 
               <Button
