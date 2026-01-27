@@ -3,6 +3,7 @@ package com.apae.gestao.repository;
 import com.apae.gestao.dto.aluno.AlunoFrequenciaResumoDTO;
 import com.apae.gestao.dto.aluno.AlunoResumoDTO;
 import com.apae.gestao.dto.aula.AulaPresencaAlunoResponseDTO;
+import java.util.List;
 import com.apae.gestao.entity.Aluno;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -107,8 +108,5 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
         Long alunoId,
         Pageable pageable
     );
-
-
-
+    List<Aluno> findByNomeContainingIgnoreCase(String nome);
 }
- 
