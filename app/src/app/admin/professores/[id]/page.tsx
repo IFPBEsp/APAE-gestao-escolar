@@ -20,7 +20,17 @@ import api from "@/services/api";
 import ModalEditarProfessor from "@/components/ModalEditarProfessor";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Professor } from "@/types/professor";
+
+interface Professor {
+  id: number;
+  nome: string;
+  email: string;
+  telefone?: string;
+  formacao?: string;
+  dataContratacao: string;
+  turmas?: Array<{ id: number; nome: string } | string>;
+  ativo: boolean;
+}
 
 export default function DetalhesProfessor() {
   const router = useRouter();
@@ -207,7 +217,9 @@ export default function DetalhesProfessor() {
                 </div>
                 {professor.turmas && professor.turmas.length > 0 ? (
                   <div className="space-y-2">
-                    {professor.turmas.map((turmaNome, index) => {
+                    {professor.turmas.map((turma, index) => {
+                      const turmaNome =
+                        typeof turma === "object" ? turma.nome : turma;
                       return (
                         <div
                           key={index}
