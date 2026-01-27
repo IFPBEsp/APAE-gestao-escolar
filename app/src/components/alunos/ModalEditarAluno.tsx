@@ -17,14 +17,8 @@ interface TurmaDTO {
 interface AlunoModalProps {
     id: number;
     nome: string;
-    nomeTurmaAtual: string | null; 
-<<<<<<< HEAD
-    turnoTurmaAtual: string | null; 
-    turmaIdAtiva: number | null | undefined; 
-=======
+    nomeTurmaAtual: string | null;
     turnoTurmaAtual: string | null;
-    turmaIdAtiva?: number | null;
->>>>>>> 26457ec400d8091bebc84bc7a284e7b15a99e492
 }
 
 interface ModalEditarAlunoProps {
@@ -37,18 +31,7 @@ interface ModalEditarAlunoProps {
 export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: ModalEditarAlunoProps) {
     const [turmasDisponiveis, setTurmasDisponiveis] = useState<TurmaDTO[]>([]);
     const [loadingTurmas, setLoadingTurmas] = useState(true);
-<<<<<<< HEAD
-
-    const [turmaId, setTurmaId] = useState(aluno?.turmaIdAtiva?.toString() ?? "");
-    
-    useEffect(() => {
-        if (aluno && aluno.turmaIdAtiva !== undefined) {
-            setTurmaId(aluno.turmaIdAtiva?.toString() ?? "");
-        }
-    }, [aluno]);
-=======
     const [turmaIdSelecionada, setTurmaIdSelecionada] = useState<string>("");
->>>>>>> 26457ec400d8091bebc84bc7a284e7b15a99e492
 
     useEffect(() => {
         const fetchTurmas = async () => {
@@ -56,8 +39,6 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
             try {
                 const data = await listarTurmas();
                 setTurmasDisponiveis(data);
-<<<<<<< HEAD
-=======
                 setTurmaIdSelecionada("");
 
                 if (aluno?.nomeTurmaAtual && aluno?.turnoTurmaAtual) {
@@ -73,7 +54,6 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                         setTurmaIdSelecionada(turmaAtual.id.toString());
                     }
                 }
->>>>>>> 26457ec400d8091bebc84bc7a284e7b15a99e492
             } catch (error) {
                 toast.error("Erro ao carregar lista de turmas.");
                 console.error("Erro ao buscar turmas:", error);
@@ -85,29 +65,18 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
         if (isOpen) {
             fetchTurmas();
         }
-    }, [isOpen]);
-
-
-    if (!aluno) {
-        return null;
-    }
+    }, [isOpen, aluno]);
 
     const handleSalvar = async () => {
-        if (!turmaId) {
+        if (!turmaIdSelecionada) {
             toast.error("Selecione uma turma!");
             return;
         }
 
-        const novaTurmaId = parseInt(turmaId);
+        const novaTurmaId = parseInt(turmaIdSelecionada);
         
-        if (aluno.turmaIdAtiva === novaTurmaId) {
-            toast.info("A turma selecionada é a mesma que a atual.");
-            onClose();
-            return;
-        }
-
         try {
-            const alunoAtualizado = await atualizarTurmaAluno(aluno.id, novaTurmaId);
+            const alunoAtualizado = await atualizarTurmaAluno(aluno!.id, novaTurmaId);
             
             onSave(alunoAtualizado); 
             toast.success(`Turma alterada para ${alunoAtualizado.nomeTurmaAtual} com sucesso!`);
@@ -125,7 +94,7 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                 <DialogHeader>
                     <DialogTitle className="text-[#0D4F97]">Editar Informações Acadêmicas</DialogTitle>
                     <DialogDescription className="text-[#222222]">
-                        Atualize a turma do aluno {aluno.nome}.
+                        Atualize a turma do aluno {aluno?.nome}.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -147,7 +116,7 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
                                     <span className="ml-2 text-sm text-[#0D4F97]">Carregando turmas...</span>
                                 </div>
                             ) : (
-                                <Select value={turmaId} onValueChange={setTurmaId}>
+                                <Select value={turmaIdSelecionada} onValueChange={setTurmaIdSelecionada}>
                                     <SelectTrigger className="h-12 border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97] cursor-pointer">
                                         <SelectValue placeholder="Selecione uma turma" />
                                     </SelectTrigger>
