@@ -25,10 +25,9 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
             MAX(av.dataAvaliacao)
         )
         FROM Aluno a
-        LEFT JOIN a.turmaAlunos ta
-            ON ta.isAlunoAtivo = true
+        LEFT JOIN a.turmaAlunos ta ON ta.isAlunoAtivo = true
         LEFT JOIN ta.turma t
-        LEFT JOIN a.presencas p
+        LEFT JOIN a.presencas p ON p.aula.turma.id = t.id
         LEFT JOIN a.avaliacoes av
         GROUP BY a.id, a.nome, a.nomeResponsavel, t.nome, t.turno
     """)
@@ -48,10 +47,9 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
             MAX(av.dataAvaliacao)
         )
         FROM Aluno a
-        LEFT JOIN a.turmaAlunos ta
-            ON ta.isAlunoAtivo = true
+        LEFT JOIN a.turmaAlunos ta ON ta.isAlunoAtivo = true
         LEFT JOIN ta.turma t
-        LEFT JOIN a.presencas p
+        LEFT JOIN a.presencas p ON p.aula.turma.id = t.id
         LEFT JOIN a.avaliacoes av
         WHERE LOWER(a.nome) LIKE LOWER(CONCAT('%', :nome, '%'))
         GROUP BY a.id, a.nome, a.nomeResponsavel, t.nome, t.turno
