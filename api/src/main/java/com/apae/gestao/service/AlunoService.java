@@ -45,11 +45,6 @@ public class AlunoService {
                         ? alunoRepository.listarAlunosResumido(pageable)
                         : alunoRepository.listarAlunosPorNomeResumido(nome, pageable);
 
-        Page<AlunoResumoDTO> page =
-                (nome == null || nome.isBlank())
-                        ? alunoRepository.listarAlunosResumido(pageable)
-                        : alunoRepository.listarAlunosPorNomeResumido(nome, pageable);
-
         return page.map(dto -> new AlunoResumoDTO(
                 dto.getId(),
                 dto.getNome(),
