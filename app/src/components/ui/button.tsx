@@ -1,33 +1,49 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-
 import { cn } from "@/lib/utils"
 
+/**
+ * DESIGN SYSTEM DOS BOTÕES DO PROJETO
+ * Fiel ao Figma
+ */
+
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        /** Botão principal (Cadastrar, Salvar, Acessar, Editar) */
+        primary:
+          "h-12 px-6 rounded-lg bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97]",
+
+        /** Botão Voltar / Sair */
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+          "h-12 px-6 rounded-lg border-2 border-[#B2D7EC] bg-transparent text-[#0D4F97] hover:bg-[#B2D7EC]/20",
+
+        /** Botão de ação perigosa */
+        danger:
+          "h-12 px-6 rounded-lg border-2 border-red-500 bg-gray-100 text-red-500 hover:bg-red-50 hover:text-[#0D4F97] hover:border-red-600",
+
+        /** Ícones (excluir turma, fechar, etc) */
+        ghost:
+          "h-10 w-10 rounded-md bg-transparent text-[#0D4F97] hover:bg-[#E8F3FF]",
+
+        /** Link visual (caso exista) */
+        link:
+          "h-auto px-0 text-[#0D4F97] underline-offset-4 hover:underline",
       },
+
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        default: "",
+        sm: "h-10 px-4 text-sm",
+        lg: "h-14 px-8 text-base",
+        icon: "h-10 w-10 p-0",
       },
     },
+
     defaultVariants: {
-      variant: "default",
+      variant: "primary",
       size: "default",
     },
   }
@@ -42,15 +58,17 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
+
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        className={cn(buttonVariants({ variant, size }), className)}
         {...props}
       />
     )
   }
 )
+
 Button.displayName = "Button"
 
 export { Button, buttonVariants }
