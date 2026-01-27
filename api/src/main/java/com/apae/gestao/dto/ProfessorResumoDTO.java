@@ -4,8 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -25,15 +23,6 @@ public class ProfessorResumoDTO {
 
     @Schema(description = "E-mail institucional", example = "maria.silva@apae.org.br")
     private String email;
-
-    @Schema(description = "Telefone cadastrado", example = "(11) 98888-0000")
-    private String telefone;
-
-    @Schema(description = "Formação acadêmica", example = "Licenciatura em Educação Especial")
-    private String formacao;
-
-    @Schema(description = "Data de contratação", example = "2024-02-01")
-    private LocalDate dataContratacao;
 
     @Schema(description = "Indica se o professor está ativo no sistema", example = "true")
     private Boolean ativo;

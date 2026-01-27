@@ -130,10 +130,10 @@ public class ProfessorController {
 
     @GetMapping("/{id}/turmas")
     @Operation(summary = "Listar turmas de um professor")
-    public ResponseEntity<List<TurmaResumoDTO>> getTurmasDeProfessor(
+    public ResponseEntity<List<TurmaResponseDTO>> getTurmasDeProfessor(
             @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.PATH)
             @PathVariable Long id) {
-        List<TurmaResumoDTO> response = professorService.getTurmasDeProfessor(id);
+        List<TurmaResponseDTO> response = professorService.getTurmasDeProfessor(id);
         return ResponseEntity.ok(response);
     }
 }

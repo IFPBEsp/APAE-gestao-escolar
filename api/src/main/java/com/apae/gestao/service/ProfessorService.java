@@ -6,12 +6,9 @@ import com.apae.gestao.exception.ConflitoDeDadosException;
 import com.apae.gestao.exception.RecursoNaoEncontradoException;
 import com.apae.gestao.repository.ProfessorRepository;
 
-import com.apae.gestao.repository.TurmaRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,16 +20,7 @@ public class ProfessorService {
     @Autowired
     private ProfessorRepository professorRepository;
 
-    @Autowired
-    private TurmaRepository turmaRepository;
-
-    private final ObjectMapper objectMapper;
-
-    public ProfessorService() {
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.registerModule(new JavaTimeModule());
-        this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional(readOnly = true)
     public List<ProfessorResumoDTO> listarProfessores(
@@ -72,14 +60,6 @@ public class ProfessorService {
             return objectMapper.readValue(json, new TypeReference<List<ProfessorResumoDTO>>() {});
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Erro ao processar JSON de professores", e);
-        }
-    }
-
-    private List<TurmaResumoDTO> parseJsonTurmasToList(String json) {
-        try {
-            return objectMapper.readValue(json, new TypeReference<List<TurmaResumoDTO>>() {});
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Erro ao processar JSON de turmas", e);
         }
     }
 
@@ -146,9 +126,13 @@ public class ProfessorService {
     }
 
     @Transactional(readOnly = true)
-    public List<TurmaResumoDTO> getTurmasDeProfessor(Long id) {
-        String jsonResult = turmaRepository.listarTurmasOtimizadoPorProfessor(id);
-        return parseJsonTurmasToList(jsonResult);
+    public List<TurmaResponseDTO> getTurmasDeProfessor(Long id) {
+        Professor professor = professorRepository.findByIdWithTurmas(id)
+                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + id));
+        return professor.getTurmas()
+                .stream()
+                .map(TurmaResponseDTO::new)
+                .toList();
     }
 
     private void mapearDtoParaEntity(ProfessorRequestDTO dto, Professor professor) {
