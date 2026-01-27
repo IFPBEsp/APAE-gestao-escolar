@@ -80,10 +80,9 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
         FROM Aluno a
         JOIN a.turmaAlunos ta
         JOIN ta.turma t
-        LEFT JOIN a.presencas p
+        LEFT JOIN a.presencas p ON p.aula.turma.id = :turmaId
         WHERE t.id = :turmaId
         AND ta.isAlunoAtivo = true
-        AND p.aula.turma.id = :turmaId
         GROUP BY a.id, a.nome
     """)
     Page<AlunoFrequenciaResumoDTO> listarFrequenciaAlunosDaTurma(
@@ -102,12 +101,6 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
         JOIN p.aula au
         JOIN p.aluno a
         WHERE a.id = :alunoId
-        AND au.turma.id = (
-            SELECT ta.turma.id
-            FROM TurmaAluno ta
-            WHERE ta.aluno.id = :alunoId
-            AND ta.isAlunoAtivo = true
-        )
         ORDER BY au.dataDaAula DESC
     """)
     Page<AulaPresencaAlunoResponseDTO> listarHistoricoAluno(
