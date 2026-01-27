@@ -112,12 +112,12 @@ export default function AlunosPage() {
             Nenhum aluno encontrado.
           </p>
         ) : (
-          alunos.map((aluno) => {
+          alunos.map((aluno, index) => {
             const turmaExibicao = formatarTurma(aluno.nomeTurma, aluno.turnoTurma);
 
             return (
               <Card
-                key={aluno.id}
+                key={`${aluno.id}-${index}`}
                 onClick={() =>
                   router.push(`/admin/alunos/detalhes/${aluno.id}`)
                 }

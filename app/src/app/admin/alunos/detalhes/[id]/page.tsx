@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, User, Calendar, BookOpen, Heart, Phone, Eye, PenSquare, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useMemo } from "react"; 
+import { useState, useEffect, useMemo, use } from "react"; 
 import ModalEditarAluno from "@/components/alunos/ModalEditarAluno";
 import ModalVisualizarAvaliacao from "@/components/alunos/ModalVisualizarAvaliacao";
 import ModalVisualizarRelatorio from "@/components/alunos/ModalVisualizarRelatorio";
@@ -12,6 +12,7 @@ import { buscarAlunoPorId, buscarAvaliacoesPorAlunoId } from "@/services/AlunoSe
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale"; 
 import { buscarRelatorioPorAluno } from "@/services/RelatorioService";
+
 
 interface AlunoDetailDTO {
     id: number;
@@ -42,9 +43,10 @@ interface RelatorioHistoricoDTO {
   recursos: string;
 }
 
-export default function DetalhesDoAluno({ params }: { params: { id: string } }) {
+export default function DetalhesDoAluno({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const alunoId = parseInt(params.id);
+  const resolvedParams = use(params); 
+  const alunoId = parseInt(resolvedParams.id);
   
   const [alunoData, setAlunoData] = useState<AlunoDetailDTO | null>(null);
   const [avaliacoes, setAvaliacoes] = useState<AvaliacaoHistoricoDTO[]>([]);
@@ -339,9 +341,7 @@ export default function DetalhesDoAluno({ params }: { params: { id: string } }) 
                           <Eye
                             className="h-5 w-5 text-gray-400 cursor-pointer hover:text-[#0D4F97]"
                             onClick={() => setSelectedRelatorio(relatorio)}
-                          >
-                            <Eye size={18} />
-                          </Button>
+                          />
                         </td>
                       </tr>
                     ))}
