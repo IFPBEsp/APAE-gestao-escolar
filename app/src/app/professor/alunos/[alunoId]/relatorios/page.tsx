@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import ModalVisualizarEditarRelatorio from "@/components/ModalVisualizarEditarRelatorio";
-import { useAuth } from "@/contexts/AuthContext"; // ✅ Import
+import { useAuth } from "@/contexts/AuthContext";
 
 import { EstudanteCard } from "@/components/alunos/EstudanteCard";
 import { buscarAlunoPorId } from "@/services/AlunoService";
@@ -31,7 +31,7 @@ export default function RelatoriosAlunoListaPage() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
-  const { professorId } = useAuth(); // ✅ Pega do contexto
+  const { professorId } = useAuth();
 
   const alunoIdFromUrl = params?.alunoId ? String(params.alunoId) : null;
   const turmaId = searchParams?.get('turmaId');
@@ -97,7 +97,6 @@ export default function RelatoriosAlunoListaPage() {
   }, [carregarRelatorios]);
 
   const handleSalvarRelatorio = async (dadosDoModal: any) => {
-    // ✅ Verifica se tem professorId
     if (!professorId) {
       toast.error("Usuário não autenticado");
       return;
@@ -116,7 +115,7 @@ export default function RelatoriosAlunoListaPage() {
         recursos: dadosDoModal.recursos,
         alunoId: Number(alunoIdFromUrl),
         turmaId: Number(turmaId) || 1,
-        professorId: professorId // ✅ Usa do contexto
+        professorId: professorId
       };
 
       if (isNovo) {

@@ -21,9 +21,6 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
 
-        System.out.println("EMAIL RECEBIDO: " + request.getEmail());
-        System.out.println("SENHA RECEBIDA: " + request.getSenha());
-
         LoginResponseDTO response = authService.login(request);
 
         return ResponseEntity.ok(response);

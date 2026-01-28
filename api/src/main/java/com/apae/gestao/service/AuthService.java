@@ -36,9 +36,6 @@ public class AuthService {
 
     public LoginResponseDTO login(LoginRequestDTO request) {
 
-        System.out.println("EMAIL RECEBIDO: " + request.getEmail());
-        System.out.println("SENHA RECEBIDA: " + request.getSenha());
-
         // ADMIN
         if (request.getEmail().equals(adminEmail)) {
             if (!request.getSenha().equals(adminPassword)) {

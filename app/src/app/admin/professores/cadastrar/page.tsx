@@ -35,7 +35,6 @@ export default function CadastrarProfessorPage() {
 
   const router = useRouter();
 
-  // 🧮 Máscara de CPF
   const applyCPFMask = (value: string) => {
     const numbers = value.replace(/\D/g, "");
     if (numbers.length <= 3) return numbers;
@@ -48,7 +47,6 @@ export default function CadastrarProfessorPage() {
     )}-${numbers.slice(9, 11)}`;
   };
 
-  // ✅ Validação de CPF
   const validateCPF = (cpf: string) => {
     const numbers = cpf.replace(/\D/g, "");
     if (numbers.length !== 11 || /^(\d)\1+$/.test(numbers)) return false;
@@ -84,7 +82,6 @@ export default function CadastrarProfessorPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 🧩 Validação frontend
     if (!validateCPF(formData.cpf)) {
       setErrors((prev) => ({ ...prev, cpf: "CPF inválido" }));
       toast.error("Por favor, corrija o CPF antes de enviar.");

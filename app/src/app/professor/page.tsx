@@ -5,7 +5,7 @@ import { BookOpen, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { buscarProfessorPorId, listarTurmasDeProfessor } from "@/services/ProfessorService";
-import { useAuth } from "@/contexts/AuthContext"; // ✅ Import
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Turma {
   id: number;
@@ -24,7 +24,7 @@ interface Professor {
 }
 
 export default function ProfessorDashboardPage() {
-  const { usuario, professorId, loading: authLoading } = useAuth(); // ✅ Usa o contexto
+  const { usuario, professorId, loading: authLoading } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [professor, setProfessor] = useState<Professor | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,9 +35,6 @@ export default function ProfessorDashboardPage() {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
-  // ✅ REMOVE todos os useEffect que pegam do localStorage
-
-  // ✅ Busca os dados do professor pelo ID real
   useEffect(() => {
     if (!professorId) return;
 
@@ -55,7 +52,6 @@ export default function ProfessorDashboardPage() {
     carregarProfessor();
   }, [professorId]);
 
-  // ✅ Busca as turmas do professor
   useEffect(() => {
     if (!professorId) return;
 
