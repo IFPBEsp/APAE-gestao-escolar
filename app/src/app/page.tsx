@@ -16,5 +16,5 @@ export default function LoginPage() {
     <Suspense fallback={<div className="min-h-screen bg-[#0D4F97]"></div>}>
       <LoginWithParams />
     </Suspense>
-  );
+  );gi
 }
