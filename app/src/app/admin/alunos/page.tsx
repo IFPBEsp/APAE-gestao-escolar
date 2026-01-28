@@ -125,7 +125,7 @@ export default function AlunosPage() {
                            shadow-md transition-all hover:border-[#0D4F97]
                            hover:shadow-lg"
               >
-                <CardContent className="p-6">
+                <CardContent className="p-6 mt-4">
                   {/* Header */}
                   <div className="mb-4 flex items-start gap-3">
                     <div className="flex h-12 w-12 items-center justify-center

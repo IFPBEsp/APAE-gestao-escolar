@@ -113,7 +113,7 @@ export default function ProfessorDashboardPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
-                <CardContent className="p-6">
+                <CardContent className="p-6 mt-4">
                   <div className="flex flex-col items-center text-center">
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#B2D7EC]/20 mb-4">
                       <BookOpen className="h-7 w-7 text-[#0D4F97]" />
@@ -127,7 +127,7 @@ export default function ProfessorDashboardPage() {
               </Card>
 
               <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
-                <CardContent className="p-6">
+                <CardContent className="p-6 mt-4">
                   <div className="flex flex-col items-center text-center">
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#B2D7EC]/20 mb-4">
                       <Users className="h-7 w-7 text-[#0D4F97]" />
