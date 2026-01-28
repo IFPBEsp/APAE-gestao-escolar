@@ -5,6 +5,7 @@ import { BookOpen, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { buscarProfessorPorId, listarTurmasDeProfessor } from "@/services/ProfessorService";
+import { useAuth } from "@/contexts/AuthContext"; // ✅ Import
 
 interface Turma {
   id: number;
@@ -20,41 +21,29 @@ interface Professor {
   id: number;
   nome: string;
   email: string;
-  // outros campos que precisar exibir
 }
 
 export default function ProfessorDashboardPage() {
+  const { usuario, professorId, loading: authLoading } = useAuth(); // ✅ Usa o contexto
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [professor, setProfessor] = useState<Professor | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [turmas, setTurmas] = useState<Turma[]>([]);
-  const [professorId, setProfessorId] = useState<number | null>(null);
 
   const handleToggleCollapse = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
-  // 🔹 Recupera o professor logado do localStorage
-  useEffect(() => {
-    const usuario = localStorage.getItem("usuarioLogado");
-    if (usuario) {
-      const parsed = JSON.parse(usuario);
-      setProfessorId(parsed.id); // número vindo do login
-    } else {
-      setError("Usuário não autenticado.");
-      setLoading(false);
-    }
-  }, []);
+  // ✅ REMOVE todos os useEffect que pegam do localStorage
 
-  // 🔹 Busca os dados do professor pelo ID real
+  // ✅ Busca os dados do professor pelo ID real
   useEffect(() => {
-    if (professorId === null) return; // ⚠️ evita passar null
+    if (!professorId) return;
 
     async function carregarProfessor() {
       try {
-        // ✅ Garantindo para o TS que professorId nunca é null
-        const response = await buscarProfessorPorId(professorId as number);
+        const response = await buscarProfessorPorId(professorId);
         setProfessor(response);
       } catch (err: any) {
         setError(err.message || "Erro ao carregar dados do professor.");
@@ -66,13 +55,13 @@ export default function ProfessorDashboardPage() {
     carregarProfessor();
   }, [professorId]);
 
-  // 🔹 Busca as turmas do professor pelo ID real
+  // ✅ Busca as turmas do professor
   useEffect(() => {
-    if (professorId === null) return;
+    if (!professorId) return;
 
     async function carregarTurmas() {
       try {
-        const response = await listarTurmasDeProfessor(professorId as number);
+        const response = await listarTurmasDeProfessor(professorId);
         setTurmas(response.filter(t => t.isAtiva));
       } catch (err: any) {
         console.error(err);
@@ -82,13 +71,12 @@ export default function ProfessorDashboardPage() {
     carregarTurmas();
   }, [professorId]);
 
-  // 🔹 Soma dos alunos ativos das turmas ativas
   const totalAlunosAtivos = turmas.reduce((total, turma) => {
     const valor = Number(turma.totalAlunosAtivos);
     return total + (isNaN(valor) ? 0 : valor);
   }, 0);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-[#0D4F97] font-semibold">Carregando painel...</p>
@@ -96,10 +84,10 @@ export default function ProfessorDashboardPage() {
     );
   }
 
-  if (error) {
+  if (error || !usuario) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-red-600 font-semibold">{error}</p>
+        <p className="text-red-600 font-semibold">{error || "Usuário não autenticado."}</p>
       </div>
     );
   }
@@ -118,21 +106,16 @@ export default function ProfessorDashboardPage() {
       >
         <div className="p-4 md:p-8">
           <div className="mx-auto max-w-6xl">
-
-            {/* Header */}
             <div className="mb-8">
               <h1 className="text-[#0D4F97] text-2xl font-bold">
                 Painel do Professor
               </h1>
               <p className="text-[#222222]">
-                Bem-vindo, {professor?.nome}!
+                Bem-vindo, {professor?.nome || usuario.email}!
               </p>
             </div>
 
-            {/* Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-              {/* Turmas Ativas */}
               <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
                 <CardContent className="p-6">
                   <div className="flex flex-col items-center text-center">
@@ -147,7 +130,6 @@ export default function ProfessorDashboardPage() {
                 </CardContent>
               </Card>
 
-              {/* Total de Alunos Ativos */}
               <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
                 <CardContent className="p-6">
                   <div className="flex flex-col items-center text-center">
@@ -161,7 +143,6 @@ export default function ProfessorDashboardPage() {
                   </div>
                 </CardContent>
               </Card>
-
             </div>
           </div>
         </div>

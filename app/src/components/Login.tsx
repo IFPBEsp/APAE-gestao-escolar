@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { login } from "@/services/authService";
+import { login as loginService } from "@/services/authService";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LoginProps {
   tipoPredefinido?: string | null;
@@ -11,6 +12,7 @@ interface LoginProps {
 
 export default function LoginComponent({ tipoPredefinido }: LoginProps) {
   const router = useRouter();
+  const { login } = useAuth(); // ✅ Usa o contexto
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -23,16 +25,21 @@ export default function LoginComponent({ tipoPredefinido }: LoginProps) {
     setCarregando(true);
 
     try {
-      const data = await login(email, senha);
+      const data = await loginService(email, senha);
       const { token, role, id } = data;
 
+      // ✅ Salva no localStorage (ainda necessário para token)
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
-      localStorage.setItem("usuarioLogado", JSON.stringify({ id, email, role }));
 
+      // ✅ Salva no contexto (que também salva usuarioLogado no localStorage)
+      login({ id, email, role });
+
+      // Cookies
       document.cookie = `token=${token}; path=/; max-age=86400; SameSite=Strict`;
       document.cookie = `role=${role}; path=/; max-age=86400; SameSite=Strict`;
 
+      // Redirecionamento
       if (role === "ADMIN") {
         window.location.href = "/admin";
       } else if (role === "TEACHER") {

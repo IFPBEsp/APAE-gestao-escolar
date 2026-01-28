@@ -6,8 +6,9 @@ import { BookOpen, Users, ClipboardCheck, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
-import { listarTurmasDeProfessor, buscarProfessorPorId } from "@/services/ProfessorService";
+import { listarTurmasDeProfessor } from "@/services/ProfessorService";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext"; // ✅ Import
 
 interface Turma {
   id: number;
@@ -19,52 +20,35 @@ interface Turma {
   totalAlunosAtivos?: number;
 }
 
-interface Professor {
-  id: number;
-  nome: string;
-  email: string;
-}
-
 export default function TurmasPage() {
   const router = useRouter();
+  const { usuario, professorId, loading: authLoading } = useAuth(); // ✅ Usa o contexto
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [professorId, setProfessorId] = useState<number | null>(null);
-  const [professor, setProfessor] = useState<Professor | null>(null);
   const [turmas, setTurmas] = useState<Turma[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ REMOVE os useEffect que pegam do localStorage
+
   useEffect(() => {
-    const usuario = localStorage.getItem("usuarioLogado");
-    if (usuario) {
-      const parsed = JSON.parse(usuario);
-      setProfessorId(parsed.id);
-    } else {
+    if (!professorId) {
       toast.error("Usuário não autenticado");
       router.push("/");
+      return;
     }
-  }, []);
-
-  useEffect(() => {
-    if (professorId === null) return;
 
     setLoading(true);
-
-    Promise.all([
-      buscarProfessorPorId(professorId as number).then(setProfessor),
-      listarTurmasDeProfessor(professorId as number).then((data) =>
-        setTurmas(data.filter(t => t.isAtiva))
-      )
-    ])
+    listarTurmasDeProfessor(professorId)
+      .then((data) => setTurmas(data.filter(t => t.isAtiva)))
       .catch((err: any) => toast.error(err.message || "Erro ao carregar dados"))
       .finally(() => setLoading(false));
-  }, [professorId]);
+  }, [professorId, router]);
 
   const handleNavigation = (path: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     router.push(path);
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-[#0D4F97] font-semibold">Carregando dados...</p>
@@ -72,7 +56,7 @@ export default function TurmasPage() {
     );
   }
 
-  if (!professor) {
+  if (!usuario) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-red-600 font-semibold">Usuário não autenticado.</p>
@@ -103,7 +87,7 @@ export default function TurmasPage() {
               Minhas Turmas
             </h1>
             <p className="text-[#222222] mt-1 text-sm md:text-lg">
-              Bem-vindo, {professor.nome}!
+              Bem-vindo, {usuario.email}!
             </p>
             <p className="text-[#222222] mt-1 text-sm md:text-base">
               Gerencie suas turmas e alunos
