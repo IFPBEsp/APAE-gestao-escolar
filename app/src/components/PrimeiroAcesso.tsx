@@ -1,20 +1,17 @@
-'use client'
+'use client';
 
 import { useState } from "react";
 import { Eye, EyeOff, LogIn } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { login as loginService } from "@/services/authService";
-import { useAuth } from "@/contexts/AuthContext";
+import { useRouter, useSearchParams } from "next/navigation";
+import { primeiroAcesso } from "@/services/authService";
 
-interface LoginProps {
-  tipoPredefinido?: string | null;
-}
-
-export default function LoginComponent({ tipoPredefinido }: LoginProps) {
+export default function PrimeiroAcessoComponent() {
   const router = useRouter();
-  const { login } = useAuth(); // ✅ Usa o contexto
-  const [email, setEmail] = useState("");
+  const params = useSearchParams();
+  const email = params.get("email") || "";
+
   const [senha, setSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
@@ -22,40 +19,20 @@ export default function LoginComponent({ tipoPredefinido }: LoginProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
+
+    if (senha !== confirmarSenha) {
+      setErro("As senhas não coincidem.");
+      return;
+    }
+
     setCarregando(true);
 
     try {
-      const data = await loginService(email, senha);
-      const { token, role, id } = data;
-
-      // ✅ Salva no localStorage (ainda necessário para token)
-      localStorage.setItem("token", token);
-      localStorage.setItem("role", role);
-
-      // ✅ Salva no contexto (que também salva usuarioLogado no localStorage)
-      login({ id, email, role });
-
-      // Cookies
-      document.cookie = `token=${token}; path=/; max-age=86400; SameSite=Strict`;
-      document.cookie = `role=${role}; path=/; max-age=86400; SameSite=Strict`;
-
-      // Redirecionamento
-      if (role === "ADMIN") {
-        window.location.href = "/admin";
-      } else if (role === "TEACHER") {
-        window.location.href = "/professor";
-      }
-
-    } catch (err: any) {
-      console.log(err.response);
-
-      const message = err.response?.data?.message;
-
-      if (message && message.includes("PRIMEIRO_ACESSO")) {
-        router.push(`/primeiro-acesso?email=${email}`);
-      } else {
-        setErro("E-mail ou senha inválidos.");
-      }
+      await primeiroAcesso(email, senha);
+      alert("Senha cadastrada com sucesso!");
+      router.push("/login?tipo=professor");
+    } catch {
+      setErro("Erro ao cadastrar a senha.");
     } finally {
       setCarregando(false);
     }
@@ -63,7 +40,7 @@ export default function LoginComponent({ tipoPredefinido }: LoginProps) {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center">
-      {/* Background */}
+      {/* Background igual ao login */}
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url('/apae-background.png')" }}
@@ -79,31 +56,16 @@ export default function LoginComponent({ tipoPredefinido }: LoginProps) {
               <div className="h-1.5 w-32 bg-[#FFD000] mx-auto rounded-full"></div>
             </div>
             <h2 className="text-2xl md:text-3xl font-semibold text-gray-800">
-              {tipoPredefinido === 'admin' ? 'Painel do Administrador' :
-               tipoPredefinido === 'professor' ? 'Painel do Professor' :
-               'Gestão Escolar'}
+              Primeiro acesso do Professor
             </h2>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-lg font-medium text-gray-700 mb-2">
-                E-mail
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-5 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0D4F97]"
-                placeholder="exemplo@apae.org.br"
-                required
-                disabled={carregando}
-              />
-            </div>
 
+            {/* Campo 1: Nova senha */}
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-2">
-                Senha
+                Nova senha
               </label>
               <div className="relative">
                 <input
@@ -111,7 +73,8 @@ export default function LoginComponent({ tipoPredefinido }: LoginProps) {
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   className="w-full px-5 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0D4F97] pr-14"
-                  placeholder="Sua senha"
+                  placeholder="Digite sua nova senha"
+                  required
                   disabled={carregando}
                 />
                 <button
@@ -122,6 +85,22 @@ export default function LoginComponent({ tipoPredefinido }: LoginProps) {
                   {mostrarSenha ? <EyeOff size={24} /> : <Eye size={24} />}
                 </button>
               </div>
+            </div>
+
+            {/* Campo 2: Confirmar senha */}
+            <div>
+              <label className="block text-lg font-medium text-gray-700 mb-2">
+                Confirmar senha
+              </label>
+              <input
+                type="password"
+                value={confirmarSenha}
+                onChange={(e) => setConfirmarSenha(e.target.value)}
+                className="w-full px-5 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0D4F97]"
+                placeholder="Confirme sua senha"
+                required
+                disabled={carregando}
+              />
             </div>
 
             {erro && (
@@ -139,7 +118,7 @@ export default function LoginComponent({ tipoPredefinido }: LoginProps) {
                 <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
                 <>
-                  <LogIn size={24} /> Entrar
+                  <LogIn size={24} /> Cadastrar senha
                 </>
               )}
             </button>

@@ -8,39 +8,50 @@ import { Button } from "@/components/ui/button";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { listarTurmasDeProfessor } from "@/services/ProfessorService";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import { Turma } from "@/types/turma"; 
 
 export default function TurmasPage() {
   const router = useRouter();
+  const { usuario, professorId, loading: authLoading } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [turmas, setTurmas] = useState<Turma[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const professorId = 1; //depois substituir pelo id que receber pelo login de prof(quando tiver login)
-
-  async function carregarTurmas() {
-    try {
-      const data = await listarTurmasDeProfessor(professorId);
-
-      // opcional: filtrar apenas turmas ativas
-      const turmasAtivas = data.filter((turma: Turma) => turma.isAtiva);
-
-      setTurmas(turmasAtivas);
-    } catch (error: any) {
-      toast.error(error.message || "Erro ao carregar turmas");
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
-    carregarTurmas();
-  }, []);
+    if (!professorId) {
+      toast.error("Usuário não autenticado");
+      router.push("/");
+      return;
+    }
+
+    setLoading(true);
+    listarTurmasDeProfessor(professorId)
+      .then((data) => setTurmas(data.filter(t => t.isAtiva)))
+      .catch((err: any) => toast.error(err.message || "Erro ao carregar dados"))
+      .finally(() => setLoading(false));
+  }, [professorId, router]);
 
   const handleNavigation = (path: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     router.push(path);
   };
+
+  if (authLoading || loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-[#0D4F97] font-semibold">Carregando dados...</p>
+      </div>
+    );
+  }
+
+  if (!usuario) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-red-600 font-semibold">Usuário não autenticado.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-[#E5E5E5]">
@@ -59,13 +70,15 @@ export default function TurmasPage() {
           isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
         }`}
       >
-        <div className="p-4 md:p-8"> 
-          {/* Título */}
+        <div className="p-4 md:p-8">
           <div className="mb-6 md:mb-8">
             <h1 className="text-[#0D4F97] text-2xl md:text-3xl font-bold">
               Minhas Turmas
             </h1>
             <p className="text-[#222222] mt-1 text-sm md:text-lg">
+              Bem-vindo, {usuario.email}!
+            </p>
+            <p className="text-[#222222] mt-1 text-sm md:text-base">
               Gerencie suas turmas e alunos
             </p>
           </div>
@@ -81,21 +94,15 @@ export default function TurmasPage() {
                     Turmas Ativas
                   </CardTitle>
                   <CardDescription className="text-[#222222] font-medium text-sm md:text-base">
-                    {loading
-                      ? "Carregando..."
-                      : `${turmas.length} turmas cadastradas`}
+                    {turmas.length} turmas ativas
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
 
             <CardContent className="pt-6">
-              {loading ? (
-                <p className="text-center">Carregando turmas...</p>
-              ) : turmas.length === 0 ? (
-                <p className="text-center">
-                  Nenhuma turma ativa encontrada.
-                </p>
+              {turmas.length === 0 ? (
+                <p className="text-center">Nenhuma turma ativa encontrada.</p>
               ) : (
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   {turmas.map((turma: Turma) => (

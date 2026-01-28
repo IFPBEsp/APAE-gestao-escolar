@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { ArrowLeft, FileText, UserCircle, Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import { format } from "date-fns";
@@ -29,6 +30,7 @@ export default function AvaliacoesAlunoPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { professorId } = useAuth();
 
   const alunoId = params?.alunoId ? parseInt(Array.isArray(params.alunoId) ? params.alunoId[0] : params.alunoId) : 0;
   const turmaId = searchParams?.get('turmaId') || '';
@@ -48,8 +50,6 @@ export default function AvaliacoesAlunoPage() {
   const [alunoData, setAlunoData] = useState<any>(null);
   const [loadingAluno, setLoadingAluno] = useState(true);
   const [turmaData, setTurmaData] = useState<any>(null);
-
-  const professorId = 1; // TODO: Substituir por auth context
 
   useEffect(() => {
     const carregarDadosIniciais = async () => {
