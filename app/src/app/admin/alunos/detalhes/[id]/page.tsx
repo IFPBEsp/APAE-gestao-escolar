@@ -12,6 +12,7 @@ import { buscarAlunoPorId, buscarAvaliacoesPorAlunoId } from "@/services/AlunoSe
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale"; 
 import { buscarRelatorioPorAluno } from "@/services/RelatorioService";
+import BotaoVoltar from "@/components/BotaoVoltar";
 
 
 interface AlunoDetailDTO {
@@ -176,15 +177,8 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
         
         {/* Cabeçalho de Navegação */}
         <div>
-            <Button
-                variant="ghost"
-                onClick={() => router.push("/admin/alunos")}
-                className="text-[#0D4F97] hover:bg-[#E8F3FF] pl-0 gap-2 mb-4"
-            >
-                <ArrowLeft size={20} />
-                Voltar
-            </Button>
-
+            <BotaoVoltar to="/admin/alunos" />
+            
             <h1 className="text-2xl font-bold text-[#0D4F97]">Detalhes do Aluno</h1>
             <p className="text-gray-500">Visualize e gerencie as informações do aluno</p>
         </div>

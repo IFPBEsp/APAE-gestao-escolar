@@ -23,6 +23,7 @@ import { getAlunosDaTurma } from "@/services/ChamadaService";
 import { buscarTurmaPorId } from "@/services/TurmaService";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import BotaoVoltar from "@/components/BotaoVoltar";
 
 export default function TurmaDetalhesPage() {
   const params = useParams();
@@ -127,13 +128,7 @@ export default function TurmaDetalhesPage() {
       <div className="p-4 md:p-8">
         <div className="mx-auto max-w-7xl">
           <div className="mb-6">
-            <Button
-              onClick={() => router.push("/professor/turmas")}
-              variant="outline"
-            >
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              Voltar
-            </Button>
+            <BotaoVoltar to="/professor/turmas" />
           </div>
 
           <div className="mb-6">
@@ -145,7 +140,7 @@ export default function TurmaDetalhesPage() {
 
           <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
             <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+              <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between mt-4">
                 <div className="flex items-center gap-4">
                   <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-[#0D4F97]/10">
                     <BookOpen className="h-8 w-8 text-[#0D4F97]" />

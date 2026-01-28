@@ -338,10 +338,10 @@ function ChamadaContent({
             )}
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="rounded-xl border-2 border-[#B2D7EC] bg-white p-4">
+                <div className="rounded-xl border-2 border-[#B2D7EC] bg-white p-4 mt-4">
                     <div className="mb-2 flex items-center gap-2 text-[#0D4F97]">
                         <CalendarIcon className="h-5 w-5" />
-                        <span className="font-medium">Data da Chamada</span>
+                        <span className="ftext-[#0D4F97] text-sm font-bold mb-2 block">Data da Chamada</span>
                     </div>
                     <Popover>
                         <PopoverTrigger asChild>
@@ -359,7 +359,7 @@ function ChamadaContent({
                     </Popover>
                 </div>
 
-                <div className="rounded-xl border-2 border-[#B2D7EC] p-4 bg-[#F8FAFC]">
+                <div className="rounded-xl border-2 border-[#B2D7EC] bg-white p-4 mt-4">
                     <label className="text-[#0D4F97] text-sm font-bold mb-2 block">Resumo da Aula</label>
                     <Textarea 
                         value={descricaoAula} 

@@ -21,6 +21,7 @@ import ModalEditarProfessor from "@/components/ModalEditarProfessor";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Professor } from "@/types/professor";
+import BotaoVoltar from "@/components/BotaoVoltar";
 
 export default function DetalhesProfessor() {
   const router = useRouter();
@@ -103,14 +104,7 @@ export default function DetalhesProfessor() {
       <div className="mx-auto max-w-5xl">
         <div className="space-y-6">
           {/* Header com Botão Voltar */}
-          <Button
-            onClick={() => router.push("/admin/professores")}
-            variant="outline"
-            className="mb-6 justify-center"
-          >
-            <ArrowLeft className="mr-2 h-5 w-5" />
-            Voltar
-          </Button>
+          <BotaoVoltar to="/admin/professores" />
 
           {/* Título */}
           <div>
