@@ -16,23 +16,24 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
 
     @Query("""
         SELECT new com.apae.gestao.dto.aluno.AlunoResumoDTO(
-            a.id,
-            a.nome,
-            a.nomeResponsavel,
-            t.nome,
-            t.turno,
-            CASE 
-                WHEN COUNT(p) = 0 THEN 0
-                ELSE SUM(CASE WHEN p.faltou = false THEN 1 ELSE 0 END) * 100.0 / COUNT(p)
-            END,
-            MAX(av.dataAvaliacao)
-        )
-        FROM Aluno a
-        LEFT JOIN a.turmaAlunos ta ON ta.isAlunoAtivo = true
-        LEFT JOIN ta.turma t
-        LEFT JOIN a.presencas p ON p.aula.turma.id = t.id
-        LEFT JOIN a.avaliacoes av
-        GROUP BY a.id, a.nome, a.nomeResponsavel, t.nome, t.turno
+        a.id,
+        a.nome,
+        a.nomeResponsavel,
+        MAX(t.nome),
+        MAX(t.turno),
+        CASE 
+            WHEN COUNT(p) = 0 THEN 0
+            ELSE SUM(CASE WHEN p.faltou = false THEN 1 ELSE 0 END) * 100.0 / COUNT(p)
+        END,
+        MAX(av.dataAvaliacao)
+    )
+    FROM Aluno a
+    LEFT JOIN a.turmaAlunos ta
+    LEFT JOIN ta.turma t
+    LEFT JOIN a.presencas p ON p.aula.turma.id = t.id
+    LEFT JOIN a.avaliacoes av
+    WHERE ta.isAlunoAtivo = true
+    GROUP BY a.id, a.nome, a.nomeResponsavel
     """)
     Page<AlunoResumoDTO> listarAlunosResumido(Pageable pageable);
 
@@ -41,8 +42,8 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
             a.id,
             a.nome,
             a.nomeResponsavel,
-            t.nome,
-            t.turno,
+            MAX(t.nome),
+            MAX(t.turno),
             CASE 
                 WHEN COUNT(p) = 0 THEN 0
                 ELSE SUM(CASE WHEN p.faltou = false THEN 1 ELSE 0 END) * 100.0 / COUNT(p)
@@ -50,12 +51,12 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
             MAX(av.dataAvaliacao)
         )
         FROM Aluno a
-        LEFT JOIN a.turmaAlunos ta ON ta.isAlunoAtivo = true
+        LEFT JOIN a.turmaAlunos ta
         LEFT JOIN ta.turma t
         LEFT JOIN a.presencas p ON p.aula.turma.id = t.id
         LEFT JOIN a.avaliacoes av
         WHERE LOWER(a.nome) LIKE LOWER(CONCAT('%', :nome, '%'))
-        GROUP BY a.id, a.nome, a.nomeResponsavel, t.nome, t.turno
+        GROUP BY a.id, a.nome, a.nomeResponsavel
     """)
     Page<AlunoResumoDTO> listarAlunosPorNomeResumido(String nome, Pageable pageable);
 

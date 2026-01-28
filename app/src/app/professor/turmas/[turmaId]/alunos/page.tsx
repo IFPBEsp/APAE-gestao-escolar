@@ -164,10 +164,10 @@ export default function TurmaDetalhesPage() {
                   <div className="text-sm text-gray-500">Status da Turma</div>
                   <div
                     className={`font-semibold ${
-                      turma?.ativa ? "text-green-600" : "text-red-600"
+                      "text-green-600"
                     }`}
                   >
-                    {turma?.ativa ? "Ativa" : "Inativa"}
+                    {"Ativa"}
                   </div>
                 </div>
               </div>

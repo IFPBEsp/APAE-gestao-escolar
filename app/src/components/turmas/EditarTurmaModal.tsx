@@ -277,9 +277,9 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                             Alterar Professor Responsável
                         </h3>
                         <div className="bg-[#E8F3FF] p-4 rounded-lg border border-[#B2D7EC]">
-                            <Label className="text-[#0D4F97] mb-1 block">Professor Atual/Selecionado:</Label>
+                            <Label className="text-[#0D4F97] mb-1 block">Professor Selecionado:</Label>
                             <div className="flex items-center gap-2 text-[#0D4F97] font-medium">
-                                <span>{professorSelecionado?.nome || "N/A"}</span>
+                                <span>{professorSelecionado?.nome || "Professor atual permanece"}</span>
                             </div>
                         </div>
 
@@ -344,7 +344,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                             <div className="max-h-60 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
                                 {alunosNaTurma.length === 0 && <p className="text-sm text-gray-400 italic text-center py-4">Nenhum aluno vinculado.</p>}
                                 {alunosNaTurma.map(aluno => (
-                                    <div key={aluno.alunoId} className="flex justify-between items-center bg-white p-3 rounded-lg border border-[#B2D7EC] shadow-sm hover:shadow transition-shadow">
+                                    <div key={`${aluno.alunoId}-${turmaData.id}`} className="flex justify-between items-center bg-white p-3 rounded-lg border border-[#B2D7EC] shadow-sm hover:shadow transition-shadow">
                                         <div className="flex items-center gap-3">
                                             <div className="h-8 w-8 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97]">
                                                 <UserRound size={18} />
