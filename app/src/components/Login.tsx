@@ -12,7 +12,7 @@ interface LoginProps {
 
 export default function LoginComponent({ tipoPredefinido }: LoginProps) {
   const router = useRouter();
-  const { login } = useAuth(); // ✅ Usa o contexto
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -28,11 +28,11 @@ export default function LoginComponent({ tipoPredefinido }: LoginProps) {
       const data = await loginService(email, senha);
       const { token, role, id } = data;
 
-      // ✅ Salva no localStorage (ainda necessário para token)
+      //  Salva no localStorage (ainda necessário para token)
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
 
-      // ✅ Salva no contexto (que também salva usuarioLogado no localStorage)
+      //  Salva no contexto (que também salva usuarioLogado no localStorage)
       login({ id, email, role });
 
       // Cookies

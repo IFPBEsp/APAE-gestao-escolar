@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { listarTurmasDeProfessor } from "@/services/ProfessorService";
 import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext"; // ✅ Import
-
+import { useAuth } from "@/contexts/AuthContext";
 interface Turma {
   id: number;
   nome: string;
@@ -22,12 +21,10 @@ interface Turma {
 
 export default function TurmasPage() {
   const router = useRouter();
-  const { usuario, professorId, loading: authLoading } = useAuth(); // ✅ Usa o contexto
+  const { usuario, professorId, loading: authLoading } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [turmas, setTurmas] = useState<Turma[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // ✅ REMOVE os useEffect que pegam do localStorage
 
   useEffect(() => {
     if (!professorId) {
