@@ -2,22 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, Users, ClipboardCheck, Calendar } from "lucide-react";
+import { BookOpen, Users, ClipboardCheck, Calendar } from "lucide-react"; 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { listarTurmasDeProfessor } from "@/services/ProfessorService";
 import { toast } from "sonner";
-
-interface Turma {
-  id: number;
-  nome: string;
-  horario: string;
-  turno: string;
-  tipo: string;
-  isAtiva: boolean;
-  totalAlunosAtivos?: number;
-}
+import { Turma } from "@/types/turma"; 
 
 export default function TurmasPage() {
   const router = useRouter();
@@ -25,14 +16,14 @@ export default function TurmasPage() {
   const [turmas, setTurmas] = useState<Turma[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const professorId = 1; // depois substituir pelo id vindo do login
+  const professorId = 1; //depois substituir pelo id que receber pelo login de prof(quando tiver login)
 
   async function carregarTurmas() {
     try {
-      const data: Turma[] = await listarTurmasDeProfessor(professorId);
+      const data = await listarTurmasDeProfessor(professorId);
 
-      // 🔹 Filtra apenas turmas ativas
-      const turmasAtivas = data.filter((turma) => turma.isAtiva === true);
+      // opcional: filtrar apenas turmas ativas
+      const turmasAtivas = data.filter((turma: Turma) => turma.isAtiva);
 
       setTurmas(turmasAtivas);
     } catch (error: any) {
@@ -68,7 +59,7 @@ export default function TurmasPage() {
           isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
         }`}
       >
-        <div className="p-4 md:p-8">
+        <div className="p-4 md:p-8"> 
           {/* Título */}
           <div className="mb-6 md:mb-8">
             <h1 className="text-[#0D4F97] text-2xl md:text-3xl font-bold">
@@ -92,7 +83,7 @@ export default function TurmasPage() {
                   <CardDescription className="text-[#222222] font-medium text-sm md:text-base">
                     {loading
                       ? "Carregando..."
-                      : `${turmas.length} turmas ativas`}
+                      : `${turmas.length} turmas cadastradas`}
                   </CardDescription>
                 </div>
               </div>
@@ -107,7 +98,7 @@ export default function TurmasPage() {
                 </p>
               ) : (
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  {turmas.map((turma) => (
+                  {turmas.map((turma: Turma) => (
                     <div
                       key={turma.id}
                       className="rounded-xl border-2 border-[#B2D7EC] bg-white p-4 md:p-6 transition-all hover:border-[#0D4F97] hover:shadow-lg cursor-pointer"
@@ -161,8 +152,7 @@ export default function TurmasPage() {
                           }
                           className="h-10 flex-1 bg-[#0D4F97] text-white font-bold hover:bg-[#FFD000] hover:text-[#0D4F97]"
                         >
-                          <ClipboardCheck className="mr-2 h-4 w-4" /> Fazer Chamada
-                        </Button>
+                          <ClipboardCheck className="mr-2 h-4 w-4" /> Frequência </Button>
                       </div>
                     </div>
                   ))}
