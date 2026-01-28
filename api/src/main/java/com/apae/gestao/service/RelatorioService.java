@@ -101,7 +101,12 @@ public class RelatorioService {
     private RelatorioResponseDTO toResponseDTO(Relatorio relatorio) {
         Aluno aluno = relatorio.getAluno();
         Professor professor = relatorio.getProfessor();
-        Turma turma = relatorio.getTurma(); 
+        Turma turma = relatorio.getTurma();
+        
+        String nomeTurmaFormatado = null;
+        if (turma != null) {
+                nomeTurmaFormatado = turma.getNome();
+        }
 
         return new RelatorioResponseDTO(
                 relatorio.getId(),
@@ -112,7 +117,7 @@ public class RelatorioService {
                 relatorio.getRecursos(),
                 aluno.getNome(),
                 aluno.getDataNascimento(),
-                turma != null ? turma.getNome() : null, 
+                nomeTurmaFormatado, 
                 professor.getNome(),
                 relatorio.getCreatedAt()
         );

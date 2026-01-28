@@ -19,10 +19,7 @@ public class MinioConnectionTest {
 
         var buckets = minioClient.listBuckets();
         assertNotNull(buckets, "A lista de buckets retornou nula");
-
-        System.out.println("Buckets encontrados:");
-        buckets.forEach(b -> System.out.println(" - " + b.name()));
-
+        
         assertTrue(true);
     }
 }

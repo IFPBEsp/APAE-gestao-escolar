@@ -53,10 +53,12 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
     const [professoresEncontrados, setProfessoresEncontrados] = useState<Professor[]>([]);
     const [professorSelecionado, setProfessorSelecionado] = useState<Professor | null>(null);
 
+    // Estados dos Alunos - mecher depois que criar o service de alunos!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     const [buscaAluno, setBuscaAluno] = useState("");
     const [alunosEncontrados, setAlunosEncontrados] = useState<Aluno[]>([]);
     const [alunosSelecionados, setAlunosSelecionados] = useState<Aluno[]>([]);
 
+    // Gerar nome automaticamente
     const nomeTurma = `${tipo ? formatTipo(tipo) : ""} ${ano} - ${turno ? formatTurno(turno) : ""}`;
 
     function formatTipo(val: string) {
@@ -116,7 +118,7 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
             setAlunosEncontrados(page.content ?? []);
         } catch (error) {
             console.log("Erro ao buscar alunos, usando lista vazia");
-            setAlunosEncontrados([]);
+            setAlunosEncontrados([]); 
         }
     }
 
@@ -153,6 +155,7 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
 
         try {
             const turmaCriada = await criarTurma(dadosNovaTurma);
+
             if (alunosSelecionados.length > 0) {
                 await adicionarAlunosATurma(
                     turmaCriada.id,
@@ -347,9 +350,9 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                                         </div>
                                         <Button
                                             variant="ghost"
-                                            size="sm"
-                                            className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 h-8 w-8 rounded-full"
+                                            size="icon"
                                             onClick={() => removerAluno(aluno.id)}
+                                            aria-label={`Remover aluno ${aluno.nome}`}
                                         >
                                             <X size={16} />
                                         </Button>
@@ -361,11 +364,15 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4 border-t">
-                    <Button variant="outline" onClick={onClose}>
+                    <Button 
+                        variant="outline"   
+                        onClick={onClose}
+                    >
                         Cancelar
                     </Button>
+
                     <Button
-                        className="bg-[#0D4F97] hover:bg-[#0B3E78] text-white"
+                        variant="primary"
                         onClick={handleSave}
                     >
                         Salvar Turma

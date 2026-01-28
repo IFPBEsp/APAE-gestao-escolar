@@ -12,12 +12,9 @@ import java.util.Set;
 
 @Entity
 @Table(name = "aulas")
-@Getter
-@Setter
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Builder
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 

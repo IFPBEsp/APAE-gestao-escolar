@@ -21,34 +21,17 @@ export default function GerenciarTurmasPage() {
 
   useEffect(() => {
     async function carregarTurmasComAlunos() {
-      try {
-        setLoading(true);
+        try {
+              setLoading(true);
 
-        // Buscar todas as turmas
-        const turmasData = await listarTurmas();
+              const turmasData = await listarTurmas();
 
-        // Para cada turma, buscar os alunos ativos e adicionar contagem
-        const turmasComContador = await Promise.all(
-          turmasData.map(async (turma: any) => {
-            try {
-              const alunosAtivos = await listarAlunosAtivos(turma.id);
-              return {
-                ...turma,
-                alunosCount: alunosAtivos.length, // contador de alunos ativos
-              };
-            } catch (err) {
-              console.error(`Erro ao contar alunos da turma ${turma.id}`, err);
-              return { ...turma, alunosCount: 0 };
+              setTurmas(turmasData);
+            } catch (error: any) {
+              toast.error(error.message || "Erro ao carregar turmas");
+            } finally {
+              setLoading(false);
             }
-          })
-        );
-
-        setTurmas(turmasComContador);
-      } catch (error: any) {
-        toast.error(error.message || "Erro ao carregar turmas");
-      } finally {
-        setLoading(false);
-      }
     }
 
     carregarTurmasComAlunos();
@@ -108,7 +91,8 @@ export default function GerenciarTurmasPage() {
 
             <div className="flex gap-4 items-center">
               <Button
-                className="w-full md:w-auto bg-[#0D4F97] hover:bg-[#0B3E78] text-white flex items-center justify-center gap-2 h-11 md:h-10"
+                variant="primary"
+                className="w-full md:w-auto"
                 onClick={() => setIsNovaTurmaOpen(true)}
               >
                 <Plus size={18} />
@@ -142,16 +126,15 @@ export default function GerenciarTurmasPage() {
                 className="border border-[#B2D7EC] bg-white rounded-xl shadow-sm p-4 md:p-6 relative cursor-pointer hover:shadow-md transition-shadow group"
               >
                 <div className="absolute right-3 md:right-4 top-3 md:top-4 flex flex-wrap gap-2 justify-end">
-                  <div className={`px-2 md:px-3 py-1 rounded-full text-xs font-medium ${
-                    turma.isAtiva
+                  <div className={`px-2 md:px-3 py-1 rounded-full text-xs font-medium ${turma.isAtiva
                       ? "bg-green-100 text-green-700 border border-green-200"
                       : "bg-gray-100 text-gray-700 border border-gray-200"
-                  }`}>
+                    }`}>
                     {turma.isAtiva ? "Ativa" : "Inativa"}
                   </div>
 
                   <div className="bg-[#E8F3FF] text-[#0D4F97] px-2 md:px-3 py-1 rounded-full text-xs font-medium border border-[#B2D7EC]">
-                    {turma.alunosCount ?? 0} alunos
+                    {turma.totalAlunosAtivos ?? 0} alunos
                   </div>
                 </div>
 
@@ -161,7 +144,7 @@ export default function GerenciarTurmasPage() {
 
                 <div className="text-gray-700 space-y-1 text-sm md:text-base">
                   <p>
-                    <strong>Professor:</strong> {turma.professor?.nome}
+                    <strong>Professor:</strong> {turma.professorNome}
                   </p>
                   <p>
                     <strong>Turno:</strong> {turma.turno}

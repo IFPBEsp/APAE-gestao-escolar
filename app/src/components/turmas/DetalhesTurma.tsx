@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Clock, Calendar, Users, Briefcase } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, Users, Briefcase, Edit, Power } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -16,7 +16,6 @@ import {
     buscarTurmaPorId,
     desativarTurma,
     ativarTurma,
-    listarAlunosAtivos
 } from "@/services/TurmaService";
 import { toast } from "sonner";
 
@@ -37,28 +36,23 @@ export function DetalhesTurma({
 }: DetalhesTurmaProps) {
 
     const [turma, setTurma] = useState<any>(null);
-    const [alunosAtivosCount, setAlunosAtivosCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     useEffect(() => {
         async function carregarTurma() {
             try {
-                setLoading(true);
+              setLoading(true);
 
-                const data = await buscarTurmaPorId(turmaId);
-                setTurma(data);
-
-                // Contador de alunos ativos
-                const ativos = await listarAlunosAtivos(turmaId);
-                setAlunosAtivosCount(ativos.length);
+              const data = await buscarTurmaPorId(turmaId);
+              setTurma(data);
 
             } catch (error: any) {
-                toast.error(error.message || "Erro ao carregar turma");
+              toast.error(error.message || "Erro ao carregar turma");
             } finally {
-                setLoading(false);
+              setLoading(false);
             }
-        }
+          }
 
         carregarTurma();
     }, [turmaId]);
@@ -98,11 +92,11 @@ export function DetalhesTurma({
         <div className="space-y-6">
             <div>
                 <Button
-                    variant="ghost"
+                    variant="outline"
                     onClick={onBack}
-                    className="text-[#0D4F97] hover:bg-[#E8F3FF] pl-0 gap-2 mb-4"
+                    className="gap-2 mb-4"
                 >
-                    <ArrowLeft size={20} />
+                    <ArrowLeft size={18} />
                     Voltar
                 </Button>
 
@@ -128,9 +122,9 @@ export function DetalhesTurma({
                                 <span
                                     className={`text-xs px-2 py-0.5 rounded-full font-medium
                                     ${turma.isAtiva
-                                        ? "bg-green-100 text-green-700"
-                                        : "bg-gray-100 text-gray-700"
-                                    }`}
+                                            ? "bg-green-100 text-green-700"
+                                            : "bg-gray-100 text-gray-700"
+                                        }`}
                                 >
                                     {turma.isAtiva ? "Ativa" : "Inativa"}
                                 </span>
@@ -150,7 +144,7 @@ export function DetalhesTurma({
                                     Professor Responsável
                                 </p>
                                 <p className="text-[#0D4F97] font-medium">
-                                    {turma.professor?.nome || "Não informado"}
+                                    {turma.professorNome || "Não informado"}
                                 </p>
                             </div>
                         </div>
@@ -192,7 +186,7 @@ export function DetalhesTurma({
                                     Quantidade de Alunos
                                 </p>
                                 <p className="text-[#0D4F97] font-medium">
-                                    {alunosAtivosCount}
+                                    {turma.totalAlunosAtivos} ativos de {turma.totalAlunos}
                                 </p>
                             </div>
                         </div>
@@ -202,22 +196,19 @@ export function DetalhesTurma({
                     <div className="pt-6 border-t border-gray-100 flex gap-4">
                         <Button
                             onClick={onEdit}
-                            className="flex-1 bg-[#0D4F97] hover:bg-[#0B3E78] text-white flex items-center justify-center gap-2"
+                            variant="primary"
+                            className="flex-1"
                         >
-                            <Briefcase size={16} />
+                            <Edit className="mr-2 h-5 w-5" />
                             Editar Turma
                         </Button>
 
                         <Button
-                            variant="outline"
-                            className={`flex-1 flex items-center justify-center gap-2
-                                ${turma.isAtiva
-                                    ? "border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-                                    : "border-green-200 text-green-600 hover:bg-green-50 hover:text-green-700"
-                                }`}
+                            variant={turma.isAtiva ? "danger" : "primary"}
+                            className="flex-1"
                             onClick={() => setIsDialogOpen(true)}
                         >
-                            <Users size={16} />
+                            <Power className="mr-2 h-5 w-5"  />
                             {turma.isAtiva ? "Inativar Turma" : "Reativar Turma"}
                         </Button>
                     </div>
@@ -244,11 +235,7 @@ export function DetalhesTurma({
                                     Cancelar
                                 </Button>
                                 <Button
-                                    className={
-                                        turma.isAtiva
-                                            ? "bg-red-600 hover:bg-red-700 text-white"
-                                            : "bg-green-600 hover:bg-green-700 text-white"
-                                    }
+                                    variant={turma.isAtiva ? "danger" : "primary"}
                                     onClick={() => {
                                         handleToggleTurma();
                                         setIsDialogOpen(false);

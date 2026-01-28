@@ -35,7 +35,6 @@ export default function CadastrarProfessorPage() {
 
   const router = useRouter();
 
-  // 🧮 Máscara de CPF
   const applyCPFMask = (value: string) => {
     const numbers = value.replace(/\D/g, "");
     if (numbers.length <= 3) return numbers;
@@ -48,7 +47,6 @@ export default function CadastrarProfessorPage() {
     )}-${numbers.slice(9, 11)}`;
   };
 
-  // ✅ Validação de CPF
   const validateCPF = (cpf: string) => {
     const numbers = cpf.replace(/\D/g, "");
     if (numbers.length !== 11 || /^(\d)\1+$/.test(numbers)) return false;
@@ -84,7 +82,6 @@ export default function CadastrarProfessorPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 🧩 Validação frontend
     if (!validateCPF(formData.cpf)) {
       setErrors((prev) => ({ ...prev, cpf: "CPF inválido" }));
       toast.error("Por favor, corrija o CPF antes de enviar.");
@@ -126,13 +123,6 @@ export default function CadastrarProfessorPage() {
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-[#E5E5E5] p-4 md:p-8">
       <div className="mx-auto max-w-2xl">
-        <button
-          onClick={() => router.back()}
-          className="mb-6 flex items-center gap-2 text-[#0D4F97] transition-colors hover:text-[#FFD000]"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          <span>Voltar</span>
-        </button>
 
         <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
           <CardHeader>
@@ -177,11 +167,10 @@ export default function CadastrarProfessorPage() {
                   required
                   maxLength={14}
                   placeholder="000.000.000-00"
-                  className={`border-2 ${
-                    errors.cpf
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                      : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
-                  }`}
+                  className={`border-2 ${errors.cpf
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                    : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                    }`}
                 />
                 {errors.cpf && <p className="text-red-500">{errors.cpf}</p>}
               </div>
@@ -226,11 +215,10 @@ export default function CadastrarProfessorPage() {
                   onChange={handleChange}
                   required
                   placeholder="Digite o endereço completo"
-                  className={`border-2 ${
-                    errors.endereco
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                      : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
-                  }`}
+                  className={`border-2 ${errors.endereco
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                    : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                    }`}
                 />
                 {errors.endereco && <p className="text-red-500">{errors.endereco}</p>}
               </div>
@@ -283,14 +271,13 @@ export default function CadastrarProfessorPage() {
                   type="button"
                   variant="outline"
                   onClick={() => router.back()}
-                  className="h-12 justify-center border-2 border-[#B2D7EC] px-4 text-[#0D4F97] hover:bg-[#B2D7EC]/20"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="h-12 min-w-[150px] justify-center bg-[#0D4F97] px-4 text-white hover:bg-[#FFD000] hover:text-[#0D4F97]"
+                  variant="primary"
                 >
                   {isSubmitting ? (
                     <>

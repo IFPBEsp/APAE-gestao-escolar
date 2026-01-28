@@ -56,14 +56,14 @@ export default function DetalhesProfessor() {
     if (!professor) return;
 
     try {
-      const endpoint = professor.ativo 
+      const endpoint = professor.ativo
         ? `/professores/${professor.id}/inativar`
         : `/professores/${professor.id}/ativar`;
-      
+
       const response = await api.patch(endpoint);
       setProfessor(response.data);
       setIsAlertOpen(false);
-      
+
       toast.success(
         `Professor ${professor.ativo ? "inativado" : "ativado"} com sucesso!`
       );
@@ -106,7 +106,7 @@ export default function DetalhesProfessor() {
           <Button
             onClick={() => router.push("/admin/professores")}
             variant="outline"
-            className="mb-6 h-12 justify-center border-2 border-[#B2D7EC] px-4 text-[#0D4F97] hover:bg-[#B2D7EC]/20"
+            className="mb-6 justify-center"
           >
             <ArrowLeft className="mr-2 h-5 w-5" />
             Voltar
@@ -136,11 +136,10 @@ export default function DetalhesProfessor() {
                       {professor.nome}
                     </h2>
                     <span
-                      className={`mt-1 inline-block rounded-full px-3 py-1 ${
-                        professor.ativo
+                      className={`mt-1 inline-block rounded-full px-3 py-1 ${professor.ativo
                           ? "bg-green-100 text-green-700"
                           : "bg-gray-100 text-gray-700"
-                      }`}
+                        }`}
                     >
                       {professor.ativo ? "Ativo" : "Inativo"}
                     </span>
@@ -165,7 +164,7 @@ export default function DetalhesProfessor() {
                   </p>
                   <p className="text-[#222222]">{professor.telefone || "—"}</p>
                 </div>
-                
+
                 {/* Formação */}
                 <div>
                   <p className="text-sm font-semibold text-[#0D4F97] mb-1">
@@ -207,16 +206,14 @@ export default function DetalhesProfessor() {
                 </div>
                 {professor.turmas && professor.turmas.length > 0 ? (
                   <div className="space-y-2">
-                    {professor.turmas.map((turmaNome, index) => {
-                      return (
-                        <div
-                          key={index}
-                          className="rounded-lg border-2 border-[#B2D7EC] bg-white p-3 text-[#222222]"
-                        >
-                          {turmaNome}
-                        </div>
-                      );
-                    })}
+                    {professor.turmas.map((turmaNome, index) => (
+                      <div
+                        key={index}
+                        className="rounded-lg border-2 border-[#B2D7EC] bg-white p-3 text-[#222222]"
+                      >
+                        {turmaNome}
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <p className="text-[#222222]">Nenhuma turma vinculada</p>
@@ -226,20 +223,18 @@ export default function DetalhesProfessor() {
               {/* Botões de Ação */}
               <div className="mt-8 flex flex-col gap-3 border-t-2 border-[#B2D7EC] pt-6 md:flex-row">
                 <Button
+                  variant="primary"
                   onClick={() => setIsModalEditarOpen(true)}
-                  className="h-12 flex-1 justify-center bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97]"
+                  className="w-full flex-1"
                 >
                   <Edit className="mr-2 h-5 w-5" />
                   Editar Professor
                 </Button>
+                
                 <Button
+                  variant={professor.ativo ? "danger" : "primary"}
                   onClick={() => setIsAlertOpen(true)}
-                  variant="outline"
-                  className={`h-12 flex-1 justify-center border-2 ${
-                    professor.ativo
-                      ? "border-red-500 text-red-600 hover:bg-red-50"
-                      : "border-green-500 text-green-600 hover:bg-green-50"
-                  }`}
+                  className="w-full flex-1"
                 >
                   <Power className="mr-2 h-5 w-5" />
                   {professor.ativo ? "Inativar Professor" : "Ativar Professor"}
@@ -262,16 +257,19 @@ export default function DetalhesProfessor() {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel className="h-12">Cancelar</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleToggleStatus}
-                  className={`h-12 ${
-                    professor.ativo
-                      ? "bg-red-600 hover:bg-red-700"
-                      : "bg-green-600 hover:bg-green-700"
-                  }`}
-                >
-                  Confirmar
+                <AlertDialogCancel asChild>
+                  <Button variant="outline">
+                    Cancelar
+                  </Button>
+                </AlertDialogCancel>
+
+                <AlertDialogAction asChild>
+                  <Button
+                    variant={professor.ativo ? "danger" : "primary"}
+                    onClick={handleToggleStatus}
+                  >
+                    Confirmar
+                  </Button>
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -289,4 +287,3 @@ export default function DetalhesProfessor() {
     </div>
   );
 }
-

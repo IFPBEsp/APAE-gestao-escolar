@@ -16,4 +16,10 @@ export interface Turma {
   professor?: Professor;
   alunos: TurmaAluno[];
   horario: string;
+  totalAlunosAtivos?: number;
+}
+
+export interface TurmaResumo {
+  id: number;
+  nome: string;
 }

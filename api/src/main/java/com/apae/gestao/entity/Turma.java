@@ -43,7 +43,7 @@ public class Turma {
 
     @ManyToOne
     @JoinColumn(name = "professor_id", nullable = false)
-    @JsonIgnoreProperties({"turmas", "relatorios", "avaliacoes"}) // Evita referência circular
+    @JsonIgnoreProperties({"turmas", "relatorios", "avaliacoes"})
     private Professor professor;
 
     @OneToMany(mappedBy = "turma", cascade = CascadeType.ALL)

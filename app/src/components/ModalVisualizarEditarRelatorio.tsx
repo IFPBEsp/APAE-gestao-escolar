@@ -6,8 +6,6 @@ import { Printer, Save, Edit } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -20,9 +18,11 @@ import TemplateImpressao from "@/components/impressao/TemplateImpressao";
 import { useImpressaoDocumento } from "@/components/impressao/useImpressaoDocumento";
 import DadosAlunoImpressao from "@/components/impressao/DadosAlunoImpressao";
 import { RelatorioIndividualConteudo } from "@/components/relatorios/RelatorioIndividualConteudo";
+import { buscarAlunoPorId } from "@/services/AlunoService";
 
 interface Relatorio {
   id: number | string;
+  alunoId?: number | string;
   data: string | Date;
   aluno?: string;
   professor?: string;
@@ -32,6 +32,7 @@ interface Relatorio {
   estrategias?: string;
   recursos?: string;
   atividade?: string;
+  aluno_nascimento?: string;
 }
 
 interface ModalVisualizarEditarRelatorioProps {
@@ -68,6 +69,12 @@ export default function ModalVisualizarEditarRelatorio({
 }: ModalVisualizarEditarRelatorioProps) {
   const [isEditando, setIsEditando] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [dadosAlunoCompleto, setDadosAlunoCompleto] = useState({
+    nome: "",
+    nascimento: "",
+    turma: ""
+  });
+
   const [formData, setFormData] = useState({
     data: new Date(),
     atividades: "",
@@ -79,7 +86,37 @@ export default function ModalVisualizarEditarRelatorio({
 
   const { refImpressao, imprimir } = useImpressaoDocumento();
 
-  // Inicializa o formData quando o modal abre
+  useEffect(() => {
+    async function carregarDadosAluno() {
+      if (isOpen && relatorio) {
+        const idParaBusca = relatorio.alunoId || relatorio.id;
+        if (idParaBusca) {
+          try {
+            const aluno = await buscarAlunoPorId(idParaBusca);
+            setDadosAlunoCompleto({
+              nome: aluno.nome || alunoNome || relatorio.aluno || "Aluno",
+              nascimento: aluno.dataNascimento || alunoDataNascimento || relatorio.aluno_nascimento || "—",
+              turma: aluno.turma?.nome || relatorio.turma || "Alfabetização 2025 - Manhã"
+            });
+          } catch (error) {
+            setDadosAlunoCompleto({
+              nome: alunoNome || relatorio.aluno || "Aluno",
+              nascimento: alunoDataNascimento || relatorio.aluno_nascimento || "—",
+              turma: relatorio.turma || "Alfabetização 2025 - Manhã"
+            });
+          }
+        } else {
+          setDadosAlunoCompleto({
+            nome: alunoNome || relatorio.aluno || "Aluno",
+            nascimento: alunoDataNascimento || relatorio.aluno_nascimento || "—",
+            turma: relatorio.turma || "Alfabetização 2025 - Manhã"
+          });
+        }
+      }
+    }
+    carregarDadosAluno();
+  }, [isOpen, relatorio, alunoNome, alunoDataNascimento]);
+
   useEffect(() => {
     if (relatorio && isOpen) {
       const isNew = !relatorio.id || relatorio.id === "novo" || relatorio.id === 0;
@@ -97,14 +134,14 @@ export default function ModalVisualizarEditarRelatorio({
 
   const handleSalvar = async () => {
     if (!formData.atividades.trim() || !formData.habilidades.trim() ||
-        !formData.estrategias.trim() || !formData.recursos.trim()) {
+      !formData.estrategias.trim() || !formData.recursos.trim()) {
       toast.error("Por favor, preencha todos os campos!");
       return;
     }
 
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500)); // simula API
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       const relatorioAtualizado: Relatorio = {
         ...relatorio!,
@@ -118,7 +155,6 @@ export default function ModalVisualizarEditarRelatorio({
       };
 
       if (onSalvar) onSalvar(relatorioAtualizado);
-
       toast.success("Relatório salvo com sucesso!");
       setIsEditando(false);
 
@@ -146,10 +182,6 @@ export default function ModalVisualizarEditarRelatorio({
     }
   };
 
-  const nomeAluno = alunoNome || relatorio?.aluno || "Aluno";
-  const nascimentoDisplay = alunoDataNascimento || "15/03/2013";
-  const turmaDisplay = relatorio?.turma || "Alfabetização 2025 - Manhã";
-
   function renderCampoVisualizacao(titulo: string, valor: string) {
     return (
       <div>
@@ -167,7 +199,7 @@ export default function ModalVisualizarEditarRelatorio({
         <h4 className="font-semibold text-[#0D4F97] mb-3 text-base">{titulo}</h4>
         <Textarea
           value={valor}
-          onChange={(e) => setFormData({...formData, [campo]: e.target.value})}
+          onChange={(e) => setFormData({ ...formData, [campo]: e.target.value })}
           className="min-h-[120px] resize-y border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus-visible:ring-0 text-sm leading-relaxed"
           disabled={isLoading}
           placeholder={placeholder}
@@ -176,27 +208,8 @@ export default function ModalVisualizarEditarRelatorio({
     );
   }
 
-  const visualizationContent = (
-    <div className="space-y-6">
-      {renderCampoVisualizacao("Atividades", formData.atividades)}
-      {renderCampoVisualizacao("Habilidades", formData.habilidades)}
-      {renderCampoVisualizacao("Estratégias", formData.estrategias)}
-      {renderCampoVisualizacao("Recursos", formData.recursos)}
-    </div>
-  );
-
-  const edicaoContent = (
-    <div className="space-y-6">
-      {renderCampoEdicao("Atividades", "atividades", formData.atividades, "Descreva as atividades...")}
-      {renderCampoEdicao("Habilidades", "habilidades", formData.habilidades, "Descreva as habilidades...")}
-      {renderCampoEdicao("Estratégias", "estrategias", formData.estrategias, "Descreva as estratégias...")}
-      {renderCampoEdicao("Recursos", "recursos", formData.recursos, "Descreva os recursos...")}
-    </div>
-  );
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { handleCancelar(); onClose(); } }}>
-      <div className="fixed inset-0 z-40 bg-black/80" />
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-6 border-b">
           <div>
@@ -204,63 +217,74 @@ export default function ModalVisualizarEditarRelatorio({
               {isEditando ? "Editando Relatório" : "Visualizando Relatório"}
             </DialogTitle>
             <DialogDescription className="text-gray-600 text-base mt-2">
-              {isEditando ? "Edite o relatório de" : "Detalhes do relatório de"} <span className="font-semibold">{nomeAluno}</span>
+              {isEditando ? "Edite o relatório de" : "Detalhes do relatório de"} <span className="font-semibold">{dadosAlunoCompleto.nome}</span>
             </DialogDescription>
           </div>
         </DialogHeader>
 
         <div className="py-6 px-4 sm:px-6">
-          {isEditando ? edicaoContent : visualizationContent}
+          {isEditando ? (
+            <div className="space-y-6">
+              {renderCampoEdicao("Atividades", "atividades", formData.atividades, "Descreva as atividades...")}
+              {renderCampoEdicao("Habilidades", "habilidades", formData.habilidades, "Descreva as habilidades...")}
+              {renderCampoEdicao("Estratégias", "estrategias", formData.estrategias, "Descreva as estratégias...")}
+              {renderCampoEdicao("Recursos", "recursos", formData.recursos, "Descreva os recursos...")}
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {renderCampoVisualizacao("Atividades", formData.atividades)}
+              {renderCampoVisualizacao("Habilidades", formData.habilidades)}
+              {renderCampoVisualizacao("Estratégias", formData.estrategias)}
+              {renderCampoVisualizacao("Recursos", formData.recursos)}
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-4 pt-6 border-t px-6 pb-6">
           {!isEditando ? (
             <>
-              <Button onClick={() => setIsEditando(true)} variant="outline" className="text-[#0D4F97] border-[#0D4F97] hover:bg-[#0D4F97] hover:text-white text-base px-6">
+              <Button onClick={() => setIsEditando(true)} variant="outline">
                 <Edit className="mr-2 h-4 w-4" /> Editar
               </Button>
-              <Button onClick={imprimir} className="bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97] text-base px-6">
+              <Button onClick={imprimir} variant="primary">
                 <Printer className="mr-2 h-4 w-4" /> Imprimir
               </Button>
             </>
           ) : (
             <>
-              <Button onClick={handleCancelar} variant="outline" className="border-gray-300 text-base px-6">Cancelar</Button>
-              <Button onClick={handleSalvar} className="bg-[#0D4F97] text-white hover:bg-[#FFD000] hover:text-[#0D4F97] text-base px-6">
+              <Button onClick={handleCancelar} variant="outline">Cancelar</Button>
+              <Button onClick={handleSalvar} variant="primary" disabled={isLoading}>
                 <Save className="mr-2 h-4 w-4" /> Salvar
               </Button>
             </>
           )}
         </div>
 
-        {/* Área de impressão usando TemplateImpressao */}
-        <div style={{ display: "none" }}>
-        <TemplateImpressao
-          ref={refImpressao}
-          titulo="Relatório Individual das Aulas Presenciais"
-          assinaturas={{
-            esquerda: { nome: formData.professor, cargo: "PROFESSOR(A)" },
-            direita: { nome: "COORDENADORA", cargo: "COORDENADORA PEDAGÓGICA" },
-          }}
-        >
-          <DadosAlunoImpressao
-            cidade="Esperança"
-            dataRelatorio={format(formData.data, "dd/MM/yyyy")}
-            nome={nomeAluno}
-            nascimento={alunoDataNascimento || "—"}
-            turma={turmaDisplay}
-            ano={format(formData.data, "yyyy")}
-          />
-
-          <RelatorioIndividualConteudo
-            atividades={formData.atividades}
-            habilidades={formData.habilidades}
-            estrategias={formData.estrategias}
-            recursos={formData.recursos}
-          />
-        </TemplateImpressao>
-      </div>
-
+        <div style={{ display: "none", position: "absolute", left: "-9999px" }}>
+          <TemplateImpressao
+            ref={refImpressao}
+            titulo="Relatório Individual das Aulas Presenciais"
+            assinaturas={{
+              esquerda: { nome: formData.professor || "Professor(a)", cargo: "PROFESSOR(A)" },
+              direita: { nome: "COORDENADORA", cargo: "COORDENADORA PEDAGÓGICA" },
+            }}
+          >
+            <DadosAlunoImpressao
+              cidade="Esperança"
+              dataRelatorio={format(formData.data, "dd/MM/yyyy")}
+              nome={dadosAlunoCompleto.nome}
+              nascimento={dadosAlunoCompleto.nascimento}
+              turma={dadosAlunoCompleto.turma}
+              ano={format(formData.data, "yyyy")}
+            />
+            <RelatorioIndividualConteudo
+              atividades={formData.atividades}
+              habilidades={formData.habilidades}
+              estrategias={formData.estrategias}
+              recursos={formData.recursos}
+            />
+          </TemplateImpressao>
+        </div>
       </DialogContent>
     </Dialog>
   );
