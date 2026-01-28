@@ -13,7 +13,8 @@ import {
   Grid3x3,
   List,
   FileText,
-  BarChart3
+  BarChart3,
+  Loader2
 } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
@@ -39,14 +40,18 @@ export default function TurmaDetalhesPage() {
     if (!alunoId) {
       return { ultimaAvaliacao: "—" };
     }
-    const avaliacoes = await listarAvaliacoesPorAluno(alunoId);
-    if (!avaliacoes || avaliacoes.length === 0) {
+    try {
+      const avaliacoes = await listarAvaliacoesPorAluno(alunoId);
+      if (!avaliacoes || avaliacoes.length === 0) {
+        return { ultimaAvaliacao: "—" };
+      }
+      const ultima = avaliacoes.reduce((maisRecente: any, atual: any) =>
+        new Date(atual.dataAvaliacao) > new Date(maisRecente.dataAvaliacao) ? atual : maisRecente
+      );
+      return { ultimaAvaliacao: format(new Date(ultima.dataAvaliacao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) };
+    } catch {
       return { ultimaAvaliacao: "—" };
     }
-    const ultima = avaliacoes.reduce((maisRecente: any, atual: any) =>
-      new Date(atual.dataAvaliacao) > new Date(maisRecente.dataAvaliacao) ? atual : maisRecente
-    );
-    return { ultimaAvaliacao: format(new Date(ultima.dataAvaliacao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) };
   }
 
   useEffect(() => {
@@ -90,26 +95,8 @@ export default function TurmaDetalhesPage() {
     carregarDados();
   }, [turmaId]);
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        Carregando...
-      </div>
-    );
-  }
-
-  if (!turmaId || !turma) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#E5E5E5]">
-        <Card className="p-8">
-          <CardContent>Turma não encontrada</CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   const filteredAlunos = alunos.filter((aluno: any) =>
-    aluno.nome.toLowerCase().includes(searchTerm.toLowerCase())
+    aluno.nome?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAvaliacoes = (alunoId: number) => {
@@ -119,6 +106,21 @@ export default function TurmaDetalhesPage() {
   const handleRelatorios = (alunoId: number) => {
     router.push(`/professor/alunos/${alunoId}/relatorios?turmaId=${turmaId}`);
   };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[`#0D4F97`]" />
+      </div>
+    );
+  }
+  if (!turma) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center text-gray-500">
+        Turma não encontrada.
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto">
@@ -136,9 +138,9 @@ export default function TurmaDetalhesPage() {
 
           <div className="mb-6">
             <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
-              Acompanhe seus Alunos - {turma.nome}
+              Acompanhe seus Alunos - {turma?.nome}
             </h1>
-            <p className="text-[#222222] text-lg">{turma.descricao}</p>
+            <p className="text-[#222222] text-lg">{turma?.descricao}</p>
           </div>
 
           <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
@@ -149,7 +151,7 @@ export default function TurmaDetalhesPage() {
                     <BookOpen className="h-8 w-8 text-[#0D4F97]" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-[#0D4F97]">{turma.nome}</h2>
+                    <h2 className="text-xl font-bold text-[#0D4F97]">{turma?.nome}</h2>
                     <div className="flex items-center gap-4 mt-2">
                       <div className="flex items-center gap-2 text-[#222222]">
                         <Users className="h-5 w-5" />
@@ -162,10 +164,10 @@ export default function TurmaDetalhesPage() {
                   <div className="text-sm text-gray-500">Status da Turma</div>
                   <div
                     className={`font-semibold ${
-                      turma.ativa ? "text-green-600" : "text-red-600"
+                      turma?.ativa ? "text-green-600" : "text-red-600"
                     }`}
                   >
-                    {turma.ativa ? "Ativa" : "Inativa"}
+                    {turma?.ativa ? "Ativa" : "Inativa"}
                   </div>
                 </div>
               </div>
@@ -228,7 +230,7 @@ export default function TurmaDetalhesPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-[#0D4F97] mt-4">{aluno.nome}</h3>
-                        <p className="text-sm text-gray-500">{turma.nome}</p>
+                        <p className="text-sm text-gray-500">{turma?.nome}</p>
                       </div>
                     </div>
 
@@ -247,7 +249,7 @@ export default function TurmaDetalhesPage() {
                     <div className="flex gap-2">
                       <Button
                         onClick={() => handleAvaliacoes(aluno.id)}
-                        className="flex-1"
+                        className="flex-1 bg-[#0D4F97] hover:bg-[#0A3D75]"
                       >
                         <FileText className="mr-2 h-4 w-4" />
                         Avaliações
@@ -256,7 +258,7 @@ export default function TurmaDetalhesPage() {
                       <Button
                         onClick={() => handleRelatorios(aluno.id)}
                         variant="outline"
-                        className="flex-1"
+                        className="flex-1 border-[#0D4F97] text-[#0D4F97] hover:bg-[#0D4F97]/10"
                       >
                         Relatórios
                       </Button>
@@ -298,6 +300,7 @@ export default function TurmaDetalhesPage() {
                             <Button
                               onClick={() => handleAvaliacoes(aluno.id)}
                               variant="outline"
+                              className="border-[#0D4F97] text-[#0D4F97]"
                             >
                               Avaliações
                             </Button>
@@ -305,6 +308,7 @@ export default function TurmaDetalhesPage() {
                             <Button
                               onClick={() => handleRelatorios(aluno.id)}
                               variant="outline"
+                              className="border-[#0D4F97] text-[#0D4F97]"
                             >
                               Relatórios
                             </Button>

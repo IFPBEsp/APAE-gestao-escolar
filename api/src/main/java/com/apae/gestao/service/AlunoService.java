@@ -40,7 +40,6 @@ public class AlunoService {
 
     @Transactional(readOnly = true)
     public Page<AlunoResumoDTO> listarAlunosPorNome(String nome, Pageable pageable) {
-
         Page<AlunoResumoDTO> page =
                 (nome == null || nome.isBlank())
                         ? alunoRepository.listarAlunosResumido(pageable)
@@ -66,7 +65,6 @@ public class AlunoService {
 
     @Transactional
     public AlunoDetalhesDTO atualizarTurma(Long alunoId, AlunoTurmaRequestDTO dto) {
-
         Aluno aluno = alunoRepository.findById(alunoId)
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
 
@@ -94,9 +92,8 @@ public class AlunoService {
         Aluno aluno = alunoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
 
-        String turmaAtual =
-                aluno.getTurmaAtual()
-                        .map(t -> t.getNome() + " - " + t.getTurno())
+        String turmaAtual = aluno.getTurmaAtual()
+                        .map(Turma::getNome)
                         .orElse("Sem turma ativa");
 
         return avaliacaoRepository
