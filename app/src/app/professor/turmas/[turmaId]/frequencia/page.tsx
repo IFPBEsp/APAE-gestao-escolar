@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Loader2, Users, CalendarIcon, AlertCircle, AlertTriangle, LayoutGrid, List, User } from "lucide-react";
+import { ArrowLeft, Loader2, Users, CalendarIcon, AlertCircle, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { Switch } from "@/components/ui/switch";
@@ -12,12 +12,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
-import { format, isSameDay, isPast, startOfDay } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { buscarTurmaPorId, listarAlunos } from "@/services/TurmaService";
-import { registrarChamada, getEstatisticasTurma, contarAulasRealizadas } from "@/services/ChamadaService";
+import { buscarTurmaPorId } from "@/services/TurmaService";
+import { 
+    registrarChamada, 
+    getEstatisticasTurma, 
+    contarAulasRealizadas, 
+    getAlunosDaTurma, 
+    getChamadaPorTurmaEData 
+} from "@/services/ChamadaService";
+import { getAlunosComFrequencia } from "@/services/FrequenciaService";
+import ChamadaCalendar from "@/components/ChamadaCalendar";
 
 export default function FrequenciaPage() {
     const router = useRouter();
@@ -36,19 +43,30 @@ export default function FrequenciaPage() {
             if (!turmaId) return;
             try {
                 setLoading(true);
+                
                 const [turmaData, alunosData, estatisticasData, aulasCount] = await Promise.all([
                     buscarTurmaPorId(turmaId),
-                    listarAlunos(turmaId),
+                    getAlunosComFrequencia(turmaId), // Usar o novo serviço
                     getEstatisticasTurma(turmaId),
                     contarAulasRealizadas(turmaId)
                 ]);
+                
                 setTurma(turmaData);
-                setAlunos(alunosData);
+                
+                // Formatar alunos para o formato esperado pelo componente
+                const alunosFormatados = alunosData.map(aluno => ({
+                    id: aluno.id,
+                    nome: aluno.nome,
+                    matricula: aluno.matricula,
+                    frequencia: aluno.percentualFrequencia
+                }));
+                setAlunos(alunosFormatados);
+                
                 setEstatisticas(Array.isArray(estatisticasData) ? estatisticasData : []);
                 setTotalAulas(aulasCount);
             } catch (error) {
+                console.error("Erro ao carregar dados:", error);
                 toast.error("Erro ao carregar dados da turma.");
-                console.error(error);
             } finally {
                 setLoading(false);
             }
@@ -67,16 +85,31 @@ export default function FrequenciaPage() {
         }
     };
 
-    const handleSalvarChamada = async (chamadas: { aluno: string; status: string }[], data: string, descricao: string) => {
-        console.log("Saving attendance:", chamadas, data, descricao);
+    const handleSalvarChamada = async () => {
         if (turmaId) {
-            getEstatisticasTurma(turmaId).then(stats => {
-                if (Array.isArray(stats)) setEstatisticas(stats);
-            }).catch(err => console.error("Error refreshing stats:", err));
-
-            contarAulasRealizadas(turmaId).then(count => {
-                setTotalAulas(count);
-            }).catch(err => console.error("Error refreshing class count:", err));
+            try {
+                // Recarregar estatísticas
+                const [newStats, newCount] = await Promise.all([
+                    getEstatisticasTurma(turmaId),
+                    contarAulasRealizadas(turmaId)
+                ]);
+                
+                if (Array.isArray(newStats)) setEstatisticas(newStats);
+                setTotalAulas(newCount);
+                
+                // Recarregar alunos com frequência atualizada
+                const alunosAtualizados = await getAlunosComFrequencia(turmaId);
+                const alunosFormatados = alunosAtualizados.map(aluno => ({
+                    id: aluno.id,
+                    nome: aluno.nome,
+                    matricula: aluno.matricula,
+                    frequencia: aluno.percentualFrequencia
+                }));
+                setAlunos(alunosFormatados);
+                
+            } catch (err) {
+                console.error("Error refreshing data:", err);
+            }
         }
     };
 
@@ -164,7 +197,7 @@ function ChamadaContent({
 }: {
     turmaId: number;
     alunos: any[];
-    onSalvarChamada?: (chamadas: { aluno: string; status: string }[], data: string, descricao: string) => void;
+    onSalvarChamada?: () => void;
     data?: Date;
     descricao?: string;
 }) {
@@ -173,20 +206,74 @@ function ChamadaContent({
     const [descricaoAula, setDescricaoAula] = useState(descricao || "");
     const [isSaving, setIsSaving] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [loadingChamada, setLoadingChamada] = useState(false);
 
     const todayStart = startOfDay(new Date());
     const selectedDateStart = startOfDay(selectedDate);
     const isSelectedDateInPast = selectedDateStart < todayStart;
     const isEditingPastDate = isEditing && isSelectedDateInPast;
 
-    const toggleAttendance = (studentId: string | number) => {
-        setAttendance((prev) => {
-            const current = prev[studentId] ?? true;
-            return {
-                ...prev,
-                [studentId]: !current,
-            };
-        });
+    useEffect(() => {
+        async function carregarChamadaExistente() {
+            if (!turmaId || alunos.length === 0) return;
+            
+            try {
+                setLoadingChamada(true);
+                const dataFormatada = format(selectedDate, "yyyy-MM-dd");
+                const chamadaExistente = await getChamadaPorTurmaEData(turmaId, dataFormatada);
+                
+                if (chamadaExistente.listaPresencas && chamadaExistente.listaPresencas.length > 0) {
+                    setDescricaoAula(chamadaExistente.descricao || "");
+                    
+                    const novaAttendance: Record<number, boolean> = {};
+                    
+                    chamadaExistente.listaPresencas.forEach(presenca => {
+                        const alunoId = Number(presenca.alunoId);
+                        novaAttendance[alunoId] = presenca.status === 'PRESENTE';
+                    });
+                    
+                    alunos.forEach(aluno => {
+                        const alunoId = Number(aluno.id);
+                        if (novaAttendance[alunoId] === undefined) {
+                            novaAttendance[alunoId] = true;
+                        }
+                    });
+                    
+                    setAttendance(novaAttendance);
+                    setIsEditing(true);
+                    
+                    toast.info("Chamada existente carregada.");
+                } else {
+                    const novaAttendance: Record<number, boolean> = {};
+                    alunos.forEach(aluno => {
+                        const alunoId = Number(aluno.id);
+                        novaAttendance[alunoId] = true;
+                    });
+                    setAttendance(novaAttendance);
+                    setIsEditing(false);
+                }
+            } catch (error) {
+                console.log("Nenhuma chamada encontrada para esta data.");
+                const novaAttendance: Record<number, boolean> = {};
+                alunos.forEach(aluno => {
+                    const alunoId = Number(aluno.id);
+                    novaAttendance[alunoId] = true;
+                });
+                setAttendance(novaAttendance);
+                setIsEditing(false);
+            } finally {
+                setLoadingChamada(false);
+            }
+        }
+        
+        carregarChamadaExistente();
+    }, [turmaId, selectedDate, JSON.stringify(alunos)]);
+
+    const toggleAttendance = (studentId: number) => {
+        setAttendance((prev) => ({
+            ...prev,
+            [studentId]: !(prev[studentId] ?? true),
+        }));
     };
 
     const handleSave = async () => {
@@ -199,19 +286,13 @@ function ChamadaContent({
 
         try {
             const dataFormatada = format(selectedDate, "yyyy-MM-dd");
-            const dataDisplay = format(selectedDate, "dd/MM/yyyy");
-
-            const chamadas = alunos.map((student) => ({
-                aluno: student.nome,
-                status: (attendance[student.id] ?? true) ? "Presente" : "Ausente",
-            }));
 
             const chamadaRequest = {
                 descricao: descricaoAula,
-                presencas: alunos.map((a, index) => {
-                    const studentId = a.id || a._id || a.alunoId || `temp-${index}`;
+                presencas: alunos.map((aluno) => {
+                    const studentId = Number(aluno.id);
                     const isPresent = attendance[studentId] ?? true;
-
+                    
                     return {
                         alunoId: studentId,
                         status: isPresent ? 'PRESENTE' : 'FALTA'
@@ -220,26 +301,39 @@ function ChamadaContent({
             };
 
             await registrarChamada(turmaId, dataFormatada, chamadaRequest);
-
-            if (onSalvarChamada) {
-                onSalvarChamada(chamadas, dataDisplay, descricaoAula);
-            }
+            
             toast.success("Chamada salva com sucesso!");
+            setIsEditing(true);
+            
+            if (onSalvarChamada) {
+                onSalvarChamada();
+            }
+            
         } catch (err: any) {
-            toast.error("Erro ao salvar chamada: " + err.message);
+            console.error("Erro ao salvar chamada:", err);
+            toast.error("Erro ao salvar chamada: " + (err.message || "Tente novamente."));
         } finally {
             setIsSaving(false);
         }
     };
 
     const totalCount = alunos.length;
-    const presentCount = alunos.reduce((acc, a, index) => {
-        const studentId = a.id || a._id || a.alunoId || `temp-${index}`;
+    const presentCount = alunos.reduce((acc, aluno) => {
+        const studentId = Number(aluno.id);
         return acc + ((attendance[studentId] ?? true) ? 1 : 0);
     }, 0);
 
+    const savedDates = [];
+
     return (
         <div className="space-y-6">
+            {loadingChamada && (
+                <div className="flex justify-center items-center p-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-[#0D4F97] mr-2" />
+                    <span className="text-[#0D4F97]">Carregando chamada...</span>
+                </div>
+            )}
+
             {isEditingPastDate && (
                 <div className="rounded-xl border-2 border-[#FFD000] bg-[#FFD000]/20 p-4">
                     <div className="flex items-start gap-3">
@@ -265,34 +359,27 @@ function ChamadaContent({
                     </div>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <button
-                                type="button"
-                                className="flex h-12 w-full items-center justify-start rounded-lg border-2 border-[#B2D7EC] bg-white px-4 text-[#222222] transition-colors hover:bg-[#B2D7EC]/20 focus:outline-none focus:ring-2 focus:ring-[#0D4F97] focus:ring-offset-2"
-                            >
+                            <Button variant="outline" className="w-full justify-start border-[#B2D7EC] h-11 bg-white">
                                 {format(selectedDate, "dd/MM/yyyy", { locale: ptBR })}
-                            </button>
+                            </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                                mode="single"
+                            <ChamadaCalendar
                                 selected={selectedDate}
                                 onSelect={(date) => date && setSelectedDate(date)}
-                                locale={ptBR}
-                                initialFocus
+                                savedDates={savedDates}
                             />
                         </PopoverContent>
                     </Popover>
                 </div>
 
-                <div className="rounded-xl border-2 border-[#B2D7EC] bg-white p-4">
-                    <div className="mb-2 flex items-center gap-2 text-[#0D4F97]">
-                        <span className="font-medium">Descrição da Aula</span>
-                    </div>
-                    <Textarea
-                        placeholder="Descrição da aula *"
-                        className="min-h-[100px]"
-                        value={descricaoAula}
-                        onChange={(e) => setDescricaoAula(e.target.value)}
+                <div className="rounded-xl border-2 border-[#B2D7EC] p-4 bg-[#F8FAFC]">
+                    <label className="text-[#0D4F97] text-sm font-bold mb-2 block">Resumo da Aula</label>
+                    <Textarea 
+                        value={descricaoAula} 
+                        onChange={(e) => setDescricaoAula(e.target.value)} 
+                        placeholder="O que foi ensinado hoje?" 
+                        className="min-h-[44px] border-[#B2D7EC] bg-white text-[#222222]"
                     />
                 </div>
             </div>
@@ -315,8 +402,8 @@ function ChamadaContent({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {alunos.map((student, index) => {
-                            const studentId = student.id || student._id || student.alunoId || `temp-${index}`;
+                        {alunos.map((student) => {
+                            const studentId = Number(student.id);
                             const isPresent = attendance[studentId] ?? true;
 
                             return (
@@ -347,7 +434,7 @@ function ChamadaContent({
 
             <Button
                 onClick={handleSave}
-                disabled={isSaving}
+                disabled={isSaving || alunos.length === 0}
                 className="w-full bg-[#0D4F97] hover:bg-[#FFD000] hover:text-[#0D4F97] text-white font-medium h-12 transition-colors"
             >
                 {isSaving ? (
@@ -385,13 +472,16 @@ function HistoricoContent({
     const [searchTerm, setSearchTerm] = useState("");
     const [showAlertsOnly, setShowAlertsOnly] = useState(false);
 
-    const alunosComFrequencia = alunos.map(a => {
-        const stat = estatisticas.find(s => String(s.alunoId) === String(a.id || a._id || a.alunoId));
-        const realFrequencia = stat?.frequencia ?? stat?.percentual ?? 0;
-
+    const alunosComFrequencia = alunos.map(aluno => {
+        const stat = estatisticas.find(s => 
+            String(s.alunoId) === String(aluno.id)
+        );
+        
         return {
-            ...a,
-            frequencia: stat ? realFrequencia : (a.frequencia ?? 0)
+            ...aluno,
+            frequencia: stat?.frequencia || aluno.frequencia || 0,
+            totalAulas: stat?.totalAulas || 0,
+            totalPresencas: stat?.totalPresencas || 0
         };
     });
 
@@ -411,7 +501,6 @@ function HistoricoContent({
         }
         return matchSearch && matchAlert;
     });
-
 
     return (
         <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
@@ -507,14 +596,14 @@ function HistoricoContent({
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredAlunos.map((aluno, index) => {
+                                filteredAlunos.map((aluno) => {
                                     const frequencia = aluno.frequencia || 0;
                                     const isAlert = frequencia < 75;
-                                    const studentId = aluno.id || aluno._id || aluno.alunoId;
+                                    const studentId = aluno.id;
 
                                     return (
                                         <TableRow
-                                            key={studentId || index}
+                                            key={studentId}
                                             className={`transition-all hover:bg-[#B2D7EC]/10 cursor-pointer ${isAlert ? "bg-orange-50/30" : ""}`}
                                             onClick={() => {
                                                 if (studentId) {
