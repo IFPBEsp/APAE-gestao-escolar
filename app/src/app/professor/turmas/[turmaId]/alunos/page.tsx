@@ -248,8 +248,8 @@ export default function TurmaDetalhesPage() {
 
                     <div className="flex gap-2">
                       <Button
+                        variant="primary"
                         onClick={() => handleAvaliacoes(aluno.id)}
-                        className="flex-1 bg-[#0D4F97] hover:bg-[#0A3D75]"
                       >
                         <FileText className="mr-2 h-4 w-4" />
                         Avaliações
@@ -258,7 +258,6 @@ export default function TurmaDetalhesPage() {
                       <Button
                         onClick={() => handleRelatorios(aluno.id)}
                         variant="outline"
-                        className="flex-1 border-[#0D4F97] text-[#0D4F97] hover:bg-[#0D4F97]/10"
                       >
                         Relatórios
                       </Button>

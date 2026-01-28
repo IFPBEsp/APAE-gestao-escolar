@@ -332,9 +332,9 @@ function ChamadaContent({
             </div>
 
             <Button
+                variant="primary"
                 onClick={handleSave}
                 disabled={isSaving}
-                className="w-full bg-[#0D4F97] hover:bg-[#FFD000] hover:text-[#0D4F97] text-white font-medium h-12 transition-colors"
             >
                 {isSaving ? (
                     <>
