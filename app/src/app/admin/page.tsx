@@ -5,9 +5,9 @@ import { User, Users, GraduationCap, TrendingUp } from "lucide-react";
 
 export default function AdminHomePage() {
   const [totalAlunos, setTotalAlunos] = useState(20);
-  const [totalTurmas, setTotalTurmas] = useState(6);
+  const [totalTurmas, setTotalTurmas] = useState(7);
   const [totalProfessores, setTotalProfessores] = useState(12);
-  const [ultimaAtividade, setUltimaAtividade] = useState("20/11/2025 - 14:30");
+  const [ultimaAtividade, setUltimaAtividade] = useState("28/01/2026 - 03:37");
 
   const cards = [
     {
