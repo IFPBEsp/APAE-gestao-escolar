@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Loader2, Users, CalendarIcon, AlertCircle, AlertTriangle, LayoutGrid, List, User } from "lucide-react";
 import Link from "next/link";
-import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,7 +28,6 @@ export default function FrequenciaPage() {
     const [estatisticas, setEstatisticas] = useState<any[]>([]);
     const [totalAulas, setTotalAulas] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     useEffect(() => {
         async function carregarDados() {
@@ -55,10 +53,6 @@ export default function FrequenciaPage() {
         }
         carregarDados();
     }, [turmaId]);
-
-    const handleToggleCollapse = () => {
-        setIsSidebarCollapsed(!isSidebarCollapsed);
-    };
 
     const handleNovaChamada = () => {
         const chamadaSection = document.getElementById('secao-chamada');
@@ -89,69 +83,61 @@ export default function FrequenciaPage() {
     }
 
     return (
-        <div className="flex min-h-screen bg-[#E5E5E5]">
-            <ProfessorSidebar
-                activeTab="turmas"
-                onTabChange={(tab) => router.push(`/professor/${tab === 'inicio' ? '' : tab}`)}
-                onLogout={() => router.push("/")}
-                onToggleCollapse={handleToggleCollapse}
-                isCollapsed={isSidebarCollapsed}
-            />
+        <>
+            <div className="mx-auto max-w-7xl space-y-6">
+                <Button
+                    onClick={() => router.back()}
+                    variant="outline"
+                >
+                    <ArrowLeft className="mr-2 h-5 w-5" />
+                    Voltar
+                </Button>
 
-            <main
-                className={`flex-1 overflow-y-auto transition-all duration-300 pt-16 md:pt-0 ${isSidebarCollapsed ? "md:ml-20" : "md:ml-64"
-                    }`}
-            >
-                <div className="p-4 md:p-8">
-                    <div className="mx-auto max-w-7xl space-y-6">
-                        <Button
-                            onClick={() => router.back()}
-                            variant="outline"
-                            className="mb-4 h-12 justify-center border-2 border-[#B2D7EC] px-4 text-[#0D4F97] hover:bg-[#B2D7EC]/20"
-                        >
-                            <ArrowLeft className="mr-2 h-5 w-5" />
-                            Voltar
-                        </Button>
-
-                        <div className="mb-6">
-                            <h1 className="text-[#0D4F97] text-2xl md:text-3xl font-bold mb-2">Gestão de Frequência - {turma?.nome}</h1>
-                            <p className="text-[#222222]">Registre chamadas e consulte o histórico de presença</p>
-                        </div>
-
-                        <div id="secao-chamada">
-                            <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
-                                <CardHeader className="bg-[#F8F9FA] border-b-2 border-[#B2D7EC]">
-                                    <CardTitle className="text-[#0D4F97]">Registrar Chamada</CardTitle>
-                                    <CardDescription className="text-[#222222]">
-                                        Marque a presença dos alunos
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="p-0">
-                                    <div className="p-6">
-                                        <ChamadaContent
-                                            turmaId={turmaId}
-                                            alunos={alunos}
-                                            onSalvarChamada={handleSalvarChamada}
-                                        />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-
-                        <div id="secao-historico">
-                            <HistoricoContent
-                                turmaNome={turma?.nome || ""}
-                                alunos={alunos}
-                                estatisticas={estatisticas}
-                                onViewAlunoHistorico={(alunoId) => router.push(`/professor/turmas/${turmaId}/frequencia/${alunoId}`)}
-                                onNovaChamada={handleNovaChamada}
-                                totalAulasRealizadas={totalAulas}
-                            />
-                        </div>
-                    </div>
+                <div className="mb-6">
+                    <h1 className="text-[#0D4F97] text-2xl md:text-3xl font-bold mb-2">
+                        Gestão de Frequência - {turma?.nome}
+                    </h1>
+                    <p className="text-[#222222]">
+                        Registre chamadas e consulte o histórico de presença
+                    </p>
                 </div>
-            </main>
-        </div>
+
+                <div id="secao-chamada">
+                <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
+                    <CardHeader className="bg-[#F8F9FA] border-b-2 border-[#B2D7EC]">
+                        <CardTitle className="text-[#0D4F97]">
+                            Registrar Chamada
+                        </CardTitle>
+                    <CardDescription className="text-[#222222]">
+                        Marque a presença dos alunos
+                    </CardDescription>
+                        </CardHeader>
+
+                        <CardContent className="p-6">
+                    <ChamadaContent
+                        turmaId={turmaId}
+                        alunos={alunos}
+                        onSalvarChamada={handleSalvarChamada}
+                    />
+                    </CardContent>
+                </Card>
+                </div>
+
+                <div id="secao-historico">
+                <HistoricoContent
+                    turmaNome={turma?.nome || ""}
+                    alunos={alunos}
+                    estatisticas={estatisticas}
+                    onViewAlunoHistorico={(alunoId) =>
+                    router.push(`/professor/turmas/${turmaId}/frequencia/${alunoId}`)
+                    }
+                    onNovaChamada={handleNovaChamada}
+                    totalAulasRealizadas={totalAulas}
+                />
+                </div>
+            </div>
+            </>
+
     );
 }
 

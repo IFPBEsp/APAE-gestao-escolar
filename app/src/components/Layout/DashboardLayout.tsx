@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from 'next/navigation';
 import { Menu, X, LogOut, ChevronLeft, ChevronRight, type LucideIcon } from 'lucide-react';
 
@@ -64,12 +65,14 @@ export default function DashboardLayout({
       `}>
                 {/* Mobile Close Button (Only visible on mobile sidebar) */}
                 {!collapsed && (
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => setIsMobileOpen(false)}
-                        className="absolute right-4 top-4 text-[#0D4F97] md:hidden"
+                        className="fixed right-4 top-4 z-40"
                     >
-                        <X className="h-6 w-6" strokeWidth={1.75} />
-                    </button>
+                        <X className="h-4 w-4" strokeWidth={1.75} />
+                    </Button>
                 )}
 
                 <div className={`flex flex-col items-center gap-3 ${!collapsed ? "pt-4" : ""}`}>
@@ -119,17 +122,14 @@ export default function DashboardLayout({
 
             {/* Footer / Logout */}
             <div className="border-t-2 border-[#0D4F97]/20 p-4">
-                <button
+                <Button
+                    variant="outline"
                     onClick={handleLogout}
-                    className={`
-            flex w-full items-center rounded-3xl bg-transparent text-[#0D4F97] transition-all hover:bg-white/40
-            ${collapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3"}
-          `}
-                    title={collapsed ? "Sair" : undefined}
+                    className={`w-full ${collapsed ? "justify-center" : "justify-start"}`}
                 >
-                    <LogOut className="h-5 w-5 flex-shrink-0" strokeWidth={1.75} />
-                    {!collapsed && <span className="font-medium">Sair</span>}
-                </button>
+                    <LogOut className="h-5 w-5" strokeWidth={1.75} />
+                    {!collapsed && <span>Sair</span>}
+                </Button>
             </div>
         </div>
     );
@@ -137,12 +137,14 @@ export default function DashboardLayout({
     return (
         <div className="flex min-h-screen bg-[#E5E5E5]">
             {/* Mobile Menu Button (Fixed Top-Left) */}
-            <button
+            <Button
+                variant="primary"
+                size="icon"
                 onClick={() => setIsMobileOpen(true)}
-                className="fixed left-4 top-4 z-40 rounded-lg bg-[#0D4F97] p-2 text-white md:hidden shadow-lg"
+                className="fixed left-4 top-4 z-40 md:hidden shadow-lg"
             >
                 <Menu className="h-6 w-6" strokeWidth={1.75} />
-            </button>
+            </Button>
 
             {/* Mobile Overlay */}
             {isMobileOpen && (
@@ -167,12 +169,16 @@ export default function DashboardLayout({
       `}>
                 {/* Toggle Button */}
                 <div className="absolute left-4 top-4 z-40">
-                    <button
+                    <Button
+                        variant="outline"
+                        size="icon"
                         onClick={() => setIsDesktopCollapsed(!isDesktopCollapsed)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-transparent text-[#0D4F97] hover:bg-black/5 transition-all"
                     >
-                        {isDesktopCollapsed ? <ChevronRight className="h-4 w-4" strokeWidth={1.75} /> : <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />}
-                    </button>
+                    {isDesktopCollapsed
+                        ? <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
+                        : <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
+                    }
+                    </Button>
                 </div>
 
                 {/* Adjust margin to account for the toggle button being absolute */}

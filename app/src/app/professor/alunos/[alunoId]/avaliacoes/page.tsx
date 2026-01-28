@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ArrowLeft, FileText, UserCircle, Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, FileText, Plus, Edit, Trash2, Loader2, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -164,9 +164,18 @@ export default function AvaliacoesAlunoPage() {
     }
   };
 
+  if (loadingAluno) {
+    return (
+      <div className="container mx-auto p-8">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-[#0D4F97]" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto">
-      {/* Main Content */}
       <div className="p-4 md:p-8">
         <div className="mx-auto max-w-6xl">
           {/* Botão Voltar */}
@@ -186,32 +195,34 @@ export default function AvaliacoesAlunoPage() {
             </div>
             <div>
               <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho do Aluno</h2>
-              <p className="text-[#222222]">Acompanhe o progresso e histórico de avaliações de {alunoData?.nome || "..."}</p>
+              <p className="text-[#222222]">
+                Acompanhe o progresso e histórico de avaliações de {alunoData?.nome || 'Carregando...'}
+              </p>
             </div>
           </div>
 
-            <EstudanteCard
-              nome={alunoData?.nome || "Carregando..."}
-              turma={turmaData?.nome || "..."}
-              turno={turmaData?.turno}
-              turmaId={turmaId}
-              alunoId={alunoId}
-              loading={loadingAluno}
-              action={
-                <Button
-                  variant="primary"
-                  onClick={handleOpenAdicionarDialog}
-                  disabled={loading || saving}
-                >
-                  <Plus className="mr-2 h-5 w-5" /> 
-                  Adicionar Avaliação
-                </Button>
-              }
-            />
-
+          {/* Card do Estudante */}
+          <EstudanteCard
+            nome={alunoData?.nome || "Carregando..."}
+            turma={turmaData?.nome || "..."}
+            turno={turmaData?.turno}
+            turmaId={turmaId}
+            alunoId={alunoId}
+            loading={loadingAluno}
+            action={
+              <Button
+                variant="primary"
+                onClick={handleOpenAdicionarDialog}
+                disabled={loading || saving}
+              >
+                <Plus className="mr-2 h-5 w-5" /> 
+                Adicionar Avaliação
+              </Button>
+            }
+          />
 
           {/* Lista de Avaliações */}
-          <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
+          <Card className="mt-6 rounded-xl border-2 border-[#B2D7EC] shadow-md">
             <CardContent className="p-0">
               {/* Header da Tabela */}
               <div className="hidden border-b-2 border-[#B2D7EC] bg-[#B2D7EC]/20 md:grid md:grid-cols-12 md:gap-4 md:p-4">
@@ -220,106 +231,108 @@ export default function AvaliacoesAlunoPage() {
                 <div className="col-span-2 text-center text-[#0D4F97] font-semibold">Ações</div>
               </div>
 
-                {loading ? (
-                  <div className="p-8 text-center flex justify-center items-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-[#0D4F97]" />
-                  </div>
-                ) : avaliacoes.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500">Nenhuma avaliação encontrada.</div>
-                ) : (
-                  avaliacoes.map((av) => (
-                    <div key={av.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border-b border-[#B2D7EC] items-center hover:bg-gray-50">
-                      <div className="md:col-span-2 font-medium">{formatarData(av.dataAvaliacao)}</div>
-                      <div className="md:col-span-8 text-sm text-gray-700">{av.descricao}</div>
-                      <div className="md:col-span-2 flex justify-center gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          onClick={() => handleOpenEditarDialog(av)} 
-                          className="text-blue-600">
-                          <Edit className="h-5 w-5" />
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          onClick={() => handleOpenExcluirDialog(av)} 
-                          className="text-red-600">
-                          <Trash2 className="h-5 w-5" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Dialog Adicionar/Editar */}
-            <Dialog open={isAdicionarDialogOpen || isEditarDialogOpen} onOpenChange={(val) => {
-              if (!val) { setIsAdicionarDialogOpen(false); setIsEditarDialogOpen(false); }
-            }}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{isEditarDialogOpen ? "Editar Avaliação" : "Nova Avaliação"}</DialogTitle>
-                </DialogHeader>
-                <div className="py-4">
-                  <Textarea
-                    placeholder="Descreva o desempenho do aluno..."
-                    value={descricaoAvaliacao}
-                    onChange={(e) => setDescricaoAvaliacao(e.target.value)}
-                    className="min-h-[150px]"
-                  />
+              {loading ? (
+                <div className="p-8 text-center flex justify-center items-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-[#0D4F97]" />
                 </div>
-                <DialogFooter>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => { setIsAdicionarDialogOpen(false); 
-                    setIsEditarDialogOpen(false); }}
-                  >
-                    Cancelar
-                  </Button>
+              ) : avaliacoes.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">Nenhuma avaliação encontrada.</div>
+              ) : (
+                avaliacoes.map((av) => (
+                  <div key={av.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border-b border-[#B2D7EC] items-center hover:bg-gray-50">
+                    <div className="md:col-span-2 font-medium">{formatarData(av.dataAvaliacao)}</div>
+                    <div className="md:col-span-8 text-sm text-gray-700">{av.descricao}</div>
+                    <div className="md:col-span-2 flex justify-center gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => handleOpenEditarDialog(av)} 
+                      >
+                        <Eye className="h-5 w-5" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => handleOpenExcluirDialog(av)} 
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
 
-                  <Button 
-                    variant="primary"
-                    onClick={isEditarDialogOpen ? handleEditarAvaliacao : handleAdicionarAvaliacao}
-                    disabled={saving}
-                  >
-                    {saving && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                    Salvar
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+          {/* Dialog Adicionar/Editar */}
+          <Dialog open={isAdicionarDialogOpen || isEditarDialogOpen} onOpenChange={(val) => {
+            if (!val) { 
+              setIsAdicionarDialogOpen(false); 
+              setIsEditarDialogOpen(false); 
+            }
+          }}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{isEditarDialogOpen ? "Editar Avaliação" : "Nova Avaliação"}</DialogTitle>
+              </DialogHeader>
+              <div className="py-4">
+                <Textarea
+                  placeholder="Descreva o desempenho do aluno..."
+                  value={descricaoAvaliacao}
+                  onChange={(e) => setDescricaoAvaliacao(e.target.value)}
+                  className="min-h-[150px]"
+                />
+              </div>
+              <DialogFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => { 
+                    setIsAdicionarDialogOpen(false); 
+                    setIsEditarDialogOpen(false); 
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  variant="primary"
+                  onClick={isEditarDialogOpen ? handleEditarAvaliacao : handleAdicionarAvaliacao}
+                  disabled={saving}
+                >
+                  {saving && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                  Salvar
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-            {/* Dialog Excluir */}
-            <Dialog open={isExcluirDialogOpen} onOpenChange={setIsExcluirDialogOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle className="text-red-600">Excluir Avaliação</DialogTitle>
-                  <DialogDescription>
-                    Tem certeza que deseja excluir esta avaliação? Esta ação não pode ser desfeita.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setIsExcluirDialogOpen(false)}
-                  >
-                    Cancelar
-                  </Button>
-
-                  <Button 
-                    variant="danger" 
-                    onClick={handleExcluirAvaliacao} 
-                    disabled={saving}
-                  >
-                    {saving ? "Excluindo..." : "Excluir"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
-          </div>
+          {/* Dialog Excluir */}
+          <Dialog open={isExcluirDialogOpen} onOpenChange={setIsExcluirDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="text-red-600">Excluir Avaliação</DialogTitle>
+                <DialogDescription>
+                  Tem certeza que deseja excluir esta avaliação? Esta ação não pode ser desfeita.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsExcluirDialogOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  variant="danger" 
+                  onClick={handleExcluirAvaliacao} 
+                  disabled={saving}
+                >
+                  {saving ? "Excluindo..." : "Excluir"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
+    </div>
   );
 }

@@ -253,7 +253,7 @@ export default function RelatoriosAlunoListaPage() {
                             variant="ghost"
                             size="icon"
                           >
-                            <Eye className="h-4 w-4" />
+                            <Eye className="h-5 w-5" />
                           </Button>
                           <Button
                             onClick={() => {
@@ -263,7 +263,7 @@ export default function RelatoriosAlunoListaPage() {
                             variant="ghost"
                             size="icon"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-5 w-5" />
                           </Button>
                         </div>
                       </div>
