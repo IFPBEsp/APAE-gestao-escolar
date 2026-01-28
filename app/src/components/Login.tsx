@@ -24,12 +24,14 @@ export default function LoginComponent({ tipoPredefinido }: LoginProps) {
 
     try {
       const data = await login(email, senha);
-      const { token, role , id} = data;
+      const { token, role, id } = data;
 
-      document.cookie = `token=${token}; path=/; max-age=86400`;
-      document.cookie = `role=${role}; path=/; max-age=86400`;
-
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
       localStorage.setItem("usuarioLogado", JSON.stringify({ id, email, role }));
+
+      document.cookie = `token=${token}; path=/; max-age=86400; SameSite=Strict`;
+      document.cookie = `role=${role}; path=/; max-age=86400; SameSite=Strict`;
 
       if (role === "ADMIN") {
         window.location.href = "/admin";
