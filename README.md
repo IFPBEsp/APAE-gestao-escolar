@@ -231,6 +231,18 @@ npm start
 ```
 
 
+### 4. Configure as funções do banco de dados
+
+Após subir o backend pela primeira vez, é necessário criar **funções PostgreSQL** que otimizam as consultas do sistema.
+
+📘 **Consulte o arquivo [`docs/funcoes.md`](docs/funcoes.md)** para:
+- Instruções detalhadas de como executar as funções no banco local (Docker)
+- Como configurar no banco de produção (Neon)
+- Código completo das funções
+- Vídeo tutorial explicativo
+
+> ⚡ **Resumo rápido:** As funções `get_chamada_por_turma_e_data`, `listar_professores_com_turmas` e `listar_turmas_otimizado` precisam ser executadas uma única vez após a criação do banco.
+
 
 ## 🤝 Como Contribuir
 
