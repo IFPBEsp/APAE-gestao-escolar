@@ -48,7 +48,8 @@ interface TurmaAPIData {
     anoCriacao: number;
     turno: string;
     nome: string;
-    professor: Professor;
+    professorId: number;
+    professorNome: string;
     alunos: AlunoNaTurma[];
     isAtiva: boolean;
 }
@@ -94,7 +95,11 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             setTipo(turmaData.tipo);
             setTurno(turmaData.turno);
             
-            setProfessorSelecionado(turmaData.professor);
+            setProfessorSelecionado({
+                id: turmaData.professorId,
+                nome: turmaData.professorNome
+            });
+
             setAlunosNaTurma(
                 (turmaData.alunos || []).map(a => ({
                     alunoId: a.alunoId,
@@ -150,7 +155,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             setAlunosEncontrados(
                 alunosArray
                     .filter(a => !alunosNaTurma.some(aluno => aluno.alunoId === a.id))
-                    .map(a => ({ alunoId: a.id, nome: a.nome }))
+                    .map(a => ({ id: a.id, nome: a.nome }))
             );
         } catch (error: any) {
             toast.error("Erro ao buscar alunos: " + (error.message || ""));
@@ -177,8 +182,18 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     }
 
     async function handleSave() {
-        if (!turmaData || !professorSelecionado) {
-            toast.error("Erro: Dados da turma ou professor ausentes.");
+        if (!turmaData) {
+            toast.error("Erro: Dados da turma ausentes.");
+            return;
+        }
+
+        const professorFinal = professorSelecionado ?? {
+            id: turmaData.professorId,
+            nome: turmaData.professorNome
+        };
+
+        if (!professorFinal) {
+            toast.error("Nenhum professor encontrado para a turma.");
             return;
         }
 
@@ -188,21 +203,24 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             tipo: tipo.toUpperCase(),
             turno: turno.toUpperCase(),
             isAtiva: turmaData.isAtiva,
-            professorId: professorSelecionado.id,
-            anoCriacao: turmaData.anoCriacao, 
+            professorId: professorFinal.id,
+            anoCriacao: turmaData.anoCriacao,
         };
 
         try {
             const turmaAtualizada = await atualizarTurma(idTurma, dadosAtualizados);
 
-            await adicionarAlunosATurma(idTurma, alunosNaTurma.map(a => a.alunoId));
+            await adicionarAlunosATurma(
+                idTurma,
+                alunosNaTurma.map(a => a.alunoId)
+            );
 
             toast.success(`Turma ${turmaData.nome} atualizada com sucesso!`);
 
             if (onSave) {
                 onSave({
                     ...turmaAtualizada,
-                    professor: professorSelecionado,
+                    professor: professorFinal,
                     alunos: alunosNaTurma,
                 });
             }
@@ -279,7 +297,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                         <div className="bg-[#E8F3FF] p-4 rounded-lg border border-[#B2D7EC]">
                             <Label className="text-[#0D4F97] mb-1 block">Professor Selecionado:</Label>
                             <div className="flex items-center gap-2 text-[#0D4F97] font-medium">
-                                <span>{professorSelecionado?.nome || "Professor atual permanece"}</span>
+                                <span>{professorSelecionado?.nome || turmaData.professorNome}</span>
                             </div>
                         </div>
 
@@ -379,7 +397,6 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                     <Button
                         variant="primary"
                         onClick={handleSave}
-                        disabled={!professorSelecionado} 
                     >
                         Salvar Alterações
                     </Button>
