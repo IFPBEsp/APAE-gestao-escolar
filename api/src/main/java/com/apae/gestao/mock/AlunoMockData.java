@@ -1,15 +1,18 @@
 package com.apae.gestao.mock;
 
-import com.apae.gestao.entity.Aluno;
-import com.apae.gestao.repository.AlunoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
+
+import com.apae.gestao.entity.Aluno;
+import com.apae.gestao.repository.AlunoRepository;
+
 @Component
+@ConditionalOnProperty(name = "app.mock.alunos.enabled", havingValue = "true")
 public class AlunoMockData implements CommandLineRunner {
 
     @Autowired

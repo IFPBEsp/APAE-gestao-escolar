@@ -54,7 +54,7 @@ O projeto está disponível online! Acesse:
 
 <div>
   <a href="https://apae-gestao-escolar.vercel.app/">
-    <img src="https://img.shields.io/badge/APAE_Gestão_Escolar-6DB33F?style=for-the-badge&logo=vercel&logo" />
+    <img src="https://img.shields.io/badge/APAE_Gestão_Escolar-6DB33F?style=for-the-badge&logo=vercel&logo" alt="APAE Gestão Escolar" />
   </a>
 </div>
 
@@ -129,7 +129,7 @@ APAE-gestao-escolar/
 
 ### Pré-requisitos
 
-Antes de começar, você precisá ter instalado em sua máquina:
+Antes de começar, você precisará ter instalado em sua máquina:
 
 | Ferramenta | Versão | Finalidade |
 |------------|--------|------------|
@@ -167,8 +167,6 @@ cd api
 
 #### 2.1 Suba o banco de dados com Docker
 
-O comando abaixo inicia o container PostgreSQL configurado no `docker-compose.yml`:
-
 ```bash
 docker compose up -d
 ```
@@ -184,7 +182,18 @@ mvnw.cmd clean package # Windows
 ```
 > O arquivo `.jar` será gerado na pasta `target/`
 
+#### 2.3 Execute o backend
 
+```bash
+./mvnw spring-boot:run   # Linux/Mac
+mvnw.cmd spring-boot:run # Windows
+```
+
+Ou, caso já tenha compilado o `.jar`:
+
+```bash
+java -jar target/*.jar
+```
 
 **A API estará disponível em:** `http://localhost:8080`
 
@@ -230,6 +239,18 @@ Execute a versão compilada:
 npm start
 ```
 
+
+### 4. Configure as funções do banco de dados
+
+Após subir o backend pela primeira vez, é necessário criar **funções PostgreSQL** que otimizam as consultas do sistema.
+
+📘 **Consulte o arquivo [`docs/funcoes.md`](docs/funcoes.md)** para:
+- Instruções detalhadas de como executar as funções no banco local (Docker)
+- Como configurar no banco de produção (Neon)
+- Código completo das funções
+- Vídeo tutorial explicativo
+
+> ⚡ **Resumo rápido:** As funções `get_chamada_por_turma_e_data`, `listar_professores_com_turmas` e `listar_turmas_otimizado` precisam ser executadas uma única vez após a criação do banco.
 
 
 ## 🤝 Como Contribuir

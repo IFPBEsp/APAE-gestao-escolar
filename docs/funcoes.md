@@ -1,15 +1,29 @@
 # 📘 Documentação Técnica – Funções do Banco de Dados
 
-Projeto: Sistema de Gestão Escolar APAE  
-Banco de Dados: PostgreSQL  
-Retorno das funções: JSON
+**Projeto:** Sistema de Gestão Escolar APAE  
+**Banco de Dados:** PostgreSQL  
+**Retorno das funções:** JSON
 
 ---
-# 🎥 Vídeo pra Auxiliar
 
- **link:** https://www.youtube.com/watch?v=Z79Swlhwmm0
+## 🐳 Acessando o Banco Local (Docker)
+
+Após subir o container Docker, use o comando abaixo para acessar o PostgreSQL e executar as funções:
+
+```bash
+docker exec -it apae-gestao-escolar-db-1 psql -U apae_user -d apae_db
+```
+
+> 💡 **Dica:** O nome do container pode variar. Use `docker ps` para listar os containers em execução e identificar o nome correto.
 
 ---
+
+## 🎥 Vídeo Auxiliar
+
+[**Assista ao tutorial no YouTube**](https://www.youtube.com/watch?v=Z79Swlhwmm0)
+
+---
+
 # 1️⃣ Função: get_chamada_por_turma_e_data
 
 ## 📌 Objetivo
@@ -353,70 +367,6 @@ BEGIN
 END;
 $function$
 ```
----
-
-# 4️⃣ Configurações da Aplicação
-
-## Banco de Dados
-
-- PostgreSQL
-- URL: jdbc:postgresql://localhost:5432/apae_db
-- Usuário: apae_user
-
-## 💻 Código da Função
-
-```
-spring.application.name=api
-# Banco de dados
-spring.datasource.url=jdbc:postgresql://localhost:5432/apae_db
-spring.datasource.username=apae_user
-spring.datasource.password=apae_pass
-
-# JPA
-spring.jpa.hibernate.ddl-auto=update
-# spring.jpa.hibernate.ddl-auto=create-drop
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-
-# Server
-server.port=8080
-
-# MinIO
-minio.url=http://localhost:9000
-minio.access-key=apae_admin
-minio.secret-key=apae_secret123
-minio.bucket=apae-bucket
-minio.secure=false
-
-# Swagger / OpenAPI
-springdoc.api-docs.path=/v3/api-docs
-springdoc.swagger-ui.path=/docs
-springdoc.swagger-ui.display-request-duration=true
-springdoc.swagger-ui.doc-expansion=none
-springdoc.swagger-ui.tags-sorter=alpha
-springdoc.swagger-ui.operations-sorter=alpha
-springdoc.swagger-ui.default-model-expand-depth=1
-springdoc.swagger-ui.defaultModelsExpandDepth=0
-springdoc.swagger-ui.persistAuthorization=true
-springdoc.swagger-ui.syntaxHighlight.theme=monokai
-springdoc.swagger-ui.customcssurl=/swagger-ui/swagger-custom.css
-springdoc.swagger-ui.customfavicon=https://apaebrasil.org.br/wp-content/uploads/2021/01/cropped-apae-icon-32x32.png
-springdoc.swagger-ui.logo.url=https://apaebrasil.org.br/wp-content/uploads/2021/01/logo-apae-2.png
-springdoc.default-produces-media-type=application/json
-springdoc.default-consumes-media-type=application/json
-
-# Mock de dados (apenas para desenvolvimento/testes)
-# Para habilitar: app.mock.professores.enabled=true
-app.mock.professores.enabled=false
-
-# Variavel da senha e do email do coordenador
-admin.email=admin@apae.org.br
-admin.password=admin123
-
-#Config JWT
-jwt.secret=MinhaChaveSuperSecretaDeNoMinimo32Caracteres
-jwt.expiration=86400000
-```
 
 ---
 
@@ -424,11 +374,11 @@ jwt.expiration=86400000
 
 As funções foram criadas com foco em:
 
-- Performance
-- Redução de múltiplas queries
-- Centralização de regras no banco
-- Retorno estruturado em JSON
-- Facilidade de integração com Spring Boot
+- **Performance**: Consultas otimizadas e agregadas no banco
+- **Redução de múltiplas queries**: Evita N+1 no backend
+- **Centralização de regras**: Lógica de negócio no banco
+- **Retorno estruturado**: Dados em JSON prontos para a API
+- **Facilidade de integração**: Compatível com Spring Boot
 
 ---
 
@@ -440,3 +390,27 @@ O uso de funções no PostgreSQL permite:
 - Consultas otimizadas
 - Menor carga no backend
 - Melhor manutenção do sistema
+
+---
+
+### ✅ Verificação das Funções
+
+Após executar as funções, teste com:
+
+```sql
+-- Testar listagem de turmas
+SELECT listar_turmas_otimizado();
+
+-- Testar listagem de professores
+SELECT listar_professores_com_turmas();
+
+-- Testar chamada (substitua 1 pela ID de uma turma existente)
+SELECT get_chamada_por_turma_e_data(1, CURRENT_DATE);
+```
+
+---
+
+### ⚠️ Nota de Segurança
+
+As credenciais do banco de dados (usuário/senha) e demais configurações sensíveis **não devem ser versionadas**. Utilize variáveis de ambiente ou arquivos `.env` ignorados pelo Git para gerenciar essas informações em desenvolvimento e produção.
+
