@@ -75,14 +75,28 @@ public class AlunoService {
                 .findAllByAlunoAndIsAlunoAtivoTrue(aluno)
                 .forEach(ta -> ta.setIsAlunoAtivo(false));
 
-        TurmaAluno novoVinculo = new TurmaAluno();
-        novoVinculo.setAluno(aluno);
-        novoVinculo.setTurma(novaTurma);
-        novoVinculo.setIsAlunoAtivo(true);
+        //busca se o aluno já tem registro no novaTurma para não criar uma nova instância de aluno no bd
+        TurmaAluno vinculo = aluno.getTurmaAlunos().stream()
+                .filter(ta -> ta.getTurma().getId().equals(novaTurma.getId()))
+                .findFirst()
+                .orElse(null);
 
-        turmaAlunoRepository.save(novoVinculo);
-        aluno.getTurmaAlunos().add(novoVinculo);
+        //se já tiver sido vinculado uma vez
+        if (vinculo != null) {
+            //reativa
+            vinculo.setIsAlunoAtivo(true);
+        } else {
+            //se nunca tiver sido vinculado
+            vinculo = new TurmaAluno();
+            vinculo.setAluno(aluno);
+            vinculo.setTurma(novaTurma);
+            vinculo.setIsAlunoAtivo(true);
 
+            //adiciona na lista pra persistência
+            aluno.getTurmaAlunos().add(vinculo);
+        }
+
+        turmaAlunoRepository.save(vinculo);
         return new AlunoDetalhesDTO(aluno);
     }
 

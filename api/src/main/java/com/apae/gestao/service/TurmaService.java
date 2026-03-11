@@ -1,6 +1,7 @@
 package com.apae.gestao.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.apae.gestao.dto.*;
@@ -148,6 +149,13 @@ public class TurmaService {
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
 
         turma.setIsAtiva(false);
+
+        if (turma.getTurmaAlunos() != null) {
+            turma.getTurmaAlunos().forEach(turmaAluno -> {
+                turmaAluno.setIsAlunoAtivo(false);
+            });
+        }
+
         Turma atualizado = turmaDAO.save(turma);
         return new TurmaResponseDTO(atualizado);
     }
@@ -163,8 +171,20 @@ public class TurmaService {
             throw new RuntimeException("Um ou mais IDs de aluno não foram encontrados.");
         }
 
+
+        //for que checa se o vínculo já existe para não duplicar no bd
         for (Aluno aluno : alunos) {
-            turma.addAluno(aluno, true);
+            Optional<TurmaAluno> vinculoExistente = turma.getTurmaAlunos().stream()
+                    .filter(ta -> ta.getAluno().getId().equals(aluno.getId()))
+                    .findFirst();
+
+            if (vinculoExistente.isPresent()) {
+                //se já existe apenas ativa
+                vinculoExistente.get().setIsAlunoAtivo(true);
+            } else {
+                //se n existe ai adiciona outro no bd
+                turma.addAluno(aluno, true);
+            }
         }
 
         Turma atualizada = turmaDAO.save(turma);
