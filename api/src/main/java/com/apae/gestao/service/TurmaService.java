@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.apae.gestao.dto.ProfessorResponseDTO;
@@ -23,6 +24,7 @@ import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.TurmaRepository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class TurmaService {
@@ -164,6 +166,19 @@ public class TurmaService {
         }
 
         for (Aluno aluno : alunos) {
+
+            List<TurmaAluno> matriculasAtivas = turmaAlunoDAO.findAllByAlunoAndIsAlunoAtivoTrue(aluno);
+
+
+            boolean ativoEmOutraTurma = matriculasAtivas.stream()
+                    .anyMatch(ta -> !ta.getTurma().getId().equals(turma.getId()));
+
+            if (ativoEmOutraTurma) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNPROCESSABLE_ENTITY,
+                        "Não foi possível matricular o aluno: o sistema não permite alunos ativos em múltiplas turmas simultaneamente."
+                );
+            }
             turma.addAluno(aluno, true);
         }
 
@@ -252,6 +267,19 @@ public class TurmaService {
                 boolean alunoJaExiste = turma.getTurmaAlunos().stream()
                         .anyMatch(ta -> ta.getAluno().getId().equals(aluno.getId()));
                 if (!alunoJaExiste) {
+                    List<TurmaAluno> matriculasAtivas = turmaAlunoDAO.findAllByAlunoAndIsAlunoAtivoTrue(aluno);
+
+
+                    boolean ativoEmOutraTurma = matriculasAtivas.stream()
+                            .anyMatch(ta -> turma.getId() == null || !ta.getTurma().getId().equals(turma.getId()));
+
+                    if (ativoEmOutraTurma) {
+                        throw new ResponseStatusException(
+                                HttpStatus.UNPROCESSABLE_ENTITY,
+                                "Não foi possível matricular o aluno: o sistema não permite alunos ativos em mais de uma turma simultaneamente."
+                        );
+                    }
+
                     turma.addAluno(aluno, true);
                 }
             }
