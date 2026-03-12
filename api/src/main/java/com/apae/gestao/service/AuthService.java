@@ -53,14 +53,19 @@ public class AuthService {
         Professor professor = professorRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Professor não encontrado"));
 
-        // Primeiro acesso
+        // Compatibilidade com professores antigos sem senha definida
         if (professor.getSenha() == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "PRIMEIRO_ACESSO");
         }
 
-        // Login normal
+        // Validação da senha informada
         if (!passwordEncoder.matches(request.getSenha(), professor.getSenha())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Senha incorreta");
+        }
+
+        // Bloqueio de acesso enquanto estiver em primeiro acesso
+        if (Boolean.TRUE.equals(professor.getPrimeiroAcesso())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "PRIMEIRO_ACESSO");
         }
 
         return new LoginResponseDTO(
@@ -75,11 +80,12 @@ public class AuthService {
         Professor professor = professorRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        if (professor.getSenha() != null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Senha já cadastrada");
+        if (Boolean.FALSE.equals(professor.getPrimeiroAcesso())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Primeiro acesso já realizado");
         }
 
         professor.setSenha(passwordEncoder.encode(request.getNovaSenha()));
+        professor.setPrimeiroAcesso(false);
         professorRepository.save(professor);
     }
 }
