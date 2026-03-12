@@ -243,6 +243,10 @@ public class TurmaService {
         Turma turma = turmaDAO.findById(turmaId)
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada."));
 
+        if (ativo && !turma.getIsAtiva()){
+            throw new RuntimeException("Não é possível ativar um aluno em uma turma inativa.");
+        }
+
         Aluno aluno = alunoDAO.findById(alunoId)
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado."));
 
