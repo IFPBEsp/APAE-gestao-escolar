@@ -213,7 +213,9 @@ BEGIN
             p.email,
             p.telefone,              
             p.formacao,              
-            p.data_contratacao,      
+            p.data_contratacao,   
+            p.data_nascimento,
+            p.endereco,
             p.ativo
         FROM professores p
         WHERE 
@@ -232,7 +234,9 @@ BEGIN
             pf.email,
             pf.telefone,             
             pf.formacao,             
-            pf.data_contratacao,     
+            pf.data_contratacao,
+            pf.data_nascimento,    
+            pf.endereco,        
             pf.ativo,
             COALESCE(
                 json_agg(t.nome ORDER BY t.nome) FILTER (WHERE t.nome IS NOT NULL),
@@ -240,7 +244,7 @@ BEGIN
             ) AS turmas
         FROM professores_filtrados pf
         LEFT JOIN turmas t ON t.professor_id = pf.id
-        GROUP BY pf.id, pf.nome, pf.cpf, pf.email, pf.telefone, pf.formacao, pf.data_contratacao, pf.ativo
+        GROUP BY pf.id, pf.nome, pf.cpf, pf.email, pf.telefone, pf.formacao, pf.data_contratacao,pf.data_nascimento, pf.endereco, pf.ativo
     )
     SELECT COALESCE(
         json_agg(
@@ -251,7 +255,9 @@ BEGIN
                 'email', email,
                 'telefone', telefone,                    
                 'formacao', formacao,                    
-                'dataContratacao', data_contratacao,     
+                'dataContratacao', data_contratacao,
+                'dataNascimento', data_nascimento, 
+                'endereco', endereco,
                 'ativo', ativo,
                 'turmas', turmas
             )

@@ -185,6 +185,28 @@ export default function DetalhesProfessor() {
                   </p>
                 </div>
 
+                {/* Data de Nascimento */}
+                <div>
+                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
+                    Data de Nascimento
+                  </p>
+                  <p className="text-[#222222]">
+                    {professor.dataNascimento
+                      ? formatDate(professor.dataNascimento)
+                      : "—"}
+                  </p>
+                </div>
+
+                {/* Endereço */}
+                <div>
+                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
+                    Endereço
+                  </p>
+                  <p className="text-[#222222]">
+                    {professor.endereco || "—"}
+                  </p>
+                </div>
+
                 {/* Número de Turmas */}
                 <div>
                   <p className="text-sm font-semibold text-[#0D4F97] mb-1">
