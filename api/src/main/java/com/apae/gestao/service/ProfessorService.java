@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -26,6 +27,9 @@ public class ProfessorService {
 
     @Autowired
     private TurmaRepository turmaRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private final ObjectMapper objectMapper;
 
@@ -98,6 +102,9 @@ public class ProfessorService {
 
         Professor professor = new Professor();
         mapearDtoParaEntity(dto, professor);
+        String cpfSomenteDigitos = dto.getCpf().replaceAll("\\D", "");
+        professor.setSenha(passwordEncoder.encode(cpfSomenteDigitos));
+        professor.setPrimeiroAcesso(true);
         professor.setAtivo(true);
         Professor salvo = professorRepository.save(professor);
 

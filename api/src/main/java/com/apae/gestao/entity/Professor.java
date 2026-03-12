@@ -85,6 +85,9 @@ public class Professor {
         if (ativo == null) {
             ativo = true;
         }
+        if (primeiroAcesso == null) {
+            primeiroAcesso = true;
+        }
     }
 
     @PreUpdate
