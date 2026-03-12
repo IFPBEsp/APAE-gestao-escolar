@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.apae.gestao.dto.ProfessorResponseDTO;
@@ -23,6 +24,7 @@ import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.TurmaRepository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class TurmaService {
@@ -164,6 +166,8 @@ public class TurmaService {
         }
 
         for (Aluno aluno : alunos) {
+
+            validarVinculoAlunoTurma(aluno,turmaId);
             turma.addAluno(aluno, true);
         }
 
@@ -225,6 +229,10 @@ public class TurmaService {
         TurmaAluno turmaAluno = turmaAlunoDAO.findByTurmaAndAluno(turma, aluno)
                 .orElseThrow(() -> new RuntimeException("O aluno não pertence a esta turma."));
 
+        if(ativo){
+            validarVinculoAlunoTurma(aluno,turmaId);
+        }
+
         turmaAluno.setIsAlunoAtivo(ativo);
         turmaAlunoDAO.save(turmaAluno);
     }
@@ -252,9 +260,26 @@ public class TurmaService {
                 boolean alunoJaExiste = turma.getTurmaAlunos().stream()
                         .anyMatch(ta -> ta.getAluno().getId().equals(aluno.getId()));
                 if (!alunoJaExiste) {
+                    validarVinculoAlunoTurma(aluno, turma.getId());
                     turma.addAluno(aluno, true);
                 }
             }
         }
     }
+
+    private void validarVinculoAlunoTurma(Aluno aluno, Long turmaIdAtual) {
+        List<TurmaAluno> matriculasAtivas = turmaAlunoDAO.findAllByAlunoAndIsAlunoAtivoTrue(aluno);
+
+        boolean ativoEmOutraTurma = matriculasAtivas.stream()
+                .anyMatch(ta -> turmaIdAtual == null || !ta.getTurma().getId().equals(turmaIdAtual));
+
+        if (ativoEmOutraTurma) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Não foi possível matricular o aluno: o sistema não permite alunos ativos em múltiplas turmas simultaneamente."
+            );
+        }
+    }
+
+
 }
