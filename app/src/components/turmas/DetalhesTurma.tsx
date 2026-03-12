@@ -11,7 +11,7 @@ import {
     DialogDescription,
     DialogFooter
 } from "@/components/ui/dialog";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     buscarTurmaPorId,
     desativarTurma,
@@ -54,28 +54,39 @@ export function DetalhesTurma({
     const [loadingHistorico, setLoadingHistorico] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [showAlertsOnly, setShowAlertsOnly] = useState(false);
+    const historicoRequestIdRef = useRef(0);
 
     useEffect(() => {
         async function carregarTurma() {
             try {
               setLoading(true);
 
+              const [turmaData] = await Promise.all([
+                buscarTurmaPorId(turmaId)
+              ]);
+
               const [
-                turmaData,
-                alunosFrequenciaResponse,
-                estatisticasResponse,
-                totalAulasResponse
-              ] = await Promise.all([
-                buscarTurmaPorId(turmaId),
+                alunosFrequenciaResult,
+                estatisticasResult,
+                totalAulasResult,
+              ] = await Promise.allSettled([
                 getAlunosComFrequencia(turmaId),
                 getEstatisticasTurma(turmaId),
                 contarAulasRealizadas(turmaId)
               ]);
 
               setTurma(turmaData);
-              setAlunosFrequencia(alunosFrequenciaResponse || []);
-              setEstatisticas(Array.isArray(estatisticasResponse) ? estatisticasResponse : []);
-              setTotalAulasRealizadas(totalAulasResponse || 0);
+              setAlunosFrequencia(
+                alunosFrequenciaResult.status === "fulfilled" ? alunosFrequenciaResult.value || [] : []
+              );
+              setEstatisticas(
+                estatisticasResult.status === "fulfilled" && Array.isArray(estatisticasResult.value)
+                  ? estatisticasResult.value
+                  : []
+              );
+              setTotalAulasRealizadas(
+                totalAulasResult.status === "fulfilled" ? totalAulasResult.value || 0 : 0
+              );
 
             } catch (error: any) {
               toast.error(error.message || "Erro ao carregar turma");
@@ -116,18 +127,26 @@ export function DetalhesTurma({
             return;
         }
 
+        const currentRequestId = ++historicoRequestIdRef.current;
+
         try {
             setAlunoSelecionado(aluno);
             setIsHistoricoOpen(true);
             setLoadingHistorico(true);
+            setHistoricoAluno([]);
 
             const historico = await getHistoricoAluno(turmaId, aluno.id);
-            setHistoricoAluno(historico);
+
+            if (historicoRequestIdRef.current === currentRequestId) {
+                setHistoricoAluno(historico);
+            }
         } catch (error: any) {
             console.error("Erro ao carregar histórico do aluno:", error);
             toast.error(error.message || "Erro ao carregar histórico do aluno.");
         } finally {
-            setLoadingHistorico(false);
+            if (historicoRequestIdRef.current === currentRequestId) {
+                setLoadingHistorico(false);
+            }
         }
     }
 

@@ -68,13 +68,17 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
           turmaResponse,
           alunosResponse,
           alunosAtivosResponse,
-          alunosFrequenciaResponse,
-          estatisticasResponse,
-          totalAulasResponse
         ] = await Promise.all([
           buscarTurmaPorId(turmaId),
           listarAlunos(turmaId),
           listarAlunosAtivos(turmaId),
+        ]);
+
+        const [
+          alunosFrequenciaResult,
+          estatisticasResult,
+          totalAulasResult,
+        ] = await Promise.allSettled([
           getAlunosComFrequencia(turmaId),
           getEstatisticasTurma(turmaId),
           contarAulasRealizadas(turmaId)
@@ -83,9 +87,17 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
         setTurma(turmaResponse);
         setAlunos(alunosResponse);
         setAlunosAtivosCount(alunosAtivosResponse.length);
-        setAlunosFrequencia(alunosFrequenciaResponse || []);
-        setEstatisticas(Array.isArray(estatisticasResponse) ? estatisticasResponse : []);
-        setTotalAulasRealizadas(totalAulasResponse || 0);
+        setAlunosFrequencia(
+          alunosFrequenciaResult.status === "fulfilled" ? alunosFrequenciaResult.value || [] : []
+        );
+        setEstatisticas(
+          estatisticasResult.status === "fulfilled" && Array.isArray(estatisticasResult.value)
+            ? estatisticasResult.value
+            : []
+        );
+        setTotalAulasRealizadas(
+          totalAulasResult.status === "fulfilled" ? totalAulasResult.value || 0 : 0
+        );
       } catch (error) {
         console.error("Erro ao carregar turma:", error);
       } finally {
