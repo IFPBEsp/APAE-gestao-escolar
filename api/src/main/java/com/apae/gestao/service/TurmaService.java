@@ -167,18 +167,7 @@ public class TurmaService {
 
         for (Aluno aluno : alunos) {
 
-            List<TurmaAluno> matriculasAtivas = turmaAlunoDAO.findAllByAlunoAndIsAlunoAtivoTrue(aluno);
-
-
-            boolean ativoEmOutraTurma = matriculasAtivas.stream()
-                    .anyMatch(ta -> !ta.getTurma().getId().equals(turma.getId()));
-
-            if (ativoEmOutraTurma) {
-                throw new ResponseStatusException(
-                        HttpStatus.UNPROCESSABLE_ENTITY,
-                        "Não foi possível matricular o aluno: o sistema não permite alunos ativos em múltiplas turmas simultaneamente."
-                );
-            }
+            validarVinculoAlunoTurma(aluno,turmaId);
             turma.addAluno(aluno, true);
         }
 
@@ -240,6 +229,10 @@ public class TurmaService {
         TurmaAluno turmaAluno = turmaAlunoDAO.findByTurmaAndAluno(turma, aluno)
                 .orElseThrow(() -> new RuntimeException("O aluno não pertence a esta turma."));
 
+        if(ativo){
+            validarVinculoAlunoTurma(aluno,turmaId);
+        }
+
         turmaAluno.setIsAlunoAtivo(ativo);
         turmaAlunoDAO.save(turmaAluno);
     }
@@ -267,22 +260,26 @@ public class TurmaService {
                 boolean alunoJaExiste = turma.getTurmaAlunos().stream()
                         .anyMatch(ta -> ta.getAluno().getId().equals(aluno.getId()));
                 if (!alunoJaExiste) {
-                    List<TurmaAluno> matriculasAtivas = turmaAlunoDAO.findAllByAlunoAndIsAlunoAtivoTrue(aluno);
-
-
-                    boolean ativoEmOutraTurma = matriculasAtivas.stream()
-                            .anyMatch(ta -> turma.getId() == null || !ta.getTurma().getId().equals(turma.getId()));
-
-                    if (ativoEmOutraTurma) {
-                        throw new ResponseStatusException(
-                                HttpStatus.UNPROCESSABLE_ENTITY,
-                                "Não foi possível matricular o aluno: o sistema não permite alunos ativos em mais de uma turma simultaneamente."
-                        );
-                    }
-
+                    validarVinculoAlunoTurma(aluno, turma.getId());
                     turma.addAluno(aluno, true);
                 }
             }
         }
     }
+
+    private void validarVinculoAlunoTurma(Aluno aluno, Long turmaIdAtual) {
+        List<TurmaAluno> matriculasAtivas = turmaAlunoDAO.findAllByAlunoAndIsAlunoAtivoTrue(aluno);
+
+        boolean ativoEmOutraTurma = matriculasAtivas.stream()
+                .anyMatch(ta -> turmaIdAtual == null || !ta.getTurma().getId().equals(turmaIdAtual));
+
+        if (ativoEmOutraTurma) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Não foi possível matricular o aluno: o sistema não permite alunos ativos em múltiplas turmas simultaneamente."
+            );
+        }
+    }
+
+
 }
