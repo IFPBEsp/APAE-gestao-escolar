@@ -165,6 +165,10 @@ public class TurmaService {
         Turma turma = turmaDAO.findById(turmaId)
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
 
+        if(!turma.getIsAtiva()){
+            throw new RuntimeException("Não é possível adicionar aluno em uma turma inativa");
+        }
+
         List<Aluno> alunos = alunoDAO.findAllById(alunoIds);
 
         if (alunos.size() != alunoIds.size()) {

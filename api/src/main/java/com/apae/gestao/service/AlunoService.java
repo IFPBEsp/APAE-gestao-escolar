@@ -71,6 +71,11 @@ public class AlunoService {
         Turma novaTurma = turmaRepository.findById(dto.getNovaTurmaId())
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada"));
 
+        if(!novaTurma.getIsAtiva()){
+            throw new RuntimeException("Não é possível adicionar aluno em uma turma inativa");
+        }
+
+
         turmaAlunoRepository
                 .findAllByAlunoAndIsAlunoAtivoTrue(aluno)
                 .forEach(ta -> ta.setIsAlunoAtivo(false));
