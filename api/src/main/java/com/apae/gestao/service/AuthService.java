@@ -53,11 +53,6 @@ public class AuthService {
         Professor professor = professorRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Professor não encontrado"));
 
-        // Compatibilidade com professores antigos sem senha definida
-        if (professor.getSenha() == null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "PRIMEIRO_ACESSO");
-        }
-
         // Validação da senha informada
         if (!passwordEncoder.matches(request.getSenha(), professor.getSenha())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Senha incorreta");
