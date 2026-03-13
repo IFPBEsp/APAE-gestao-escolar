@@ -21,22 +21,24 @@ import { toast } from "sonner";
 
 interface DetalhesTurmaProps {
     turmaId: number;
+    turmaData?: any;
     onBack: () => void;
     onNavigate: (screen: string, turmaId?: number) => void;
     onEdit: () => void;
-    onInactivate?: () => void;
+    onInactivate?: (turmaAtualizada?: any) => void;
 }
 
 export function DetalhesTurma({
     turmaId,
+    turmaData,
     onBack,
     onNavigate,
     onEdit,
     onInactivate
 }: DetalhesTurmaProps) {
 
-    const [turma, setTurma] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
+    const [turma, setTurma] = useState<any>(turmaData || null);
+    const [loading, setLoading] = useState(!turmaData);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     useEffect(() => {
@@ -44,8 +46,12 @@ export function DetalhesTurma({
             try {
               setLoading(true);
 
-              const data = await buscarTurmaPorId(turmaId);
-              setTurma(data);
+              if (turmaData) {
+                setTurma(turmaData);
+              } else {
+                const data = await buscarTurmaPorId(turmaId);
+                setTurma(data);
+              }
 
             } catch (error: any) {
               toast.error(error.message || "Erro ao carregar turma");
@@ -55,7 +61,7 @@ export function DetalhesTurma({
           }
 
         carregarTurma();
-    }, [turmaId]);
+    }, [turmaId, turmaData]);
 
     async function handleToggleTurma() {
         try {
@@ -67,13 +73,11 @@ export function DetalhesTurma({
                 toast.success("Turma reativada com sucesso");
             }
 
-            setTurma((prev: any) => ({
-                ...prev,
-                isAtiva: !prev.isAtiva
-            }));
+            const turmaAtualizada = await buscarTurmaPorId(turmaId);
+            setTurma(turmaAtualizada);
 
             if (onInactivate) {
-                onInactivate();
+                onInactivate(turmaAtualizada);
             }
         } catch (error: any) {
             toast.error(error.message || "Erro ao alterar status da turma");
@@ -123,7 +127,7 @@ export function DetalhesTurma({
                                     className={`text-xs px-2 py-0.5 rounded-full font-medium
                                     ${turma.isAtiva
                                             ? "bg-green-100 text-green-700"
-                                            : "bg-gray-100 text-gray-700"
+                                            : "bg-red-100 text-red-700"
                                         }`}
                                 >
                                     {turma.isAtiva ? "Ativa" : "Inativa"}
@@ -205,7 +209,7 @@ export function DetalhesTurma({
 
                         <Button
                             variant={turma.isAtiva ? "danger" : "primary"}
-                            className="flex-1"
+                            className={`flex-1 ${!turma.isAtiva ? "bg-green-500 hover:bg-green-600 text-white border-green-500 hover:border-green-600" : ""}`}
                             onClick={() => setIsDialogOpen(true)}
                         >
                             <Power className="mr-2 h-5 w-5"  />
@@ -236,6 +240,7 @@ export function DetalhesTurma({
                                 </Button>
                                 <Button
                                     variant={turma.isAtiva ? "danger" : "primary"}
+                                    className={!turma.isAtiva ? "bg-green-500 hover:bg-green-600 text-white border-green-500 hover:border-green-600" : ""}
                                     onClick={() => {
                                         handleToggleTurma();
                                         setIsDialogOpen(false);
