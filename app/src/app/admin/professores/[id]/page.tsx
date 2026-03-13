@@ -4,7 +4,18 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit, Power, UserCircle, BookOpen } from "lucide-react";
+import {
+  ArrowLeft,
+  Edit,
+  Power,
+  UserCircle,
+  BookOpen,
+  Mail,
+  Phone,
+  GraduationCap,
+  Calendar,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -148,40 +159,66 @@ export default function DetalhesProfessor() {
 
               {/* Grid de Informações */}
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {/* Email */}
-                <div>
-                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
-                    E-mail
-                  </p>
-                  <p className="text-[#222222]">{professor.email || "—"}</p>
+                {/* E-mail */}
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <Mail className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      E-mail
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.email || "—"}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Telefone */}
-                <div>
-                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
-                    Telefone
-                  </p>
-                  <p className="text-[#222222]">{professor.telefone || "—"}</p>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <Phone className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Telefone
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.telefone || "—"}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Formação */}
-                <div>
-                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
-                    Formação
-                  </p>
-                  <p className="text-[#222222]">{professor.formacao || "—"}</p>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <GraduationCap className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Formação
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.formacao || "—"}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Data de Contratação */}
-                <div>
-                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
-                    Data de Contratação
-                  </p>
-                  <p className="text-[#222222]">
-                    {professor.dataContratacao
-                      ? formatDate(professor.dataContratacao)
-                      : "—"}
-                  </p>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <Calendar className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Data de Contratação
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.dataContratacao
+                        ? formatDate(professor.dataContratacao)
+                        : "—"}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Data de Nascimento */}
@@ -207,13 +244,18 @@ export default function DetalhesProfessor() {
                 </div>
 
                 {/* Número de Turmas */}
-                <div>
-                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
-                    Número de Turmas
-                  </p>
-                  <p className="text-[#222222]">
-                    {professor.turmas?.length || 0}
-                  </p>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <Users className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Número de Turmas
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.turmas?.length || 0}
+                    </p>
+                  </div>
                 </div>
               </div>
 
