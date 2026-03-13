@@ -160,7 +160,7 @@ export default function Professores() {
                       </h3>
                       <span className={`inline-block rounded-full px-2 md:px-3 py-1 text-xs md:text-sm font-medium ${professor.ativo
                           ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-700"
+                          : "bg-red-100 text-red-700"
                         }`}>
                         {professor.ativo ? "Ativo" : "Inativo"}
                       </span>

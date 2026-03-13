@@ -137,7 +137,7 @@ export default function DetalhesProfessor() {
                     <span
                       className={`mt-1 inline-block rounded-full px-3 py-1 ${professor.ativo
                           ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-700"
+                          : "bg-red-100 text-red-700"
                         }`}
                     >
                       {professor.ativo ? "Ativo" : "Inativo"}
@@ -255,7 +255,7 @@ export default function DetalhesProfessor() {
                 <Button
                   variant={professor.ativo ? "danger" : "primary"}
                   onClick={() => setIsAlertOpen(true)}
-                  className="w-full flex-1"
+                  className={`w-full flex-1 ${!professor.ativo ? "bg-green-500 hover:bg-green-600 text-white border-green-500 hover:border-green-600" : ""}`}
                 >
                   <Power className="mr-2 h-5 w-5" />
                   {professor.ativo ? "Inativar Professor" : "Ativar Professor"}
@@ -287,6 +287,7 @@ export default function DetalhesProfessor() {
                 <AlertDialogAction asChild>
                   <Button
                     variant={professor.ativo ? "danger" : "primary"}
+                    className={!professor.ativo ? "bg-green-500 hover:bg-green-600 text-white border-green-500 hover:border-green-600" : ""}
                     onClick={handleToggleStatus}
                   >
                     Confirmar
