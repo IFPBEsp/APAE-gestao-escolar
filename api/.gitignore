@@ -49,5 +49,3 @@ docker-compose.override.yml
 .gradle/
 out/
 *.class
-
-.env
