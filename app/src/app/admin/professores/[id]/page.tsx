@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import api from "@/services/api";
 import ModalEditarProfessor from "@/components/ModalEditarProfessor";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Professor } from "@/types/professor";
 
@@ -74,12 +74,11 @@ export default function DetalhesProfessor() {
   };
 
   const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
+
+      const date = parseISO(dateString);
+      if (!isValid(date)) return dateString;
       return format(date, "dd/MM/yyyy", { locale: ptBR });
-    } catch {
-      return dateString;
-    }
+
   };
 
   if (loading) {
@@ -182,6 +181,28 @@ export default function DetalhesProfessor() {
                     {professor.dataContratacao
                       ? formatDate(professor.dataContratacao)
                       : "—"}
+                  </p>
+                </div>
+
+                {/* Data de Nascimento */}
+                <div>
+                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
+                    Data de Nascimento
+                  </p>
+                  <p className="text-[#222222]">
+                    {professor.dataNascimento
+                      ? formatDate(professor.dataNascimento)
+                      : "—"}
+                  </p>
+                </div>
+
+                {/* Endereço */}
+                <div>
+                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
+                    Endereço
+                  </p>
+                  <p className="text-[#222222]">
+                    {professor.endereco || "—"}
                   </p>
                 </div>
 
