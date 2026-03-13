@@ -2,10 +2,9 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, User, Calendar, BookOpen, Heart, Phone, Eye, PenSquare, Loader2 } from "lucide-react";
+import { ArrowLeft, User, Calendar, BookOpen, Heart, Phone, Eye, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useMemo, use } from "react"; 
-import ModalEditarAluno from "@/components/alunos/ModalEditarAluno";
 import ModalVisualizarAvaliacao from "@/components/alunos/ModalVisualizarAvaliacao";
 import ModalVisualizarRelatorio from "@/components/alunos/ModalVisualizarRelatorio";
 import { buscarAlunoPorId, buscarAvaliacoesPorAlunoId } from "@/services/AlunoService"; 
@@ -54,8 +53,6 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
   const [loadingAluno, setLoadingAluno] = useState(true);
   const [loadingAvaliacoes, setLoadingAvaliacoes] = useState(true);
   const [loadingRelatorios, setLoadingRelatorios] = useState(true);
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAvaliacao, setSelectedAvaliacao] = useState<any>(null); 
   const [selectedRelatorio, setSelectedRelatorio] = useState<any>(null); 
 
@@ -148,10 +145,6 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
     }
   };
 
-  const handleSaveAluno = (alunoAtualizado: AlunoDetailDTO) => {
-    setAlunoData(alunoAtualizado);
-  };
-
   if (loadingAluno) {
     return (
         <div className="flex justify-center items-center h-[calc(100vh-64px)]">
@@ -202,15 +195,6 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
                   <p className="text-gray-600 text-sm md:text-lg">{calcularIdade(alunoData.dataNascimento)} anos</p>
                 </div>
               </div>
-
-              <Button
-                variant="primary"
-                onClick={() => setIsEditModalOpen(true)}
-                className="w-full sm:w-auto flex items-center gap-2"
-              >
-                <PenSquare size={16} />
-                Editar Aluno
-              </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-y-8 gap-x-12 mt-6 md:mt-10">
@@ -353,13 +337,6 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
         </Card>
 
         {/* Modais */}
-        <ModalEditarAluno
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          aluno={alunoData}
-          onSave={handleSaveAluno}
-        />
-
         <ModalVisualizarAvaliacao
           isOpen={!!selectedAvaliacao}
           onClose={() => setSelectedAvaliacao(null)}

@@ -8,13 +8,34 @@
 
 ## 🐳 Acessando o Banco Local (Docker)
 
-Após subir o container Docker, use o comando abaixo para acessar o PostgreSQL e executar as funções:
-
+Após subir o container Docker, você pode acessar o PostgreSQL com:
 ```bash
 docker exec -it apae-gestao-escolar-db-1 psql -U apae_user -d apae_db
 ```
 
 > 💡 **Dica:** O nome do container pode variar. Use `docker ps` para listar os containers em execução e identificar o nome correto.
+
+---
+
+## ⚙️ Como as funções são criadas hoje
+
+- As funções **não precisam mais ser executadas manualmente** no DBeaver ou via `psql`.
+- Ao iniciar o backend Spring Boot, o **Flyway** executa automaticamente o script de migração:
+  - `api/src/main/resources/db/migration/V1__create_functions.sql`
+- Esse script contém as funções:
+  - `get_chamada_por_turma_e_data`
+  - `listar_professores_com_turmas`
+  - `public.listar_turmas_otimizado`
+
+> ✅ Isso garante que, em qualquer ambiente novo, basta subir o backend que as funções serão criadas/atualizadas automaticamente.
+
+Se você quiser apenas **verificar** se as funções existem no banco, dentro do `psql` execute, por exemplo:
+
+```sql
+\df+ get_chamada_por_turma_e_data
+\df+ listar_professores_com_turmas
+\df+ listar_turmas_otimizado
+```
 
 ---
 
