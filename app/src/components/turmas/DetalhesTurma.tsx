@@ -108,7 +108,7 @@ export function DetalhesTurma({
                 <CardContent className="p-8 space-y-8">
 
                     {/* Cabeçalho */}
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between pt-6">
                         <div className="space-y-1">
                             <div className="flex items-center gap-3">
                                 <div className="h-10 w-10 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97]">
