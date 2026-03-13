@@ -5,6 +5,9 @@ import com.apae.gestao.dto.AvaliacaoHistoricoResponseDTO;
 import com.apae.gestao.dto.aluno.AlunoDetalhesDTO;
 import com.apae.gestao.dto.aluno.AlunoResumoDTO;
 import com.apae.gestao.service.AlunoService;
+import com.apae.gestao.openapi.Doc400ValidationError;
+import com.apae.gestao.openapi.Doc404NotFound;
+import com.apae.gestao.openapi.DocStandardErrors;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -55,9 +58,9 @@ public class AlunoController {
     @GetMapping("/{id}")
     @Operation(summary = "Buscar aluno por ID")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Aluno encontrado"),
-            @ApiResponse(responseCode = "404", description = "Aluno não encontrado")
+            @ApiResponse(responseCode = "200", description = "Aluno encontrado")
     })
+    @Doc404NotFound
     public ResponseEntity<AlunoDetalhesDTO> buscarPorId(@PathVariable Long id) {
         AlunoDetalhesDTO aluno = alunoService.buscarPorId(id);
         return ResponseEntity.ok(aluno);
@@ -69,10 +72,9 @@ public class AlunoController {
         description = "Desativa a turma anterior e ativa a nova turma."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Turma atualizada com sucesso"),
-        @ApiResponse(responseCode = "404", description = "Aluno ou Turma não encontrados"),
-        @ApiResponse(responseCode = "400", description = "Requisição inválida")
+        @ApiResponse(responseCode = "200", description = "Turma atualizada com sucesso")
     })
+    @DocStandardErrors
     public ResponseEntity<AlunoDetalhesDTO> atualizarTurma(
         @PathVariable Long alunoId,
         @Valid @RequestBody AlunoTurmaRequestDTO dto
@@ -85,6 +87,7 @@ public class AlunoController {
 
     @GetMapping("/{id}/avaliacoes")
     @Operation(summary = "Buscar histórico de avaliações do aluno")
+    @Doc404NotFound
     public ResponseEntity<List<AvaliacaoHistoricoResponseDTO>> buscarAvaliacoesPorAlunoId(
             @PathVariable Long id
     ) {
