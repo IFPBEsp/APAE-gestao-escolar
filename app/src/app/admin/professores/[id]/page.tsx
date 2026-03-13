@@ -81,6 +81,8 @@ export default function DetalhesProfessor() {
 
   };
 
+  const activateButtonStyles = "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700";
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -255,7 +257,7 @@ export default function DetalhesProfessor() {
                 <Button
                   variant={professor.ativo ? "danger" : "primary"}
                   onClick={() => setIsAlertOpen(true)}
-                  className={`w-full flex-1 ${!professor.ativo ? "bg-green-500 hover:bg-green-600 text-white border-green-500 hover:border-green-600" : ""}`}
+                  className={`w-full flex-1 ${!professor.ativo ? activateButtonStyles : ""}`}
                 >
                   <Power className="mr-2 h-5 w-5" />
                   {professor.ativo ? "Inativar Professor" : "Ativar Professor"}
@@ -287,7 +289,7 @@ export default function DetalhesProfessor() {
                 <AlertDialogAction asChild>
                   <Button
                     variant={professor.ativo ? "danger" : "primary"}
-                    className={!professor.ativo ? "bg-green-500 hover:bg-green-600 text-white border-green-500 hover:border-green-600" : ""}
+                    className={!professor.ativo ? activateButtonStyles : ""}
                     onClick={handleToggleStatus}
                   >
                     Confirmar

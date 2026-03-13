@@ -97,7 +97,6 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             if (!turmaData || !isOpen) return;
 
             try {
-                // Sempre busca os dados mais recentes da turma no backend
                 const turmaBackend = await buscarTurmaPorId(turmaData.id);
 
                 setTipo(turmaBackend.tipo);
@@ -125,7 +124,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                     console.error("Erro ao carregar alunos da turma:", error);
                     toast.error(error.message || "Erro ao carregar alunos da turma.");
                     setAlunosNaTurma((turmaBackend.alunos || []).map((a: any) => ({
-                        alunoId: a.alunoId,
+                        alunoId: a.id || a.alunoId,
                         nome: a.nome,
                         isAtivo: a.isAtivo ?? true,
                     })));

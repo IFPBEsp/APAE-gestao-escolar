@@ -50,6 +50,7 @@ export function DetalhesTurma({
     const [totalAulasRealizadas, setTotalAulasRealizadas] = useState(0);
     const [loading, setLoading] = useState(!turmaData);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isSubmittingToggle, setIsSubmittingToggle] = useState(false);
     const [isHistoricoOpen, setIsHistoricoOpen] = useState(false);
     const [historicoAluno, setHistoricoAluno] = useState<any[]>([]);
     const [alunoSelecionado, setAlunoSelecionado] = useState<any | null>(null);
@@ -104,6 +105,7 @@ export function DetalhesTurma({
 
     async function handleToggleTurma() {
         try {
+            setIsSubmittingToggle(true);
             if (turma.isAtiva) {
                 await desativarTurma(turmaId);
                 toast.success("Turma inativada com sucesso");
@@ -118,8 +120,12 @@ export function DetalhesTurma({
             if (onInactivate) {
                 onInactivate(turmaAtualizada);
             }
+            
+            setIsDialogOpen(false);
         } catch (error: any) {
             toast.error(error.message || "Erro ao alterar status da turma");
+        } finally {
+            setIsSubmittingToggle(false);
         }
     }
 
@@ -315,7 +321,7 @@ export function DetalhesTurma({
 
                         <Button
                             variant={turma.isAtiva ? "danger" : "primary"}
-                            className={`flex-1 ${!turma.isAtiva ? "bg-green-500 hover:bg-green-600 text-white border-green-500 hover:border-green-600" : ""}`}
+                            className={`flex-1 ${!turma.isAtiva ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700" : ""}`}
                             onClick={() => setIsDialogOpen(true)}
                         >
                             <Power className="mr-2 h-5 w-5"  />
@@ -339,19 +345,18 @@ export function DetalhesTurma({
                             <DialogFooter>
                                 <Button
                                     variant="outline"
+                                    disabled={isSubmittingToggle}
                                     onClick={() => setIsDialogOpen(false)}
                                 >
                                     Cancelar
                                 </Button>
                                 <Button
                                     variant={turma.isAtiva ? "danger" : "primary"}
-                                    className={!turma.isAtiva ? "bg-green-500 hover:bg-green-600 text-white border-green-500 hover:border-green-600" : ""}
-                                    onClick={() => {
-                                        handleToggleTurma();
-                                        setIsDialogOpen(false);
-                                    }}
+                                    className={!turma.isAtiva ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700" : ""}
+                                    disabled={isSubmittingToggle}
+                                    onClick={handleToggleTurma}
                                 >
-                                    Confirmar
+                                    {isSubmittingToggle ? "Processando..." : "Confirmar"}
                                 </Button>
                             </DialogFooter>
                         </DialogContent>
