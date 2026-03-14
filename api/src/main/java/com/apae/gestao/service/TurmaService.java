@@ -87,8 +87,26 @@ public class TurmaService {
     public TurmaResponseDTO criar(TurmaRequestDTO dto) {
         Turma turma = new Turma();
         mapearDtoParaEntity(dto, turma);
+        turma.setNome(obterNomeUnicoParaTurma(turma.getNome()));
         Turma salvo = turmaDAO.save(turma);
         return new TurmaResponseDTO(salvo);
+    }
+
+    /**
+     * Garante um nome único para a turma. Se já existir turma com o mesmo nome,
+     * adiciona sufixo numérico (2), (3), ... até encontrar um nome disponível.
+     */
+    private String obterNomeUnicoParaTurma(String nomeBase) {
+        if (!turmaDAO.existsByNome(nomeBase)) {
+            return nomeBase;
+        }
+        int sufixo = 2;
+        String nomeCandidato;
+        do {
+            nomeCandidato = nomeBase + " (" + sufixo + ")";
+            sufixo++;
+        } while (turmaDAO.existsByNome(nomeCandidato));
+        return nomeCandidato;
     }
 
     @Transactional(readOnly = true)
