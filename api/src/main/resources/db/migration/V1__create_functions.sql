@@ -196,7 +196,7 @@ BEGIN
                                               ELSE 'Horário não definido'
                                    END
                        )
-                           ORDER BY t.nome
+                           ORDER BY t.ano_criacao DESC, t.nome ASC
                ),
                '[]'::json
        ) INTO v_result
