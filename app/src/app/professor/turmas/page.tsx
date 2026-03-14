@@ -24,12 +24,16 @@ export default function TurmasPage() {
     }
 
     setLoading(true);
-
     listarTurmasDeProfessor(professorId)
-      .then((data) => setTurmas(data.filter((t) => t.isAtiva)))
+      .then((data) => {
+          const ativas = data.filter(t => t.isAtiva);
+          const ordenadas = ativas.sort((a, b) =>
+            (b.anoCriacao || 0) - (a.anoCriacao || 0) || a.nome.localeCompare(b.nome)
+          );
+          setTurmas(ordenadas);
+      })
       .catch((err: any) => toast.error(err.message || "Erro ao carregar dados"))
       .finally(() => setLoading(false));
-
   }, [professorId, router]);
 
   const handleNavigation = (path: string, e?: React.MouseEvent) => {
