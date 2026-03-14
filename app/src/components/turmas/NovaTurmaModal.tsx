@@ -151,17 +151,12 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
             turno: turno.toUpperCase(),
             professorId: professorSelecionado.id,
             isAtiva: true,
+            alunosIds: alunosSelecionados.map(a => a.id)
         };
 
         try {
             const turmaCriada = await criarTurma(dadosNovaTurma);
 
-            if (alunosSelecionados.length > 0) {
-                await adicionarAlunosATurma(
-                    turmaCriada.id,
-                    alunosSelecionados.map(a => a.id)
-                );
-            }
 
             toast.success("Turma criada com sucesso!");
 
