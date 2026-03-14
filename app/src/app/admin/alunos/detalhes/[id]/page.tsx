@@ -170,7 +170,7 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
         {/* Cabeçalho de Navegação */}
         <div>
             <Button
-                variant="ghost"
+                variant="outline"
                 onClick={() => router.push("/admin/alunos")}
                 className="text-[#0D4F97] hover:bg-[#E8F3FF] pl-0 gap-2 mb-4"
             >

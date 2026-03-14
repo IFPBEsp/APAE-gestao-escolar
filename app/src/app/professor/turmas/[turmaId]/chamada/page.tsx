@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import ProfessorSidebar from "@/components/Sidebar/ProfessorSidebar";
 import Chamada from "@/components/Chamada";
 import { Button } from "@/components/ui/button";
 import { buscarTurmaPorId } from "@/services/TurmaService";
@@ -12,10 +11,13 @@ import { TurmaResumo } from "@/types/turma";
 export default function ChamadaPage() {
   const router = useRouter();
   const params = useParams();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
   const [turma, setTurma] = useState<TurmaResumo | null>(null);
   const [loading, setLoading] = useState(true);
-  const turmaId = params?.turmaId ? String(params.turmaId) : null;
+
+  const turmaId = params?.turmaId
+    ? String(Array.isArray(params.turmaId) ? params.turmaId[0] : params.turmaId)
+    : null;
 
   useEffect(() => {
     if (!turmaId) return;
@@ -35,11 +37,12 @@ export default function ChamadaPage() {
   }, [turmaId]);
 
   const handleBack = () => router.push('/professor/turmas');
-  const handleSaveSuccess = () => setTimeout(() => router.push('/professor/turmas'), 1500);
+  const handleSaveSuccess = () =>
+    setTimeout(() => router.push('/professor/turmas'), 1500);
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-[#E5E5E5] items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center">
         <p className="text-[#0D4F97] text-lg font-bold">
           Carregando turma...
         </p>
@@ -49,11 +52,12 @@ export default function ChamadaPage() {
 
   if (!turma) {
     return (
-      <div className="flex min-h-screen bg-[#E5E5E5] items-center justify-center p-4">
+      <div className="flex min-h-screen items-center justify-center p-4">
         <div className="bg-white p-8 rounded-xl border-2 border-[#B2D7EC] text-center shadow-md">
           <h2 className="text-[#0D4F97] text-2xl font-bold mb-4">
             Turma não identificada
           </h2>
+
           <Button
             variant="outline"
             onClick={() => router.push("/professor/turmas")}
@@ -66,31 +70,13 @@ export default function ChamadaPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#E5E5E5]">
-      <ProfessorSidebar
-        activeTab="turmas"
-        onTabChange={(tab) =>
-          router.push(`/professor/${tab === 'inicio' ? '' : tab}`)
-        }
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        onLogout={() => router.push("/")}
+    <div className="p-4 md:p-8">
+      <Chamada
+        turmaIdProp={turma.id}
+        turmaNomeProp={turma.nome}
+        onBack={handleBack}
+        onSaveSuccess={handleSaveSuccess}
       />
-
-      <main
-        className={`flex-1 overflow-y-auto transition-all duration-300 pt-16 md:pt-0 ${
-          isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
-        }`}
-      >
-        <div className="p-4 md:p-8">
-          <Chamada
-            turmaIdProp={turma.id}
-            turmaNomeProp={turma.nome}
-            onBack={handleBack}
-            onSaveSuccess={handleSaveSuccess}
-          />
-        </div>
-      </main>
     </div>
   );
 }
