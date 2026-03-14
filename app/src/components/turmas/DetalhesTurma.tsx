@@ -26,14 +26,16 @@ import { useRouter } from "next/navigation";
 
 interface DetalhesTurmaProps {
     turmaId: number;
+    turmaData?: any;
     onBack: () => void;
     onNavigate: (screen: string, turmaId?: number) => void;
     onEdit: () => void;
-    onInactivate?: () => void;
+    onInactivate?: (turmaAtualizada?: any) => void;
 }
 
 export function DetalhesTurma({
     turmaId,
+    turmaData,
     onBack,
     onNavigate,
     onEdit,
@@ -42,12 +44,13 @@ export function DetalhesTurma({
 
     const router = useRouter();
 
-    const [turma, setTurma] = useState<any>(null);
+    const [turma, setTurma] = useState<any>(turmaData || null);
     const [alunosFrequencia, setAlunosFrequencia] = useState<any[]>([]);
     const [estatisticas, setEstatisticas] = useState<any[]>([]);
     const [totalAulasRealizadas, setTotalAulasRealizadas] = useState(0);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!turmaData);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isSubmittingToggle, setIsSubmittingToggle] = useState(false);
     const [isHistoricoOpen, setIsHistoricoOpen] = useState(false);
     const [historicoAluno, setHistoricoAluno] = useState<any[]>([]);
     const [alunoSelecionado, setAlunoSelecionado] = useState<any | null>(null);
@@ -61,9 +64,12 @@ export function DetalhesTurma({
             try {
               setLoading(true);
 
-              const [turmaData] = await Promise.all([
-                buscarTurmaPorId(turmaId)
-              ]);
+              if (turmaData) {
+                setTurma(turmaData);
+              } else {
+                const data = await buscarTurmaPorId(turmaId);
+                setTurma(data);
+              }
 
               const [
                 alunosFrequenciaResult,
@@ -75,7 +81,6 @@ export function DetalhesTurma({
                 contarAulasRealizadas(turmaId)
               ]);
 
-              setTurma(turmaData);
               setAlunosFrequencia(
                 alunosFrequenciaResult.status === "fulfilled" ? alunosFrequenciaResult.value || [] : []
               );
@@ -96,10 +101,11 @@ export function DetalhesTurma({
           }
 
         carregarTurma();
-    }, [turmaId]);
+    }, [turmaId, turmaData]);
 
     async function handleToggleTurma() {
         try {
+            setIsSubmittingToggle(true);
             if (turma.isAtiva) {
                 await desativarTurma(turmaId);
                 toast.success("Turma inativada com sucesso");
@@ -108,16 +114,18 @@ export function DetalhesTurma({
                 toast.success("Turma reativada com sucesso");
             }
 
-            setTurma((prev: any) => ({
-                ...prev,
-                isAtiva: !prev.isAtiva
-            }));
+            const turmaAtualizada = await buscarTurmaPorId(turmaId);
+            setTurma(turmaAtualizada);
 
             if (onInactivate) {
-                onInactivate();
+                onInactivate(turmaAtualizada);
             }
+            
+            setIsDialogOpen(false);
         } catch (error: any) {
             toast.error(error.message || "Erro ao alterar status da turma");
+        } finally {
+            setIsSubmittingToggle(false);
         }
     }
 
@@ -233,7 +241,7 @@ export function DetalhesTurma({
                                     className={`text-xs px-2 py-0.5 rounded-full font-medium
                                     ${turma.isAtiva
                                             ? "bg-green-100 text-green-700"
-                                            : "bg-gray-100 text-gray-700"
+                                            : "bg-red-100 text-red-700"
                                         }`}
                                 >
                                     {turma.isAtiva ? "Ativa" : "Inativa"}
@@ -313,7 +321,7 @@ export function DetalhesTurma({
 
                         <Button
                             variant={turma.isAtiva ? "danger" : "primary"}
-                            className="flex-1"
+                            className={`flex-1 ${!turma.isAtiva ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700" : ""}`}
                             onClick={() => setIsDialogOpen(true)}
                         >
                             <Power className="mr-2 h-5 w-5"  />
@@ -337,18 +345,18 @@ export function DetalhesTurma({
                             <DialogFooter>
                                 <Button
                                     variant="outline"
+                                    disabled={isSubmittingToggle}
                                     onClick={() => setIsDialogOpen(false)}
                                 >
                                     Cancelar
                                 </Button>
                                 <Button
                                     variant={turma.isAtiva ? "danger" : "primary"}
-                                    onClick={() => {
-                                        handleToggleTurma();
-                                        setIsDialogOpen(false);
-                                    }}
+                                    className={!turma.isAtiva ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700" : ""}
+                                    disabled={isSubmittingToggle}
+                                    onClick={handleToggleTurma}
                                 >
-                                    Confirmar
+                                    {isSubmittingToggle ? "Processando..." : "Confirmar"}
                                 </Button>
                             </DialogFooter>
                         </DialogContent>
