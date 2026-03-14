@@ -1,9 +1,11 @@
-"use client";
+'use client';
 
 import {
   atualizarTurma,
-  adicionarAlunosATurma, 
-} from "@/services/TurmaService"; 
+  adicionarAlunosATurma,
+  listarAlunos as listarAlunosDaTurma,
+  buscarTurmaPorId,
+} from "@/services/TurmaService";
 import { listarProfessores } from "@/services/ProfessorService";
 import { toast } from "sonner";
 import { listarAlunos } from "@/services/AlunoService";
@@ -91,26 +93,52 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     }
 
     useEffect(() => {
-        if (turmaData && isOpen) {
-            setTipo(turmaData.tipo);
-            setTurno(turmaData.turno);
-            
-            setProfessorSelecionado({
-                id: turmaData.professorId,
-                nome: turmaData.professorNome
-            });
+        async function carregarDadosIniciais() {
+            if (!turmaData || !isOpen) return;
 
-            setAlunosNaTurma(
-                (turmaData.alunos || []).map(a => ({
-                    alunoId: a.alunoId,
-                    nome: a.nome,
-                     isAtivo: a.isAtivo ?? true,
-                }))
-            );
-            
-            setBuscaProfessor("");
-            setBuscaAluno("");
+            try {
+                const turmaBackend = await buscarTurmaPorId(turmaData.id);
+
+                setTipo(turmaBackend.tipo);
+                setTurno(turmaBackend.turno);
+
+                if (turmaBackend.professorId && (turmaBackend.professorNome || turmaBackend.professor?.nome)) {
+                    setProfessorSelecionado({
+                        id: turmaBackend.professorId,
+                        nome: turmaBackend.professorNome || turmaBackend.professor?.nome,
+                    });
+                } else {
+                    setProfessorSelecionado(null);
+                }
+
+                try {
+                    const alunosDaTurma = await listarAlunosDaTurma(turmaBackend.id);
+                    setAlunosNaTurma(
+                        (alunosDaTurma || []).map((a: any) => ({
+                            alunoId: a.id || a.alunoId,
+                            nome: a.nome,
+                            isAtivo: a.isAtivo ?? true,
+                        }))
+                    );
+                } catch (error: any) {
+                    console.error("Erro ao carregar alunos da turma:", error);
+                    toast.error(error.message || "Erro ao carregar alunos da turma.");
+                    setAlunosNaTurma((turmaBackend.alunos || []).map((a: any) => ({
+                        alunoId: a.id || a.alunoId,
+                        nome: a.nome,
+                        isAtivo: a.isAtivo ?? true,
+                    })));
+                }
+
+                setBuscaProfessor("");
+                setBuscaAluno("");
+            } catch (error: any) {
+                console.error("Erro ao carregar dados da turma para edição:", error);
+                toast.error(error.message || "Erro ao carregar dados da turma para edição.");
+            }
         }
+
+        carregarDadosIniciais();
     }, [turmaData, isOpen]);
 
     useEffect(() => {
@@ -187,25 +215,22 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             return;
         }
 
-        const professorFinal = professorSelecionado ?? {
-            id: turmaData.professorId,
-            nome: turmaData.professorNome
-        };
+        const idTurma = turmaData.id;
 
+        const professorFinal = professorSelecionado;
         if (!professorFinal) {
-            toast.error("Nenhum professor encontrado para a turma.");
+            toast.error("Nenhum professor selecionado para a turma.");
             return;
         }
 
-        const idTurma = turmaData.id;
-
-        const dadosAtualizados = {
+        const dadosAtualizados: any = {
             tipo: tipo.toUpperCase(),
             turno: turno.toUpperCase(),
             isAtiva: turmaData.isAtiva,
-            professorId: professorFinal.id,
             anoCriacao: turmaData.anoCriacao,
         };
+
+        dadosAtualizados.professorId = professorFinal.id;
 
         try {
             const turmaAtualizada = await atualizarTurma(idTurma, dadosAtualizados);
