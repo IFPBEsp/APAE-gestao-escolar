@@ -15,6 +15,9 @@ import {
   GraduationCap,
   Calendar,
   Users,
+  FileText,
+  MapPin,
+  CalendarDays,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -138,15 +141,13 @@ export default function DetalhesProfessor() {
               {/* Nome do Professor e Status */}
               <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center mt-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#B2D7EC]/20">
+                  <div className="flex items-center gap-3">
                     <UserCircle className="h-10 w-10 text-[#0D4F97]" />
-                  </div>
-                  <div>
                     <h2 className="text-2xl font-bold text-[#0D4F97]">
                       {professor.nome}
                     </h2>
                     <span
-                      className={`mt-1 inline-block rounded-full px-3 py-1 ${professor.ativo
+                      className={`inline-block rounded-full px-3 py-1 ${professor.ativo
                           ? "bg-green-100 text-green-700"
                           : "bg-gray-100 text-gray-700"
                         }`}
@@ -159,6 +160,21 @@ export default function DetalhesProfessor() {
 
               {/* Grid de Informações */}
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                {/* CPF */}
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      CPF
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.cpf || "—"}
+                    </p>
+                  </div>
+                </div>
+
                 {/* E-mail */}
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
@@ -222,25 +238,35 @@ export default function DetalhesProfessor() {
                 </div>
 
                 {/* Data de Nascimento */}
-                <div>
-                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
-                    Data de Nascimento
-                  </p>
-                  <p className="text-[#222222]">
-                    {professor.dataNascimento
-                      ? formatDate(professor.dataNascimento)
-                      : "—"}
-                  </p>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <CalendarDays className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Data de Nascimento
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.dataNascimento
+                        ? formatDate(professor.dataNascimento)
+                        : "—"}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Endereço */}
-                <div>
-                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
-                    Endereço
-                  </p>
-                  <p className="text-[#222222]">
-                    {professor.endereco || "—"}
-                  </p>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <MapPin className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Endereço
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.endereco || "—"}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Número de Turmas */}
