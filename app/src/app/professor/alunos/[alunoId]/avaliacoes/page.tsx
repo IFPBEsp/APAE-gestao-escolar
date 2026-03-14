@@ -236,7 +236,7 @@ export default function AvaliacoesAlunoPage() {
                           size="icon" 
                           onClick={() => handleOpenEditarDialog(av)} 
                           >
-                          <Eye className="h-5 w-5" />
+                          <Edit className="h-5 w-5" />
                         </Button>
                         <Button 
                           variant="ghost" 

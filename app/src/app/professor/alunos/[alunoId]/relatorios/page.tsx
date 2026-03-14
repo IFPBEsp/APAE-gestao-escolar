@@ -156,7 +156,7 @@ export default function RelatoriosAlunoListaPage() {
             onClick={() => router.back()}
             variant="outline"
           >
-            <ArrowLeft className="mr-2 h-5 w-5" strokeWidth={1.75} />
+            <ArrowLeft className="mr-2 h-5 w-5" />
             Voltar
           </Button>
 

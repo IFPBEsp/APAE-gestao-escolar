@@ -224,15 +224,16 @@ export default function ModalVisualizarAvaliacao({
                     <div className="hidden print:block">
                         {printContent}
                     </div>
-                    <div className="flex justify-end mt-4">
-                        <Button
-                            onClick={handleImprimir}
-                            variant="primary"
-                        >
-                            <Printer className="mr-2 h-5 w-5" />
-                            Imprimir
-                        </Button>
-                    </div>
+                </div>
+
+                <div className="flex justify-end mt-4 print:hidden">
+                    <Button
+                        onClick={handleImprimir}
+                        variant="primary"
+                    >
+                        <Printer className="mr-2 h-5 w-5" />
+                        Imprimir
+                    </Button>
                 </div>
 
             </DialogContent>
