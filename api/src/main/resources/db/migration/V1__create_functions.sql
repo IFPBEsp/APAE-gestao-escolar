@@ -196,7 +196,7 @@ BEGIN
                                               ELSE 'Horário não definido'
                                    END
                        )
-                           ORDER BY t.ano_criacao DESC, t.nome ASC
+                           ORDER BY t.nome
                ),
                '[]'::json
        ) INTO v_result
@@ -221,4 +221,3 @@ BEGIN
     RETURN v_result;
 END;
 $function$;
-
