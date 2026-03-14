@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { NovaTurmaModal } from "@/components/turmas/NovaTurmaModal";
 import { DetalhesTurma } from "@/components/turmas/DetalhesTurma";
 import { EditarTurmaModal } from "@/components/turmas/EditarTurmaModal";
-import { listarTurmas, listarAlunosAtivos } from "@/services/TurmaService";
+import { listarTurmas, listarAlunosAtivos, buscarTurmaPorId } from "@/services/TurmaService";
 import { toast } from "sonner";
 
 export default function GerenciarTurmasPage() {
@@ -18,6 +18,7 @@ export default function GerenciarTurmasPage() {
   const [currentPage, setCurrentPage] = useState<"listar-turmas" | "detalhes-turma">("listar-turmas");
   const [selectedTurma, setSelectedTurma] = useState<any>(null);
   const [isEditarTurmaOpen, setIsEditarTurmaOpen] = useState(false);
+  const [turmaParaEditar, setTurmaParaEditar] = useState<any | null>(null);
 
   useEffect(() => {
     async function carregarTurmasComAlunos() {
@@ -55,8 +56,17 @@ export default function GerenciarTurmasPage() {
     console.log("Navigate to:", screen);
   };
 
-  const handleEditClick = () => {
-    setIsEditarTurmaOpen(true);
+  const handleEditClick = async () => {
+    if (!selectedTurma) return;
+
+    try {
+      const turmaCompleta = await buscarTurmaPorId(selectedTurma.id);
+      setTurmaParaEditar(turmaCompleta);
+      setIsEditarTurmaOpen(true);
+    } catch (error: any) {
+      console.error("Erro ao carregar dados da turma para edição:", error);
+      toast.error(error.message || "Erro ao carregar dados completos da turma.");
+    }
   };
 
   const handleSaveNovaTurma = async () => {
@@ -64,18 +74,37 @@ export default function GerenciarTurmasPage() {
     setTurmas(data);
   };
 
-  const handleUpdateTurma = (updatedTurma: any) => {
-    const updatedList = turmas.map(t => t.id === updatedTurma.id ? updatedTurma : t);
-    setTurmas(updatedList);
-    setSelectedTurma(updatedTurma);
+  const handleUpdateTurma = async (updatedTurma: any) => {
+    try {
+      // Recarrega todas as turmas para garantir contadores e dados agregados atualizados
+      const todasTurmas = await listarTurmas();
+      setTurmas(todasTurmas);
+
+      const turmaAtualizadaLista = todasTurmas.find(t => t.id === updatedTurma.id) || updatedTurma;
+      setSelectedTurma(turmaAtualizadaLista);
+      setTurmaParaEditar(turmaAtualizadaLista);
+    } catch (error: any) {
+      console.error("Erro ao atualizar lista de turmas após edição:", error);
+      toast.error(error.message || "Erro ao atualizar lista de turmas.");
+    }
   };
 
-  const handleInactivateTurma = () => {
-    if (selectedTurma) {
-      const updated = { ...selectedTurma, status: "Inativa" };
-      const updatedList = turmas.map(t => t.id === selectedTurma.id ? updated : t);
+  const handleInactivateTurma = async (turmaAtualizada?: any) => {
+    if (turmaAtualizada) {
+      setSelectedTurma(turmaAtualizada);
+      const updatedList = turmas.map(t => t.id === turmaAtualizada.id ? turmaAtualizada : t);
       setTurmas(updatedList);
-      handleBackToGerenciarTurmas();
+    } else if (selectedTurma) {
+      try {
+        const todasTurmas = await listarTurmas();
+        const turmaEncontrada = todasTurmas.find(t => t.id === selectedTurma.id);
+        if (turmaEncontrada) {
+          setSelectedTurma(turmaEncontrada);
+          setTurmas(todasTurmas);
+        }
+      } catch (error) {
+        console.error("Erro ao atualizar turma:", error);
+      }
     }
   };
 
@@ -128,7 +157,7 @@ export default function GerenciarTurmasPage() {
                 <div className="absolute right-3 md:right-4 top-3 md:top-4 flex flex-wrap gap-2 justify-end">
                   <div className={`px-2 md:px-3 py-1 rounded-full text-xs font-medium ${turma.isAtiva
                       ? "bg-green-100 text-green-700 border border-green-200"
-                      : "bg-gray-100 text-gray-700 border border-gray-200"
+                      : "bg-red-100 text-red-700 border border-red-200"
                     }`}>
                     {turma.isAtiva ? "Ativa" : "Inativa"}
                   </div>
@@ -160,6 +189,7 @@ export default function GerenciarTurmasPage() {
         <>
           <DetalhesTurma
             turmaId={selectedTurma.id}
+            turmaData={selectedTurma}
             onBack={handleBackToGerenciarTurmas}
             onNavigate={handleNavigate}
             onEdit={handleEditClick}
@@ -168,7 +198,7 @@ export default function GerenciarTurmasPage() {
           <EditarTurmaModal
             isOpen={isEditarTurmaOpen}
             onClose={() => setIsEditarTurmaOpen(false)}
-            turmaData={selectedTurma}
+            turmaData={turmaParaEditar || selectedTurma}
             onSave={handleUpdateTurma}
           />
         </>
