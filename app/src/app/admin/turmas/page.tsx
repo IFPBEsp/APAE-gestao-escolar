@@ -38,9 +38,14 @@ export default function GerenciarTurmasPage() {
     carregarTurmasComAlunos();
   }, []);
 
-  const turmasFiltradas = turmas.filter((t) =>
-    t.nome?.toLowerCase().includes(busca.toLowerCase())
-  );
+  const turmasFiltradas = turmas
+    .filter((t) => t.nome?.toLowerCase().includes(busca.toLowerCase()))
+    .sort((a, b) => {
+      if (b.anoCriacao !== a.anoCriacao) {
+        return (b.anoCriacao || 0) - (a.anoCriacao || 0);
+      }
+      return a.nome.localeCompare(b.nome);
+    });
 
   const handleCardClick = (turma: any) => {
     setSelectedTurma(turma);

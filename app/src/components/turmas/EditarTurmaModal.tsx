@@ -228,17 +228,13 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             turno: turno.toUpperCase(),
             isAtiva: turmaData.isAtiva,
             anoCriacao: turmaData.anoCriacao,
+            alunosIds: alunosNaTurma.map(a => a.alunoId)
         };
 
         dadosAtualizados.professorId = professorFinal.id;
 
         try {
             const turmaAtualizada = await atualizarTurma(idTurma, dadosAtualizados);
-
-            await adicionarAlunosATurma(
-                idTurma,
-                alunosNaTurma.map(a => a.alunoId)
-            );
 
             toast.success(`Turma ${turmaData.nome} atualizada com sucesso!`);
 

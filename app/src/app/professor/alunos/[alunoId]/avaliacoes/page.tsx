@@ -179,9 +179,9 @@ export default function AvaliacoesAlunoPage() {
           </Button>
 
           {/* Título Principal da Página */}
-          <div className="flex items-start gap-3 mb-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0D4F97]/10">
-              <FileText className="h-6 w-6 text-[#0D4F97]" />
+          <div className="flex items-start gap-3 mb-6 mt-6">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D4F97]/10">
+              <FileText className="h-5 w-5 text-[#0D4F97]" />
             </div>
             <div>
               <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho do Aluno</h2>
