@@ -68,7 +68,7 @@ export default function DashboardLayout({
                         onClick={() => setIsMobileOpen(false)}
                         className="absolute right-4 top-4 text-[#0D4F97] md:hidden"
                     >
-                        <X className="h-6 w-6" strokeWidth={1.75} />
+                        <X className="h-5 w-5" strokeWidth={1.75} />
                     </button>
                 )}
 

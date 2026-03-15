@@ -172,7 +172,6 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
             <Button
                 variant="outline"
                 onClick={() => router.push("/admin/alunos")}
-                className="text-[#0D4F97] hover:bg-[#E8F3FF] pl-0 gap-2 mb-4"
             >
                 <ArrowLeft size={20} />
                 Voltar
