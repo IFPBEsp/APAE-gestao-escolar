@@ -1,5 +1,6 @@
 package com.apae.gestao.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -195,25 +196,8 @@ public class TurmaService {
             throw new RuntimeException("Um ou mais IDs de aluno não foram encontrados.");
         }
 
-
-        //for que checa se o vínculo já existe para não duplicar no bd
-        for (Aluno aluno : alunos) {
-
-            validarVinculoAlunoTurma(aluno,turmaId);
-
-
-            Optional<TurmaAluno> vinculoExistente = turma.getTurmaAlunos().stream()
-                    .filter(ta -> ta.getAluno().getId().equals(aluno.getId()))
-                    .findFirst();
-
-            if (vinculoExistente.isPresent()) {
-                //se já existe apenas ativa
-                vinculoExistente.get().setIsAlunoAtivo(true);
-            } else {
-                //se n existe ai adiciona outro no bd
-                turma.addAluno(aluno, true);
-            }
-        }
+        validarAlunosNaoAtivosEmOutrasTurmas(alunos, turma.getId());
+        vincularOuReativarAlunos(turma, alunos);
 
         Turma atualizada = turmaDAO.save(turma);
 
@@ -278,7 +262,10 @@ public class TurmaService {
                 .orElseThrow(() -> new RuntimeException("O aluno não pertence a esta turma."));
 
         if(ativo){
-            validarVinculoAlunoTurma(aluno,turmaId);
+            if(isAlunoAtivoEmOutraTurma(aluno, turmaId)){
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                        "Não foi possível ativar. O aluno "+ aluno.getNome() +" já está ativo em outra turma.");
+            }
         }
 
         turmaAluno.setIsAlunoAtivo(ativo);
@@ -301,31 +288,50 @@ public class TurmaService {
             turma.setProfessor(professor);
         }
 
+
         if (dto.getAlunosIds() != null && !dto.getAlunosIds().isEmpty()) {
             List<Aluno> alunos = alunoDAO.findAllById(dto.getAlunosIds());
 
-            for (Aluno aluno : alunos) {
-                boolean alunoJaExiste = turma.getTurmaAlunos().stream()
-                        .anyMatch(ta -> ta.getAluno().getId().equals(aluno.getId()));
-                if (!alunoJaExiste) {
-                    validarVinculoAlunoTurma(aluno, turma.getId());
-                    turma.addAluno(aluno, true);
-                }
+            validarAlunosNaoAtivosEmOutrasTurmas(alunos, turma.getId());
+            vincularOuReativarAlunos(turma, alunos);
+
+        }
+
+    }
+
+    private boolean isAlunoAtivoEmOutraTurma(Aluno aluno, Long turmaIdAtual) {
+        List<TurmaAluno> matriculasAtivas = turmaAlunoDAO.findAllByAlunoAndIsAlunoAtivoTrue(aluno);
+
+        return matriculasAtivas.stream()
+                .anyMatch(ta -> turmaIdAtual == null || !ta.getTurma().getId().equals(turmaIdAtual));
+    }
+
+    private void validarAlunosNaoAtivosEmOutrasTurmas(List<Aluno> alunos, Long turmaIdAtual) {
+        List<String> alunosInvalidos = new ArrayList<>();
+        for (Aluno aluno : alunos) {
+            if (isAlunoAtivoEmOutraTurma(aluno, turmaIdAtual)) {
+                alunosInvalidos.add(aluno.getNome());
             }
+        }
+
+        if (!alunosInvalidos.isEmpty()) {
+            String mensagemErro = "Operação cancelada. Os seguintes alunos já estão ativos em outra turma: "
+                    + String.join(", ", alunosInvalidos);
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, mensagemErro);
         }
     }
 
-    private void validarVinculoAlunoTurma(Aluno aluno, Long turmaIdAtual) {
-        List<TurmaAluno> matriculasAtivas = turmaAlunoDAO.findAllByAlunoAndIsAlunoAtivoTrue(aluno);
+    private void vincularOuReativarAlunos(Turma turma, List<Aluno> alunos) {
+        for (Aluno aluno : alunos) {
+            Optional<TurmaAluno> vinculoExistente = turma.getTurmaAlunos().stream()
+                    .filter(ta -> ta.getAluno().getId().equals(aluno.getId()))
+                    .findFirst();
 
-        boolean ativoEmOutraTurma = matriculasAtivas.stream()
-                .anyMatch(ta -> turmaIdAtual == null || !ta.getTurma().getId().equals(turmaIdAtual));
-
-        if (ativoEmOutraTurma) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNPROCESSABLE_ENTITY,
-                    "Não foi possível matricular o aluno: o sistema não permite alunos ativos em múltiplas turmas simultaneamente."
-            );
+            if (vinculoExistente.isPresent()) {
+                vinculoExistente.get().setIsAlunoAtivo(true);
+            } else {
+                turma.addAluno(aluno, true);
+            }
         }
     }
 
