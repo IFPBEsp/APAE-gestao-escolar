@@ -9,9 +9,17 @@ import { listarTurmasDeProfessor } from "@/services/ProfessorService";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Turma } from "@/types/turma";
+import { buscarProfessorPorId } from "@/services/ProfessorService";
+
+interface Professor {
+  id: number;
+  nome: string;
+  email: string;
+}
 
 export default function TurmasPage() {
   const router = useRouter();
+  const [professor, setProfessor] = useState<Professor | null>(null);
   const { usuario, professorId, loading: authLoading } = useAuth();
   const [turmas, setTurmas] = useState<Turma[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,6 +30,9 @@ export default function TurmasPage() {
       router.push("/");
       return;
     }
+    buscarProfessorPorId(professorId)
+      .then(setProfessor)
+      .catch(() => toast.error("Erro ao carregar professor"));
 
     setLoading(true);
     listarTurmasDeProfessor(professorId)
@@ -65,7 +76,7 @@ export default function TurmasPage() {
         </h1>
 
         <p className="text-[#222222] mt-1 text-sm md:text-lg">
-          Bem-vindo, {usuario.email}!
+          Bem-vindo, {professor?.nome || usuario.email}!
         </p>
 
         <p className="text-[#222222] mt-1 text-sm md:text-base">
