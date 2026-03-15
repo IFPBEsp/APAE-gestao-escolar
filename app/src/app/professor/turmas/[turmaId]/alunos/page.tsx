@@ -147,11 +147,11 @@ export default function TurmaDetalhesPage() {
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-[#0D4F97]/10">
-                    <BookOpen className="h-8 w-8 text-[#0D4F97]" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0D4F97]/10">
+                    <BookOpen className="h-5 w-5 text-[#0D4F97]" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-[#0D4F97]">{turma?.nome}</h2>
+                    <h2 className="text-xl font-bold text-[#0D4F97] mt-2">{turma?.nome}</h2>
                     <div className="flex items-center gap-4 mt-2">
                       <div className="flex items-center gap-2 text-[#222222]">
                         <Users className="h-5 w-5" />
