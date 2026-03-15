@@ -210,13 +210,7 @@ export default function ModalVisualizarAvaliacao({
                         <DialogTitle className="text-[#0D4F97]">Visualizar Avaliação</DialogTitle>
                         <DialogDescription className="dialog-description">Avaliação de {alunoNome}</DialogDescription>
                     </div>
-                    <Button
-                        onClick={handleImprimir}
-                        variant="outline"
-                    >
-                        <Printer className="mr-2 h-4 w-4" />
-                        Imprimir
-                    </Button>
+                    
                 </DialogHeader>
 
                 {/* Conteúdo da Modal */}
@@ -229,6 +223,15 @@ export default function ModalVisualizarAvaliacao({
                     {/* Conteúdo para Impressão (Oculto no Ecrã, Visível na Impressão) */}
                     <div className="hidden print:block">
                         {printContent}
+                    </div>
+                    <div className="flex justify-end mt-4 print:hidden">
+                        <Button
+                            onClick={handleImprimir}
+                            variant="primary"
+                        >
+                            <Printer className="mr-2 h-5 w-5" />
+                            Imprimir
+                        </Button>
                     </div>
                 </div>
 

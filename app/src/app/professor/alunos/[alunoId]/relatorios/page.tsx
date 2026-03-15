@@ -163,7 +163,7 @@ export default function RelatoriosAlunoListaPage() {
           {/* SEÇÃO RELATÓRIOS */}
           <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#B2D7EC]/40">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D4F97]/10">
                 <FileText className="h-5 w-5 text-[#0D4F97]" />
               </div>
               <div>
@@ -260,7 +260,7 @@ export default function RelatoriosAlunoListaPage() {
                             variant="ghost"
                             size="icon"
                           >
-                            <Eye className="h-4 w-4" />
+                            <Eye className="h-5 w-5" />
                           </Button>
                           <Button
                             onClick={() => {
@@ -270,7 +270,7 @@ export default function RelatoriosAlunoListaPage() {
                             variant="ghost"
                             size="icon"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-5 w-5" />
                           </Button>
                         </div>
                       </div>

@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { ArrowLeft, FileText, UserCircle, Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, FileText, UserCircle, Eye, Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -173,16 +173,15 @@ export default function AvaliacoesAlunoPage() {
           <Button
             onClick={() => router.push(turmaId ? `/professor/turmas/${turmaId}/alunos` : "/professor/turmas")}
             variant="outline"
-            className="mb-6"
           >
             <ArrowLeft className="mr-2 h-5 w-5" />
             Voltar
           </Button>
 
           {/* Título Principal da Página */}
-          <div className="flex items-start gap-3 mb-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0D4F97]/10">
-              <FileText className="h-6 w-6 text-[#0D4F97]" />
+          <div className="flex items-start gap-3 mb-6 mt-6">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D4F97]/10">
+              <FileText className="h-5 w-5 text-[#0D4F97]" />
             </div>
             <div>
               <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho do Aluno</h2>
@@ -233,17 +232,17 @@ export default function AvaliacoesAlunoPage() {
                       <div className="md:col-span-8 text-sm text-gray-700">{av.descricao}</div>
                       <div className="md:col-span-2 flex justify-center gap-2">
                         <Button 
-                          variant="outline" 
+                          variant="ghost" 
                           size="icon" 
                           onClick={() => handleOpenEditarDialog(av)} 
-                          className="text-blue-600">
+                          >
                           <Edit className="h-5 w-5" />
                         </Button>
                         <Button 
-                          variant="outline" 
+                          variant="ghost" 
                           size="icon" 
                           onClick={() => handleOpenExcluirDialog(av)} 
-                          className="text-red-600">
+                          >
                           <Trash2 className="h-5 w-5" />
                         </Button>
                       </div>
