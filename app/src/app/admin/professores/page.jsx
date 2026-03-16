@@ -85,13 +85,14 @@ export default function Professores() {
             <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
               Gerenciar Professores
             </h1>
-            <p className="text-sm md:text-base text-[#222222]">Visualize e edite a lista de professores</p>
+            <p className="text-sm md:text-base text-[#222222]">
+              Visualize e edite a lista de professores
+            </p>
           </div>
 
           <Button
             variant="primary"
             onClick={() => router.push("/admin/professores/cadastrar")}
-            className="w-full md:w-auto justify-center"
           >
             <UserPlus className="mr-2 h-5 w-5" />
             Cadastrar Professor
@@ -102,9 +103,10 @@ export default function Professores() {
         <div className="mb-4 md:mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#0D4F97]" />
+
             <Input
               type="text"
-              placeholder="Buscar professor..."
+              placeholder="Buscar Professor..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-11 md:h-12 pl-10 border-2 border-[#B2D7EC] bg-white text-[#222222] placeholder:text-gray-400 focus:border-[#0D4F97]"
@@ -142,7 +144,7 @@ export default function Professores() {
             ) : null}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {professores.map((professor) => (
               <Card
                 key={professor.id}
