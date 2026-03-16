@@ -168,43 +168,45 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
       <div className="p-4 md:p-8 space-y-6">
         
         {/* Cabeçalho de Navegação */}
-        <div>
-            <Button
-                variant="outline"
-                onClick={() => router.push("/admin/alunos")}
-            >
-                <ArrowLeft size={20} />
-                Voltar
-            </Button>
-
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
             <h1 className="text-2xl font-bold text-[#0D4F97]">Detalhes do Aluno</h1>
             <p className="text-gray-500">Visualize e gerencie as informações do aluno</p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => router.push("/admin/alunos")}
+            className="w-full md:w-auto"
+          >
+            <ArrowLeft size={20} className="mr-2" />
+            Voltar
+          </Button>
         </div>
 
         {/* Card principal do Aluno */}
         <Card className="border border-[#E2E8F0] shadow-sm rounded-xl overflow-hidden">
           <CardContent className="p-4 md:p-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="flex items-center gap-3 md:gap-4">
-                <div className="h-12 w-12 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97]">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex items-center gap-3 md:gap-4 w-full">
+                <div className="h-12 w-12 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97] shrink-0">
                   <User size={24} />
                 </div>
-                <div>
-                  <h2 className="text-xl md:text-2xl font-bold text-[#0D4F97]">{alunoData.nome}</h2>
-                  <p className="text-gray-600 text-sm md:text-lg">{calcularIdade(alunoData.dataNascimento)} anos</p>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-xl md:text-2xl font-bold text-[#0D4F97] truncate">{alunoData.nome}</h2>
+                  <p className="text-gray-600 text-sm md:text-base">{calcularIdade(alunoData.dataNascimento)} anos</p>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-y-8 gap-x-12 mt-6 md:mt-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 mt-6 md:mt-10">
               
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
                     <Calendar size={20} />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Data de Nascimento</p>
-                  <p className="text-[#0D4F97] font-medium">{formatarData(alunoData.dataNascimento)}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-500 mb-1 truncate">Data de Nascimento</p>
+                  <p className="text-[#0D4F97] font-medium break-words">{formatarData(alunoData.dataNascimento)}</p>
                 </div>
               </div>
 
@@ -212,9 +214,9 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
                 <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
                     <BookOpen size={20} />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Turma Atual</p>
-                  <p className="text-[#0D4F97] font-medium">{turmaCompleta}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-500 mb-1 truncate">Turma Atual</p>
+                  <p className="text-[#0D4F97] font-medium break-words">{turmaCompleta}</p>
                 </div>
               </div>
 
@@ -222,9 +224,9 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
                 <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
                     <Heart size={20} />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Deficiência</p>
-                  <p className="text-[#0D4F97] font-medium">{alunoData.deficiencia}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-500 mb-1 truncate">Deficiência</p>
+                  <p className="text-[#0D4F97] font-medium break-words">{alunoData.deficiencia}</p>
                 </div>
               </div>
 
@@ -232,10 +234,10 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
                 <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
                     <Phone size={20} />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Responsável</p>
-                  <p className="text-[#0D4F97] font-medium">{alunoData.nomeResponsavel}</p>
-                  <p className="text-gray-500 text-sm">{alunoData.telefoneResponsavel}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-500 mb-1 truncate">Responsável</p>
+                  <p className="text-[#0D4F97] font-medium break-words">{alunoData.nomeResponsavel}</p>
+                  <p className="text-gray-500 text-sm break-words">{alunoData.telefoneResponsavel}</p>
                 </div>
               </div>
 
