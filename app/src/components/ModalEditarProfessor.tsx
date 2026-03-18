@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { X, Calendar } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/services/api";
 import { format } from "date-fns";
@@ -176,10 +176,6 @@ export default function ModalEditarProfessor({
         setSugestoesTurmas([]);
       }
     }
-  };
-
-  const handleRemoveTurma = (id: number) => {
-    setTurmasVinculadas(turmasVinculadas.filter(t => t.id !== id));
   };
 
   const vincularProfessorATurma = async (turmaId: number, professorId: number) => {
@@ -534,15 +530,6 @@ export default function ModalEditarProfessor({
                           {turma.turno} • {turma.tipo}
                         </div>
                       </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveTurma(turma.id)}
-                        aria-label={`Remover turma ${turma.nome}`}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
                     </div>
                   ))}
                 </div>
