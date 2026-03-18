@@ -15,9 +15,13 @@ public interface TurmaAlunoRepository extends JpaRepository<TurmaAluno, Long>{
 
     List<TurmaAluno> findByTurmaAndIsAlunoAtivo(Turma turma, Boolean isAlunoAtivo);
 
+    List<TurmaAluno> findByTurmaAndIsAlunoAtivoOrderByAlunoNomeAsc(Turma turma, Boolean isAlunoAtivo);
+
     Optional<TurmaAluno> findByTurmaAndAluno(Turma turma, Aluno aluno);
 
     List<TurmaAluno> findAllByAlunoAndIsAlunoAtivoTrue(Aluno aluno);
 
     List<TurmaAluno> findByTurmaId(Long turmaId);
+
+    List<TurmaAluno> findByTurmaIdOrderByAlunoNomeAsc(Long turmaId);
 }

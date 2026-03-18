@@ -208,7 +208,7 @@ public class TurmaService {
 
     @Transactional(readOnly = true)
     public List<TurmaAlunoResponseDTO> listarAlunos(Long turmaId) {
-        return turmaAlunoDAO.findByTurmaId(turmaId)
+        return turmaAlunoDAO.findByTurmaIdOrderByAlunoNomeAsc(turmaId)
                 .stream()
                 .map(TurmaAlunoResponseDTO::new)
                 .toList();
@@ -219,7 +219,7 @@ public class TurmaService {
         Turma turma = turmaDAO.findById(turmaId)
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada."));
 
-        return turmaAlunoDAO.findByTurmaAndIsAlunoAtivo(turma, true)
+        return turmaAlunoDAO.findByTurmaAndIsAlunoAtivoOrderByAlunoNomeAsc(turma, true)
                 .stream()
                 .map(TurmaAlunoResponseDTO::new)
                 .toList();
@@ -230,7 +230,7 @@ public class TurmaService {
         Turma turma = turmaDAO.findById(turmaId)
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada."));
 
-        return turmaAlunoDAO.findByTurmaAndIsAlunoAtivo(turma, false)
+        return turmaAlunoDAO.findByTurmaAndIsAlunoAtivoOrderByAlunoNomeAsc(turma, false)
                 .stream()
                 .map(TurmaAlunoResponseDTO::new)
                 .toList();
