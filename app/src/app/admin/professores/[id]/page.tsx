@@ -312,11 +312,11 @@ export default function DetalhesProfessor() {
               </div>
 
               {/* Botões de Ação */}
-              <div className="mt-8 flex flex-col gap-3 border-t border-[#E2E8F0] pt-6 md:flex-row">
+              <div className="mt-8 pt-6 border-t border-[#E2E8F0] flex flex-col md:flex-row gap-4 w-full">
                 <Button
                   variant="primary"
                   onClick={() => setIsModalEditarOpen(true)}
-                  className="w-full flex-1"
+                  className="w-full md:flex-1"
                 >
                   <Edit className="mr-2 h-5 w-5" />
                   Editar Professor
@@ -325,7 +325,7 @@ export default function DetalhesProfessor() {
                 <Button
                   variant={professor.ativo ? "danger" : "primary"}
                   onClick={() => setIsAlertOpen(true)}
-                  className={`w-full flex-1 ${!professor.ativo ? activateButtonStyles : ""}`}
+                  className={`w-full md:flex-1 ${!professor.ativo ? activateButtonStyles : ""}`}
                 >
                   <Power className="mr-2 h-5 w-5" />
                   {professor.ativo ? "Inativar Professor" : "Ativar Professor"}
