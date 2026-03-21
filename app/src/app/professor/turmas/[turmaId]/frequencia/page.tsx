@@ -262,6 +262,13 @@ function ChamadaContent({
     };
 
     const handleSave = async () => {
+
+        const diaDaSemana = selectedDate.getDay();
+        if (diaDaSemana === 0 || diaDaSemana === 6) {
+            toast.error("O sistema não permite registrar aulas ou frequência aos sábados e domingos.");
+            return;
+        }
+
         if (!descricaoAula.trim()) {
             toast.error("Por favor, adicione uma descrição para a aula.");
             return;
