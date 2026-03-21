@@ -372,7 +372,7 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
 
                 <Table className="min-w-[1100px]">
 
-                  <TableHeader className="sticky top-0 z-10">
+                  <TableHeader className="sticky top-0 z-10 bg-[#EAF4FB]">
                     <TableRow className="bg-[#EAF4FB] hover:bg-[#EAF4FB]">
 
                       <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6 w-[120px] truncate">
