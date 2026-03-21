@@ -46,7 +46,7 @@ interface NovaTurmaModalProps {
 
 export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps) {
     const [tipo, setTipo] = useState("");
-    const [ano, setAno] = useState("2025");
+    const [ano, setAno] = useState(new Date().getFullYear().toString());
     const [turno, setTurno] = useState("");
 
     const [buscaProfessor, setBuscaProfessor] = useState("");
