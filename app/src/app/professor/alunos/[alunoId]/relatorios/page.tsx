@@ -211,7 +211,7 @@ export default function RelatoriosAlunoListaPage() {
                 </div>
 
                 {/* Lista de Relatórios */}
-                <div className="divide-y-2 divide-[#B2D7EC]">
+                <div className="w-full">
                   {relatorios.length === 0 ? (
                     <div className="p-8 text-center text-gray-500">
                       Nenhum relatório encontrado.
