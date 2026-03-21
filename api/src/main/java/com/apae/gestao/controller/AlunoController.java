@@ -71,7 +71,8 @@ public class AlunoController {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Turma atualizada com sucesso"),
         @ApiResponse(responseCode = "404", description = "Aluno ou Turma não encontrados"),
-        @ApiResponse(responseCode = "400", description = "Requisição inválida")
+        @ApiResponse(responseCode = "400", description = "Requisição inválida"),
+        @ApiResponse(responseCode = "422", description = "Regra de negócio violada (Turma Inativa)")
     })
     public ResponseEntity<AlunoDetalhesDTO> atualizarTurma(
         @PathVariable Long alunoId,
