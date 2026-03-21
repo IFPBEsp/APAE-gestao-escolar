@@ -118,7 +118,7 @@ export default function GerenciarTurmasPage() {
       <div className="mx-auto max-w-6xl">
         {currentPage === "listar-turmas" && (
           <>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 md:mb-10 gap-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 md:mb-6 gap-4">
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
                   Gerenciar Turmas
