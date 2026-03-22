@@ -79,6 +79,12 @@ export default function ModalEditarProfessor({
 
   useEffect(() => {
     if (professor && isOpen) {
+
+      const extrairData = (dataString?: string) => {
+              if (!dataString) return "";
+              return dataString.split('T')[0];
+      };
+
       setFormData({
         nome: professor.nome || "",
         cpf: professor.cpf || "",
@@ -86,11 +92,11 @@ export default function ModalEditarProfessor({
         telefone: professor.telefone || "",
         endereco: professor.endereco || "",
         dataNascimento: professor.dataNascimento
-          ? format(new Date(professor.dataNascimento), "yyyy-MM-dd")
+          ? extrairData(professor.dataNascimento)
           : "",
         formacao: professor.formacao || "",
         dataContratacao: professor.dataContratacao
-          ? format(new Date(professor.dataContratacao), "yyyy-MM-dd")
+          ? extrairData(professor.dataContratacao)
           : "",
       });
 
