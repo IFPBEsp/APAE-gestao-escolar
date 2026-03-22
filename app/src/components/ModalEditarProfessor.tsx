@@ -76,13 +76,13 @@ export default function ModalEditarProfessor({
   const [sugestoesTurmas, setSugestoesTurmas] = useState<Turma[]>([]);
   const [loadingTurmas, setLoadingTurmas] = useState(false);
 
+  const extrairData = (dataString?: string) => {
+      if (!dataString) return "";
+      return dataString.split('T')[0];
+  };
+
   useEffect(() => {
     if (professor && isOpen) {
-
-      const extrairData = (dataString?: string) => {
-              if (!dataString) return "";
-              return dataString.split('T')[0];
-      };
 
       setFormData({
         nome: professor.nome || "",
@@ -90,13 +90,9 @@ export default function ModalEditarProfessor({
         email: professor.email || "",
         telefone: professor.telefone || "",
         endereco: professor.endereco || "",
-        dataNascimento: professor.dataNascimento
-          ? extrairData(professor.dataNascimento)
-          : "",
+        dataNascimento: extrairData(professor.dataNascimento),
         formacao: professor.formacao || "",
-        dataContratacao: professor.dataContratacao
-          ? extrairData(professor.dataContratacao)
-          : "",
+        dataContratacao: extrairData(professor.dataContratacao),
       });
 
       // Buscar turmas do professor
