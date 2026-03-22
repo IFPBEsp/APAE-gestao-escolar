@@ -276,28 +276,36 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
               ) : (
                 <div className="overflow-x-auto max-h-80 overflow-y-auto border-2 border-[#B2D7EC] rounded-lg">
 
-                  <Table className="min-w-[1100px]">
+                  <Table className="w-full table-fixed">
 
-                    <TableHeader className="sticky top-0 z-10 bg-[#EAF4FB]">
+                    <colgroup>
+                      <col style={{ width: '130px' }} /> {/* Data */}
+                      <col style={{ width: '130px' }} /> {/* Professor */}
+                      <col style={{ width: '200px' }} /> {/* Turma */}
+                      <col /> {/* Descrição */}
+                      <col style={{ width: '60px' }} /> {/* Ações */}
+                    </colgroup>
+
+                    <TableHeader className="sticky top-0 z-20 bg-[#EAF4FB]">
                       <TableRow className="bg-[#EAF4FB] hover:bg-[#EAF4FB]">
 
-                        <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6 w-[120px]">
+                        <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6">
                           Data
                         </TableHead>
 
-                        <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6 w-[150px]">
+                        <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6">
                           Professor
                         </TableHead>
 
-                        <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6 w-[180px]">
+                        <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6">
                           Turma
                         </TableHead>
 
-                        <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6 w-[300px]">
+                        <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6">
                           Descrição
                         </TableHead>
 
-                        <TableHead className="sticky right-0 z-40 bg-[#EAF4FB] text-[#0D4F97] font-semibold w-[120px] min-w-[120px] text-center shadow-[-4px_0_8px_rgba(0,0,0,0.08)]">
+                        <TableHead className="sticky right-0 z-10 bg-[#EAF4FB] text-[#0D4F97] font-semibold text-center shadow-[-4px_0_8px_rgba(0,0,0,0.08)]">
                           Ações
                         </TableHead>
 
@@ -306,31 +314,29 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
 
                     <TableBody className="text-gray-600">
                       {avaliacoes.map((avaliacao: any, index: number) => (
-                        <TableRow
-                          key={index}
-                        >
+                        <TableRow key={index}>
 
-                          <TableCell className="font-medium text-gray-900 truncate max-w-[120px]">
+                          <TableCell className="font-medium text-gray-900 truncate px-4 sm:px-6">
                             {formatarData(avaliacao.dataAvaliacao)}
                           </TableCell>
 
-                          <TableCell className="truncate max-w-[150px]">
+                          <TableCell className="truncate px-4 sm:px-6">
                             {avaliacao.professorNome}
                           </TableCell>
 
-                          <TableCell className="truncate max-w-[180px]">
+                          <TableCell className="truncate px-4 sm:px-6">
                             {avaliacao.turmaNomeCompleto}
                           </TableCell>
 
                           <TableCell
-                            className="truncate max-w-[300px]"
+                            className="truncate px-4 sm:px-6"
                             title={avaliacao.descricao}
                           >
                             {avaliacao.descricao}
                           </TableCell>
 
-                          <TableCell className="sticky right-0 z-30 bg-white group-hover:bg-[#B2D7EC]/10 text-center w-[120px] min-w-[120px] shadow-[-4px_0_8px_rgba(0,0,0,0.05)]">
-                            <div className="flex items-center justify-center">
+                          <TableCell className="sticky right-0 z-10 bg-white group-hover:bg-[#B2D7EC]/10 text-center shadow-[-4px_0_8px_rgba(0,0,0,0.05)]">
+                            <div className="flex items-center justify-center h-full">
                               <Eye
                                 className="h-5 w-5 cursor-pointer hover:text-[#0D4F97] transition-colors"
                                 onClick={() => setSelectedAvaliacao(avaliacao)}
@@ -370,40 +376,51 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
             ) : (
               <div className="overflow-x-auto max-h-80 overflow-y-auto border-2 border-[#B2D7EC] rounded-lg">
 
-                <Table className="min-w-[1100px]">
+                <Table className="w-full table-fixed">
 
-                  <TableHeader className="sticky top-0 z-10">
+                  <colgroup>
+                    <col style={{ width: '130px' }} /> {/* Data */}
+                    <col style={{ width: '130px' }} /> {/* Professor */}
+                    <col style={{ width: '200px' }} /> {/* Turma */}
+                    <col style={{ width: '220px' }} /> {/* Atividades */}
+                    <col style={{ width: '220px' }} /> {/* Habilidades */}
+                    <col style={{ width: '220px' }} /> {/* Estratégias */}
+                    <col style={{ width: '220px' }} /> {/* Recursos */}
+                    <col style={{ width: '60px' }} /> {/* Ações */}
+                  </colgroup>
+
+                  <TableHeader className="sticky top-0 z-20 bg-[#EAF4FB]">
                     <TableRow className="bg-[#EAF4FB] hover:bg-[#EAF4FB]">
 
-                      <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6 w-[120px] truncate">
+                      <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6 truncate">
                         Data
                       </TableHead>
 
-                      <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6 w-[150px] truncate">
+                      <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6 truncate">
                         Professor
                       </TableHead>
 
-                      <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6 w-[180px] truncate">
+                      <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6 truncate">
                         Turma
                       </TableHead>
 
-                      <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6 w-[180px] truncate">
+                      <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6 truncate">
                         Atividades
                       </TableHead>
 
-                      <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6 w-[180px] truncate">
+                      <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6 truncate">
                         Habilidades
                       </TableHead>
 
-                      <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6 w-[180px] truncate">
+                      <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6 truncate">
                         Estratégias
                       </TableHead>
 
-                      <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6 w-[180px] truncate">
+                      <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6 truncate">
                         Recursos
                       </TableHead>
 
-                      <TableHead className="sticky right-0 z-40 bg-[#EAF4FB] text-[#0D4F97] font-semibold w-[120px] min-w-[120px] text-center shadow-[-4px_0_8px_rgba(0,0,0,0.08)]">
+                      <TableHead className="sticky right-0 z-10 bg-[#EAF4FB] text-[#0D4F97] font-semibold text-center shadow-[-4px_0_8px_rgba(0,0,0,0.08)]">
                         Ações
                       </TableHead>
 
@@ -411,53 +428,60 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
                   </TableHeader>
 
                   <TableBody className="text-gray-600">
-                    {relatorios.map((relatorio, index) => (
-                      <TableRow
-                        key={index}
-                      >
+                    {relatorios.map((relatorio: any, index: number) => (
+                      <TableRow key={index}>
 
-                        <TableCell className="font-medium text-gray-900 truncate max-w-[120px]" title={formatarData(relatorio.createdAt)}>
+                        <TableCell
+                          className="font-medium text-gray-900 truncate px-4 sm:px-6"
+                          title={formatarData(relatorio.createdAt)}
+                        >
                           {formatarData(relatorio.createdAt)}
                         </TableCell>
 
-                        <TableCell className="truncate max-w-[150px]" title={relatorio.professorNome}>
+                        <TableCell
+                          className="truncate px-4 sm:px-6"
+                          title={relatorio.professorNome}
+                        >
                           {relatorio.professorNome}
                         </TableCell>
 
-                        <TableCell className="truncate max-w-[180px]" title={relatorio.turmaNome || "Sem Turma"}>
+                        <TableCell
+                          className="truncate px-4 sm:px-6"
+                          title={relatorio.turmaNome || "Sem Turma"}
+                        >
                           {relatorio.turmaNome || "Sem Turma"}
                         </TableCell>
 
                         <TableCell
-                          className="truncate max-w-[200px]"
+                          className="truncate px-4 sm:px-6"
                           title={relatorio.atividades}
                         >
                           {relatorio.atividades}
                         </TableCell>
 
                         <TableCell
-                          className="truncate max-w-[200px]"
+                          className="truncate px-4 sm:px-6"
                           title={relatorio.habilidades}
                         >
                           {relatorio.habilidades}
                         </TableCell>
 
                         <TableCell
-                          className="truncate max-w-[200px]"
+                          className="truncate px-4 sm:px-6"
                           title={relatorio.estrategias}
                         >
                           {relatorio.estrategias}
                         </TableCell>
 
                         <TableCell
-                          className="truncate max-w-[200px]"
+                          className="truncate px-4 sm:px-6"
                           title={relatorio.recursos}
                         >
                           {relatorio.recursos}
                         </TableCell>
 
-                        <TableCell className="sticky right-0 z-30 bg-white group-hover:bg-[#B2D7EC]/10 text-center w-[120px] min-w-[120px] shadow-[-4px_0_8px_rgba(0,0,0,0.05)]">
-                          <div className="flex items-center justify-center">
+                        <TableCell className="sticky right-0 z-10 bg-white group-hover:bg-[#B2D7EC]/10 text-center shadow-[-4px_0_8px_rgba(0,0,0,0.05)]">
+                          <div className="flex items-center justify-center h-full">
                             <Eye
                               className="h-5 w-5 cursor-pointer hover:text-[#0D4F97] transition-colors"
                               onClick={() => setSelectedRelatorio(relatorio)}
