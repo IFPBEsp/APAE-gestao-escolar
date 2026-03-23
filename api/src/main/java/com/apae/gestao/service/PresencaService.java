@@ -7,9 +7,12 @@ import com.apae.gestao.entity.*;
 import com.apae.gestao.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 
 
@@ -41,6 +44,9 @@ public class PresencaService {
             RegistrarChamadaRequestDTO request
     ) {
 
+
+        validarDiadaSemana(data);
+
         Turma turma = turmaRepository.findById(turmaId)
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada com id: " + turmaId));
 
@@ -60,6 +66,9 @@ public class PresencaService {
     }
 
     private Aula criarNovaAula(Turma turma, LocalDate data, String descricao) {
+
+        validarDiadaSemana(data);
+
         Aula aula = Aula.builder()
                 .turma(turma)
                 .dataDaAula(data)
@@ -94,5 +103,13 @@ public class PresencaService {
 
         presencaRepository.save(presenca);
     }
+
+    private void validarDiadaSemana(LocalDate data) {
+        DayOfWeek diaDaSemana = data.getDayOfWeek();
+        if (diaDaSemana == DayOfWeek.SATURDAY || diaDaSemana == DayOfWeek.SUNDAY) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "O sistema não permite registrar aulas ou frequência aos sábados e domingos.");
+        }
+    }
+
 }
 
