@@ -88,22 +88,29 @@ export function DetalhesTurma({
                 contarAulasRealizadas(turmaId)
               ]);
 
-              setAlunosDaTurma(
-                alunosResponse.status === "fulfilled" && Array.isArray(alunosResponse.value)
-                  ? alunosResponse.value
-                  : []
-              );
-              setAlunosFrequencia(
-                alunosFrequenciaResult.status === "fulfilled" ? alunosFrequenciaResult.value || [] : []
-              );
-              setEstatisticas(
-                estatisticasResult.status === "fulfilled" && Array.isArray(estatisticasResult.value)
-                  ? estatisticasResult.value
-                  : []
-              );
-              setTotalAulasRealizadas(
-                totalAulasResult.status === "fulfilled" ? totalAulasResult.value || 0 : 0
-              );
+              if (alunosResponse.status === "fulfilled" && Array.isArray(alunosResponse.value)) {
+                setAlunosDaTurma(alunosResponse.value);
+              } else {
+                toast.error("Não foi possível carregar os alunos da turma.");
+              }
+
+              if (alunosFrequenciaResult.status === "fulfilled") {
+                setAlunosFrequencia(alunosFrequenciaResult.value || []);
+              } else {
+                toast.error("Não foi possível carregar a frequência dos alunos.");
+              }
+
+              if (estatisticasResult.status === "fulfilled" && Array.isArray(estatisticasResult.value)) {
+                setEstatisticas(estatisticasResult.value);
+              } else {
+                toast.error("Não foi possível carregar as estatísticas da turma.");
+              }
+
+              if (totalAulasResult.status === "fulfilled") {
+                setTotalAulasRealizadas(totalAulasResult.value || 0);
+              } else {
+                toast.error("Não foi possível carregar o total de aulas realizadas.");
+              }
 
             } catch (error: any) {
               toast.error(error.message || "Erro ao carregar turma");
@@ -125,7 +132,13 @@ export function DetalhesTurma({
                 await ativarTurma(turmaId);
                 toast.success("Turma reativada com sucesso");
             }
+        } catch (error: any) {
+            toast.error(error.message || "Erro ao alterar status da turma");
+            setIsSubmittingToggle(false);
+            return;
+        }
 
+        try {
             const turmaAtualizada = await buscarTurmaPorId(turmaId);
             setTurma(turmaAtualizada);
 
@@ -135,7 +148,8 @@ export function DetalhesTurma({
             
             setIsDialogOpen(false);
         } catch (error: any) {
-            toast.error(error.message || "Erro ao alterar status da turma");
+            console.error("Erro ao atualizar dados da turma:", error);
+            toast.error("Erro ao atualizar dados da tela. Recarregue a página.");
         } finally {
             setIsSubmittingToggle(false);
         }
@@ -180,7 +194,13 @@ export function DetalhesTurma({
                 await ativarAlunoDaTurma(turmaId, alunoId);
                 toast.success("Aluno ativado com sucesso");
             }
+        } catch (error: any) {
+            toast.error(error.message || "Erro ao alterar status do aluno");
+            setIsTogglingAluno(null);
+            return;
+        }
 
+        try {
             const turmaAtualizada = await buscarTurmaPorId(turmaId);
             setTurma(turmaAtualizada);
             if (onInactivate) onInactivate(turmaAtualizada);
@@ -190,17 +210,20 @@ export function DetalhesTurma({
                 getAlunosComFrequencia(turmaId)
             ]);
 
-            setAlunosDaTurma(
-                alunosResponse.status === "fulfilled" && Array.isArray(alunosResponse.value)
-                    ? alunosResponse.value
-                    : []
-            );
-            setAlunosFrequencia(
-                alunosFrequenciaResult.status === "fulfilled" ? alunosFrequenciaResult.value || [] : []
-            );
+            if (alunosResponse.status === "fulfilled" && Array.isArray(alunosResponse.value)) {
+                setAlunosDaTurma(alunosResponse.value);
+            } else if (alunosResponse.status === "rejected") {
+                toast.error("Não foi possível recarregar a lista de alunos.");
+            }
 
+            if (alunosFrequenciaResult.status === "fulfilled") {
+                setAlunosFrequencia(alunosFrequenciaResult.value || []);
+            } else if (alunosFrequenciaResult.status === "rejected") {
+                toast.error("Não foi possível recarregar a frequência dos alunos.");
+            }
         } catch (error: any) {
-            toast.error(error.message || "Erro ao alterar status do aluno");
+            console.error("Erro ao atualizar dados após toggle do aluno:", error);
+            toast.error("Erro ao atualizar dados da tela. Recarregue a página.");
         } finally {
             setIsTogglingAluno(null);
         }
@@ -469,7 +492,7 @@ export function DetalhesTurma({
                                                     variant={aluno.isAtivo ? "danger" : "primary"}
                                                     size="sm"
                                                     className={`w-[120px] ${!aluno.isAtivo ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700" : ""}`}
-                                                    disabled={isTogglingAluno === aluno.alunoId}
+                                                    disabled={isTogglingAluno !== null}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         handleToggleAlunoStatus(aluno.alunoId, aluno.isAtivo);
