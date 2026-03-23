@@ -45,6 +45,7 @@ export default function DetalhesProfessor() {
   const [loading, setLoading] = useState(true);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [isModalEditarOpen, setIsModalEditarOpen] = useState(false);
+  const [isSubmittingToggle, setIsSubmittingToggle] = useState(false);
 
   useEffect(() => {
     if (professorId) {
@@ -70,6 +71,7 @@ export default function DetalhesProfessor() {
     if (!professor) return;
 
     try {
+      setIsSubmittingToggle(true);
       const endpoint = professor.ativo
         ? `/professores/${professor.id}/inativar`
         : `/professores/${professor.id}/ativar`;
@@ -81,9 +83,11 @@ export default function DetalhesProfessor() {
       toast.success(
         `Professor ${professor.ativo ? "inativado" : "ativado"} com sucesso!`
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao alterar status:", error);
-      toast.error("Erro ao alterar status do professor");
+      toast.error(error.message || "Erro ao alterar status do professor");
+    } finally {
+      setIsSubmittingToggle(false);
     }
   };
 
@@ -324,7 +328,8 @@ export default function DetalhesProfessor() {
                 <Button
                   variant={professor.ativo ? "danger" : "primary"}
                   onClick={() => setIsAlertOpen(true)}
-                  className={`w-full md:flex-1 ${!professor.ativo ? activateButtonStyles : ""}`}
+                  className={`w-full flex-1 ${!professor.ativo ? activateButtonStyles : ""}`}
+                  disabled={isSubmittingToggle}
                 >
                   <Power className="mr-2 h-5 w-5" />
                   {professor.ativo ? "Inativar Professor" : "Ativar Professor"}
@@ -348,7 +353,7 @@ export default function DetalhesProfessor() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel asChild>
-                  <Button variant="outline">
+                  <Button variant="outline" disabled={isSubmittingToggle}>
                     Cancelar
                   </Button>
                 </AlertDialogCancel>
@@ -358,8 +363,9 @@ export default function DetalhesProfessor() {
                     variant={professor.ativo ? "danger" : "primary"}
                     className={!professor.ativo ? activateButtonStyles : ""}
                     onClick={handleToggleStatus}
+                    disabled={isSubmittingToggle}
                   >
-                    Confirmar
+                    {isSubmittingToggle ? "Processando..." : "Confirmar"}
                   </Button>
                 </AlertDialogAction>
               </AlertDialogFooter>
