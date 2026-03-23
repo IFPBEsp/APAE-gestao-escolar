@@ -185,13 +185,19 @@ export function DetalhesTurma({
             setTurma(turmaAtualizada);
             if (onInactivate) onInactivate(turmaAtualizada);
 
-            const [alunosResponse, alunosFrequenciaResult] = await Promise.all([
-                listarAlunos(turmaId).catch(() => []),
-                getAlunosComFrequencia(turmaId).catch(() => [])
+            const [alunosResponse, alunosFrequenciaResult] = await Promise.allSettled([
+                listarAlunos(turmaId),
+                getAlunosComFrequencia(turmaId)
             ]);
-            
-            setAlunosDaTurma(Array.isArray(alunosResponse) ? alunosResponse : []);
-            setAlunosFrequencia(alunosFrequenciaResult || []);
+
+            setAlunosDaTurma(
+                alunosResponse.status === "fulfilled" && Array.isArray(alunosResponse.value)
+                    ? alunosResponse.value
+                    : []
+            );
+            setAlunosFrequencia(
+                alunosFrequenciaResult.status === "fulfilled" ? alunosFrequenciaResult.value || [] : []
+            );
 
         } catch (error: any) {
             toast.error(error.message || "Erro ao alterar status do aluno");
