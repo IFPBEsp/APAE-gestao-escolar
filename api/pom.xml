@@ -81,7 +81,7 @@
 		<!-- Carrega .env automaticamente no Spring Boot 3 -->
 		<dependency>
 			<groupId>me.paulschwarz</groupId>
-			<artifactId>springboot3-dotenv</artifactId>
+			<artifactId>spring-dotenv</artifactId>
 			<version>4.0.0</version>
 		</dependency>
 
