@@ -304,10 +304,12 @@ public class TurmaService {
             Set<Long> novosIds = dto.getAlunosIds();
 
             if (turma.getTurmaAlunos() != null) {
-                turma.getTurmaAlunos().stream()
+                List<Aluno> alunosParaRemover = turma.getTurmaAlunos().stream()
                         .filter(ta -> Boolean.TRUE.equals(ta.getIsAlunoAtivo()))
                         .filter(ta -> !novosIds.contains(ta.getAluno().getId()))
-                        .forEach(ta -> ta.setIsAlunoAtivo(false));
+                        .map(TurmaAluno::getAluno)
+                        .toList();
+                alunosParaRemover.forEach(turma::removeAluno);
             }
 
             if (!novosIds.isEmpty()) {
