@@ -198,7 +198,7 @@ export default function TurmaDetalhesPage() {
                     <Button
                       onClick={() => setViewMode("grid")}
                       variant={viewMode === "grid" ? "primary" : "outline"}
-                      className="flex-1"
+                      className="flex-1 px-0 min-w-0"
                     >
                       <Grid3x3 className="h-5 w-5" />
                     </Button>
@@ -206,7 +206,7 @@ export default function TurmaDetalhesPage() {
                     <Button
                       onClick={() => setViewMode("list")}
                       variant={viewMode === "list" ? "primary" : "outline"}
-                      className="flex-1"
+                      className="flex-1 px-0 min-w-0"
                     >
                       <List className="h-5 w-5" />
                     </Button>
@@ -246,22 +246,23 @@ export default function TurmaDetalhesPage() {
                       </div>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 w-full">
                       <Button
                         variant="primary"
                         onClick={() => handleAvaliacoes(aluno.id)}
+                        className="flex-1 px-2 min-w-0"
                       >
-                        <FileText className="mr-2 h-5 w-5" />
-                        Avaliações
+                        <FileText className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
+                        <span className="text-[11px] sm:text-sm font-semibold truncate block">Avaliações</span>
                       </Button>
 
                       <Button
                         onClick={() => handleRelatorios(aluno.id)}
                         variant="outline"
-                        className="flex-1"
+                        className="flex-1 px-2 min-w-0"
                       >
-                        <FileText className="mr-2 h-5 w-5" />
-                        Relatórios
+                        <FileText className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
+                        <span className="text-[11px] sm:text-sm font-semibold truncate block">Relatórios</span>
                       </Button>
                     </div>
                   </CardContent>
@@ -297,21 +298,23 @@ export default function TurmaDetalhesPage() {
                             </div>
                           </div>
 
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 w-full md:w-auto">
                             <Button
                               onClick={() => handleAvaliacoes(aluno.id)}
                               variant="outline"
-                              className="border-[#0D4F97] text-[#0D4F97]"
+                              className="flex-1 px-2 min-w-0 border-[#0D4F97] text-[#0D4F97]"
                             >
-                              Avaliações
+                              <FileText className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
+                              <span className="text-[11px] sm:text-sm font-semibold truncate block">Avaliações</span>
                             </Button>
 
                             <Button
                               onClick={() => handleRelatorios(aluno.id)}
                               variant="outline"
-                              className="border-[#0D4F97] text-[#0D4F97]"
+                              className="flex-1 px-2 min-w-0 border-[#0D4F97] text-[#0D4F97]"
                             >
-                              Relatórios
+                              <FileText className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
+                              <span className="text-[11px] sm:text-sm font-semibold truncate block">Relatórios</span>
                             </Button>
                           </div>
                         </div>
