@@ -46,7 +46,7 @@ interface NovaTurmaModalProps {
 
 export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps) {
     const [tipo, setTipo] = useState("");
-    const [ano, setAno] = useState("2025");
+    const [ano, setAno] = useState(new Date().getFullYear().toString());
     const [turno, setTurno] = useState("");
 
     const [buscaProfessor, setBuscaProfessor] = useState("");
@@ -180,7 +180,7 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
 
     function resetForm() {
         setTipo("");
-        setAno("2025");
+        setAno(new Date().getFullYear().toString());
         setTurno("");
         setBuscaProfessor("");
         setProfessorSelecionado(null);
@@ -230,7 +230,7 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                             <Input
                                 value={ano}
                                 onChange={(e) => setAno(e.target.value)}
-                                placeholder="Digite o ano (ex: 2025)"
+                                placeholder="Digite o ano (ex: 2026)"
                                 className="bg-white border-[#B2D7EC]"
                             />
                         </div>
