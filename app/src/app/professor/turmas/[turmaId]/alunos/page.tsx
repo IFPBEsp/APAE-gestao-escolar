@@ -24,6 +24,24 @@ import { buscarTurmaPorId } from "@/services/TurmaService";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+interface ActionButtonProps {
+  variant: "primary" | "outline";
+  onClick: () => void;
+  label: string;
+  extraClass?: string;
+}
+
+const ActionButton = ({ variant, onClick, label, extraClass = "" }: ActionButtonProps) => (
+  <Button
+    variant={variant}
+    onClick={onClick}
+    className={`w-full !px-1 min-w-0 flex flex-col xl:flex-row items-center justify-center overflow-hidden gap-1 xl:gap-2 !h-auto py-2 xl:!py-0 xl:!h-12 ${extraClass}`}
+  >
+    <FileText className="h-4 w-4 lg:h-5 lg:w-5 shrink-0" />
+    <span className="text-[10px] sm:text-xs font-semibold truncate block">{label}</span>
+  </Button>
+);
+
 export default function TurmaDetalhesPage() {
   const params = useParams();
   const turmaId = params?.turmaId ? Number(params.turmaId) : null;
@@ -199,6 +217,8 @@ export default function TurmaDetalhesPage() {
                       onClick={() => setViewMode("grid")}
                       variant={viewMode === "grid" ? "primary" : "outline"}
                       className="flex-1 px-0 min-w-0"
+                      aria-label="Visualização em grade"
+                      title="Visualização em grade"
                     >
                       <Grid3x3 className="h-5 w-5" />
                     </Button>
@@ -207,6 +227,8 @@ export default function TurmaDetalhesPage() {
                       onClick={() => setViewMode("list")}
                       variant={viewMode === "list" ? "primary" : "outline"}
                       className="flex-1 px-0 min-w-0"
+                      aria-label="Visualização em lista"
+                      title="Visualização em lista"
                     >
                       <List className="h-5 w-5" />
                     </Button>
@@ -246,24 +268,17 @@ export default function TurmaDetalhesPage() {
                       </div>
                     </div>
 
-                    <div className="flex gap-2 w-full">
-                      <Button
+                    <div className="grid grid-cols-2 gap-2 w-full">
+                      <ActionButton
                         variant="primary"
                         onClick={() => handleAvaliacoes(aluno.id)}
-                        className="flex-1 px-2 min-w-0"
-                      >
-                        <FileText className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
-                        <span className="text-[11px] sm:text-sm font-semibold truncate block">Avaliações</span>
-                      </Button>
-
-                      <Button
-                        onClick={() => handleRelatorios(aluno.id)}
+                        label="Avaliações"
+                      />
+                      <ActionButton
                         variant="outline"
-                        className="flex-1 px-2 min-w-0"
-                      >
-                        <FileText className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
-                        <span className="text-[11px] sm:text-sm font-semibold truncate block">Relatórios</span>
-                      </Button>
+                        onClick={() => handleRelatorios(aluno.id)}
+                        label="Relatórios"
+                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -298,24 +313,19 @@ export default function TurmaDetalhesPage() {
                             </div>
                           </div>
 
-                          <div className="flex gap-2 w-full md:w-auto">
-                            <Button
+                          <div className="grid grid-cols-2 gap-2 w-full md:w-auto md:flex md:flex-row">
+                            <ActionButton
+                              variant="outline"
                               onClick={() => handleAvaliacoes(aluno.id)}
+                              label="Avaliações"
+                              extraClass="md:flex-1 border-[#0D4F97] text-[#0D4F97]"
+                            />
+                            <ActionButton
                               variant="outline"
-                              className="flex-1 px-2 min-w-0 border-[#0D4F97] text-[#0D4F97]"
-                            >
-                              <FileText className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
-                              <span className="text-[11px] sm:text-sm font-semibold truncate block">Avaliações</span>
-                            </Button>
-
-                            <Button
                               onClick={() => handleRelatorios(aluno.id)}
-                              variant="outline"
-                              className="flex-1 px-2 min-w-0 border-[#0D4F97] text-[#0D4F97]"
-                            >
-                              <FileText className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5 shrink-0" />
-                              <span className="text-[11px] sm:text-sm font-semibold truncate block">Relatórios</span>
-                            </Button>
+                              label="Relatórios"
+                              extraClass="md:flex-1 border-[#0D4F97] text-[#0D4F97]"
+                            />
                           </div>
                         </div>
                       </div>
