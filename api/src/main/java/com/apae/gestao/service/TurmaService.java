@@ -3,6 +3,7 @@ package com.apae.gestao.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.apae.gestao.dto.*;
@@ -160,6 +161,15 @@ public class TurmaService {
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
 
         turma.setIsAtiva(true);
+
+        if (turma.getTurmaAlunos() != null) {
+            turma.getTurmaAlunos().forEach(turmaAluno -> {
+                if (!isAlunoAtivoEmOutraTurma(turmaAluno.getAluno(), turmaId)) {
+                    turmaAluno.setIsAlunoAtivo(true);
+                }
+            });
+        }
+
         Turma atualizado = turmaDAO.save(turma);
         return new TurmaResponseDTO(atualizado);
     }
@@ -210,6 +220,7 @@ public class TurmaService {
     public List<TurmaAlunoResponseDTO> listarAlunos(Long turmaId) {
         return turmaAlunoDAO.findByTurmaId(turmaId)
                 .stream()
+                .filter(ta -> Boolean.TRUE.equals(ta.getIsAlunoAtivo()))
                 .map(TurmaAlunoResponseDTO::new)
                 .toList();
     }
@@ -289,18 +300,27 @@ public class TurmaService {
         }
 
 
-        if (dto.getAlunosIds() != null && !dto.getAlunosIds().isEmpty()) {
+        if (dto.getAlunosIds() != null) {
+            Set<Long> novosIds = dto.getAlunosIds();
 
-            if(!turma.getIsAtiva()){
-                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,"Não é possível adicionar aluno em uma turma inativa");
+            if (turma.getTurmaAlunos() != null) {
+                List<Aluno> alunosParaRemover = turma.getTurmaAlunos().stream()
+                        .filter(ta -> Boolean.TRUE.equals(ta.getIsAlunoAtivo()))
+                        .filter(ta -> !novosIds.contains(ta.getAluno().getId()))
+                        .map(TurmaAluno::getAluno)
+                        .toList();
+                alunosParaRemover.forEach(turma::removeAluno);
             }
 
+            if (!novosIds.isEmpty()) {
+                if (!turma.getIsAtiva()) {
+                    throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Não é possível adicionar aluno em uma turma inativa");
+                }
 
-            List<Aluno> alunos = alunoDAO.findAllById(dto.getAlunosIds());
-
-            validarAlunosNaoAtivosEmOutrasTurmas(alunos, turma.getId());
-            vincularOuReativarAlunos(turma, alunos);
-
+                List<Aluno> alunos = alunoDAO.findAllById(novosIds);
+                validarAlunosNaoAtivosEmOutrasTurmas(alunos, turma.getId());
+                vincularOuReativarAlunos(turma, alunos);
+            }
         }
 
     }
