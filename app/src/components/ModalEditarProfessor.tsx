@@ -12,10 +12,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { X, Calendar } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/services/api";
-import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { listarTurmas } from "@/services/TurmaService";
 import { listarTurmasDeProfessor } from "@/services/ProfessorService";
@@ -77,21 +76,23 @@ export default function ModalEditarProfessor({
   const [sugestoesTurmas, setSugestoesTurmas] = useState<Turma[]>([]);
   const [loadingTurmas, setLoadingTurmas] = useState(false);
 
+  const extrairData = (dataString?: string) => {
+      if (!dataString) return "";
+      return dataString.split('T')[0];
+  };
+
   useEffect(() => {
     if (professor && isOpen) {
+
       setFormData({
         nome: professor.nome || "",
         cpf: professor.cpf || "",
         email: professor.email || "",
         telefone: professor.telefone || "",
         endereco: professor.endereco || "",
-        dataNascimento: professor.dataNascimento
-          ? format(new Date(professor.dataNascimento), "yyyy-MM-dd")
-          : "",
+        dataNascimento: extrairData(professor.dataNascimento),
         formacao: professor.formacao || "",
-        dataContratacao: professor.dataContratacao
-          ? format(new Date(professor.dataContratacao), "yyyy-MM-dd")
-          : "",
+        dataContratacao: extrairData(professor.dataContratacao),
       });
 
       // Buscar turmas do professor
@@ -176,10 +177,6 @@ export default function ModalEditarProfessor({
         setSugestoesTurmas([]);
       }
     }
-  };
-
-  const handleRemoveTurma = (id: number) => {
-    setTurmasVinculadas(turmasVinculadas.filter(t => t.id !== id));
   };
 
   const vincularProfessorATurma = async (turmaId: number, professorId: number) => {
@@ -534,15 +531,6 @@ export default function ModalEditarProfessor({
                           {turma.turno} • {turma.tipo}
                         </div>
                       </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveTurma(turma.id)}
-                        aria-label={`Remover turma ${turma.nome}`}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
                     </div>
                   ))}
                 </div>

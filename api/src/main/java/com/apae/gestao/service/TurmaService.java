@@ -197,7 +197,7 @@ public class TurmaService {
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
 
         if(!turma.getIsAtiva()){
-            throw new RuntimeException("Não é possível adicionar aluno em uma turma inativa");
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,"Não é possível adicionar aluno em uma turma inativa");
         }
 
         List<Aluno> alunos = alunoDAO.findAllById(alunoIds);
@@ -263,7 +263,7 @@ public class TurmaService {
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada."));
 
         if (ativo && !turma.getIsAtiva()){
-            throw new RuntimeException("Não é possível ativar um aluno em uma turma inativa.");
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,"Não é possível adicionar aluno em uma turma inativa");
         }
 
         Aluno aluno = alunoDAO.findById(alunoId)
@@ -311,6 +311,10 @@ public class TurmaService {
             }
 
             if (!novosIds.isEmpty()) {
+                if (!turma.getIsAtiva()) {
+                    throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Não é possível adicionar aluno em uma turma inativa");
+                }
+
                 List<Aluno> alunos = alunoDAO.findAllById(novosIds);
                 validarAlunosNaoAtivosEmOutrasTurmas(alunos, turma.getId());
                 vincularOuReativarAlunos(turma, alunos);
