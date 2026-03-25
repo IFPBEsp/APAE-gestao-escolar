@@ -16,6 +16,9 @@ import {
     buscarTurmaPorId,
     desativarTurma,
     ativarTurma,
+    listarAlunos,
+    ativarAlunoDaTurma,
+    desativarAlunoDaTurma,
 } from "@/services/TurmaService";
 import { getAlunosComFrequencia } from "@/services/FrequenciaService";
 import { getEstatisticasTurma, contarAulasRealizadas, getHistoricoAluno } from "@/services/ChamadaService";
@@ -45,12 +48,14 @@ export function DetalhesTurma({
     const router = useRouter();
 
     const [turma, setTurma] = useState<any>(turmaData || null);
+    const [alunosDaTurma, setAlunosDaTurma] = useState<any[]>([]);
     const [alunosFrequencia, setAlunosFrequencia] = useState<any[]>([]);
     const [estatisticas, setEstatisticas] = useState<any[]>([]);
     const [totalAulasRealizadas, setTotalAulasRealizadas] = useState(0);
     const [loading, setLoading] = useState(!turmaData);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSubmittingToggle, setIsSubmittingToggle] = useState(false);
+    const [isTogglingAluno, setIsTogglingAluno] = useState<number | null>(null);
     const [isHistoricoOpen, setIsHistoricoOpen] = useState(false);
     const [historicoAluno, setHistoricoAluno] = useState<any[]>([]);
     const [alunoSelecionado, setAlunoSelecionado] = useState<any | null>(null);
@@ -72,26 +77,40 @@ export function DetalhesTurma({
               }
 
               const [
+                alunosResponse,
                 alunosFrequenciaResult,
                 estatisticasResult,
                 totalAulasResult,
               ] = await Promise.allSettled([
+                listarAlunos(turmaId),
                 getAlunosComFrequencia(turmaId),
                 getEstatisticasTurma(turmaId),
                 contarAulasRealizadas(turmaId)
               ]);
 
-              setAlunosFrequencia(
-                alunosFrequenciaResult.status === "fulfilled" ? alunosFrequenciaResult.value || [] : []
-              );
-              setEstatisticas(
-                estatisticasResult.status === "fulfilled" && Array.isArray(estatisticasResult.value)
-                  ? estatisticasResult.value
-                  : []
-              );
-              setTotalAulasRealizadas(
-                totalAulasResult.status === "fulfilled" ? totalAulasResult.value || 0 : 0
-              );
+              if (alunosResponse.status === "fulfilled" && Array.isArray(alunosResponse.value)) {
+                setAlunosDaTurma(alunosResponse.value);
+              } else {
+                toast.error("Não foi possível carregar os alunos da turma.");
+              }
+
+              if (alunosFrequenciaResult.status === "fulfilled") {
+                setAlunosFrequencia(alunosFrequenciaResult.value || []);
+              } else {
+                toast.error("Não foi possível carregar a frequência dos alunos.");
+              }
+
+              if (estatisticasResult.status === "fulfilled" && Array.isArray(estatisticasResult.value)) {
+                setEstatisticas(estatisticasResult.value);
+              } else {
+                toast.error("Não foi possível carregar as estatísticas da turma.");
+              }
+
+              if (totalAulasResult.status === "fulfilled") {
+                setTotalAulasRealizadas(totalAulasResult.value || 0);
+              } else {
+                toast.error("Não foi possível carregar o total de aulas realizadas.");
+              }
 
             } catch (error: any) {
               toast.error(error.message || "Erro ao carregar turma");
@@ -113,7 +132,13 @@ export function DetalhesTurma({
                 await ativarTurma(turmaId);
                 toast.success("Turma reativada com sucesso");
             }
+        } catch (error: any) {
+            toast.error(error.message || "Erro ao alterar status da turma");
+            setIsSubmittingToggle(false);
+            return;
+        }
 
+        try {
             const turmaAtualizada = await buscarTurmaPorId(turmaId);
             setTurma(turmaAtualizada);
 
@@ -123,7 +148,8 @@ export function DetalhesTurma({
             
             setIsDialogOpen(false);
         } catch (error: any) {
-            toast.error(error.message || "Erro ao alterar status da turma");
+            console.error("Erro ao atualizar dados da turma:", error);
+            toast.error("Erro ao atualizar dados da tela. Recarregue a página.");
         } finally {
             setIsSubmittingToggle(false);
         }
@@ -155,6 +181,51 @@ export function DetalhesTurma({
             if (historicoRequestIdRef.current === currentRequestId) {
                 setLoadingHistorico(false);
             }
+        }
+    }
+
+    async function handleToggleAlunoStatus(alunoId: number, isAtivo: boolean) {
+        try {
+            setIsTogglingAluno(alunoId);
+            if (isAtivo) {
+                await desativarAlunoDaTurma(turmaId, alunoId);
+                toast.success("Aluno inativado com sucesso");
+            } else {
+                await ativarAlunoDaTurma(turmaId, alunoId);
+                toast.success("Aluno ativado com sucesso");
+            }
+        } catch (error: any) {
+            toast.error(error.message || "Erro ao alterar status do aluno");
+            setIsTogglingAluno(null);
+            return;
+        }
+
+        try {
+            const turmaAtualizada = await buscarTurmaPorId(turmaId);
+            setTurma(turmaAtualizada);
+            if (onInactivate) onInactivate(turmaAtualizada);
+
+            const [alunosResponse, alunosFrequenciaResult] = await Promise.allSettled([
+                listarAlunos(turmaId),
+                getAlunosComFrequencia(turmaId)
+            ]);
+
+            if (alunosResponse.status === "fulfilled" && Array.isArray(alunosResponse.value)) {
+                setAlunosDaTurma(alunosResponse.value);
+            } else if (alunosResponse.status === "rejected") {
+                toast.error("Não foi possível recarregar a lista de alunos.");
+            }
+
+            if (alunosFrequenciaResult.status === "fulfilled") {
+                setAlunosFrequencia(alunosFrequenciaResult.value || []);
+            } else if (alunosFrequenciaResult.status === "rejected") {
+                toast.error("Não foi possível recarregar a frequência dos alunos.");
+            }
+        } catch (error: any) {
+            console.error("Erro ao atualizar dados após toggle do aluno:", error);
+            toast.error("Erro ao atualizar dados da tela. Recarregue a página.");
+        } finally {
+            setIsTogglingAluno(null);
         }
     }
 
