@@ -217,6 +217,12 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             return;
         }
 
+        const anoNumerico = Number(anoCriacao);
+        if (!Number.isInteger(anoNumerico) || anoNumerico < 2000 || anoNumerico > 2100) {
+            toast.error("Informe um ano válido entre 2000 e 2100.");
+            return;
+        }
+
         const idTurma = turmaData.id;
 
         const professorFinal = professorSelecionado;
@@ -229,7 +235,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             tipo: tipo.toUpperCase(),
             turno: turno.toUpperCase(),
             isAtiva: turmaData.isAtiva,
-            anoCriacao: Number(anoCriacao) || new Date().getFullYear(),
+            anoCriacao: anoNumerico,
             alunosIds: alunosNaTurma.map(a => a.alunoId)
         };
 
