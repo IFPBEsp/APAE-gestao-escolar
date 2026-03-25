@@ -15,6 +15,8 @@ public interface TurmaRepository extends JpaRepository<Turma, Long> {
 
     boolean existsByNome(String nome);
 
+    boolean existsByNomeAndIdNot(String nome, Long id);
+
     @Query("""
         SELECT new com.apae.gestao.dto.turma.TurmaResumoFrequenciaDTO(
             CAST(SUM(CASE WHEN p.faltou = false THEN 1.0 ELSE 0.0 END) * 100.0 / NULLIF(COUNT(p), 0) AS double),
