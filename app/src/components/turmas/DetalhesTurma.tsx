@@ -16,6 +16,9 @@ import {
     buscarTurmaPorId,
     desativarTurma,
     ativarTurma,
+    listarAlunos,
+    ativarAlunoDaTurma,
+    desativarAlunoDaTurma,
 } from "@/services/TurmaService";
 import { getAlunosComFrequencia } from "@/services/FrequenciaService";
 import { getEstatisticasTurma, contarAulasRealizadas, getHistoricoAluno } from "@/services/ChamadaService";
@@ -45,12 +48,14 @@ export function DetalhesTurma({
     const router = useRouter();
 
     const [turma, setTurma] = useState<any>(turmaData || null);
+    const [alunosDaTurma, setAlunosDaTurma] = useState<any[]>([]);
     const [alunosFrequencia, setAlunosFrequencia] = useState<any[]>([]);
     const [estatisticas, setEstatisticas] = useState<any[]>([]);
     const [totalAulasRealizadas, setTotalAulasRealizadas] = useState(0);
     const [loading, setLoading] = useState(!turmaData);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSubmittingToggle, setIsSubmittingToggle] = useState(false);
+    const [isTogglingAluno, setIsTogglingAluno] = useState<number | null>(null);
     const [isHistoricoOpen, setIsHistoricoOpen] = useState(false);
     const [historicoAluno, setHistoricoAluno] = useState<any[]>([]);
     const [alunoSelecionado, setAlunoSelecionado] = useState<any | null>(null);
@@ -72,26 +77,40 @@ export function DetalhesTurma({
               }
 
               const [
+                alunosResponse,
                 alunosFrequenciaResult,
                 estatisticasResult,
                 totalAulasResult,
               ] = await Promise.allSettled([
+                listarAlunos(turmaId),
                 getAlunosComFrequencia(turmaId),
                 getEstatisticasTurma(turmaId),
                 contarAulasRealizadas(turmaId)
               ]);
 
-              setAlunosFrequencia(
-                alunosFrequenciaResult.status === "fulfilled" ? alunosFrequenciaResult.value || [] : []
-              );
-              setEstatisticas(
-                estatisticasResult.status === "fulfilled" && Array.isArray(estatisticasResult.value)
-                  ? estatisticasResult.value
-                  : []
-              );
-              setTotalAulasRealizadas(
-                totalAulasResult.status === "fulfilled" ? totalAulasResult.value || 0 : 0
-              );
+              if (alunosResponse.status === "fulfilled" && Array.isArray(alunosResponse.value)) {
+                setAlunosDaTurma(alunosResponse.value);
+              } else {
+                toast.error("Não foi possível carregar os alunos da turma.");
+              }
+
+              if (alunosFrequenciaResult.status === "fulfilled") {
+                setAlunosFrequencia(alunosFrequenciaResult.value || []);
+              } else {
+                toast.error("Não foi possível carregar a frequência dos alunos.");
+              }
+
+              if (estatisticasResult.status === "fulfilled" && Array.isArray(estatisticasResult.value)) {
+                setEstatisticas(estatisticasResult.value);
+              } else {
+                toast.error("Não foi possível carregar as estatísticas da turma.");
+              }
+
+              if (totalAulasResult.status === "fulfilled") {
+                setTotalAulasRealizadas(totalAulasResult.value || 0);
+              } else {
+                toast.error("Não foi possível carregar o total de aulas realizadas.");
+              }
 
             } catch (error: any) {
               toast.error(error.message || "Erro ao carregar turma");
@@ -113,7 +132,13 @@ export function DetalhesTurma({
                 await ativarTurma(turmaId);
                 toast.success("Turma reativada com sucesso");
             }
+        } catch (error: any) {
+            toast.error(error.message || "Erro ao alterar status da turma");
+            setIsSubmittingToggle(false);
+            return;
+        }
 
+        try {
             const turmaAtualizada = await buscarTurmaPorId(turmaId);
             setTurma(turmaAtualizada);
 
@@ -123,7 +148,8 @@ export function DetalhesTurma({
             
             setIsDialogOpen(false);
         } catch (error: any) {
-            toast.error(error.message || "Erro ao alterar status da turma");
+            console.error("Erro ao atualizar dados da turma:", error);
+            toast.error("Erro ao atualizar dados da tela. Recarregue a página.");
         } finally {
             setIsSubmittingToggle(false);
         }
@@ -155,6 +181,51 @@ export function DetalhesTurma({
             if (historicoRequestIdRef.current === currentRequestId) {
                 setLoadingHistorico(false);
             }
+        }
+    }
+
+    async function handleToggleAlunoStatus(alunoId: number, isAtivo: boolean) {
+        try {
+            setIsTogglingAluno(alunoId);
+            if (isAtivo) {
+                await desativarAlunoDaTurma(turmaId, alunoId);
+                toast.success("Aluno inativado com sucesso");
+            } else {
+                await ativarAlunoDaTurma(turmaId, alunoId);
+                toast.success("Aluno ativado com sucesso");
+            }
+        } catch (error: any) {
+            toast.error(error.message || "Erro ao alterar status do aluno");
+            setIsTogglingAluno(null);
+            return;
+        }
+
+        try {
+            const turmaAtualizada = await buscarTurmaPorId(turmaId);
+            setTurma(turmaAtualizada);
+            if (onInactivate) onInactivate(turmaAtualizada);
+
+            const [alunosResponse, alunosFrequenciaResult] = await Promise.allSettled([
+                listarAlunos(turmaId),
+                getAlunosComFrequencia(turmaId)
+            ]);
+
+            if (alunosResponse.status === "fulfilled" && Array.isArray(alunosResponse.value)) {
+                setAlunosDaTurma(alunosResponse.value);
+            } else if (alunosResponse.status === "rejected") {
+                toast.error("Não foi possível recarregar a lista de alunos.");
+            }
+
+            if (alunosFrequenciaResult.status === "fulfilled") {
+                setAlunosFrequencia(alunosFrequenciaResult.value || []);
+            } else if (alunosFrequenciaResult.status === "rejected") {
+                toast.error("Não foi possível recarregar a frequência dos alunos.");
+            }
+        } catch (error: any) {
+            console.error("Erro ao atualizar dados após toggle do aluno:", error);
+            toast.error("Erro ao atualizar dados da tela. Recarregue a página.");
+        } finally {
+            setIsTogglingAluno(null);
         }
     }
 
@@ -361,6 +432,85 @@ export function DetalhesTurma({
                         </DialogContent>
                     </Dialog>
 
+                </CardContent>
+            </Card>
+
+            {/* Gerenciamento de Alunos */}
+            <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
+                <CardHeader className="bg-[#F8F9FA] border-b-2 border-[#B2D7EC]">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <CardTitle className="text-[#0D4F97]">Gerenciamento de Alunos</CardTitle>
+                            <CardDescription className="text-[#222222]">
+                                Lista de todos os alunos vinculados à turma
+                            </CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="p-4 sm:p-6">
+                    <div className="overflow-x-auto w-full rounded-lg border-2 border-[#B2D7EC]">
+                        <Table className="min-w-[500px]">
+                            <TableHeader>
+                                <TableRow className="bg-[#B2D7EC]/20 hover:bg-[#B2D7EC]/20">
+                                    <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6 w-1/2">
+                                        Nome do Aluno
+                                    </TableHead>
+                                    <TableHead className="text-[#0D4F97] font-semibold text-center w-1/4">
+                                        Status
+                                    </TableHead>
+                                    <TableHead className="text-[#0D4F97] font-semibold text-center w-1/4">
+                                        Ações
+                                    </TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {alunosDaTurma.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={3} className="text-center text-[#222222] py-8">
+                                            Nenhum aluno vinculado a esta turma.
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    alunosDaTurma.map((aluno) => (
+                                        <TableRow key={aluno.alunoId} className="transition-all hover:bg-[#B2D7EC]/10">
+                                            <TableCell className="font-medium text-[#222222] pl-4 sm:pl-6">
+                                                <span className="text-[#0D4F97]">{aluno.nome}</span>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <span
+                                                    className={`inline-flex rounded-full px-3 py-1 font-medium text-xs
+                                                        ${aluno.isAtivo
+                                                            ? "bg-green-100 text-green-700"
+                                                            : "bg-red-100 text-red-700"
+                                                    }`}
+                                                >
+                                                    {aluno.isAtivo ? "Ativo" : "Inativo"}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <Button
+                                                    variant={aluno.isAtivo ? "danger" : "primary"}
+                                                    size="sm"
+                                                    className={`w-[120px] ${!aluno.isAtivo ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700" : ""}`}
+                                                    disabled={isTogglingAluno !== null}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleToggleAlunoStatus(aluno.alunoId, aluno.isAtivo);
+                                                    }}
+                                                >
+                                                    <Power className="mr-2 h-4 w-4" />
+                                                    {isTogglingAluno === aluno.alunoId
+                                                        ? "Processando..."
+                                                        : aluno.isAtivo ? "Inativar" : "Ativar"
+                                                    }
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
 

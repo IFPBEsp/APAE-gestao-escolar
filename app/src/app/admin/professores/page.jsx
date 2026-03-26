@@ -121,27 +121,17 @@ export default function Professores() {
           </div>
         ) : professores.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 space-y-2">
-            <p className="text-[#222222] text-base md:text-lg font-medium text-center px-4">
-              {searchTerm ? "Nenhum professor encontrado." : "Nenhum professor cadastrado."}
-            </p>
-            {error ? (
+            {!error && (
+              <p className="text-[#222222] text-base md:text-lg font-medium text-center px-4">
+                {searchTerm ? "Nenhum professor encontrado." : "Nenhum professor cadastrado."}
+              </p>
+            )}
+            {error && (
               <div className="mt-4 p-4 bg-red-50 border-2 border-red-200 rounded-lg max-w-md mx-4">
                 <p className="text-red-700 font-semibold">Erro de Conexão</p>
                 <p className="text-red-600 text-sm mt-1">{error}</p>
-                <p className="text-red-500 text-xs mt-2">
-                  💡 Dica: Verifique se o backend Spring Boot está rodando na porta 8080
-                </p>
               </div>
-            ) : !searchTerm ? (
-              <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg max-w-md text-center mx-4">
-                <p className="text-blue-700 text-sm">
-                  Verifique se o backend está rodando e se o mock foi executado.
-                </p>
-                <p className="text-blue-600 text-xs mt-2 break-all">
-                  Teste: <code className="bg-blue-100 px-2 py-1 rounded">http://localhost:8080/api/professores</code>
-                </p>
-              </div>
-            ) : null}
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">

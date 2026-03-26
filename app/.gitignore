@@ -56,3 +56,6 @@ desktop.ini
 # Resíduos de merge
 *.orig
 *.swp
+
+# Next.js auto-generated
+next-env.d.ts

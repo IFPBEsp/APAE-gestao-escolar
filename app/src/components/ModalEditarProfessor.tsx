@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/services/api";
-import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { listarTurmas } from "@/services/TurmaService";
 import { listarTurmasDeProfessor } from "@/services/ProfessorService";
@@ -78,21 +77,23 @@ export default function ModalEditarProfessor({
   const [sugestoesTurmas, setSugestoesTurmas] = useState<Turma[]>([]);
   const [loadingTurmas, setLoadingTurmas] = useState(false);
 
+  const extrairData = (dataString?: string) => {
+      if (!dataString) return "";
+      return dataString.split('T')[0];
+  };
+
   useEffect(() => {
     if (professor && isOpen) {
+
       setFormData({
         nome: professor.nome || "",
         cpf: professor.cpf || "",
         email: professor.email || "",
         telefone: professor.telefone || "",
         endereco: professor.endereco || "",
-        dataNascimento: professor.dataNascimento
-          ? format(new Date(professor.dataNascimento), "yyyy-MM-dd")
-          : "",
+        dataNascimento: extrairData(professor.dataNascimento),
         formacao: professor.formacao || "",
-        dataContratacao: professor.dataContratacao
-          ? format(new Date(professor.dataContratacao), "yyyy-MM-dd")
-          : "",
+        dataContratacao: extrairData(professor.dataContratacao),
       });
 
       // Buscar turmas do professor

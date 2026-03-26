@@ -84,7 +84,11 @@ export default function TurmaDetalhesPage() {
           })
         );
 
-        setAlunos(alunosFormatados);
+        const alunosOrdenados = [...alunosFormatados].sort((a: any, b: any) =>
+          (a?.nome ?? "").localeCompare((b?.nome ?? ""), "pt-BR", { sensitivity: "base" })
+        );
+
+        setAlunos(alunosOrdenados);
       } catch (error: any) {
         toast.error(error.message || "Erro ao carregar dados da turma");
       } finally {
