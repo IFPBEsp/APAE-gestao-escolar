@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import api from "@/services/api";
 import { ptBR } from "date-fns/locale";
 import { listarTurmas } from "@/services/TurmaService";
-import { listarTurmasDeProfessor } from "@/services/ProfessorService";
+import { listarTurmasDeProfessor, ativarProfessorporId } from "@/services/ProfessorService";
 
 interface Turma {
   id: number;
@@ -220,7 +220,7 @@ export default function ModalEditarProfessor({
         (t: Turma) => !turmasVinculadasIds.includes(t.id)
       );
 
-      // 4. Checagem se o professor estiver ativo para possível reativação ao vincular numa nova turma
+      // 4. Checagem se o professor estiver inativo para possível reativação ao vincular numa nova turma
       if (!professor.ativo && turmasParaAdicionar.length > 0) {
           const confirmarReativacao = window.confirm(
             "Este professor está INATIVO, ao vinculá-lo a uma turma, ele será REATIVADO automaticamente no sistema. Deseja confirmar esta ação?"
@@ -232,7 +232,14 @@ export default function ModalEditarProfessor({
           }
 
           //reativação do professor pela api
-          await api.patch(`/professores/${professor.id}/ativar`);
+          try{
+              await ativarProfessorporId(professor.id);
+          } catch (reactivationError: any){
+              toast.error(reactivationError.message);
+              setIsSubmitting(false);
+              return;
+          }
+
       }
 
 
