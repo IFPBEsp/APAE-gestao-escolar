@@ -131,6 +131,7 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
         <Button
           variant="outline"
           onClick={() => router.back()}
+          className="mb-6 justify-center"
         >
           <ArrowLeft className="mr-2 h-5 w-5" />
           Voltar
@@ -141,113 +142,41 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#E5E5E5]">
-      <div className="p-4 md:p-8 space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
-              Detalhes da Turma
-            </h1>
-            <p className="text-[#222222]">
-              Visualize e gerencie as informações da turma
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => router.back()}
-          >
-            <ArrowLeft className="mr-2 h-5 w-5" />
-            Voltar
-          </Button>
-        </div>
+    <div className="min-h-[calc(100vh-5rem)] bg-[#E5E5E5] p-4 md:p-8">
+      <div className="mx-auto max-w-6xl">
 
-        {/* CARD PRINCIPAL ÚNICO */}
-        <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
+        <Button
+          variant="outline"
+          onClick={() => router.back()}
+          className="mb-6 justify-center"
+        >
+          <ArrowLeft className="mr-2 h-5 w-5" />
+          Voltar
+        </Button>
+
+        <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
           <CardContent className="p-8">
-            {/* Nome da Turma e Status */}
-            <div className="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mt-4">
-              <div className="flex items-center gap-3 w-full">
-                <div className="h-10 w-10 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97] shrink-0">
-                  <Users className="h-6 w-6 text-[#0D4F97]" />
-                </div>
-                <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3 flex-1 min-w-0">
-                  <h2 className="text-2xl font-bold text-[#0D4F97] truncate">
-                    {`${turma.tipo} ${turma.anoCriacao} - ${turma.turno}`}
-                  </h2>
-                  <span
-                    className={`inline-block rounded-full px-3 py-1 font-medium text-xs lg:text-sm w-fit ${turma?.isAtiva
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                      }`}
-                  >
-                    {turma?.isAtiva ? "Ativa" : "Inativa"}
-                  </span>
-                </div>
-              </div>
+            <div>
+              <h1 className="mb-2 text-[#0D4F97] text-2xl font-bold">
+                {`${turma.tipo} ${turma.anoCriacao} - ${turma.turno}`}
+              </h1>
+              <p className="text-[#222222]">Informações detalhadas da turma</p>
             </div>
 
-            {/* Grid de Informações */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-6 gap-x-8 mt-6 md:mt-10">
-              {/* Professor Responsável */}
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
-                  <Edit className="h-5 w-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-500 mb-1 truncate">
-                    Professor Responsável
-                  </p>
-                  <p className="text-[#0D4F97] font-medium break-words">
-                    {turma.professorNome || "—"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Total de Alunos */}
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
-                  <Users className="h-5 w-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-500 mb-1 truncate">
-                    Total de Alunos
-                  </p>
-                  <p className="text-[#0D4F97] font-medium break-words">
-                    {alunos.length}
-                  </p>
-                </div>
-              </div>
-
-              {/* Alunos Ativos */}
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
-                  <TrendingUp className="h-5 w-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-500 mb-1 truncate">
-                    Alunos Ativos
-                  </p>
-                  <p className="text-[#0D4F97] font-medium break-words">
-                    {alunosAtivosCount}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Botões de Ação */}
-            <div className="mt-8 flex flex-col gap-3 border-t border-[#E2E8F0] pt-6 md:flex-row">
+            <div className="mt-8 flex flex-col gap-3 border-t-2 border-[#B2D7EC] pt-6 md:flex-row">
               <Button
                 variant="primary"
                 onClick={() => setIsEditarOpen(true)}
                 className="w-full flex-1"
               >
                 <Edit className="mr-2 h-5 w-5" />
-                Editar Turma
+                Editar Turmassssss
               </Button>
 
               <Button
                 variant={turma?.isAtiva ? "danger" : "primary"}
                 onClick={handleDesativarTurma}
+                className="w-full flex-1"
               >
                 <Power className="mr-2 h-5 w-5" />
                 {turma?.isAtiva ? "Inativar Turma" : "Ativar Turma"}
@@ -267,6 +196,72 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
           estatisticas={estatisticas}
           totalAulasRealizadas={totalAulasRealizadas}
         />
+
+        <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-4">
+
+          <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <Users className="h-6 w-6 text-[#0D4F97]" />
+                <div>
+                  <p>Total de Alunos</p>
+                  <p className="text-[#0D4F97]">{alunos.length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <TrendingUp className="h-6 w-6 text-green-600" />
+                <div>
+                  <p>Alunos Ativos</p>
+                  <p className="text-green-600">{alunosAtivosCount}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+        </div>
+
+        <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
+          <CardHeader>
+            <CardTitle className="text-[#0D4F97]">Alunos da Turma</CardTitle>
+            <CardDescription>Lista de alunos vinculados</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <table className="w-full">
+              <thead>
+                <tr className="border-b-2 border-[#B2D7EC]">
+                  <th className="p-3 text-left text-[#0D4F97]">Aluno</th>
+                  <th className="p-3 text-center text-[#0D4F97]">Status</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {alunos.map((aluno) => (
+                  <tr key={aluno.id} className="border-b border-[#B2D7EC]">
+                    <td className="p-3">{aluno.nome}</td>
+
+                    <td className="p-3 text-center">
+                      {aluno.isAtivo ? (
+                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                          Ativo
+                        </span>
+                      ) : (
+                        <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full">
+                          Inativo
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
+
       </div>
     </div>
   );
