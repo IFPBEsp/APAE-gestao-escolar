@@ -277,13 +277,13 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
                 <div className="overflow-x-auto max-h-80 overflow-y-auto border-2 border-[#B2D7EC] rounded-lg">
 
                   <Table className="w-full table-fixed">
-
+                    // Ordem das colunas: Data, Professor, Turma, Descrição, Ações
                     <colgroup>
-                      <col style={{ width: '130px' }} /> /* Data */
-                      <col style={{ width: '160px' }} /> /* Professor */
-                      <col style={{ width: '200px' }} /> /* Turma */
-                      <col style={{ width: '300px' }} /> /* Descrição */
-                      <col style={{ width: '70px' }} /> /* Ações */
+                      <col style={{ width: '130px' }} /> 
+                      <col style={{ width: '160px' }} /> 
+                      <col style={{ width: '200px' }} /> 
+                      <col style={{ width: '300px' }} /> 
+                      <col style={{ width: '70px' }} /> 
                     </colgroup>
 
                     <TableHeader className="sticky top-0 z-20 bg-[#EAF4FB]">
@@ -377,16 +377,16 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
               <div className="overflow-x-auto max-h-80 overflow-y-auto border-2 border-[#B2D7EC] rounded-lg">
 
                 <Table className="w-full table-fixed">
-
+                  // Ordem das colunas: Data, Professor, Turma, Atividades, Habilidades, Estratégias, Recursos, Ações
                   <colgroup>
-                    <col style={{ width: '130px' }} /> /* Data */
-                    <col style={{ width: '160px' }} /> /* Professor */
-                    <col style={{ width: '200px' }} /> /* Turma */
-                    <col style={{ width: '220px' }} /> /* Atividades */
-                    <col style={{ width: '220px' }} /> /* Habilidades */
-                    <col style={{ width: '220px' }} /> /* Estratégias */
-                    <col style={{ width: '220px' }} /> /* Recursos */
-                    <col style={{ width: '70px' }} /> /* Ações */
+                    <col style={{ width: '130px' }} /> 
+                    <col style={{ width: '160px' }} /> 
+                    <col style={{ width: '200px' }} /> 
+                    <col style={{ width: '220px' }} /> 
+                    <col style={{ width: '220px' }} /> 
+                    <col style={{ width: '220px' }} /> 
+                    <col style={{ width: '220px' }} /> 
+                    <col style={{ width: '70px' }} /> 
                   </colgroup>
 
                   <TableHeader className="sticky top-0 z-20 bg-[#EAF4FB]">

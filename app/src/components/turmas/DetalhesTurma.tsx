@@ -595,7 +595,7 @@ export function DetalhesTurma({
                                                                 {frequencia}%
                                                             </div>
                                                             <div className="text-xs text-gray-500 mt-1">
-                                                                {frequencia >= 75 ? "Presente" : "Ausente"}
+                                                                {frequencia >= 75 ? "Frequência adequada" : "Baixa frequência"}
                                                             </div>
                                                         </TableCell>
                                                     </TableRow>
