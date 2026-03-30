@@ -3,6 +3,7 @@ package com.apae.gestao.service;
 import com.apae.gestao.dto.*;
 import com.apae.gestao.dto.turma.TurmaResponseDTO;
 import com.apae.gestao.entity.Professor;
+import com.apae.gestao.entity.Turma;
 import com.apae.gestao.exception.ConflitoDeDadosException;
 import com.apae.gestao.exception.RecursoNaoEncontradoException;
 import com.apae.gestao.repository.ProfessorRepository;
@@ -132,15 +133,24 @@ public class ProfessorService {
 
     @Transactional
     public ProfessorResponseDTO inativar(Long id) {
-        Professor professor = professorRepository.findById(id)
+        Professor professor = professorRepository.findByIdWithTurmas(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id));
 
         professor.setAtivo(false);
+
+        List<Turma> turmasAtivas = professor.getTurmas().stream()
+                .filter(t -> Boolean.TRUE.equals(t.getIsAtiva()))
+                .toList();
+
+        for (Turma turma : turmasAtivas) {
+            turma.setProfessor(null);
+            turmaRepository.save(turma);
+        }
+
+        professor.getTurmas().removeAll(turmasAtivas);
         Professor salvo = professorRepository.save(professor);
 
-        return professorRepository.findByIdWithTurmas(salvo.getId())
-                .map(ProfessorResponseDTO::new)
-                .orElse(new ProfessorResponseDTO(salvo));
+        return new ProfessorResponseDTO(salvo);
     }
 
     @Transactional
