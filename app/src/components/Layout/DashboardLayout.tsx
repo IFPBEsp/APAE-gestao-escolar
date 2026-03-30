@@ -135,7 +135,7 @@ export default function DashboardLayout({
     );
 
     return (
-        <div className="flex w-full min-h-screen bg-[#E5E5E5] overflow-x-hidden">
+        <div className="flex w-full min-h-screen bg-[#F4F6FB] overflow-x-hidden">
             {/* Mobile Menu Button (Fixed Top-Left) */}
             <button
                 onClick={() => setIsMobileOpen(true)}

@@ -538,7 +538,7 @@ export default function ModalEditarProfessor({
             )}
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="gap-3">
             <Button
               type="button"
               variant="outline"
