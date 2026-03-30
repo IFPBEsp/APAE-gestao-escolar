@@ -208,16 +208,18 @@ export default function ModalVisualizarEditarRelatorio({
     );
   }
 
+  const isNovoRelatorio = !relatorio?.id || relatorio.id === "novo" || relatorio.id === 0;
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { handleCancelar(); onClose(); } }}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-6 border-b">
           <div>
             <DialogTitle className="text-2xl font-bold text-[#0D4F97]">
-              {isEditando ? "Editando Relatório" : "Visualizando Relatório"}
+              {isNovoRelatorio ? "Criar Relatório" : isEditando ? "Editando Relatório" : "Visualizando Relatório"}
             </DialogTitle>
             <DialogDescription className="text-gray-600 text-base mt-2">
-              {isEditando ? "Edite o relatório de" : "Detalhes do relatório de"} <span className="font-semibold">{dadosAlunoCompleto.nome}</span>
+              {isNovoRelatorio ? "Crie um novo relatório para " : isEditando ? "Edite o relatório de " : "Detalhes do relatório de "} <span className="font-semibold">{dadosAlunoCompleto.nome}</span>
             </DialogDescription>
           </div>
         </DialogHeader>
