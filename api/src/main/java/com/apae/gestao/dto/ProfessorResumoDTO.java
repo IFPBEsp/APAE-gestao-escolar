@@ -38,6 +38,12 @@ public class ProfessorResumoDTO {
     @Schema(description = "Data de contratação", example = "2024-02-01")
     private LocalDate dataContratacao;
 
+    @Schema(description = "Data de nascimento", example = "1985-10-15")
+    private LocalDate dataNascimento;
+
+    @Schema(description = "Endereço cadastrado", example = "Rua das Flores, 123")
+    private String endereco;
+
     @Schema(description = "Lista com nomes das turmas vinculadas ao professor")
     private List<String> turmas;
 }

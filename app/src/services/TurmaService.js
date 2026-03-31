@@ -178,7 +178,7 @@ export async function ativarAlunoDaTurma(turmaId, alunoId){
 
 export async function desativarAlunoDaTurma(turmaId, alunoId){
     try {
-        await api.patch(`/turmas/${turmaId}/alunos/${alunoId}/desativar`);
+        await api.patch(`/turmas/${turmaId}/alunos/${alunoId}/inativar`);
     } catch (error) {
         const apiMessage = error.response?.data?.message;
         const errorMessage = apiMessage

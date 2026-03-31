@@ -21,4 +21,9 @@ export interface ProfessorResumo {
   email: string;
   ativo: boolean;
   turmas: string[];
+  telefone?: string;
+  formacao?: string;
+  dataContratacao?: string;
+  dataNascimento?: string;
+  endereco?: string;
 }

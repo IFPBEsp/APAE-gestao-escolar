@@ -1,5 +1,6 @@
 package com.apae.gestao.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -12,6 +13,10 @@ import java.util.Optional;
 
 @Repository
 public interface TurmaRepository extends JpaRepository<Turma, Long> {
+
+    boolean existsByNome(String nome);
+
+    boolean existsByNomeAndIdNot(String nome, Long id);
 
     @Query("""
         SELECT new com.apae.gestao.dto.turma.TurmaResumoFrequenciaDTO(
@@ -56,4 +61,8 @@ public interface TurmaRepository extends JpaRepository<Turma, Long> {
 
     @Query(value = "SELECT listar_turmas_otimizado(NULL, NULL, NULL, NULL, NULL, NULL, :professorId)", nativeQuery = true)
     String listarTurmasOtimizadoPorProfessor(@Param("professorId") Long professorId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Turma t SET t.professor = null WHERE t.professor.id = :professorId AND t.isAtiva = true")
+    void desvincularProfessorDeTurmasAtivas(@Param("professorId") Long professorId);
 }

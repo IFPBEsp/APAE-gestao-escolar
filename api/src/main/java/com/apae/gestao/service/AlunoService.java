@@ -13,8 +13,10 @@ import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.TurmaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -71,18 +73,37 @@ public class AlunoService {
         Turma novaTurma = turmaRepository.findById(dto.getNovaTurmaId())
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada"));
 
+        if(!novaTurma.getIsAtiva()){
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,"Não é possível adicionar aluno em uma turma inativa");
+        }
+
+
         turmaAlunoRepository
                 .findAllByAlunoAndIsAlunoAtivoTrue(aluno)
                 .forEach(ta -> ta.setIsAlunoAtivo(false));
 
-        TurmaAluno novoVinculo = new TurmaAluno();
-        novoVinculo.setAluno(aluno);
-        novoVinculo.setTurma(novaTurma);
-        novoVinculo.setIsAlunoAtivo(true);
+        //busca se o aluno já tem registro no novaTurma para não criar uma nova instância de aluno no bd
+        TurmaAluno vinculo = aluno.getTurmaAlunos().stream()
+                .filter(ta -> ta.getTurma().getId().equals(novaTurma.getId()))
+                .findFirst()
+                .orElse(null);
 
-        turmaAlunoRepository.save(novoVinculo);
-        aluno.getTurmaAlunos().add(novoVinculo);
+        //se já tiver sido vinculado uma vez
+        if (vinculo != null) {
+            //reativa
+            vinculo.setIsAlunoAtivo(true);
+        } else {
+            //se nunca tiver sido vinculado
+            vinculo = new TurmaAluno();
+            vinculo.setAluno(aluno);
+            vinculo.setTurma(novaTurma);
+            vinculo.setIsAlunoAtivo(true);
 
+            //adiciona na lista pra persistência
+            aluno.getTurmaAlunos().add(vinculo);
+        }
+
+        turmaAlunoRepository.save(vinculo);
         return new AlunoDetalhesDTO(aluno);
     }
 

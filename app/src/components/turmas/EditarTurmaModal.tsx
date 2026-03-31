@@ -1,9 +1,11 @@
-"use client";
+'use client';
 
 import {
   atualizarTurma,
-  adicionarAlunosATurma, 
-} from "@/services/TurmaService"; 
+  adicionarAlunosATurma,
+  listarAlunos as listarAlunosDaTurma,
+  buscarTurmaPorId,
+} from "@/services/TurmaService";
 import { listarProfessores } from "@/services/ProfessorService";
 import { toast } from "sonner";
 import { listarAlunos } from "@/services/AlunoService";
@@ -48,7 +50,8 @@ interface TurmaAPIData {
     anoCriacao: number;
     turno: string;
     nome: string;
-    professor: Professor;
+    professorId: number;
+    professorNome: string;
     alunos: AlunoNaTurma[];
     isAtiva: boolean;
 }
@@ -90,22 +93,52 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     }
 
     useEffect(() => {
-        if (turmaData && isOpen) {
-            setTipo(turmaData.tipo);
-            setTurno(turmaData.turno);
-            
-            setProfessorSelecionado(turmaData.professor);
-            setAlunosNaTurma(
-                (turmaData.alunos || []).map(a => ({
-                    alunoId: a.alunoId,
-                    nome: a.nome,
-                     isAtivo: a.isAtivo ?? true,
-                }))
-            );
-            
-            setBuscaProfessor("");
-            setBuscaAluno("");
+        async function carregarDadosIniciais() {
+            if (!turmaData || !isOpen) return;
+
+            try {
+                const turmaBackend = await buscarTurmaPorId(turmaData.id);
+
+                setTipo(turmaBackend.tipo);
+                setTurno(turmaBackend.turno);
+
+                if (turmaBackend.professorId && (turmaBackend.professorNome || turmaBackend.professor?.nome)) {
+                    setProfessorSelecionado({
+                        id: turmaBackend.professorId,
+                        nome: turmaBackend.professorNome || turmaBackend.professor?.nome,
+                    });
+                } else {
+                    setProfessorSelecionado(null);
+                }
+
+                try {
+                    const alunosDaTurma = await listarAlunosDaTurma(turmaBackend.id);
+                    setAlunosNaTurma(
+                        (alunosDaTurma || []).map((a: any) => ({
+                            alunoId: a.id || a.alunoId,
+                            nome: a.nome,
+                            isAtivo: a.isAtivo ?? true,
+                        }))
+                    );
+                } catch (error: any) {
+                    console.error("Erro ao carregar alunos da turma:", error);
+                    toast.error(error.message || "Erro ao carregar alunos da turma.");
+                    setAlunosNaTurma((turmaBackend.alunos || []).map((a: any) => ({
+                        alunoId: a.id || a.alunoId,
+                        nome: a.nome,
+                        isAtivo: a.isAtivo ?? true,
+                    })));
+                }
+
+                setBuscaProfessor("");
+                setBuscaAluno("");
+            } catch (error: any) {
+                console.error("Erro ao carregar dados da turma para edição:", error);
+                toast.error(error.message || "Erro ao carregar dados da turma para edição.");
+            }
         }
+
+        carregarDadosIniciais();
     }, [turmaData, isOpen]);
 
     useEffect(() => {
@@ -150,7 +183,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             setAlunosEncontrados(
                 alunosArray
                     .filter(a => !alunosNaTurma.some(aluno => aluno.alunoId === a.id))
-                    .map(a => ({ alunoId: a.id, nome: a.nome }))
+                    .map(a => ({ id: a.id, nome: a.nome }))
             );
         } catch (error: any) {
             toast.error("Erro ao buscar alunos: " + (error.message || ""));
@@ -177,32 +210,38 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     }
 
     async function handleSave() {
-        if (!turmaData || !professorSelecionado) {
-            toast.error("Erro: Dados da turma ou professor ausentes.");
+        if (!turmaData) {
+            toast.error("Erro: Dados da turma ausentes.");
             return;
         }
 
         const idTurma = turmaData.id;
 
-        const dadosAtualizados = {
+        const professorFinal = professorSelecionado;
+        if (!professorFinal) {
+            toast.error("Nenhum professor selecionado para a turma.");
+            return;
+        }
+
+        const dadosAtualizados: any = {
             tipo: tipo.toUpperCase(),
             turno: turno.toUpperCase(),
             isAtiva: turmaData.isAtiva,
-            professorId: professorSelecionado.id,
-            anoCriacao: turmaData.anoCriacao, 
+            anoCriacao: turmaData.anoCriacao,
+            alunosIds: alunosNaTurma.map(a => a.alunoId)
         };
+
+        dadosAtualizados.professorId = professorFinal.id;
 
         try {
             const turmaAtualizada = await atualizarTurma(idTurma, dadosAtualizados);
-
-            await adicionarAlunosATurma(idTurma, alunosNaTurma.map(a => a.alunoId));
 
             toast.success(`Turma ${turmaData.nome} atualizada com sucesso!`);
 
             if (onSave) {
                 onSave({
                     ...turmaAtualizada,
-                    professor: professorSelecionado,
+                    professor: professorFinal,
                     alunos: alunosNaTurma,
                 });
             }
@@ -279,7 +318,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                         <div className="bg-[#E8F3FF] p-4 rounded-lg border border-[#B2D7EC]">
                             <Label className="text-[#0D4F97] mb-1 block">Professor Selecionado:</Label>
                             <div className="flex items-center gap-2 text-[#0D4F97] font-medium">
-                                <span>{professorSelecionado?.nome || "Professor atual permanece"}</span>
+                                <span>{professorSelecionado?.nome || turmaData.professorNome}</span>
                             </div>
                         </div>
 
@@ -379,7 +418,6 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                     <Button
                         variant="primary"
                         onClick={handleSave}
-                        disabled={!professorSelecionado} 
                     >
                         Salvar Alterações
                     </Button>

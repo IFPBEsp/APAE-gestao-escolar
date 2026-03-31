@@ -32,6 +32,9 @@ public class TurmaResumoDTO {
     @Schema(description = "Nome do professor responsável", example = "Maria da Silva")
     private String professorNome;
 
+    @Schema(description = "ID do professor responsável", example = "1")
+    private Long professorId;
+
     @Schema(description = "Total de alunos matriculados", example = "25")
     private Long totalAlunos;
 

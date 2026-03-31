@@ -98,7 +98,7 @@ export default function ModalVisualizarRelatorio({
             onClick={imprimir}
             variant="primary"
           >
-            <Printer className="mr-2 h-4 w-4" />
+            <Printer className="mr-2 h-5 w-5" />
             Imprimir
           </Button>
         </div>
