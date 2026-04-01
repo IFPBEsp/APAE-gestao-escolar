@@ -141,7 +141,7 @@ export default function Professores() {
                 onClick={() => handleCardClick(professor.id)}
                 className="rounded-xl border-2 border-[#B2D7EC] bg-white shadow-md transition-all hover:border-[#0D4F97] hover:shadow-lg cursor-pointer"
               >
-                <CardContent className="p-4 md:p-6">
+                <CardContent className="pt-4 md:pt-6 pb-4 md:pb-6 px-4 md:px-6">
                   <div className="mb-3 md:mb-4 flex items-start gap-2 md:gap-3">
                     <div className="flex h-10 w-10 md:h-12 md:w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#B2D7EC]/20">
                       <UserCircle className="h-6 w-6 md:h-7 md:w-7 text-[#0D4F97]" />

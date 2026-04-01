@@ -42,7 +42,7 @@ public class Turma {
     private Set<TurmaAluno> turmaAlunos = new HashSet<>();
 
     @ManyToOne
-    @JoinColumn(name = "professor_id", nullable = false)
+    @JoinColumn(name = "professor_id", nullable = true)
     @JsonIgnoreProperties({"turmas", "relatorios", "avaliacoes"})
     private Professor professor;
 

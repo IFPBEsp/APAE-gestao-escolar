@@ -122,11 +122,11 @@ export default function DetalhesProfessor() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#E5E5E5]">
+    <div className="w-full min-h-screen bg-[#F4F6FB]">
       <div className="p-4 md:p-8 space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-[#0D4F97] mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
                 Detalhes do Professor
               </h1>
               <p className="text-[#222222]">
@@ -136,7 +136,6 @@ export default function DetalhesProfessor() {
             <Button
               onClick={() => router.push("/admin/professores")}
               variant="outline"
-              className="w-full md:w-auto"
             >
               <ArrowLeft className="mr-2 h-5 w-5" />
               Voltar
@@ -149,8 +148,8 @@ export default function DetalhesProfessor() {
               {/* Nome do Professor e Status */}
               <div className="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mt-4">
                 <div className="flex items-center gap-3 w-full">
-                  <div className="h-10 w-10 shrink-0 flex items-center justify-center">
-                    <UserCircle className="h-10 w-10 text-[#0D4F97]" />
+                  <div className="h-10 w-10 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97] shrink-0">
+                    <UserCircle className="h-6 w-6 text-[#0D4F97]" />
                   </div>
                   <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3 flex-1 min-w-0">
                     <h2 className="text-2xl font-bold text-[#0D4F97] truncate">
@@ -296,11 +295,11 @@ export default function DetalhesProfessor() {
               </div>
 
               {/* Turmas que Leciona */}
-              <div className="mt-6 border-t border-[#E2E8F0] pt-6">
+              <div className="mt-6 border-t-8 border-[#E2E8F0] pt-6">
                 <div className="mb-3 flex items-center gap-2">
                   <BookOpen className="h-5 w-5 text-[#0D4F97]" />
                   <h3 className="text-lg font-semibold text-[#0D4F97]">
-                    Turmas que Leciona
+                    Turmas que leciona
                   </h3>
                 </div>
                 {professor.turmas && professor.turmas.length > 0 ? (
@@ -320,11 +319,11 @@ export default function DetalhesProfessor() {
               </div>
 
               {/* Botões de Ação */}
-              <div className="mt-8 pt-6 border-t border-[#E2E8F0] flex flex-col md:flex-row gap-4 w-full">
+              <div className="mt-8 pt-6 border-t-8 border-[#E2E8F0] flex flex-col md:flex-row gap-3 w-full">
                 <Button
                   variant="primary"
                   onClick={() => setIsModalEditarOpen(true)}
-                  className="w-full md:flex-1"
+                  className="w-full"
                 >
                   <Edit className="mr-2 h-5 w-5" />
                   Editar Professor
@@ -333,7 +332,7 @@ export default function DetalhesProfessor() {
                 <Button
                   variant={professor.ativo ? "danger" : "primary"}
                   onClick={() => setIsAlertOpen(true)}
-                  className={`w-full flex-1 ${!professor.ativo ? activateButtonStyles : ""}`}
+                  className={`w-full ${!professor.ativo ? activateButtonStyles : ""}`}
                   disabled={isSubmittingToggle}
                 >
                   <Power className="mr-2 h-5 w-5" />

@@ -186,7 +186,7 @@ export default function RelatoriosAlunoListaPage() {
               action={
                 <Button
                   onClick={() => {
-                    setRelatorioSelecionado({ id: 0 });
+                    setRelatorioSelecionado({ id: 0, alunoId: Number(alunoIdFromUrl) });
                     setIsModalRelatorioOpen(true);
                   }}
                   variant="primary"
@@ -291,6 +291,8 @@ export default function RelatoriosAlunoListaPage() {
             setRelatorioSelecionado(null);
           }}
           relatorio={relatorioSelecionado}
+          alunoNome={alunoData?.nome}
+          alunoDataNascimento={alunoData?.dataNascimento}
           onSalvar={handleSalvarRelatorio}
         />
       )}
