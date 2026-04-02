@@ -63,6 +63,7 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
 
     function formatTipo(val: string) {
         if (val === 'alfabetizacao') return 'Alfabetização';
+        if (val === 'estimulacao') return 'Estimulação';
         if (val === 'matematica') return 'Matemática';
         return val;
     }
@@ -146,9 +147,9 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
         }
 
         const dadosNovaTurma = {
-            tipo: tipo.toUpperCase(),
+            tipo: formatTipo(tipo),
             anoCriacao: Number(ano),
-            turno: turno.toUpperCase(),
+            turno: formatTurno(turno),
             professorId: professorSelecionado.id,
             isAtiva: true,
             alunosIds: alunosSelecionados.map(a => a.id)
@@ -215,7 +216,7 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                                     Alfabetização
                                 </SelectItem>
                                 <SelectItem
-                                    value="Estimulação"
+                                    value="estimulacao"
                                     className="cursor-pointer hover:bg-[#D0E7FA] focus:bg-[#D0E7FA] transition-colors"
                                 >
                                     Estimulação

@@ -224,8 +224,8 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
         }
 
         const dadosAtualizados: any = {
-            tipo: tipo.toUpperCase(),
-            turno: turno.toUpperCase(),
+            tipo: formatTipo(tipo),
+            turno: formatTurno(turno),
             isAtiva: turmaData.isAtiva,
             anoCriacao: turmaData.anoCriacao,
             alunosIds: alunosNaTurma.map(a => a.alunoId)
