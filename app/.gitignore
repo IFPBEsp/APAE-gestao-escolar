@@ -59,3 +59,4 @@ desktop.ini
 
 # Next.js auto-generated
 next-env.d.ts
+.vercel
