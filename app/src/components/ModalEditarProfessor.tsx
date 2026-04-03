@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import api from "@/services/api";
 import { ptBR } from "date-fns/locale";
 import { listarTurmas } from "@/services/TurmaService";
-import { listarTurmasDeProfessor } from "@/services/ProfessorService";
+import { listarTurmasDeProfessor, ativarProfessorporId } from "@/services/ProfessorService";
 
 interface Turma {
   id: number;
@@ -43,6 +43,7 @@ interface Professor {
   formacao?: string;
   dataContratacao?: string;
   turmas?: Turma[] | string[];
+  ativo: boolean;
 }
 
 interface ModalEditarProfessorProps {
@@ -203,25 +204,49 @@ export default function ModalEditarProfessor({
     setIsSubmitting(true);
 
     try {
-      // 1. Atualizar dados básicos do professor
-      await api.put(`/professores/${professor.id}`, formData);
       
-      // 2. Buscar turmas atuais do professor para comparar
+      // 1. Buscar turmas atuais do professor para comparar
       const turmasAtuais = await listarTurmasDeProfessor(professor.id);
       const turmasAtuaisIds = turmasAtuais.map((t: Turma) => t.id);
       const turmasVinculadasIds = turmasVinculadas.map(t => t.id);
       
-      // 3. Turmas para adicionar (estão em turmasVinculadas mas não em turmasAtuais)
+      // 2. Turmas para adicionar (estão em turmasVinculadas mas não em turmasAtuais)
       const turmasParaAdicionar = turmasVinculadas.filter(
         t => !turmasAtuaisIds.includes(t.id)
       );
       
-      // 4. Turmas para remover (estão em turmasAtuais mas não em turmasVinculadas)
+      // 3. Turmas para remover (estão em turmasAtuais mas não em turmasVinculadas)
       const turmasParaRemover = turmasAtuais.filter(
         (t: Turma) => !turmasVinculadasIds.includes(t.id)
       );
+
+      // 4. Checagem se o professor estiver inativo para possível reativação ao vincular numa nova turma
+      if (!professor.ativo && turmasParaAdicionar.length > 0) {
+          const confirmarReativacao = window.confirm(
+            "Este professor está INATIVO, ao vinculá-lo a uma turma, ele será REATIVADO automaticamente no sistema. Deseja confirmar esta ação?"
+          );
+
+          if (!confirmarReativacao) {
+            setIsSubmitting(false);
+            return;
+          }
+
+          //reativação do professor pela api
+          try{
+              await ativarProfessorporId(professor.id);
+          } catch (reactivationError: any){
+              toast.error(reactivationError.message);
+              setIsSubmitting(false);
+              return;
+          }
+
+      }
+
+
+      // 5. Atualizar dados básicos do professor
+      await api.put(`/professores/${professor.id}`, formData);
       
-      // 5. Adicionar novas turmas
+      // 6. Adicionar novas turmas
       for (const turma of turmasParaAdicionar) {
         try {
           await vincularProfessorATurma(turma.id, professor.id);
@@ -230,7 +255,7 @@ export default function ModalEditarProfessor({
         }
       }
       
-      // 6. Remover turmas desvinculadas
+      // 7. Remover turmas desvinculadas
       for (const turma of turmasParaRemover) {
         try {
           await desvincularProfessorDaTurma(turma.id, professor.id);
