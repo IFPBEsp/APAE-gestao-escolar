@@ -8,7 +8,9 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useMemo, use } from "react"; 
 import ModalVisualizarAvaliacao from "@/components/alunos/ModalVisualizarAvaliacao";
 import ModalVisualizarRelatorio from "@/components/alunos/ModalVisualizarRelatorio";
-import { buscarAlunoPorId, buscarAvaliacoesPorAlunoId } from "@/services/AlunoService"; 
+import ModalHistoricoFrequencia from "@/components/frequencia/ModalHistoricoFrequencia";
+import { buscarAlunoPorId, buscarAvaliacoesPorAlunoId, buscarHistoricoTurmasPorAlunoId } from "@/services/AlunoService"; 
+import { getHistoricoAluno } from "@/services/ChamadaService";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale"; 
 import { buscarRelatorioPorAluno } from "@/services/RelatorioService";
@@ -43,6 +45,14 @@ interface RelatorioHistoricoDTO {
   recursos: string;
 }
 
+interface AlunoTurmaHistoricoDTO {
+  turmaId: number;
+  tipo: string | null;
+  ano: number;
+  turno: string;
+  turmaAtual: boolean;
+}
+
 export default function DetalhesDoAluno({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const resolvedParams = use(params); 
@@ -51,11 +61,17 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
   const [alunoData, setAlunoData] = useState<AlunoDetailDTO | null>(null);
   const [avaliacoes, setAvaliacoes] = useState<AvaliacaoHistoricoDTO[]>([]);
   const [relatorios, setRelatorios] = useState<RelatorioHistoricoDTO[]>([]);
+  const [historicoTurmas, setHistoricoTurmas] = useState<AlunoTurmaHistoricoDTO[]>([]);
   const [loadingAluno, setLoadingAluno] = useState(true);
   const [loadingAvaliacoes, setLoadingAvaliacoes] = useState(true);
   const [loadingRelatorios, setLoadingRelatorios] = useState(true);
+  const [loadingHistoricoTurmas, setLoadingHistoricoTurmas] = useState(true);
   const [selectedAvaliacao, setSelectedAvaliacao] = useState<any>(null); 
   const [selectedRelatorio, setSelectedRelatorio] = useState<any>(null); 
+  const [isHistoricoOpen, setIsHistoricoOpen] = useState(false);
+  const [historicoAluno, setHistoricoAluno] = useState<any[]>([]);
+  const [loadingHistorico, setLoadingHistorico] = useState(false);
+  const [turmaSelecionada, setTurmaSelecionada] = useState<any | null>(null);
 
   useEffect(() => {
     async function loadAlunoData() {
@@ -107,6 +123,45 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
     }
     loadRelatorios();
   }, [alunoId]);
+
+  useEffect(() => {
+    async function loadHistoricoTurmas() {
+      setLoadingHistoricoTurmas(true);
+      try {
+        if (alunoId) {
+          const data = await buscarHistoricoTurmasPorAlunoId(alunoId);
+          setHistoricoTurmas(data);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar histórico de turmas:", error);
+      } finally {
+        setLoadingHistoricoTurmas(false);
+      }
+    }
+    loadHistoricoTurmas();
+  }, [alunoId]);
+
+  async function handleAbrirHistoricoTurma(item: AlunoTurmaHistoricoDTO) {
+    if (!alunoId || !item?.turmaId) {
+      console.error("Dados inválidos para buscar histórico");
+      return;
+    }
+
+    try {
+      setTurmaSelecionada(item);
+      setIsHistoricoOpen(true);
+      setLoadingHistorico(true);
+      setHistoricoAluno([]);
+
+      const historico = await getHistoricoAluno(item.turmaId, alunoId);
+
+      setHistoricoAluno(historico);
+    } catch (error) {
+      console.error("Erro ao carregar histórico:", error);
+    } finally {
+      setLoadingHistorico(false);
+    }
+  }
 
   const turmaCompleta = useMemo(() => {
       if (!alunoData) return "Carregando...";
@@ -497,6 +552,108 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
               </div>
             )}
 
+            {/* HISTÓRICO DE TURMAS */}
+            <div className="mt-10 border-t-8 border-[#E2E8F0] pt-8">
+              <h2 className="text-xl font-bold text-[#0D4F97] mb-2">
+                Histórico de Turmas
+              </h2>
+
+              <p className="text-gray-500 mb-6">
+                Turmas em que o aluno já esteve vinculado ({historicoTurmas.length} registros).
+              </p>
+
+              {loadingHistoricoTurmas ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-[#0D4F97]" />
+                </div>
+              ) : historicoTurmas.length === 0 ? (
+                <p className="text-center text-gray-500 py-4">
+                  Nenhum registro de turma encontrado para este aluno.
+                </p>
+              ) : (
+                <div className="overflow-x-auto max-h-80 overflow-y-auto border-2 border-[#B2D7EC] rounded-lg">
+                  <Table className="w-full min-w-[560px] table-fixed">
+                    
+                    <colgroup>
+                      <col style={{ width: "160px" }} />
+                      <col style={{ width: "100px" }} />
+                      <col style={{ width: "110px" }} />
+                      <col style={{ width: "140px" }} />
+                      <col style={{ width: "100px" }} />
+                    </colgroup>
+
+                    <TableHeader className="sticky top-0 z-20 bg-[#EAF4FB]">
+                      <TableRow className="bg-[#EAF4FB] hover:bg-[#EAF4FB]">
+
+                        <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6">
+                          Turma
+                        </TableHead>
+
+                        <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6">
+                          Ano
+                        </TableHead>
+
+                        <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6">
+                          Turno
+                        </TableHead>
+
+                        <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6">
+                          Situação
+                        </TableHead>
+
+                        <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6 text-center">
+                          Frequência
+                        </TableHead>
+
+                      </TableRow>
+                    </TableHeader>
+
+                    <TableBody className="text-gray-600">
+                      {historicoTurmas.map((item, index) => (
+                        <TableRow key={`${item.ano}-${item.turno}-${item.tipo ?? ""}-${index}`}>
+
+                          <TableCell className="font-medium text-gray-900 truncate px-4 sm:px-6">
+                            {item.tipo?.trim() ? item.tipo : "—"}
+                          </TableCell>
+
+                          <TableCell className="truncate px-4 sm:px-6">
+                            {item.ano}
+                          </TableCell>
+
+                          <TableCell className="truncate px-4 sm:px-6">
+                            {item.turno}
+                          </TableCell>
+
+                          <TableCell className="px-4 sm:px-6">
+                            <span
+                              className={
+                                item.turmaAtual
+                                  ? "inline-flex rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800"
+                                  : "inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700"
+                              }
+                            >
+                              {item.turmaAtual ? "Turma atual" : "Turma anterior"}
+                            </span>
+                          </TableCell>
+
+                          <TableCell className="px-4 sm:px-6 text-center">
+                            <div className="flex justify-center">
+                              <Eye
+                                className="h-5 w-5 cursor-pointer hover:text-[#0D4F97] transition-colors"
+                                onClick={() => handleAbrirHistoricoTurma(item)}
+                              />
+                            </div>
+                          </TableCell>
+
+                        </TableRow>
+                      ))}
+                    </TableBody>
+
+                  </Table>
+                </div>
+              )}
+            </div>
+
           </div>
 
           </CardContent>
@@ -515,6 +672,15 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
           relatorio={selectedRelatorio}
           alunoNome={alunoData.nome}
           alunoDataNascimento={alunoData.dataNascimento}
+        />
+
+        <ModalHistoricoFrequencia
+          isOpen={isHistoricoOpen}
+          onClose={() => setIsHistoricoOpen(false)}
+          alunoNome={alunoData.nome}
+          historico={historicoAluno}
+          loading={loadingHistorico}
+          turma={turmaSelecionada}
         />
       </div>
     </div>
