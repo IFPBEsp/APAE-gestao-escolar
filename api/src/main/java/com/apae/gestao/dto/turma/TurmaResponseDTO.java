@@ -63,7 +63,6 @@ public class TurmaResponseDTO {
 
         if (turma.getTurmaAlunos() != null) {
             this.alunos = turma.getTurmaAlunos().stream()
-                    .filter(ta -> Boolean.TRUE.equals(ta.getIsAlunoAtivo()))
                     .map(TurmaAlunoResponseDTO::new)
                     .collect(Collectors.toList());
         }

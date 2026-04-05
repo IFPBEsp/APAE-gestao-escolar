@@ -230,7 +230,6 @@ public class TurmaService {
     public List<TurmaAlunoResponseDTO> listarAlunos(Long turmaId) {
         return turmaAlunoDAO.findByTurmaIdOrderByAlunoNomeAsc(turmaId)
                 .stream()
-                .filter(ta -> Boolean.TRUE.equals(ta.getIsAlunoAtivo()))
                 .map(TurmaAlunoResponseDTO::new)
                 .toList();
     }

@@ -408,8 +408,15 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                                             <div className="h-8 w-8 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97]">
                                                 <UserRound size={18} />
                                             </div>
-                                            <div>
+                                            <div className="flex items-center gap-2">
                                                 <p className="text-sm font-semibold text-[#0D4F97]">{aluno.nome}</p>
+                                                <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                                                    aluno.isAtivo !== false
+                                                        ? "bg-green-100 text-green-700"
+                                                        : "bg-red-100 text-red-700"
+                                                }`}>
+                                                    {aluno.isAtivo !== false ? "Ativo" : "Inativo"}
+                                                </span>
                                             </div>
                                         </div>
                                         <Button
