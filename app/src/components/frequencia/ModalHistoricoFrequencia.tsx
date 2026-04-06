@@ -31,13 +31,18 @@ export default function ModalHistoricoFrequencia({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[95vw] sm:max-w-xl w-full pt-10 sm:pt-6">
         <DialogHeader>
-          <DialogTitle>
-            Histórico de Frequência - {alunoNome || ""}
-          </DialogTitle>
-          <DialogDescription>
-            Registros individuais de presença do aluno.
-          </DialogDescription>
-        </DialogHeader>
+  <DialogTitle>
+    Histórico de Frequência - {alunoNome || ""}
+    {turma && (
+      <span className="block text-sm font-normal text-gray-500 mt-1">
+        Turma: {turma.tipo || "—"} - {turma.ano} ({turma.turno})
+      </span>
+    )}
+  </DialogTitle>
+  <DialogDescription>
+    Registros individuais de presença do aluno.
+  </DialogDescription>
+</DialogHeader>
 
         {loading ? (
           <div className="py-6 text-center text-[#0D4F97]">
