@@ -242,18 +242,22 @@ export default function AvaliacoesAlunoPage() {
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                          onClick={() => handleOpenEditarDialog(av)} 
-                          >
-                          <Edit className="h-5 w-5" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleOpenExcluirDialog(av)} 
-                          >
-                          <Trash2 className="h-5 w-5" />
-                        </Button>
-                      </div>
+                              aria-label="Editar avaliação"
+                              title="Editar avaliação"
+                              onClick={() => handleOpenEditarDialog(av)} 
+                            >
+                              <Edit className="h-5 w-5" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              aria-label="Excluir avaliação"
+                              title="Excluir avaliação"
+                              onClick={() => handleOpenExcluirDialog(av)} 
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </Button>
+                          </div>
                     </div>
                   ))}
                 </div>

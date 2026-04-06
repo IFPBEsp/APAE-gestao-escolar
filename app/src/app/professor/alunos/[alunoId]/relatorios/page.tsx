@@ -253,27 +253,31 @@ export default function RelatoriosAlunoListaPage() {
                           </div>
 
                           <div className="col-span-1 md:col-span-2 flex md:justify-center gap-2">
-                          <Button
-                            onClick={() => {
-                              setRelatorioSelecionado(rel);
-                              setIsModalRelatorioOpen(true);
-                            }}
-                            variant="ghost"
-                            size="icon"
-                          >
-                            <Eye className="h-5 w-5" />
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              setRelatorioExcluindo(rel);
-                              setIsExcluirDialogOpen(true);
-                            }}
-                            variant="ghost"
-                            size="icon"
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </Button>
-                        </div>
+                            <Button
+                              onClick={() => {
+                                setRelatorioSelecionado(rel);
+                                setIsModalRelatorioOpen(true);
+                              }}
+                              variant="ghost"
+                              size="icon"
+                              aria-label="Visualizar relatório"
+                              title="Visualizar relatório"
+                            >
+                              <Eye className="h-5 w-5" />
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                setRelatorioExcluindo(rel);
+                                setIsExcluirDialogOpen(true);
+                              }}
+                              variant="ghost"
+                              size="icon"
+                              aria-label="Excluir relatório"
+                              title="Excluir relatório"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </Button>
+                          </div>
                       </div>
                       ))
                     )}
