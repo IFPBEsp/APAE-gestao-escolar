@@ -275,8 +275,7 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
 
               ) : (
                 <div className="overflow-x-auto max-h-80 overflow-y-auto border-2 border-[#B2D7EC] rounded-lg">
-
-                  <Table className="w-full table-fixed">
+                  <Table className="w-full table-fixed min-w-[860px]">
                       {/* Ordem das colunas: Data, Professor, Turma, Descrição, Ações*/}
                     <colgroup>
                       <col style={{ width: '130px' }} /> 
@@ -375,8 +374,7 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
 
             ) : (
               <div className="overflow-x-auto max-h-80 overflow-y-auto border-2 border-[#B2D7EC] rounded-lg">
-
-                <Table className="w-full table-fixed">
+                <Table className="w-full table-fixed min-w-[1440px]">
                   {/* Ordem das colunas: Data, Professor, Turma, Atividades, Habilidades, Estratégias, Recursos, Ações*/}
                   <colgroup>
                     <col style={{ width: '130px' }} /> 

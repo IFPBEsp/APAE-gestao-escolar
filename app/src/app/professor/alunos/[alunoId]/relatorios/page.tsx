@@ -199,59 +199,60 @@ export default function RelatoriosAlunoListaPage() {
 
             {/* TABELA / GRID */}
             <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
-              <CardContent className="p-0">
-                {/* Cabeçalho Desktop */}
-                <div className="hidden border-b-2 border-[#B2D7EC] bg-[#B2D7EC]/20 md:grid md:grid-cols-12 md:gap-4 md:p-4">
-                  <div className="col-span-2 text-[#0D4F97] font-semibold">Data</div>
-                  <div className="col-span-2 text-[#0D4F97] font-semibold">Atividades</div>
-                  <div className="col-span-2 text-[#0D4F97] font-semibold">Habilidades</div>
-                  <div className="col-span-2 text-[#0D4F97] font-semibold">Estratégias</div>
-                  <div className="col-span-2 text-[#0D4F97] font-semibold">Recursos</div>
-                  <div className="col-span-2 text-center text-[#0D4F97] font-semibold">Ações</div>
-                </div>
+              <CardContent className="p-0 overflow-x-auto">
+                <div className="min-w-[1000px] w-full">
+                  {/* Cabeçalho Desktop */}
+                  <div className="hidden border-b-2 border-[#B2D7EC] bg-[#B2D7EC]/20 md:grid md:grid-cols-12 md:gap-4 md:p-4">
+                    <div className="col-span-2 text-[#0D4F97] font-semibold">Data</div>
+                    <div className="col-span-2 text-[#0D4F97] font-semibold">Atividades</div>
+                    <div className="col-span-2 text-[#0D4F97] font-semibold">Habilidades</div>
+                    <div className="col-span-2 text-[#0D4F97] font-semibold">Estratégias</div>
+                    <div className="col-span-2 text-[#0D4F97] font-semibold">Recursos</div>
+                    <div className="col-span-2 text-center text-[#0D4F97] font-semibold">Ações</div>
+                  </div>
 
-                {/* Lista de Relatórios */}
-                <div className="w-full">
-                  {relatorios.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">
-                      Nenhum relatório encontrado.
-                    </div>
-                  ) : (
-                    relatorios.map((rel) => (
-                      <div
-                        key={rel.id}
-                        className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border-b border-[#B2D7EC] items-center hover:bg-gray-50"
-                      >
-                        <div className="col-span-1 md:col-span-2">
-                          <p className="text-[#0D4F97] md:hidden font-semibold">Data:</p>
-                          <p className="font-medium">
-                            {rel.createdAt
-                              ? format(new Date(rel.createdAt), "dd/MM/yyyy")
-                              : "---"}
-                          </p>
-                        </div>
+                  {/* Lista de Relatórios */}
+                  <div className="w-full">
+                    {relatorios.length === 0 ? (
+                      <div className="p-8 text-center text-gray-500">
+                        Nenhum relatório encontrado.
+                      </div>
+                    ) : (
+                      relatorios.map((rel) => (
+                        <div
+                          key={rel.id}
+                          className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border-b border-[#B2D7EC] items-center hover:bg-gray-50"
+                        >
+                          <div className="col-span-1 md:col-span-2">
+                            <p className="text-[#0D4F97] md:hidden font-semibold">Data:</p>
+                            <p className="font-medium min-w-0 break-words">
+                              {rel.createdAt
+                                ? format(new Date(rel.createdAt), "dd/MM/yyyy")
+                                : "---"}
+                            </p>
+                          </div>
 
-                        <div className="col-span-1 md:col-span-2">
-                          <p className="text-[#0D4F97] md:hidden font-semibold">Atividades:</p>
-                          <p className="text-sm text-gray-700 line-clamp-3">{rel.atividades}</p>
-                        </div>
+                          <div className="col-span-1 md:col-span-2">
+                            <p className="text-[#0D4F97] md:hidden font-semibold">Atividades:</p>
+                            <p className="text-sm text-gray-700 line-clamp-3 min-w-0 break-words">{rel.atividades}</p>
+                          </div>
 
-                        <div className="col-span-1 md:col-span-2">
-                          <p className="text-[#0D4F97] md:hidden font-semibold">Habilidades:</p>
-                          <p className="text-sm text-gray-700 line-clamp-3">{rel.habilidades}</p>
-                        </div>
+                          <div className="col-span-1 md:col-span-2">
+                            <p className="text-[#0D4F97] md:hidden font-semibold">Habilidades:</p>
+                            <p className="text-sm text-gray-700 line-clamp-3 min-w-0 break-words">{rel.habilidades}</p>
+                          </div>
 
-                        <div className="col-span-1 md:col-span-2">
-                          <p className="text-[#0D4F97] md:hidden font-semibold">Estratégias:</p>
-                          <p className="text-sm text-gray-700 line-clamp-3">{rel.estrategias}</p>
-                        </div>
+                          <div className="col-span-1 md:col-span-2">
+                            <p className="text-[#0D4F97] md:hidden font-semibold">Estratégias:</p>
+                            <p className="text-sm text-gray-700 line-clamp-3 min-w-0 break-words">{rel.estrategias}</p>
+                          </div>
 
-                        <div className="col-span-1 md:col-span-2">
-                          <p className="text-[#0D4F97] md:hidden font-semibold">Recursos:</p>
-                          <p className="text-sm text-gray-700 line-clamp-3">{rel.recursos}</p>
-                        </div>
+                          <div className="col-span-1 md:col-span-2">
+                            <p className="text-[#0D4F97] md:hidden font-semibold">Recursos:</p>
+                            <p className="text-sm text-gray-700 line-clamp-3 min-w-0 break-words">{rel.recursos}</p>
+                          </div>
 
-                        <div className="col-span-1 md:col-span-2 flex justify-center gap-2">
+                          <div className="col-span-1 md:col-span-2 flex md:justify-center gap-2">
                           <Button
                             onClick={() => {
                               setRelatorioSelecionado(rel);
@@ -274,8 +275,9 @@ export default function RelatoriosAlunoListaPage() {
                           </Button>
                         </div>
                       </div>
-                    ))
-                  )}
+                      ))
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
