@@ -41,6 +41,7 @@ interface ModalVisualizarEditarRelatorioProps {
   relatorio: Relatorio | null;
   alunoNome?: string;
   alunoDataNascimento?: string;
+  alunoTurma?: string;
   onSalvar?: (relatorioAtualizado: Relatorio) => void;
 }
 
@@ -65,6 +66,7 @@ export default function ModalVisualizarEditarRelatorio({
   relatorio,
   alunoNome,
   alunoDataNascimento,
+  alunoTurma,
   onSalvar,
 }: ModalVisualizarEditarRelatorioProps) {
   const [isEditando, setIsEditando] = useState(false);
@@ -96,26 +98,26 @@ export default function ModalVisualizarEditarRelatorio({
             setDadosAlunoCompleto({
               nome: aluno.nome || alunoNome || relatorio.aluno || "Aluno",
               nascimento: aluno.dataNascimento || alunoDataNascimento || relatorio.aluno_nascimento || "—",
-              turma: aluno.turma?.nome || relatorio.turma || "Alfabetização 2025 - Manhã"
+              turma: aluno.turma?.nome || alunoTurma || relatorio.turma || "—"
             });
           } catch (error) {
             setDadosAlunoCompleto({
               nome: alunoNome || relatorio.aluno || "Aluno",
               nascimento: alunoDataNascimento || relatorio.aluno_nascimento || "—",
-              turma: relatorio.turma || "Alfabetização 2025 - Manhã"
+              turma: alunoTurma || relatorio.turma || "—"
             });
           }
         } else {
           setDadosAlunoCompleto({
             nome: alunoNome || relatorio.aluno || "Aluno",
             nascimento: alunoDataNascimento || relatorio.aluno_nascimento || "—",
-            turma: relatorio.turma || "Alfabetização 2025 - Manhã"
+            turma: alunoTurma || relatorio.turma || "—"
           });
         }
       }
     }
     carregarDadosAluno();
-  }, [isOpen, relatorio, alunoNome, alunoDataNascimento]);
+  }, [isOpen, relatorio, alunoNome, alunoDataNascimento, alunoTurma]);
 
   useEffect(() => {
     if (relatorio && isOpen) {
@@ -277,7 +279,6 @@ export default function ModalVisualizarEditarRelatorio({
               nome={dadosAlunoCompleto.nome}
               nascimento={dadosAlunoCompleto.nascimento}
               turma={dadosAlunoCompleto.turma}
-              ano={format(formData.data, "yyyy")}
             />
             <RelatorioIndividualConteudo
               atividades={formData.atividades}

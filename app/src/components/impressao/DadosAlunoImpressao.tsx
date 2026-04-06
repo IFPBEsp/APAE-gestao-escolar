@@ -4,7 +4,6 @@ interface DadosAlunoImpressaoProps {
   nome: string;
   nascimento: string;
   turma: string;
-  ano: string;
 }
 
 export default function DadosAlunoImpressao({
@@ -13,7 +12,6 @@ export default function DadosAlunoImpressao({
   nome,
   nascimento,
   turma,
-  ano,
 }: DadosAlunoImpressaoProps) {
   return (
     <section className="impressao-dados">
@@ -31,9 +29,6 @@ export default function DadosAlunoImpressao({
 
       <p>
         <strong>TURMA:</strong> {turma}
-        <span style={{ marginLeft: "80px" }}>
-          <strong>ANO:</strong> {ano}
-        </span>
       </p>
     </section>
   );
