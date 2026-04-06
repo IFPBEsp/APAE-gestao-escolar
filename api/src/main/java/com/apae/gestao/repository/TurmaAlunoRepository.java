@@ -23,6 +23,15 @@ public interface TurmaAlunoRepository extends JpaRepository<TurmaAluno, Long>{
 
     List<TurmaAluno> findAllByAlunoAndIsAlunoAtivoTrue(Aluno aluno);
 
+    @Query("""
+            SELECT DISTINCT ta FROM TurmaAluno ta
+            JOIN FETCH ta.turma t
+            LEFT JOIN FETCH t.professor
+            WHERE ta.aluno = :aluno
+            ORDER BY t.anoCriacao DESC, t.nome ASC
+            """)
+    List<TurmaAluno> findAllHistoricoByAluno(@Param("aluno") Aluno aluno);
+
     List<TurmaAluno> findByTurmaId(Long turmaId);
 
     List<TurmaAluno> findByTurmaIdOrderByAlunoNomeAsc(Long turmaId);

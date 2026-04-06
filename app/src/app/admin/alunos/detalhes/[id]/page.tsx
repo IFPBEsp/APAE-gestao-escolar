@@ -551,6 +551,7 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
                 </Table>
               </div>
             )}
+            </div>
 
             {/* HISTÓRICO DE TURMAS */}
             <div className="mt-10 border-t-8 border-[#E2E8F0] pt-8">
@@ -653,8 +654,6 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
                 </div>
               )}
             </div>
-
-          </div>
 
           </CardContent>
         </Card>

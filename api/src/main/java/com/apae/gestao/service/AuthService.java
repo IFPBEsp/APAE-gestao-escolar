@@ -53,6 +53,11 @@ public class AuthService {
         Professor professor = professorRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Professor não encontrado"));
 
+        //validação de professor ativo no sistema
+        if(!professor.getAtivo()){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Professor inativado no sistema");
+        }
+
         // Validação da senha informada
         if (!passwordEncoder.matches(request.getSenha(), professor.getSenha())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Senha incorreta");
