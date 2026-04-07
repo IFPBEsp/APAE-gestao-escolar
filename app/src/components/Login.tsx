@@ -53,6 +53,8 @@ export default function LoginComponent({ tipoPredefinido }: LoginProps) {
 
       if (message && message.includes("PRIMEIRO_ACESSO")) {
         router.push(`/primeiro-acesso?email=${email}`);
+      } else if (message && message.includes("Professor inativado no sistema")){
+        setErro("Professor inativo no sistema");
       } else {
         setErro("E-mail ou senha inválidos.");
       }

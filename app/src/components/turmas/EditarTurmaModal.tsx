@@ -66,6 +66,7 @@ interface EditarTurmaModalProps {
 export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarTurmaModalProps) {
     const [tipo, setTipo] = useState("");
     const [turno, setTurno] = useState("");
+    const [anoCriacao, setAnoCriacao] = useState("");
     
     const [buscaProfessor, setBuscaProfessor] = useState("");
     const [professoresEncontrados, setProfessoresEncontrados] = useState<Professor[]>([]);
@@ -76,8 +77,8 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     const [alunosNaTurma, setAlunosNaTurma] = useState<AlunoNaTurma[]>([]); 
 
     const nomeTurma = useMemo(
-        () => `${tipo ? formatTipo(tipo) : ""} ${turmaData?.anoCriacao || ""} - ${turno ? formatTurno(turno) : ""}`,
-        [tipo, turno, turmaData]
+        () => `${tipo ? formatTipo(tipo) : ""} ${anoCriacao || ""} - ${turno ? formatTurno(turno) : ""}`,
+        [tipo, turno, anoCriacao]
     );
 
     function formatTipo(val: string) {
@@ -101,6 +102,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
 
                 setTipo(turmaBackend.tipo);
                 setTurno(turmaBackend.turno);
+                setAnoCriacao(turmaBackend.anoCriacao?.toString() || "");
 
                 if (turmaBackend.professorId && (turmaBackend.professorNome || turmaBackend.professor?.nome)) {
                     setProfessorSelecionado({
@@ -215,6 +217,12 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             return;
         }
 
+        const anoNumerico = Number(anoCriacao);
+        if (!Number.isInteger(anoNumerico) || anoNumerico < 2000 || anoNumerico > 2100) {
+            toast.error("Informe um ano válido entre 2000 e 2100.");
+            return;
+        }
+
         const idTurma = turmaData.id;
 
         const professorFinal = professorSelecionado;
@@ -227,7 +235,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             tipo: tipo.toUpperCase(),
             turno: turno.toUpperCase(),
             isAtiva: turmaData.isAtiva,
-            anoCriacao: turmaData.anoCriacao,
+            anoCriacao: anoNumerico,
             alunosIds: alunosNaTurma.map(a => a.alunoId)
         };
 
@@ -270,7 +278,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                     <div className="space-y-4">
                         <h3 className="text-[#0D4F97] font-medium border-b border-[#B2D7EC] pb-2">Informações Básicas</h3>
                         
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div className="space-y-2">
                                 <Label className="text-[#0D4F97]">Tipo de Turma</Label>
                                 <Select onValueChange={setTipo} defaultValue={turmaData.tipo}>
@@ -282,6 +290,18 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                                         <SelectItem value="ESTIMULACAO">Estimulação</SelectItem>
                                     </SelectContent>
                                 </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-[#0D4F97]">Ano</Label>
+                                <Input
+                                    type="number"
+                                    min="2000"
+                                    max="2100"
+                                    value={anoCriacao}
+                                    onChange={(e) => setAnoCriacao(e.target.value)}
+                                    className="bg-white border-[#B2D7EC]"
+                                />
                             </div>
 
                             <div className="space-y-2">
@@ -306,7 +326,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                                 className="bg-gray-50 border-[#B2D7EC]"
                             />
                             <p className="text-xs text-[#0D4F97]">
-                                O nome da turma é gerado a partir do Tipo, Ano ({turmaData.anoCriacao}) e Turno.
+                                O nome da turma é gerado a partir do Tipo, Ano e Turno alterados acima.
                             </p>
                         </div>
                     </div>
@@ -388,8 +408,15 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                                             <div className="h-8 w-8 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97]">
                                                 <UserRound size={18} />
                                             </div>
-                                            <div>
+                                            <div className="flex items-center gap-2">
                                                 <p className="text-sm font-semibold text-[#0D4F97]">{aluno.nome}</p>
+                                                <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                                                    aluno.isAtivo !== false
+                                                        ? "bg-green-100 text-green-700"
+                                                        : "bg-red-100 text-red-700"
+                                                }`}>
+                                                    {aluno.isAtivo !== false ? "Ativo" : "Inativo"}
+                                                </span>
                                             </div>
                                         </div>
                                         <Button
