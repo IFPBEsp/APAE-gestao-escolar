@@ -4,6 +4,7 @@ import com.apae.gestao.dto.AlunoTurmaRequestDTO;
 import com.apae.gestao.dto.AvaliacaoHistoricoResponseDTO;
 import com.apae.gestao.dto.aluno.AlunoDetalhesDTO;
 import com.apae.gestao.dto.aluno.AlunoResumoDTO;
+import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoItemDTO;
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Turma;
 import com.apae.gestao.entity.TurmaAluno;
@@ -13,8 +14,10 @@ import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.TurmaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -72,7 +75,7 @@ public class AlunoService {
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada"));
 
         if(!novaTurma.getIsAtiva()){
-            throw new RuntimeException("Não é possível adicionar aluno em uma turma inativa");
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,"Não é possível adicionar aluno em uma turma inativa");
         }
 
 
@@ -119,6 +122,16 @@ public class AlunoService {
                 .findByAlunoOrderByDataAvaliacaoDesc(aluno)
                 .stream()
                 .map(a -> AvaliacaoHistoricoResponseDTO.fromEntity(a, turmaAtual))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AlunoTurmaHistoricoItemDTO> listarHistoricoTurmasPorAlunoId(Long alunoId) {
+        Aluno aluno = alunoRepository.findById(alunoId)
+                .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
+
+        return turmaAlunoRepository.findAllHistoricoByAluno(aluno).stream()
+                .map(AlunoTurmaHistoricoItemDTO::new)
                 .toList();
     }
 }

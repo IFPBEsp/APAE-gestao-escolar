@@ -97,3 +97,45 @@ export async function listarTurmasDeProfessor(id) {
     }
     
 }
+
+/**
+ * Reativa um professor inativo pelo ID.
+ *
+ * @param {number} id - ID do professor
+ * @returns {Promise<object>} Professor atualizado (ativo)
+ */
+export async function ativarProfessorporId(id) {
+    try {
+        const response = await api.patch(`/professores/${id}/ativar`);
+        return response.data;
+    } catch (error) {
+        const apiMessage = error.response?.data?.message;
+        const errorMessage = apiMessage
+            || error.message
+            || "Erro ao tentar reativar o professor.";
+
+        console.error("Professor Error (Ativar):", error.response || error);
+        throw new Error(errorMessage);
+    }
+}
+
+/**
+ * Inativa um professor pelo ID.
+ *
+ * @param {number} id - ID do professor
+ * @returns {Promise<object>} Professor atualizado (inativo)
+ */
+export async function inativarProfessorporId(id) {
+    try {
+        const response = await api.patch(`/professores/${id}/inativar`);
+        return response.data;
+    } catch (error) {
+        const apiMessage = error.response?.data?.message;
+        const errorMessage = apiMessage
+            || error.message
+            || "Erro ao tentar inativar o professor.";
+
+        console.error("Professor Error (Inativar):", error.response || error);
+        throw new Error(errorMessage);
+    }
+}

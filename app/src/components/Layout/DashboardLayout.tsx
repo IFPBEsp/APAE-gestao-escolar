@@ -68,7 +68,7 @@ export default function DashboardLayout({
                         onClick={() => setIsMobileOpen(false)}
                         className="absolute right-4 top-4 text-[#0D4F97] md:hidden"
                     >
-                        <X className="h-6 w-6" strokeWidth={1.75} />
+                        <X className="h-5 w-5" strokeWidth={1.75} />
                     </button>
                 )}
 
@@ -135,7 +135,7 @@ export default function DashboardLayout({
     );
 
     return (
-        <div className="flex min-h-screen bg-[#E5E5E5]">
+        <div className="flex w-full min-h-screen bg-[#F4F6FB] overflow-x-hidden">
             {/* Mobile Menu Button (Fixed Top-Left) */}
             <button
                 onClick={() => setIsMobileOpen(true)}
@@ -183,10 +183,10 @@ export default function DashboardLayout({
 
             {/* Main Content Area */}
             <main className={`
-        flex-1 min-h-screen transition-all duration-300
+        flex-1 min-w-0 flex flex-col min-h-screen transition-all duration-300 w-full overflow-x-hidden
         ${isDesktopCollapsed ? 'md:ml-20' : 'md:ml-64'}
       `}>
-                <div className="p-4 md:p-8 pt-20 md:pt-8 max-w-7xl mx-auto">
+                <div className="p-4 md:p-8 pt-20 md:pt-8 w-full max-w-7xl mx-auto">
                     {children}
                 </div>
             </main>

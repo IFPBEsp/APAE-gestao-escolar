@@ -9,9 +9,17 @@ import { listarTurmasDeProfessor } from "@/services/ProfessorService";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Turma } from "@/types/turma";
+import { buscarProfessorPorId } from "@/services/ProfessorService";
+
+interface Professor {
+  id: number;
+  nome: string;
+  email: string;
+}
 
 export default function TurmasPage() {
   const router = useRouter();
+  const [professor, setProfessor] = useState<Professor | null>(null);
   const { usuario, professorId, loading: authLoading } = useAuth();
   const [turmas, setTurmas] = useState<Turma[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,6 +30,9 @@ export default function TurmasPage() {
       router.push("/");
       return;
     }
+    buscarProfessorPorId(professorId)
+      .then(setProfessor)
+      .catch(() => toast.error("Erro ao carregar professor"));
 
     setLoading(true);
     listarTurmasDeProfessor(professorId)
@@ -60,12 +71,12 @@ export default function TurmasPage() {
   return (
     <div className="p-4 md:p-8">
       <div className="mb-6 md:mb-8">
-        <h1 className="text-[#0D4F97] text-2xl md:text-3xl font-bold">
+        <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
           Minhas Turmas
         </h1>
 
         <p className="text-[#222222] mt-1 text-sm md:text-lg">
-          Bem-vindo, {usuario.email}!
+          Bem-vindo, {professor?.nome || usuario.email}!
         </p>
 
         <p className="text-[#222222] mt-1 text-sm md:text-base">
@@ -76,8 +87,8 @@ export default function TurmasPage() {
       <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
         <CardHeader className="border-b border-[#B2D7EC]/30 pb-4 md:pb-6">
           <div className="flex items-center gap-3 md:gap-4">
-            <div className="flex h-12 w-12 md:h-14 md:w-14 items-center justify-center rounded-full bg-[#B2D7EC]/20 text-[#0D4F97]">
-              <BookOpen className="h-6 w-6 md:h-8 md:w-8" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0D4F97]/10">
+              <BookOpen className="h-5 w-5 text-[#0D4F97]" />
             </div>
 
             <div>

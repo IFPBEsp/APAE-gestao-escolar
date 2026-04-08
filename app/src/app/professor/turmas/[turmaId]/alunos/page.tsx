@@ -24,6 +24,24 @@ import { buscarTurmaPorId } from "@/services/TurmaService";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+interface ActionButtonProps {
+  variant: "primary" | "outline";
+  onClick: () => void;
+  label: string;
+  extraClass?: string;
+}
+
+const ActionButton = ({ variant, onClick, label, extraClass = "" }: ActionButtonProps) => (
+  <Button
+    variant={variant}
+    onClick={onClick}
+    className={`w-full !px-1 min-w-0 flex flex-col xl:flex-row items-center justify-center overflow-hidden gap-1 xl:gap-2 !h-auto py-2 xl:!py-0 xl:!h-12 ${extraClass}`}
+  >
+    <FileText className="h-4 w-4 lg:h-5 lg:w-5 shrink-0" />
+    <span className="text-[10px] sm:text-xs font-semibold truncate block">{label}</span>
+  </Button>
+);
+
 export default function TurmaDetalhesPage() {
   const params = useParams();
   const turmaId = params?.turmaId ? Number(params.turmaId) : null;
@@ -84,7 +102,11 @@ export default function TurmaDetalhesPage() {
           })
         );
 
-        setAlunos(alunosFormatados);
+        const alunosOrdenados = [...alunosFormatados].sort((a: any, b: any) =>
+          (a?.nome ?? "").localeCompare((b?.nome ?? ""), "pt-BR", { sensitivity: "base" })
+        );
+
+        setAlunos(alunosOrdenados);
       } catch (error: any) {
         toast.error(error.message || "Erro ao carregar dados da turma");
       } finally {
@@ -147,11 +169,11 @@ export default function TurmaDetalhesPage() {
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-[#0D4F97]/10">
-                    <BookOpen className="h-8 w-8 text-[#0D4F97]" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0D4F97]/10">
+                    <BookOpen className="h-5 w-5 text-[#0D4F97]" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-[#0D4F97]">{turma?.nome}</h2>
+                    <h2 className="text-xl font-bold text-[#0D4F97] mt-2">{turma?.nome}</h2>
                     <div className="flex items-center gap-4 mt-2">
                       <div className="flex items-center gap-2 text-[#222222]">
                         <Users className="h-5 w-5" />
@@ -198,7 +220,9 @@ export default function TurmaDetalhesPage() {
                     <Button
                       onClick={() => setViewMode("grid")}
                       variant={viewMode === "grid" ? "primary" : "outline"}
-                      className="flex-1"
+                      className="flex-1 px-0 min-w-0"
+                      aria-label="Visualização em grade"
+                      title="Visualização em grade"
                     >
                       <Grid3x3 className="h-5 w-5" />
                     </Button>
@@ -206,7 +230,9 @@ export default function TurmaDetalhesPage() {
                     <Button
                       onClick={() => setViewMode("list")}
                       variant={viewMode === "list" ? "primary" : "outline"}
-                      className="flex-1"
+                      className="flex-1 px-0 min-w-0"
+                      aria-label="Visualização em lista"
+                      title="Visualização em lista"
                     >
                       <List className="h-5 w-5" />
                     </Button>
@@ -246,22 +272,17 @@ export default function TurmaDetalhesPage() {
                       </div>
                     </div>
 
-                    <div className="flex gap-2">
-                      <Button
+                    <div className="grid grid-cols-2 gap-2 w-full">
+                      <ActionButton
+                        variant="primary"
                         onClick={() => handleAvaliacoes(aluno.id)}
-                        className="flex-1 bg-[#0D4F97] hover:bg-[#0A3D75]"
-                      >
-                        <FileText className="mr-2 h-4 w-4" />
-                        Avaliações
-                      </Button>
-
-                      <Button
-                        onClick={() => handleRelatorios(aluno.id)}
+                        label="Avaliações"
+                      />
+                      <ActionButton
                         variant="outline"
-                        className="flex-1 border-[#0D4F97] text-[#0D4F97] hover:bg-[#0D4F97]/10"
-                      >
-                        Relatórios
-                      </Button>
+                        onClick={() => handleRelatorios(aluno.id)}
+                        label="Relatórios"
+                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -296,22 +317,19 @@ export default function TurmaDetalhesPage() {
                             </div>
                           </div>
 
-                          <div className="flex gap-2">
-                            <Button
+                          <div className="grid grid-cols-2 gap-2 w-full md:w-auto md:flex md:flex-row">
+                            <ActionButton
+                              variant="outline"
                               onClick={() => handleAvaliacoes(aluno.id)}
+                              label="Avaliações"
+                              extraClass="md:flex-1 border-[#0D4F97] text-[#0D4F97]"
+                            />
+                            <ActionButton
                               variant="outline"
-                              className="border-[#0D4F97] text-[#0D4F97]"
-                            >
-                              Avaliações
-                            </Button>
-
-                            <Button
                               onClick={() => handleRelatorios(aluno.id)}
-                              variant="outline"
-                              className="border-[#0D4F97] text-[#0D4F97]"
-                            >
-                              Relatórios
-                            </Button>
+                              label="Relatórios"
+                              extraClass="md:flex-1 border-[#0D4F97] text-[#0D4F97]"
+                            />
                           </div>
                         </div>
                       </div>
