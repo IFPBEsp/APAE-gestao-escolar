@@ -199,11 +199,18 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
         setBuscaAluno("");
         setAlunosEncontrados([]);
         setAlunosSelecionados([]);
+        setAlunoParaRemover(null);
+    }
+
+    function handleCloseModal() {
+        setAlunoParaRemover(null);
+        onClose();
+        resetForm();
     }
 
     return (
         <>
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isOpen} onOpenChange={handleCloseModal}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-[#0D4F97] text-xl">Nova Turma</DialogTitle>
@@ -373,7 +380,7 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                 <div className="flex justify-end gap-3 pt-4 border-t">
                     <Button 
                         variant="outline"   
-                        onClick={onClose}
+                        onClick={handleCloseModal}
                     >
                         Cancelar
                     </Button>

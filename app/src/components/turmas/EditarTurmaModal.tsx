@@ -272,11 +272,16 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
         }
     }
 
+    function handleCloseModal() {
+        setAlunoParaRemover(null);
+        onClose();
+    }
+
     if (!turmaData) return null;
 
     return (
         <>
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isOpen} onOpenChange={handleCloseModal}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-[#0D4F97] text-xl">Editar Informações da Turma</DialogTitle>
@@ -436,6 +441,8 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                                             size="icon"
                                             className="hover:text-red-600 hover:bg-red-50"
                                             onClick={() => setAlunoParaRemover(aluno)}
+                                            title="Remover Aluno"
+                                            aria-label={`Remover aluno ${aluno.nome}`}
                                         >
                                             <X size={16} />
                                         </Button>
@@ -449,7 +456,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                 <div className="flex justify-end gap-3 pt-4 border-t border-[#E5E5E5]">
                     <Button 
                         variant="outline" 
-                        onClick={onClose}
+                        onClick={handleCloseModal}
                     >
                         Cancelar
                     </Button>
