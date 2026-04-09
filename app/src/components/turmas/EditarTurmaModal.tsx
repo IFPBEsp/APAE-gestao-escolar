@@ -25,6 +25,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Search, UserRound, X } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 
@@ -75,6 +85,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     const [buscaAluno, setBuscaAluno] = useState("");
     const [alunosEncontrados, setAlunosEncontrados] = useState<AlunoAPI[]>([]); 
     const [alunosNaTurma, setAlunosNaTurma] = useState<AlunoNaTurma[]>([]); 
+    const [alunoParaRemover, setAlunoParaRemover] = useState<AlunoNaTurma | null>(null);
 
     const nomeTurma = useMemo(
         () => `${tipo ? formatTipo(tipo) : ""} ${anoCriacao || ""} - ${turno ? formatTurno(turno) : ""}`,
@@ -264,6 +275,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     if (!turmaData) return null;
 
     return (
+        <>
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
@@ -423,7 +435,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                                             variant="ghost"
                                             size="icon"
                                             className="hover:text-red-600 hover:bg-red-50"
-                                            onClick={() => removerAluno(aluno.alunoId)}
+                                            onClick={() => setAlunoParaRemover(aluno)}
                                         >
                                             <X size={16} />
                                         </Button>
@@ -451,5 +463,34 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                 </div>
             </DialogContent>
         </Dialog>
+
+        <AlertDialog open={!!alunoParaRemover} onOpenChange={(open) => !open && setAlunoParaRemover(null)}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle className="text-[#0D4F97]">Atenção!</AlertDialogTitle>
+                    <AlertDialogDescription className="text-gray-600">
+                        Tem certeza de que deseja remover o aluno <strong className="text-gray-900">{alunoParaRemover?.nome}</strong> desta turma?
+                        Esta ação removerá o vínculo do aluno com a turma selecionada.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => setAlunoParaRemover(null)}>
+                        Cancelar
+                    </AlertDialogCancel>
+                    <AlertDialogAction 
+                        onClick={() => {
+                            if (alunoParaRemover) {
+                                removerAluno(alunoParaRemover.alunoId);
+                                setAlunoParaRemover(null);
+                            }
+                        }}
+                        className="bg-red-600 text-white hover:bg-red-700 hover:text-white border-0"
+                    >
+                        Remover Aluno
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+        </>
     );
 }
