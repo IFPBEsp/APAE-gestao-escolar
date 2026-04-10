@@ -183,6 +183,7 @@ public class TurmaController {
             summary = "Adicionar alunos à turma",
             description = "Adiciona uma lista de alunos já cadastrados a uma turma existente."
     )
+    @Doc404NotFound
     public ResponseEntity<TurmaResponseDTO> adicionarAlunos(@RequestBody List<Long> alunosId, @PathVariable Long turmaId){
         TurmaResponseDTO response = service.adicionarAlunos(turmaId, alunosId);
         return ResponseEntity.ok(response);
@@ -193,6 +194,7 @@ public class TurmaController {
             summary = "Listar alunos da turma",
             description = "Lista todos os alunos, ativos e inativos, vinculados à turma."
     )
+    @Doc404NotFound
     public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosNaTurma(@PathVariable Long turmaId){
         List<TurmaAlunoResponseDTO> response = service.listarAlunos(turmaId);
         return ResponseEntity.ok(response);
@@ -203,6 +205,7 @@ public class TurmaController {
             summary = "Listar alunos ativos da turma",
             description = "Lista apenas os alunos com vínculo ativo na turma."
     )
+    @Doc404NotFound
     public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosAtivosNaTurma(@PathVariable Long turmaId){
         List<TurmaAlunoResponseDTO> response = service.listarAlunosAtivos(turmaId);
         return ResponseEntity.ok(response);
@@ -213,6 +216,7 @@ public class TurmaController {
             summary = "Listar alunos inativos da turma",
             description = "Lista apenas os alunos com vínculo inativo na turma."
     )
+    @Doc404NotFound
     public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosInativosNaTurma(@PathVariable Long turmaId){
         List<TurmaAlunoResponseDTO> response = service.listarAlunosInativos(turmaId);
         return ResponseEntity.ok(response);
@@ -223,6 +227,7 @@ public class TurmaController {
             summary = "Ativar aluno na turma",
             description = "Reativa o vínculo do aluno com a turma para participação nas atividades."
     )
+    @Doc404NotFound
     public ResponseEntity<TurmaAlunoResponseDTO> ativarAlunoNaTurma(@PathVariable Long turmaId, @PathVariable Long alunoId){
         service.ativarAluno(turmaId, alunoId);
         return ResponseEntity.ok().build();
@@ -233,6 +238,7 @@ public class TurmaController {
             summary = "Inativar aluno na turma",
             description = "Inativa o vínculo do aluno com a turma, mantendo o histórico preservado."
     )
+    @Doc404NotFound
     public ResponseEntity<TurmaAlunoResponseDTO> desativarAlunoNaTurma(@PathVariable Long turmaId, @PathVariable Long alunoId){
         service.desativarAluno(turmaId, alunoId);
         return ResponseEntity.ok().build();
