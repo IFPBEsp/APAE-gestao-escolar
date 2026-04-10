@@ -156,21 +156,21 @@ export default function RelatoriosAlunoListaPage() {
             onClick={() => router.back()}
             variant="outline"
           >
-            <ArrowLeft className="mr-2 h-5 w-5" strokeWidth={1.75} />
+            <ArrowLeft className="mr-2 h-5 w-5" />
             Voltar
           </Button>
 
           {/* SEÇÃO RELATÓRIOS */}
           <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#B2D7EC]/40">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D4F97]/10">
                 <FileText className="h-5 w-5 text-[#0D4F97]" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-[#0D4F97]">
                   Relatórios do Aluno
                 </h1>
-                <p className="text-sm text-gray-600">
+                <p className="text-[#222222]">
                   Visualize e gerencie os relatórios de aluno
                 </p>
               </div>
@@ -186,7 +186,7 @@ export default function RelatoriosAlunoListaPage() {
               action={
                 <Button
                   onClick={() => {
-                    setRelatorioSelecionado({ id: 0 });
+                    setRelatorioSelecionado({ id: 0, alunoId: Number(alunoIdFromUrl) });
                     setIsModalRelatorioOpen(true);
                   }}
                   variant="primary"
@@ -211,7 +211,7 @@ export default function RelatoriosAlunoListaPage() {
                 </div>
 
                 {/* Lista de Relatórios */}
-                <div className="divide-y-2 divide-[#B2D7EC]">
+                <div className="w-full">
                   {relatorios.length === 0 ? (
                     <div className="p-8 text-center text-gray-500">
                       Nenhum relatório encontrado.
@@ -220,11 +220,11 @@ export default function RelatoriosAlunoListaPage() {
                     relatorios.map((rel) => (
                       <div
                         key={rel.id}
-                        className="grid grid-cols-1 gap-4 p-4 transition-all hover:bg-[#B2D7EC]/10 md:grid-cols-12 md:items-start"
+                        className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border-b border-[#B2D7EC] items-center hover:bg-gray-50"
                       >
                         <div className="col-span-1 md:col-span-2">
                           <p className="text-[#0D4F97] md:hidden font-semibold">Data:</p>
-                          <p className="text-[#0D4F97] font-medium">
+                          <p className="font-medium">
                             {rel.createdAt
                               ? format(new Date(rel.createdAt), "dd/MM/yyyy")
                               : "---"}
@@ -233,22 +233,22 @@ export default function RelatoriosAlunoListaPage() {
 
                         <div className="col-span-1 md:col-span-2">
                           <p className="text-[#0D4F97] md:hidden font-semibold">Atividades:</p>
-                          <p className="text-sm text-[#222222] line-clamp-3">{rel.atividades}</p>
+                          <p className="text-sm text-gray-700 line-clamp-3">{rel.atividades}</p>
                         </div>
 
                         <div className="col-span-1 md:col-span-2">
                           <p className="text-[#0D4F97] md:hidden font-semibold">Habilidades:</p>
-                          <p className="text-sm text-[#222222] line-clamp-3">{rel.habilidades}</p>
+                          <p className="text-sm text-gray-700 line-clamp-3">{rel.habilidades}</p>
                         </div>
 
                         <div className="col-span-1 md:col-span-2">
                           <p className="text-[#0D4F97] md:hidden font-semibold">Estratégias:</p>
-                          <p className="text-sm text-[#222222] line-clamp-3">{rel.estrategias}</p>
+                          <p className="text-sm text-gray-700 line-clamp-3">{rel.estrategias}</p>
                         </div>
 
                         <div className="col-span-1 md:col-span-2">
                           <p className="text-[#0D4F97] md:hidden font-semibold">Recursos:</p>
-                          <p className="text-sm text-[#222222] line-clamp-3">{rel.recursos}</p>
+                          <p className="text-sm text-gray-700 line-clamp-3">{rel.recursos}</p>
                         </div>
 
                         <div className="col-span-1 md:col-span-2 flex justify-center gap-2">
@@ -260,7 +260,7 @@ export default function RelatoriosAlunoListaPage() {
                             variant="ghost"
                             size="icon"
                           >
-                            <Eye className="h-4 w-4" />
+                            <Eye className="h-5 w-5" />
                           </Button>
                           <Button
                             onClick={() => {
@@ -270,7 +270,7 @@ export default function RelatoriosAlunoListaPage() {
                             variant="ghost"
                             size="icon"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-5 w-5" />
                           </Button>
                         </div>
                       </div>
@@ -291,6 +291,8 @@ export default function RelatoriosAlunoListaPage() {
             setRelatorioSelecionado(null);
           }}
           relatorio={relatorioSelecionado}
+          alunoNome={alunoData?.nome}
+          alunoDataNascimento={alunoData?.dataNascimento}
           onSalvar={handleSalvarRelatorio}
         />
       )}

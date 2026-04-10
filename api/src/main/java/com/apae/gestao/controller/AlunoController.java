@@ -4,6 +4,7 @@ import com.apae.gestao.dto.AlunoTurmaRequestDTO;
 import com.apae.gestao.dto.AvaliacaoHistoricoResponseDTO;
 import com.apae.gestao.dto.aluno.AlunoDetalhesDTO;
 import com.apae.gestao.dto.aluno.AlunoResumoDTO;
+import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoItemDTO;
 import com.apae.gestao.service.AlunoService;
 import com.apae.gestao.openapi.Doc400ValidationError;
 import com.apae.gestao.openapi.Doc404NotFound;
@@ -72,7 +73,8 @@ public class AlunoController {
         description = "Desativa a turma anterior e ativa a nova turma."
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Turma atualizada com sucesso")
+        @ApiResponse(responseCode = "200", description = "Turma atualizada com sucesso"),
+        @ApiResponse(responseCode = "422", description = "Regra de negócio violada (Turma Inativa)")
     })
     @DocStandardErrors
     public ResponseEntity<AlunoDetalhesDTO> atualizarTurma(
@@ -95,5 +97,20 @@ public class AlunoController {
                 alunoService.buscarAvaliacoesPorAlunoId(id);
 
         return ResponseEntity.ok(avaliacoes);
+    }
+
+    @GetMapping("/{id}/turmas")
+    @Operation(
+        summary = "Listar histórico de turmas do aluno",
+        description = "Retorna todas as turmas em que o aluno possui ou possuiu vínculo (ativas ou inativas, vínculo atual ou antigo)."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Aluno não encontrado")
+    })
+    public ResponseEntity<List<AlunoTurmaHistoricoItemDTO>> listarHistoricoTurmasPorAlunoId(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(alunoService.listarHistoricoTurmasPorAlunoId(id));
     }
 }

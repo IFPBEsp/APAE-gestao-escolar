@@ -3,6 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, User, Calendar, BookOpen, Heart, Phone, Eye, Loader2 } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useMemo, use } from "react"; 
 import ModalVisualizarAvaliacao from "@/components/alunos/ModalVisualizarAvaliacao";
@@ -163,49 +164,58 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#E5E5E5]">
-      {/* Conteúdo - Padronizado com Detalhes da Turma */}
+    <div className="w-full min-h-screen bg-[#F4F6FB]">
       <div className="p-4 md:p-8 space-y-6">
-        
-        {/* Cabeçalho de Navegação */}
-        <div>
-            <Button
-                variant="ghost"
-                onClick={() => router.push("/admin/alunos")}
-                className="text-[#0D4F97] hover:bg-[#E8F3FF] pl-0 gap-2 mb-4"
-            >
-                <ArrowLeft size={20} />
-                Voltar
-            </Button>
 
-            <h1 className="text-2xl font-bold text-[#0D4F97]">Detalhes do Aluno</h1>
-            <p className="text-gray-500">Visualize e gerencie as informações do aluno</p>
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
+              Detalhes do Aluno
+            </h1>
+            <p className="text-[#222222]">
+              Visualize e gerencie as informações do aluno
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => router.push("/admin/alunos")}
+          >
+            <ArrowLeft className="mr-2 h-5 w-5" />
+            Voltar
+          </Button>
         </div>
 
-        {/* Card principal do Aluno */}
-        <Card className="border border-[#E2E8F0] shadow-sm rounded-xl overflow-hidden">
-          <CardContent className="p-4 md:p-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="flex items-center gap-3 md:gap-4">
-                <div className="h-12 w-12 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97]">
-                  <User size={24} />
+        {/* CARD PRINCIPAL ÚNICO */}
+        <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
+          <CardContent className="p-8">
+
+            {/* DADOS DO ALUNO */}
+            <div className="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mt-4">
+              <div className="flex items-center gap-3 w-full">
+                <div className="h-10 w-10 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97] shrink-0">
+                  <User className="h-6 w-6 text-[#0D4F97]" />
                 </div>
-                <div>
-                  <h2 className="text-xl md:text-2xl font-bold text-[#0D4F97]">{alunoData.nome}</h2>
-                  <p className="text-gray-600 text-sm md:text-lg">{calcularIdade(alunoData.dataNascimento)} anos</p>
+                <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3 flex-1 min-w-0">
+                  <h2 className="text-2xl font-bold text-[#0D4F97] truncate">
+                    {alunoData.nome}
+                  </h2>
+                  <p className="text-gray-600 text-sm md:text-base">
+                    {calcularIdade(alunoData.dataNascimento)} anos
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 md:gap-y-8 gap-x-12 mt-6 md:mt-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 mt-6 md:mt-10">
               
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
                     <Calendar size={20} />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Data de Nascimento</p>
-                  <p className="text-[#0D4F97] font-medium">{formatarData(alunoData.dataNascimento)}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-500 mb-1 truncate">Data de Nascimento</p>
+                  <p className="text-[#0D4F97] font-medium break-words">{formatarData(alunoData.dataNascimento)}</p>
                 </div>
               </div>
 
@@ -213,9 +223,9 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
                 <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
                     <BookOpen size={20} />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Turma Atual</p>
-                  <p className="text-[#0D4F97] font-medium">{turmaCompleta}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-500 mb-1 truncate">Turma Atual</p>
+                  <p className="text-[#0D4F97] font-medium break-words">{turmaCompleta}</p>
                 </div>
               </div>
 
@@ -223,9 +233,9 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
                 <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
                     <Heart size={20} />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Deficiência</p>
-                  <p className="text-[#0D4F97] font-medium">{alunoData.deficiencia}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-500 mb-1 truncate">Deficiência</p>
+                  <p className="text-[#0D4F97] font-medium break-words">{alunoData.deficiencia}</p>
                 </div>
               </div>
 
@@ -233,110 +243,265 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
                 <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
                     <Phone size={20} />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">Responsável</p>
-                  <p className="text-[#0D4F97] font-medium">{alunoData.nomeResponsavel}</p>
-                  <p className="text-gray-500 text-sm">{alunoData.telefoneResponsavel}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-500 mb-1 truncate">Responsável</p>
+                  <p className="text-[#0D4F97] font-medium break-words">{alunoData.nomeResponsavel}</p>
+                  <p className="text-gray-500 text-sm break-words">{alunoData.telefoneResponsavel}</p>
                 </div>
               </div>
 
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Histórico de Avaliações */}
-        <Card className="border border-[#E2E8F0] shadow-sm rounded-xl overflow-hidden">
-          <CardContent className="p-4 md:p-8">
-            <h2 className="text-xl font-bold text-[#0D4F97] mb-2">Histórico de Avaliações</h2>
-            <p className="text-gray-500 mb-6">Avaliações realizadas pelos professores ({avaliacoes.length} registros)</p>
+            {/* HISTÓRICO DE AVALIAÇÕES */}
+            <div className="mt-10 border-t-8 border-[#E2E8F0] pt-8">
 
-            {loadingAvaliacoes ? (
+              <h2 className="text-xl font-bold text-[#0D4F97] mb-2">
+                Histórico de Avaliações
+              </h2>
+
+              <p className="text-gray-500 mb-6">
+                Avaliações realizadas pelos professores ({avaliacoes.length} registros)
+              </p>
+
+              {loadingAvaliacoes ? (
                 <div className="flex justify-center py-4">
-                    <Loader2 className="h-6 w-6 animate-spin text-[#0D4F97]" />
+                  <Loader2 className="h-6 w-6 animate-spin text-[#0D4F97]" />
                 </div>
-            ) : avaliacoes.length === 0 ? (
-                <p className="text-center text-gray-500 py-4">Nenhuma avaliação encontrada para este aluno.</p>
-            ) : (
-                <div className="overflow-x-auto">
-                    <table className="w-full min-w-[700px] text-left border-collapse">
-                        <thead>
-                            <tr className="border-b border-gray-100">
-                                <th className="pb-3 pr-3 font-semibold text-[#0D4F97] w-[120px]">Data</th>
-                                <th className="pb-3 pr-3 font-semibold text-[#0D4F97] w-[150px]">Professor</th>
-                                <th className="pb-3 pr-3 font-semibold text-[#0D4F97] w-[180px]">Turma</th>
-                                <th className="pb-3 pr-3 font-semibold text-[#0D4F97]">Descrição</th>
-                                <th className="pb-3 font-semibold text-[#0D4F97] w-[80px]">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody className="text-gray-600">
-                            {avaliacoes.map((avaliacao: any, index: number) => (
-                            <tr key={index} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                                <td className="py-4 font-medium text-gray-900 pr-3">{formatarData(avaliacao.dataAvaliacao)}</td> 
-                                <td className="py-4 pr-3">{avaliacao.professorNome}</td>
-                                <td className="py-4 pr-3">{avaliacao.turmaNomeCompleto}</td>
-                                <td className="py-4 pr-3 truncate max-w-[200px]" title={avaliacao.descricao}>{avaliacao.descricao}</td>
-                                <td className="py-4">
-                                <Eye
-                                    className="h-5 w-5 text-gray-400 cursor-pointer hover:text-[#0D4F97]"
-                                    onClick={() => setSelectedAvaliacao(avaliacao)}
-                                />
-                                </td>
-                            </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-          </CardContent>
-        </Card>
 
-        {/* Histórico de Relatórios */}
-        <Card className="border border-[#E2E8F0] shadow-sm rounded-xl overflow-hidden mt-8">
-          <CardContent className="p-4 md:p-8">
-            <h2 className="text-xl font-bold text-[#0D4F97] mb-2">Histórico de Relatórios</h2>
-            <p className="text-gray-500 mb-6">Relatórios pedagógicos registrados ({relatorios.length} registros)</p>
+              ) : avaliacoes.length === 0 ? (
+                <p className="text-center text-gray-500 py-4">
+                  Nenhuma avaliação encontrada para este aluno.
+                </p>
+
+              ) : (
+                <div className="overflow-x-auto max-h-80 overflow-y-auto border-2 border-[#B2D7EC] rounded-lg">
+
+                  <Table className="w-full table-fixed">
+                      {/* Ordem das colunas: Data, Professor, Turma, Descrição, Ações*/}
+                    <colgroup>
+                      <col style={{ width: '130px' }} /> 
+                      <col style={{ width: '160px' }} /> 
+                      <col style={{ width: '200px' }} /> 
+                      <col style={{ width: '300px' }} /> 
+                      <col style={{ width: '70px' }} /> 
+                    </colgroup>
+
+                    <TableHeader className="sticky top-0 z-20 bg-[#EAF4FB]">
+                      <TableRow className="bg-[#EAF4FB] hover:bg-[#EAF4FB]">
+
+                        <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6">
+                          Data
+                        </TableHead>
+
+                        <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6">
+                          Professor
+                        </TableHead>
+
+                        <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6">
+                          Turma
+                        </TableHead>
+
+                        <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6">
+                          Descrição
+                        </TableHead>
+
+                        <TableHead className="sticky right-0 z-10 bg-[#EAF4FB] text-[#0D4F97] font-semibold text-center shadow-[-4px_0_8px_rgba(0,0,0,0.08)]">
+                          Ações
+                        </TableHead>
+
+                      </TableRow>
+                    </TableHeader>
+
+                    <TableBody className="text-gray-600">
+                      {avaliacoes.map((avaliacao: any, index: number) => (
+                        <TableRow key={index}>
+
+                          <TableCell className="font-medium text-gray-900 truncate px-4 sm:px-6">
+                            {formatarData(avaliacao.dataAvaliacao)}
+                          </TableCell>
+
+                          <TableCell className="truncate px-4 sm:px-6">
+                            {avaliacao.professorNome}
+                          </TableCell>
+
+                          <TableCell className="truncate px-4 sm:px-6">
+                            {avaliacao.turmaNomeCompleto}
+                          </TableCell>
+
+                          <TableCell
+                            className="truncate px-4 sm:px-6"
+                            title={avaliacao.descricao}
+                          >
+                            {avaliacao.descricao}
+                          </TableCell>
+
+                          <TableCell className="sticky right-0 z-10 bg-white group-hover:bg-[#B2D7EC]/10 text-center shadow-[-4px_0_8px_rgba(0,0,0,0.05)]">
+                            <div className="flex items-center justify-center h-full">
+                              <Eye
+                                className="h-5 w-5 cursor-pointer hover:text-[#0D4F97] transition-colors"
+                                onClick={() => setSelectedAvaliacao(avaliacao)}
+                              />
+                            </div>
+                          </TableCell>
+
+                        </TableRow>
+                      ))}
+                    </TableBody>
+
+                  </Table>
+                </div>
+              )}
+            </div>
+
+            {/* HISTÓRICO DE RELATÓRIOS */}
+            <div className="mt-10 border-t-8 border-[#E2E8F0] pt-8">
+              <h2 className="text-xl font-bold text-[#0D4F97] mb-2">
+                Histórico de Relatórios
+              </h2>
+
+              <p className="text-gray-500 mb-6">
+                Relatórios pedagógicos registrados ({relatorios.length} registros).
+              </p>
 
             {loadingRelatorios ? (
               <div className="flex justify-center py-4">
                 <Loader2 className="h-6 w-6 animate-spin text-[#0D4F97]" />
               </div>
+
             ) : relatorios.length === 0 ? (
-              <p className="text-center text-gray-500 py-4">Nenhum relatório encontrado para este aluno.</p>
+              <p className="text-center text-gray-500 py-4">
+                Nenhum relatório encontrado para este aluno.
+              </p>
+
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[800px] text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-gray-100">
-                      <th className="pb-3 pr-3 font-semibold text-[#0D4F97] w-[120px]">Data</th>
-                      <th className="pb-3 pr-3 font-semibold text-[#0D4F97] w-[150px]">Professor</th>
-                      <th className="pb-3 pr-3 font-semibold text-[#0D4F97] w-[180px]">Turma</th>
-                      <th className="pb-3 pr-3 font-semibold text-[#0D4F97]">Atividades</th>
-                      <th className="pb-3 font-semibold text-[#0D4F97] w-[80px]">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-gray-600">
-                    {relatorios.map((relatorio, index) => (
-                      <tr key={index} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                        <td className="py-4 font-medium text-gray-900 pr-3">{formatarData(relatorio.createdAt)}</td>
-                        <td className="py-4 pr-3">{relatorio.professorNome}</td>
-                        <td className="py-4 pr-3">{relatorio.turmaNome || "Sem Turma"}</td>
-                        <td className="py-4 pr-3 truncate max-w-[220px]" title={relatorio.atividades}>{relatorio.atividades}</td>
-                        <td className="py-4">
-                          <Eye
-                            className="h-5 w-5 text-gray-400 cursor-pointer hover:text-[#0D4F97]"
-                            onClick={() => setSelectedRelatorio(relatorio)}
-                          />
-                        </td>
-                      </tr>
+              <div className="overflow-x-auto max-h-80 overflow-y-auto border-2 border-[#B2D7EC] rounded-lg">
+
+                <Table className="w-full table-fixed">
+                  {/* Ordem das colunas: Data, Professor, Turma, Atividades, Habilidades, Estratégias, Recursos, Ações*/}
+                  <colgroup>
+                    <col style={{ width: '130px' }} /> 
+                    <col style={{ width: '160px' }} /> 
+                    <col style={{ width: '200px' }} /> 
+                    <col style={{ width: '220px' }} /> 
+                    <col style={{ width: '220px' }} /> 
+                    <col style={{ width: '220px' }} /> 
+                    <col style={{ width: '220px' }} /> 
+                    <col style={{ width: '70px' }} /> 
+                  </colgroup>
+
+                  <TableHeader className="sticky top-0 z-20 bg-[#EAF4FB]">
+                    <TableRow className="bg-[#EAF4FB] hover:bg-[#EAF4FB]">
+
+                      <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6 truncate">
+                        Data
+                      </TableHead>
+
+                      <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6 truncate">
+                        Professor
+                      </TableHead>
+
+                      <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6 truncate">
+                        Turma
+                      </TableHead>
+
+                      <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6 truncate">
+                        Atividades
+                      </TableHead>
+
+                      <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6 truncate">
+                        Habilidades
+                      </TableHead>
+
+                      <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6 truncate">
+                        Estratégias
+                      </TableHead>
+
+                      <TableHead className="text-[#0D4F97] font-semibold px-4 sm:px-6 truncate">
+                        Recursos
+                      </TableHead>
+
+                      <TableHead className="sticky right-0 z-10 bg-[#EAF4FB] text-[#0D4F97] font-semibold text-center shadow-[-4px_0_8px_rgba(0,0,0,0.08)]">
+                        Ações
+                      </TableHead>
+
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody className="text-gray-600">
+                    {relatorios.map((relatorio: any, index: number) => (
+                      <TableRow key={index}>
+
+                        <TableCell
+                          className="font-medium text-gray-900 truncate px-4 sm:px-6"
+                          title={formatarData(relatorio.createdAt)}
+                        >
+                          {formatarData(relatorio.createdAt)}
+                        </TableCell>
+
+                        <TableCell
+                          className="truncate px-4 sm:px-6"
+                          title={relatorio.professorNome}
+                        >
+                          {relatorio.professorNome}
+                        </TableCell>
+
+                        <TableCell
+                          className="truncate px-4 sm:px-6"
+                          title={relatorio.turmaNome || "Sem Turma"}
+                        >
+                          {relatorio.turmaNome || "Sem Turma"}
+                        </TableCell>
+
+                        <TableCell
+                          className="truncate px-4 sm:px-6"
+                          title={relatorio.atividades}
+                        >
+                          {relatorio.atividades}
+                        </TableCell>
+
+                        <TableCell
+                          className="truncate px-4 sm:px-6"
+                          title={relatorio.habilidades}
+                        >
+                          {relatorio.habilidades}
+                        </TableCell>
+
+                        <TableCell
+                          className="truncate px-4 sm:px-6"
+                          title={relatorio.estrategias}
+                        >
+                          {relatorio.estrategias}
+                        </TableCell>
+
+                        <TableCell
+                          className="truncate px-4 sm:px-6"
+                          title={relatorio.recursos}
+                        >
+                          {relatorio.recursos}
+                        </TableCell>
+
+                        <TableCell className="sticky right-0 z-10 bg-white group-hover:bg-[#B2D7EC]/10 text-center shadow-[-4px_0_8px_rgba(0,0,0,0.05)]">
+                          <div className="flex items-center justify-center h-full">
+                            <Eye
+                              className="h-5 w-5 cursor-pointer hover:text-[#0D4F97] transition-colors"
+                              onClick={() => setSelectedRelatorio(relatorio)}
+                            />
+                          </div>
+                        </TableCell>
+
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+
+                </Table>
               </div>
             )}
+
+          </div>
+
           </CardContent>
         </Card>
 
-        {/* Modais */}
         <ModalVisualizarAvaliacao
           isOpen={!!selectedAvaliacao}
           onClose={() => setSelectedAvaliacao(null)}

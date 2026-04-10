@@ -38,11 +38,11 @@ public class Turma {
     @Column(nullable = false)
     private Boolean isAtiva = true;
 
-    @OneToMany(mappedBy = "turma", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "turma", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TurmaAluno> turmaAlunos = new HashSet<>();
 
     @ManyToOne
-    @JoinColumn(name = "professor_id", nullable = false)
+    @JoinColumn(name = "professor_id", nullable = true)
     @JsonIgnoreProperties({"turmas", "relatorios", "avaliacoes"})
     private Professor professor;
 

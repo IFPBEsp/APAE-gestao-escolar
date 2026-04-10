@@ -4,7 +4,21 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit, Power, UserCircle, BookOpen } from "lucide-react";
+import {
+  ArrowLeft,
+  Edit,
+  Power,
+  UserCircle,
+  BookOpen,
+  Mail,
+  Phone,
+  GraduationCap,
+  Calendar,
+  Users,
+  FileText,
+  MapPin,
+  CalendarDays,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -21,6 +35,7 @@ import ModalEditarProfessor from "@/components/ModalEditarProfessor";
 import { format, isValid, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Professor } from "@/types/professor";
+import { ativarProfessorporId, inativarProfessorporId } from "@/services/ProfessorService";
 
 export default function DetalhesProfessor() {
   const router = useRouter();
@@ -31,6 +46,7 @@ export default function DetalhesProfessor() {
   const [loading, setLoading] = useState(true);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [isModalEditarOpen, setIsModalEditarOpen] = useState(false);
+  const [isSubmittingToggle, setIsSubmittingToggle] = useState(false);
 
   useEffect(() => {
     if (professorId) {
@@ -56,20 +72,26 @@ export default function DetalhesProfessor() {
     if (!professor) return;
 
     try {
-      const endpoint = professor.ativo
-        ? `/professores/${professor.id}/inativar`
-        : `/professores/${professor.id}/ativar`;
+      setIsSubmittingToggle(true);
+      let professorAtualizado;
 
-      const response = await api.patch(endpoint);
-      setProfessor(response.data);
+      if (professor.ativo) {
+        professorAtualizado = await inativarProfessorporId(professor.id);
+      } else {
+        professorAtualizado = await ativarProfessorporId(professor.id);
+      }
+
+      setProfessor(professorAtualizado);
       setIsAlertOpen(false);
 
       toast.success(
         `Professor ${professor.ativo ? "inativado" : "ativado"} com sucesso!`
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao alterar status:", error);
-      toast.error("Erro ao alterar status do professor");
+      toast.error(error.message || "Erro ao alterar status do professor");
+    } finally {
+      setIsSubmittingToggle(false);
     }
   };
 
@@ -80,6 +102,8 @@ export default function DetalhesProfessor() {
       return format(date, "dd/MM/yyyy", { locale: ptBR });
 
   };
+
+  const activateButtonStyles = "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700";
 
   if (loading) {
     return (
@@ -98,46 +122,43 @@ export default function DetalhesProfessor() {
   }
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="mx-auto max-w-5xl">
-        <div className="space-y-6">
-          {/* Header com Botão Voltar */}
-          <Button
-            onClick={() => router.push("/admin/professores")}
-            variant="outline"
-            className="mb-6 justify-center"
-          >
-            <ArrowLeft className="mr-2 h-5 w-5" />
-            Voltar
-          </Button>
-
-          {/* Título */}
-          <div>
-            <h1 className="text-3xl font-bold text-[#0D4F97] mb-2">
-              Detalhes do Professor
-            </h1>
-            <p className="text-[#222222]">
-              Visualize e gerencie as informações do professor
-            </p>
+    <div className="w-full min-h-screen bg-[#F4F6FB]">
+      <div className="p-4 md:p-8 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
+                Detalhes do Professor
+              </h1>
+              <p className="text-[#222222]">
+                Visualize e gerencie as informações do professor
+              </p>
+            </div>
+            <Button
+              onClick={() => router.push("/admin/professores")}
+              variant="outline"
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Voltar
+            </Button>
           </div>
 
           {/* Card Principal com Informações */}
           <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
             <CardContent className="p-8">
               {/* Nome do Professor e Status */}
-              <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center mt-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#B2D7EC]/20">
-                    <UserCircle className="h-10 w-10 text-[#0D4F97]" />
+              <div className="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mt-4">
+                <div className="flex items-center gap-3 w-full">
+                  <div className="h-10 w-10 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97] shrink-0">
+                    <UserCircle className="h-6 w-6 text-[#0D4F97]" />
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-[#0D4F97]">
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3 flex-1 min-w-0">
+                    <h2 className="text-2xl font-bold text-[#0D4F97] truncate">
                       {professor.nome}
                     </h2>
                     <span
-                      className={`mt-1 inline-block rounded-full px-3 py-1 ${professor.ativo
+                      className={`inline-block rounded-full px-3 py-1 font-medium text-xs lg:text-sm w-fit ${professor.ativo
                           ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-700"
+                          : "bg-red-100 text-red-700"
                         }`}
                     >
                       {professor.ativo ? "Ativo" : "Inativo"}
@@ -147,82 +168,138 @@ export default function DetalhesProfessor() {
               </div>
 
               {/* Grid de Informações */}
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {/* Email */}
-                <div>
-                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
-                    E-mail
-                  </p>
-                  <p className="text-[#222222]">{professor.email || "—"}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-6 gap-x-8">
+                {/* CPF */}
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      CPF
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.cpf || "—"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* E-mail */}
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <Mail className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      E-mail
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.email || "—"}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Telefone */}
-                <div>
-                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
-                    Telefone
-                  </p>
-                  <p className="text-[#222222]">{professor.telefone || "—"}</p>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <Phone className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Telefone
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.telefone || "—"}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Formação */}
-                <div>
-                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
-                    Formação
-                  </p>
-                  <p className="text-[#222222]">{professor.formacao || "—"}</p>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <GraduationCap className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Formação
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.formacao || "—"}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Data de Contratação */}
-                <div>
-                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
-                    Data de Contratação
-                  </p>
-                  <p className="text-[#222222]">
-                    {professor.dataContratacao
-                      ? formatDate(professor.dataContratacao)
-                      : "—"}
-                  </p>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <Calendar className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Data de Contratação
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.dataContratacao
+                        ? formatDate(professor.dataContratacao)
+                        : "—"}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Data de Nascimento */}
-                <div>
-                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
-                    Data de Nascimento
-                  </p>
-                  <p className="text-[#222222]">
-                    {professor.dataNascimento
-                      ? formatDate(professor.dataNascimento)
-                      : "—"}
-                  </p>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <CalendarDays className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Data de Nascimento
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.dataNascimento
+                        ? formatDate(professor.dataNascimento)
+                        : "—"}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Endereço */}
-                <div>
-                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
-                    Endereço
-                  </p>
-                  <p className="text-[#222222]">
-                    {professor.endereco || "—"}
-                  </p>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <MapPin className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Endereço
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.endereco || "—"}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Número de Turmas */}
-                <div>
-                  <p className="text-sm font-semibold text-[#0D4F97] mb-1">
-                    Número de Turmas
-                  </p>
-                  <p className="text-[#222222]">
-                    {professor.turmas?.length || 0}
-                  </p>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                    <Users className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Número de Turmas
+                    </p>
+                    <p className="text-[#222222]">
+                      {professor.turmas?.length || 0}
+                    </p>
+                  </div>
                 </div>
               </div>
 
               {/* Turmas que Leciona */}
-              <div className="mt-6 border-t-2 border-[#B2D7EC] pt-6">
+              <div className="mt-6 border-t-8 border-[#E2E8F0] pt-6">
                 <div className="mb-3 flex items-center gap-2">
                   <BookOpen className="h-5 w-5 text-[#0D4F97]" />
                   <h3 className="text-lg font-semibold text-[#0D4F97]">
-                    Turmas que Leciona
+                    Turmas que leciona
                   </h3>
                 </div>
                 {professor.turmas && professor.turmas.length > 0 ? (
@@ -242,11 +319,11 @@ export default function DetalhesProfessor() {
               </div>
 
               {/* Botões de Ação */}
-              <div className="mt-8 flex flex-col gap-3 border-t-2 border-[#B2D7EC] pt-6 md:flex-row">
+              <div className="mt-8 pt-6 border-t-8 border-[#E2E8F0] flex flex-col md:flex-row gap-3 w-full">
                 <Button
                   variant="primary"
                   onClick={() => setIsModalEditarOpen(true)}
-                  className="w-full flex-1"
+                  className="w-full"
                 >
                   <Edit className="mr-2 h-5 w-5" />
                   Editar Professor
@@ -255,7 +332,8 @@ export default function DetalhesProfessor() {
                 <Button
                   variant={professor.ativo ? "danger" : "primary"}
                   onClick={() => setIsAlertOpen(true)}
-                  className="w-full flex-1"
+                  className={`w-full ${!professor.ativo ? activateButtonStyles : ""}`}
+                  disabled={isSubmittingToggle}
                 >
                   <Power className="mr-2 h-5 w-5" />
                   {professor.ativo ? "Inativar Professor" : "Ativar Professor"}
@@ -279,7 +357,7 @@ export default function DetalhesProfessor() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel asChild>
-                  <Button variant="outline">
+                  <Button variant="outline" disabled={isSubmittingToggle}>
                     Cancelar
                   </Button>
                 </AlertDialogCancel>
@@ -287,9 +365,11 @@ export default function DetalhesProfessor() {
                 <AlertDialogAction asChild>
                   <Button
                     variant={professor.ativo ? "danger" : "primary"}
+                    className={!professor.ativo ? activateButtonStyles : ""}
                     onClick={handleToggleStatus}
+                    disabled={isSubmittingToggle}
                   >
-                    Confirmar
+                    {isSubmittingToggle ? "Processando..." : "Confirmar"}
                   </Button>
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -303,7 +383,6 @@ export default function DetalhesProfessor() {
             professor={professor}
             onUpdate={loadProfessor}
           />
-        </div>
       </div>
     </div>
   );

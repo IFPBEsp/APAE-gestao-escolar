@@ -224,7 +224,7 @@ public class TurmaController {
             description = "Reativa o vínculo do aluno com a turma para participação nas atividades."
     )
     public ResponseEntity<TurmaAlunoResponseDTO> ativarAlunoNaTurma(@PathVariable Long turmaId, @PathVariable Long alunoId){
-        service.ativarAluno(alunoId, turmaId);
+        service.ativarAluno(turmaId, alunoId);
         return ResponseEntity.ok().build();
     }
 
@@ -234,7 +234,7 @@ public class TurmaController {
             description = "Inativa o vínculo do aluno com a turma, mantendo o histórico preservado."
     )
     public ResponseEntity<TurmaAlunoResponseDTO> desativarAlunoNaTurma(@PathVariable Long turmaId, @PathVariable Long alunoId){
-        service.desativarAluno(alunoId, turmaId);
+        service.desativarAluno(turmaId, alunoId);
         return ResponseEntity.ok().build();
     }
 }

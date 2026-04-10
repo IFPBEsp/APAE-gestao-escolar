@@ -16,6 +16,9 @@ import {
     buscarTurmaPorId,
     desativarTurma,
     ativarTurma,
+    listarAlunos,
+    ativarAlunoDaTurma,
+    desativarAlunoDaTurma,
 } from "@/services/TurmaService";
 import { getAlunosComFrequencia } from "@/services/FrequenciaService";
 import { getEstatisticasTurma, contarAulasRealizadas, getHistoricoAluno } from "@/services/ChamadaService";
@@ -26,14 +29,16 @@ import { useRouter } from "next/navigation";
 
 interface DetalhesTurmaProps {
     turmaId: number;
+    turmaData?: any;
     onBack: () => void;
     onNavigate: (screen: string, turmaId?: number) => void;
     onEdit: () => void;
-    onInactivate?: () => void;
+    onInactivate?: (turmaAtualizada?: any) => void;
 }
 
 export function DetalhesTurma({
     turmaId,
+    turmaData,
     onBack,
     onNavigate,
     onEdit,
@@ -42,12 +47,15 @@ export function DetalhesTurma({
 
     const router = useRouter();
 
-    const [turma, setTurma] = useState<any>(null);
+    const [turma, setTurma] = useState<any>(turmaData || null);
+    const [alunosDaTurma, setAlunosDaTurma] = useState<any[]>([]);
     const [alunosFrequencia, setAlunosFrequencia] = useState<any[]>([]);
     const [estatisticas, setEstatisticas] = useState<any[]>([]);
     const [totalAulasRealizadas, setTotalAulasRealizadas] = useState(0);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!turmaData);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isSubmittingToggle, setIsSubmittingToggle] = useState(false);
+    const [isTogglingAluno, setIsTogglingAluno] = useState<number | null>(null);
     const [isHistoricoOpen, setIsHistoricoOpen] = useState(false);
     const [historicoAluno, setHistoricoAluno] = useState<any[]>([]);
     const [alunoSelecionado, setAlunoSelecionado] = useState<any | null>(null);
@@ -61,32 +69,48 @@ export function DetalhesTurma({
             try {
               setLoading(true);
 
-              const [turmaData] = await Promise.all([
-                buscarTurmaPorId(turmaId)
-              ]);
+              if (turmaData) {
+                setTurma(turmaData);
+              } else {
+                const data = await buscarTurmaPorId(turmaId);
+                setTurma(data);
+              }
 
               const [
+                alunosResponse,
                 alunosFrequenciaResult,
                 estatisticasResult,
                 totalAulasResult,
               ] = await Promise.allSettled([
+                listarAlunos(turmaId),
                 getAlunosComFrequencia(turmaId),
                 getEstatisticasTurma(turmaId),
                 contarAulasRealizadas(turmaId)
               ]);
 
-              setTurma(turmaData);
-              setAlunosFrequencia(
-                alunosFrequenciaResult.status === "fulfilled" ? alunosFrequenciaResult.value || [] : []
-              );
-              setEstatisticas(
-                estatisticasResult.status === "fulfilled" && Array.isArray(estatisticasResult.value)
-                  ? estatisticasResult.value
-                  : []
-              );
-              setTotalAulasRealizadas(
-                totalAulasResult.status === "fulfilled" ? totalAulasResult.value || 0 : 0
-              );
+              if (alunosResponse.status === "fulfilled" && Array.isArray(alunosResponse.value)) {
+                setAlunosDaTurma(alunosResponse.value);
+              } else {
+                toast.error("Não foi possível carregar os alunos da turma.");
+              }
+
+              if (alunosFrequenciaResult.status === "fulfilled") {
+                setAlunosFrequencia(alunosFrequenciaResult.value || []);
+              } else {
+                toast.error("Não foi possível carregar a frequência dos alunos.");
+              }
+
+              if (estatisticasResult.status === "fulfilled" && Array.isArray(estatisticasResult.value)) {
+                setEstatisticas(estatisticasResult.value);
+              } else {
+                toast.error("Não foi possível carregar as estatísticas da turma.");
+              }
+
+              if (totalAulasResult.status === "fulfilled") {
+                setTotalAulasRealizadas(totalAulasResult.value || 0);
+              } else {
+                toast.error("Não foi possível carregar o total de aulas realizadas.");
+              }
 
             } catch (error: any) {
               toast.error(error.message || "Erro ao carregar turma");
@@ -96,10 +120,11 @@ export function DetalhesTurma({
           }
 
         carregarTurma();
-    }, [turmaId]);
+    }, [turmaId, turmaData]);
 
     async function handleToggleTurma() {
         try {
+            setIsSubmittingToggle(true);
             if (turma.isAtiva) {
                 await desativarTurma(turmaId);
                 toast.success("Turma inativada com sucesso");
@@ -107,17 +132,26 @@ export function DetalhesTurma({
                 await ativarTurma(turmaId);
                 toast.success("Turma reativada com sucesso");
             }
-
-            setTurma((prev: any) => ({
-                ...prev,
-                isAtiva: !prev.isAtiva
-            }));
-
-            if (onInactivate) {
-                onInactivate();
-            }
         } catch (error: any) {
             toast.error(error.message || "Erro ao alterar status da turma");
+            setIsSubmittingToggle(false);
+            return;
+        }
+
+        try {
+            const turmaAtualizada = await buscarTurmaPorId(turmaId);
+            setTurma(turmaAtualizada);
+
+            if (onInactivate) {
+                onInactivate(turmaAtualizada);
+            }
+            
+            setIsDialogOpen(false);
+        } catch (error: any) {
+            console.error("Erro ao atualizar dados da turma:", error);
+            toast.error("Erro ao atualizar dados da tela. Recarregue a página.");
+        } finally {
+            setIsSubmittingToggle(false);
         }
     }
 
@@ -147,6 +181,51 @@ export function DetalhesTurma({
             if (historicoRequestIdRef.current === currentRequestId) {
                 setLoadingHistorico(false);
             }
+        }
+    }
+
+    async function handleToggleAlunoStatus(alunoId: number, isAtivo: boolean) {
+        try {
+            setIsTogglingAluno(alunoId);
+            if (isAtivo) {
+                await desativarAlunoDaTurma(turmaId, alunoId);
+                toast.success("Aluno inativado com sucesso");
+            } else {
+                await ativarAlunoDaTurma(turmaId, alunoId);
+                toast.success("Aluno ativado com sucesso");
+            }
+        } catch (error: any) {
+            toast.error(error.message || "Erro ao alterar status do aluno");
+            setIsTogglingAluno(null);
+            return;
+        }
+
+        try {
+            const turmaAtualizada = await buscarTurmaPorId(turmaId);
+            setTurma(turmaAtualizada);
+            if (onInactivate) onInactivate(turmaAtualizada);
+
+            const [alunosResponse, alunosFrequenciaResult] = await Promise.allSettled([
+                listarAlunos(turmaId),
+                getAlunosComFrequencia(turmaId)
+            ]);
+
+            if (alunosResponse.status === "fulfilled" && Array.isArray(alunosResponse.value)) {
+                setAlunosDaTurma(alunosResponse.value);
+            } else if (alunosResponse.status === "rejected") {
+                toast.error("Não foi possível recarregar a lista de alunos.");
+            }
+
+            if (alunosFrequenciaResult.status === "fulfilled") {
+                setAlunosFrequencia(alunosFrequenciaResult.value || []);
+            } else if (alunosFrequenciaResult.status === "rejected") {
+                toast.error("Não foi possível recarregar a frequência dos alunos.");
+            }
+        } catch (error: any) {
+            console.error("Erro ao atualizar dados após toggle do aluno:", error);
+            toast.error("Erro ao atualizar dados da tela. Recarregue a página.");
+        } finally {
+            setIsTogglingAluno(null);
         }
     }
 
@@ -199,361 +278,451 @@ export function DetalhesTurma({
     });
 
     return (
-        <div className="space-y-6">
-            <div>
-                <Button
-                    variant="outline"
-                    onClick={onBack}
-                    className="gap-2 mb-4"
-                >
-                    <ArrowLeft size={18} />
-                    Voltar
-                </Button>
+        <div className="w-full min-h-screen bg-[#F4F6FB]">
+            <div className="p-4 md:p-8 space-y-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
+                            Detalhes da Turma
+                        </h1>
+                        <p className="text-[#222222]">
+                            Visualize e gerencie as informações da turma
+                        </p>
+                    </div>
+                    <Button
+                        variant="outline"
+                        onClick={onBack}
+                    >
+                        <ArrowLeft className="mr-2 h-5 w-5" />
+                        Voltar
+                    </Button>
+                </div>
 
-                <h1 className="text-2xl font-bold text-[#0D4F97]">Detalhes da Turma</h1>
-                <p className="text-gray-500">Visualize e gerencie as informações da turma</p>
-            </div>
+                {/* CARD PRINCIPAL ÚNICO */}
+                <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
+                    <CardContent className="p-8">
 
-            <Card className="border border-[#E2E8F0] shadow-sm rounded-xl overflow-hidden">
-                <CardContent className="p-8 space-y-8">
-
-                    {/* Cabeçalho */}
-                    <div className="flex items-start justify-between pt-6">
-                        <div className="space-y-1">
-                            <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97]">
-                                    <Users size={20} />
+                        {/* Nome da Turma e Status */}
+                        <div className="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mt-4">
+                            <div className="flex items-center gap-3 w-full">
+                                <div className="h-10 w-10 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97] shrink-0 ">
+                                    <Users className="h-6 w-6 text-[#0D4F97]"/>
                                 </div>
-                                <h2 className="text-xl font-semibold text-[#0D4F97]">
-                                    {turma.nome || turma.name}
-                                </h2>
-                            </div>
-                            <div className="pl-[52px]">
-                                <span
-                                    className={`text-xs px-2 py-0.5 rounded-full font-medium
-                                    ${turma.isAtiva
-                                            ? "bg-green-100 text-green-700"
-                                            : "bg-gray-100 text-gray-700"
-                                        }`}
-                                >
-                                    {turma.isAtiva ? "Ativa" : "Inativa"}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
-
-                        <div className="flex items-start gap-3">
-                            <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
-                                <Briefcase size={20} />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-500 mb-1">
-                                    Professor Responsável
-                                </p>
-                                <p className="text-[#0D4F97] font-medium">
-                                    {turma.professorNome || "Não informado"}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-3">
-                            <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
-                                <Calendar size={20} />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-500 mb-1">
-                                    Ano de Criação
-                                </p>
-                                <p className="text-[#0D4F97] font-medium">
-                                    {turma.anoCriacao}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-3">
-                            <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
-                                <Clock size={20} />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-500 mb-1">
-                                    Turno
-                                </p>
-                                <p className="text-[#0D4F97] font-medium">
-                                    {turma.turno}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-3">
-                            <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
-                                <Users size={20} />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-500 mb-1">
-                                    Quantidade de Alunos
-                                </p>
-                                <p className="text-[#0D4F97] font-medium">
-                                    {turma.totalAlunosAtivos} ativos de {turma.totalAlunos}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="pt-6 border-t border-gray-100 flex gap-4">
-                        <Button
-                            onClick={onEdit}
-                            variant="primary"
-                            className="flex-1"
-                        >
-                            <Edit className="mr-2 h-5 w-5" />
-                            Editar Turma
-                        </Button>
-
-                        <Button
-                            variant={turma.isAtiva ? "danger" : "primary"}
-                            className="flex-1"
-                            onClick={() => setIsDialogOpen(true)}
-                        >
-                            <Power className="mr-2 h-5 w-5"  />
-                            {turma.isAtiva ? "Inativar Turma" : "Reativar Turma"}
-                        </Button>
-                    </div>
-
-                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                        <DialogContent className="max-w-[425px]">
-                            <DialogHeader>
-                                <DialogTitle>
-                                    {turma.isAtiva ? "Inativar Turma?" : "Reativar Turma?"}
-                                </DialogTitle>
-                                <DialogDescription>
-                                    {turma.isAtiva
-                                        ? "Ao inativar esta turma, ela não aparecerá mais nas listagens ativas."
-                                        : "Ao reativar esta turma, ela voltará a aparecer nas listagens ativas."
-                                    }
-                                </DialogDescription>
-                            </DialogHeader>
-                            <DialogFooter>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setIsDialogOpen(false)}
-                                >
-                                    Cancelar
-                                </Button>
-                                <Button
-                                    variant={turma.isAtiva ? "danger" : "primary"}
-                                    onClick={() => {
-                                        handleToggleTurma();
-                                        setIsDialogOpen(false);
-                                    }}
-                                >
-                                    Confirmar
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-
-                </CardContent>
-            </Card>
-
-            <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
-                <CardHeader className="bg-[#F8F9FA] border-b-2 border-[#B2D7EC]">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <CardTitle className="text-[#0D4F97]">Histórico de Frequência</CardTitle>
-                            <CardDescription className="text-[#222222]">
-                                Estatísticas e registros de presença da turma
-                            </CardDescription>
-                        </div>
-                    </div>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mt-6">
-                        <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
-                            <CardContent className="p-6 pt-12 text-center flex flex-col items-center justify-start h-full">
-                                <p className="text-[#0D4F97] text-2xl font-bold">{mediaFrequencia}%</p>
-                                <p className="text-[#222222] text-sm mt-1">
-                                    Frequência média anual da turma
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="rounded-xl border-2 border-orange-200 shadow-md">
-                            <CardContent className="p-6 pt-12 text-center flex flex-col items-center justify-start h-full">
-                                <p className="text-orange-600 text-2xl font-bold">
-                                    {alunosEmAlerta} Alunos
-                                </p>
-                                <p className="text-[#222222] text-sm mt-1">
-                                    Com frequência abaixo de 75%
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
-                            <CardContent className="p-6 pt-12 text-center flex flex-col items-center justify-start h-full">
-                                <p className="text-[#0D4F97] text-2xl font-bold">
-                                    {aulasRegistradas} / {totalDiasLetivos}
-                                </p>
-                                <p className="text-[#222222] text-sm mt-1">
-                                    {aulasRegistradas} chamadas de {totalDiasLetivos} dias letivos
-                                </p>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    <div className="space-y-4">
-                        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                            <div className="flex-1">
-                                <Input
-                                    placeholder="Buscar por nome do aluno..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="border-2 border-[#B2D7EC]"
-                                />
-                            </div>
-                            <button
-                                onClick={() => setShowAlertsOnly(!showAlertsOnly)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all duration-200 shadow-sm hover:shadow ${showAlertsOnly
-                                    ? "bg-orange-50 border-orange-200 text-orange-700 shadow-orange-200/50"
-                                    : "bg-gray-100 border-gray-300 text-gray-800 hover:bg-gray-200 shadow-gray-300/50"
-                                    }`}
-                            >
-                                <span className="text-sm font-medium">Apenas Alertas</span>
-                                <div className="relative inline-flex items-center h-5 rounded-full w-10 bg-gray-200">
+                                <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3 flex-1 min-w-0">
+                                    <h2 className="text-2xl font-bold text-[#0D4F97] truncate">
+                                        {turma.nome || turma.name}
+                                    </h2>
                                     <span
-                                        className={`absolute flex items-center justify-center w-5 h-5 rounded-full transition-all duration-200 ${showAlertsOnly ? "left-5 bg-orange-500" : "left-0 bg-white"
+                                        className={`inline-block rounded-full px-3 py-1 font-medium text-xs lg:text-sm w-fit
+                                        ${turma.isAtiva
+                                                ? "bg-green-100 text-green-700"
+                                                : "bg-red-100 text-red-700"
                                             }`}
                                     >
-                                        <AlertTriangle
-                                            className={`h-3 w-3 ${showAlertsOnly ? "text-white" : "text-gray-400"
-                                                }`}
-                                        />
+                                        {turma.isAtiva ? "Ativa" : "Inativa"}
                                     </span>
                                 </div>
-                            </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="overflow-x-auto rounded-lg border-2 border-[#B2D7EC]">
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="bg-[#B2D7EC]/20 hover:bg-[#B2D7EC]/20">
-                                    <TableHead className="text-[#0D4F97] font-semibold pl-6">
-                                        Nome do Aluno
-                                    </TableHead>
-                                    <TableHead className="text-[#0D4F97] font-semibold pl-4">
-                                        Status
-                                    </TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredAlunos.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell
-                                            colSpan={2}
-                                            className="text-center text-[#222222] py-8"
-                                        >
-                                            Nenhum aluno encontrado
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    filteredAlunos.map((aluno) => {
-                                        const frequencia = aluno.frequencia || 0;
-                                        const isAlert = frequencia < 75;
+                        {/* Grid de Informações */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-6 gap-x-8 mt-6 md:mt-10">
+                            {/* Professor Responsável */}
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                                    <Briefcase className="h-5 w-5" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium text-gray-500 mb-1 truncate">
+                                        Professor Responsável
+                                    </p>
+                                    <p className="text-[#0D4F97] font-medium break-words">
+                                        {turma.professorNome || "—"}
+                                    </p>
+                                </div>
+                            </div>
 
-                                        return (
-                                            <TableRow
-                                                key={aluno.id}
-                                                className={`transition-all hover:bg-[#B2D7EC]/10 cursor-pointer ${isAlert ? "bg-orange-50/30" : ""
-                                                    }`}
-                                                onClick={() => handleAbrirHistoricoAluno(aluno)}
-                                            >
-                                                <TableCell className="font-medium text-[#222222] pl-6">
-                                                    <div className="flex items-center gap-2">
-                                                        {isAlert && (
-                                                            <AlertTriangle className="h-4 w-4 text-orange-600 flex-shrink-0" />
-                                                        )}
-                                                        <span className="whitespace-nowrap overflow-hidden text-ellipsis underline text-[#0D4F97]">
-                                                            {aluno.nome}
-                                                        </span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    <div
-                                                        className={`font-semibold ${isAlert ? "text-orange-600" : "text-[#0D4F97]"
-                                                            }`}
-                                                    >
-                                                        {frequencia}%
-                                                    </div>
-                                                    <div className="text-xs text-gray-500 mt-1">
-                                                        {frequencia >= 75 ? "Presente" : "Ausente"}
-                                                    </div>
+                            {/* Ano de Criação */}
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                                    <Calendar className="h-5 w-5" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium text-gray-500 mb-1 truncate">
+                                        Ano de Criação
+                                    </p>
+                                    <p className="text-[#0D4F97] font-medium break-words">
+                                        {turma.anoCriacao || "—"}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Turno */}
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                                    <Clock className="h-5 w-5" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium text-gray-500 mb-1 truncate">
+                                        Turno
+                                    </p>
+                                    <p className="text-[#0D4F97] font-medium break-words">
+                                        {turma.turno || "—"}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Quantidade de Alunos */}
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                                    <Users className="h-5 w-5" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium text-gray-500 mb-1 truncate">
+                                        Quantidade de Alunos
+                                    </p>
+                                    <p className="text-[#0D4F97] font-medium break-words">
+                                        {turma.totalAlunosAtivos || 0} ativos de {turma.totalAlunos || 0}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* GERENCIAMENTO DE ALUNOS */}
+                        <div className="mt-10 border-t-8 border-[#E2E8F0] pt-8">
+                            <h2 className="text-xl font-bold text-[#0D4F97] mb-2">
+                                Gerenciamento de Alunos
+                            </h2>
+                            <p className="text-gray-500 mb-6">
+                                Ative ou inative alunos da turma
+                            </p>
+
+                            <div className="overflow-x-auto w-full rounded-lg border-2 border-[#B2D7EC]">
+                                <Table className="min-w-[500px]">
+                                    <TableHeader>
+                                        <TableRow className="bg-[#B2D7EC]/20 hover:bg-[#B2D7EC]/20">
+                                            <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6">
+                                                Nome do Aluno
+                                            </TableHead>
+                                            <TableHead className="text-[#0D4F97] font-semibold text-center">
+                                                Status
+                                            </TableHead>
+                                            <TableHead className="text-[#0D4F97] font-semibold text-center">
+                                                Ações
+                                            </TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+
+                                    <TableBody>
+                                        {alunosDaTurma.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={3} className="text-center text-[#222222] py-8">
+                                                    Nenhum aluno vinculado a esta turma.
                                                 </TableCell>
                                             </TableRow>
-                                        );
-                                    })
-                                )}
-                            </TableBody>
-                        </Table>
-                    </div>
+                                        ) : (
+                                            alunosDaTurma.map((aluno) => (
+                                                <TableRow key={aluno.alunoId} className="transition-all hover:bg-[#B2D7EC]/10">
+                                                    <TableCell className="font-medium text-[#222222] pl-4 sm:pl-6">
+                                                        <span className="text-[#0D4F97]">
+                                                            {aluno.nome}
+                                                        </span>
+                                                    </TableCell>
 
-                    <Dialog open={isHistoricoOpen} onOpenChange={setIsHistoricoOpen}>
-                        <DialogContent className="max-w-xl">
-                            <DialogHeader>
-                                <DialogTitle>
-                                    Histórico de Frequência - {alunoSelecionado?.nome || ""}
-                                </DialogTitle>
-                                <DialogDescription>
-                                    Registros individuais de presença do aluno na turma.
-                                </DialogDescription>
-                            </DialogHeader>
+                                                    <TableCell className="text-center">
+                                                        <span
+                                                            className={`inline-flex rounded-full px-3 py-1 font-medium text-xs ${
+                                                                aluno.isAtivo
+                                                                    ? "bg-green-100 text-green-700"
+                                                                    : "bg-red-100 text-red-700"
+                                                            }`}
+                                                        >
+                                                            {aluno.isAtivo ? "Ativo" : "Inativo"}
+                                                        </span>
+                                                    </TableCell>
 
-                            {loadingHistorico ? (
-                                <div className="py-6 text-center text-[#0D4F97]">
-                                    Carregando histórico...
-                                </div>
-                            ) : historicoAluno.length === 0 ? (
-                                <div className="py-6 text-center text-[#222222]">
-                                    Nenhum registro de frequência encontrado para este aluno.
-                                </div>
-                            ) : (
-                                <div className="max-h-80 overflow-y-auto mt-4 space-y-2">
-                                    {historicoAluno.map((item, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex items-center justify-between border-b border-[#E2E8F0] py-2"
-                                        >
-                                            <div>
-                                                <p className="font-medium text-[#0D4F97]">{item.data}</p>
-                                                <p className="text-sm text-[#222222]">
-                                                    {item.descricao || "Sem descrição"}
-                                                </p>
-                                            </div>
-                                            <div className="text-right">
-                                                <span
-                                                    className={`px-3 py-1 rounded-full text-xs font-semibold ${item.status === "Presente"
-                                                            ? "bg-green-100 text-green-700"
-                                                            : "bg-red-100 text-red-700"
-                                                        }`}
-                                                >
-                                                    {item.status}
-                                                </span>
-                                            </div>
+                                                    <TableCell className="text-center">
+                                                        <Button
+                                                            variant={aluno.isAtivo ? "danger" : "primary"}
+                                                            size="sm"
+                                                            className={`w-[120px] ${
+                                                                !aluno.isAtivo
+                                                                    ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700"
+                                                                    : ""
+                                                            }`}
+                                                            disabled={isTogglingAluno !== null}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleToggleAlunoStatus(aluno.alunoId, aluno.isAtivo);
+                                                            }}
+                                                        >
+                                                            <Power className="mr-2 h-4 w-4" />
+                                                            {isTogglingAluno === aluno.alunoId
+                                                                ? "Processando..."
+                                                                : aluno.isAtivo
+                                                                ? "Inativar"
+                                                                : "Ativar"}
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </div>
+
+                        {/* HISTÓRICO DE FREQUÊNCIA */}
+                        <div className="mt-10 border-t-8 border-[#E2E8F0] pt-8">
+                            <h2 className="text-xl font-bold text-[#0D4F97] mb-2">Histórico de Frequência</h2>
+                            <p className="text-gray-500 mb-6">Estatísticas e registros de presença da turma</p>
+
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mt-4 sm:mt-6">
+                                <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
+                                    <CardContent className="p-4 sm:p-6 pt-8 sm:pt-12 text-center flex flex-col items-center justify-start h-full">
+                                        <p className="text-[#0D4F97] text-2xl font-bold">{mediaFrequencia}%</p>
+                                        <p className="text-[#222222] text-sm mt-1">
+                                            Frequência média anual da turma
+                                        </p>
+                                    </CardContent>
+                                </Card>
+
+                                <Card className="rounded-xl border-2 border-orange-200 shadow-md">
+                                    <CardContent className="p-4 sm:p-6 pt-8 sm:pt-12 text-center flex flex-col items-center justify-start h-full">
+                                        <p className="text-orange-600 text-2xl font-bold">
+                                            {alunosEmAlerta} Alunos
+                                        </p>
+                                        <p className="text-[#222222] text-sm mt-1">
+                                            Com frequência abaixo de 75%
+                                        </p>
+                                    </CardContent>
+                                </Card>
+
+                                <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
+                                    <CardContent className="p-4 sm:p-6 pt-8 sm:pt-12 text-center flex flex-col items-center justify-start h-full">
+                                        <p className="text-[#0D4F97] text-2xl font-bold">
+                                            {aulasRegistradas} / {totalDiasLetivos}
+                                        </p>
+                                        <p className="text-[#222222] text-sm mt-1">
+                                            {aulasRegistradas} chamadas de {totalDiasLetivos} dias letivos
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            <div className="space-y-4 mt-8">
+                                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                                    <div className="flex-1">
+                                        <Input
+                                            placeholder="Buscar por nome do aluno..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="border-2 border-[#B2D7EC]"
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={() => setShowAlertsOnly(!showAlertsOnly)}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all duration-200 shadow-sm hover:shadow ${showAlertsOnly
+                                            ? "bg-orange-50 border-orange-200 text-orange-700 shadow-orange-200/50"
+                                            : "bg-gray-100 border-gray-300 text-gray-800 hover:bg-gray-200 shadow-gray-300/50"
+                                            }`}
+                                    >
+                                        <span className="text-sm font-medium">Apenas Alertas</span>
+                                        <div className="relative inline-flex items-center h-5 rounded-full w-10 bg-gray-200">
+                                            <span
+                                                className={`absolute flex items-center justify-center w-5 h-5 rounded-full transition-all duration-200 ${showAlertsOnly ? "left-5 bg-orange-500" : "left-0 bg-white"
+                                                }`}
+                                            >
+                                                <AlertTriangle
+                                                    className={`h-3 w-3 ${showAlertsOnly ? "text-white" : "text-gray-400"
+                                                    }`}
+                                                />
+                                            </span>
                                         </div>
-                                    ))}
+                                    </button>
                                 </div>
-                            )}
+                            </div>
 
-                            <DialogFooter className="mt-4">
-                                <Button variant="outline" onClick={() => setIsHistoricoOpen(false)}>
-                                    Fechar
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-                </CardContent>
-            </Card>
+                            <div className="overflow-x-auto w-full rounded-lg border-2 border-[#B2D7EC] mt-8">
+                                <Table className="min-w-[400px]">
+                                    <TableHeader>
+                                        <TableRow className="bg-[#B2D7EC]/20 hover:bg-[#B2D7EC]/20">
+                                            <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6">
+                                                Nome do Aluno
+                                            </TableHead>
+                                            <TableHead className="text-[#0D4F97] font-semibold pl-4 sm:pl-6 text-center">
+                                                Status
+                                            </TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredAlunos.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell
+                                                    colSpan={2}
+                                                    className="text-center text-[#222222] py-8"
+                                                >
+                                                    Nenhum aluno encontrado
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            filteredAlunos.map((aluno) => {
+                                                const frequencia = aluno.frequencia || 0;
+                                                const isAlert = frequencia < 75;
+
+                                                return (
+                                                    <TableRow
+                                                        key={aluno.id}
+                                                        className={`transition-all hover:bg-[#B2D7EC]/10 cursor-pointer ${isAlert ? "bg-orange-50/30" : ""
+                                                            }`}
+                                                        onClick={() => handleAbrirHistoricoAluno(aluno)}
+                                                    >
+                                                        <TableCell className="font-medium text-[#222222] pl-4 sm:pl-6">
+                                                            <div className="flex items-center gap-2">
+                                                                {isAlert && (
+                                                                    <AlertTriangle className="h-4 w-4 text-orange-600 flex-shrink-0" />
+                                                                )}
+                                                                <span className="truncate max-w-[120px] sm:max-w-[200px] md:max-w-none text-[#0D4F97]">
+                                                                    {aluno.nome}
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-center">
+                                                            <div
+                                                                className={`font-semibold ${isAlert ? "text-orange-600" : "text-[#0D4F97]"
+                                                                    }`}
+                                                            >
+                                                                {frequencia}%
+                                                            </div>
+                                                            <div className="text-xs text-gray-500 mt-1">
+                                                                {frequencia >= 75 ? "Frequência adequada" : "Baixa frequência"}
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                );
+                                            })
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </div>
+
+                        {/* Botões de Ação */}
+                        <div className="mt-8 flex flex-col gap-3 border-t-8 border-[#E2E8F0] pt-6 md:flex-row">
+                            <Button
+                                variant="primary"
+                                onClick={onEdit}
+                                className="w-full"
+                            >
+                                <Edit className="mr-2 h-5 w-5" />
+                                Editar Turma
+                            </Button>
+
+                            <Button
+                                variant={turma.isAtiva ? "danger" : "primary"}
+                                className={`w-full ${!turma.isAtiva ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700" : ""}`}
+                                onClick={() => setIsDialogOpen(true)}
+                            >
+                                <Power className="mr-2 h-5 w-5" />
+                                {turma.isAtiva ? "Inativar Turma" : "Reativar Turma"}
+                            </Button>
+                        </div>
+
+                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                            <DialogContent className="max-w-[95vw] sm:max-w-[425px] w-full">
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        {turma.isAtiva ? "Inativar Turma?" : "Reativar Turma?"}
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        {turma.isAtiva
+                                            ? "Ao inativar esta turma, ela não aparecerá mais nas listagens ativas."
+                                            : "Ao reativar esta turma, ela voltará a aparecer nas listagens ativas."
+                                        }
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                    <Button
+                                        variant="outline"
+                                        disabled={isSubmittingToggle}
+                                        onClick={() => setIsDialogOpen(false)}
+                                    >
+                                        Cancelar
+                                    </Button>
+                                    <Button
+                                        variant={turma.isAtiva ? "danger" : "primary"}
+                                        className={!turma.isAtiva ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700" : ""}
+                                        disabled={isSubmittingToggle}
+                                        onClick={handleToggleTurma}
+                                    >
+                                        {isSubmittingToggle ? "Processando..." : "Confirmar"}
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+
+                        <Dialog open={isHistoricoOpen} onOpenChange={setIsHistoricoOpen}>
+                            <DialogContent className="max-w-[95vw] sm:max-w-xl w-full">
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        Histórico de Frequência - {alunoSelecionado?.nome || ""}
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        Registros individuais de presença do aluno na turma.
+                                    </DialogDescription>
+                                </DialogHeader>
+
+                                {loadingHistorico ? (
+                                    <div className="py-6 text-center text-[#0D4F97]">
+                                        Carregando histórico...
+                                    </div>
+                                ) : historicoAluno.length === 0 ? (
+                                    <div className="py-6 text-center text-[#222222]">
+                                        Nenhum registro de frequência encontrado para este aluno.
+                                    </div>
+                                ) : (
+                                    <div className="max-h-80 overflow-y-auto mt-4 space-y-2">
+                                        {historicoAluno.map((item, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center justify-between border-b border-[#E2E8F0] py-2"
+                                            >
+                                                <div>
+                                                    <p className="font-medium text-[#0D4F97]">{item.data}</p>
+                                                    <p className="text-sm text-[#222222]">
+                                                        {item.descricao || "Sem descrição"}
+                                                    </p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span
+                                                        className={`px-3 py-1 rounded-full text-xs font-semibold ${item.status === "Presente"
+                                                                ? "bg-green-100 text-green-700"
+                                                                : "bg-red-100 text-red-700"
+                                                            }`}
+                                                    >
+                                                        {item.status}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <DialogFooter className="mt-4">
+                                    <Button variant="outline" 
+                                    onClick={() => setIsHistoricoOpen(false)}
+                                    >
+                                        Fechar
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 }
+
+export default DetalhesTurma;
