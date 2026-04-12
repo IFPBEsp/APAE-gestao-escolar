@@ -183,7 +183,7 @@ public class TurmaController {
             summary = "Adicionar alunos à turma",
             description = "Adiciona uma lista de alunos já cadastrados a uma turma existente."
     )
-    @Doc404NotFound
+    @DocStandardErrors
     public ResponseEntity<TurmaResponseDTO> adicionarAlunos(@RequestBody List<Long> alunosId, @PathVariable Long turmaId){
         TurmaResponseDTO response = service.adicionarAlunos(turmaId, alunosId);
         return ResponseEntity.ok(response);

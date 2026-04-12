@@ -7,6 +7,7 @@ import com.apae.gestao.dto.RelatorioResponseDTO;
 import com.apae.gestao.service.RelatorioService;
 import com.apae.gestao.openapi.Doc400ValidationError;
 import com.apae.gestao.openapi.Doc404NotFound;
+import com.apae.gestao.openapi.DocStandardErrors;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,7 +37,7 @@ public class RelatorioController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Relatório criado", content = @Content(schema = @Schema(implementation = RelatorioResponseDTO.class)))
     })
-    @Doc400ValidationError
+    @DocStandardErrors
     public ResponseEntity<RelatorioResponseDTO> criar(@RequestBody RelatorioRequestDTO request) {
         RelatorioResponseDTO relatorio = relatorioService.criar(request);
         return ResponseEntity.ok(relatorio);
@@ -74,7 +75,7 @@ public class RelatorioController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Relatório atualizado", content = @Content(schema = @Schema(implementation = RelatorioResponseDTO.class)))
     })
-    @Doc404NotFound
+    @DocStandardErrors
     public ResponseEntity<RelatorioResponseDTO> atualizar(
             @Parameter(description = "Identificador do relatório", example = "1", in = ParameterIn.PATH) @PathVariable Long id,
             @RequestBody RelatorioRequestDTO request) {
