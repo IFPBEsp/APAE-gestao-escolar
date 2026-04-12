@@ -25,6 +25,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Search, UserRound, X } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 
@@ -75,6 +85,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     const [buscaAluno, setBuscaAluno] = useState("");
     const [alunosEncontrados, setAlunosEncontrados] = useState<AlunoAPI[]>([]); 
     const [alunosNaTurma, setAlunosNaTurma] = useState<AlunoNaTurma[]>([]); 
+    const [alunoParaRemover, setAlunoParaRemover] = useState<AlunoNaTurma | null>(null);
 
     const nomeTurma = useMemo(
         () => `${tipo ? formatTipo(tipo) : ""} ${anoCriacao || ""} - ${turno ? formatTurno(turno) : ""}`,
@@ -261,10 +272,16 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
         }
     }
 
+    function handleCloseModal() {
+        setAlunoParaRemover(null);
+        onClose();
+    }
+
     if (!turmaData) return null;
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <>
+        <Dialog open={isOpen} onOpenChange={handleCloseModal}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-[#0D4F97] text-xl">Editar Informações da Turma</DialogTitle>
@@ -423,7 +440,9 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                                             variant="ghost"
                                             size="icon"
                                             className="hover:text-red-600 hover:bg-red-50"
-                                            onClick={() => removerAluno(aluno.alunoId)}
+                                            onClick={() => setAlunoParaRemover(aluno)}
+                                            title="Remover Aluno"
+                                            aria-label={`Remover aluno ${aluno.nome}`}
                                         >
                                             <X size={16} />
                                         </Button>
@@ -437,7 +456,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                 <div className="flex justify-end gap-3 pt-4 border-t border-[#E5E5E5]">
                     <Button 
                         variant="outline" 
-                        onClick={onClose}
+                        onClick={handleCloseModal}
                     >
                         Cancelar
                     </Button>
@@ -451,5 +470,34 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                 </div>
             </DialogContent>
         </Dialog>
+
+        <AlertDialog open={!!alunoParaRemover} onOpenChange={(open) => !open && setAlunoParaRemover(null)}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle className="text-[#0D4F97]">Atenção!</AlertDialogTitle>
+                    <AlertDialogDescription className="text-gray-600">
+                        Tem certeza de que deseja remover o aluno <strong className="text-gray-900">{alunoParaRemover?.nome}</strong> desta turma?
+                        Esta ação removerá o vínculo do aluno com a turma selecionada.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => setAlunoParaRemover(null)}>
+                        Cancelar
+                    </AlertDialogCancel>
+                    <AlertDialogAction 
+                        onClick={() => {
+                            if (alunoParaRemover) {
+                                removerAluno(alunoParaRemover.alunoId);
+                                setAlunoParaRemover(null);
+                            }
+                        }}
+                        className="bg-red-600 text-white hover:bg-red-700 hover:text-white border-0"
+                    >
+                        Remover Aluno
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+        </>
     );
 }

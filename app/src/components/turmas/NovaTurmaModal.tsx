@@ -23,6 +23,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Search, X } from "lucide-react";
 import { listarProfessores } from "@/services/ProfessorService";
 
@@ -57,6 +67,7 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
     const [buscaAluno, setBuscaAluno] = useState("");
     const [alunosEncontrados, setAlunosEncontrados] = useState<Aluno[]>([]);
     const [alunosSelecionados, setAlunosSelecionados] = useState<Aluno[]>([]);
+    const [alunoParaRemover, setAlunoParaRemover] = useState<Aluno | null>(null);
 
     // Gerar nome automaticamente
     const nomeTurma = `${tipo ? formatTipo(tipo) : ""} ${ano} - ${turno ? formatTurno(turno) : ""}`;
@@ -188,10 +199,18 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
         setBuscaAluno("");
         setAlunosEncontrados([]);
         setAlunosSelecionados([]);
+        setAlunoParaRemover(null);
+    }
+
+    function handleCloseModal() {
+        setAlunoParaRemover(null);
+        onClose();
+        resetForm();
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <>
+        <Dialog open={isOpen} onOpenChange={handleCloseModal}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-[#0D4F97] text-xl">Nova Turma</DialogTitle>
@@ -346,7 +365,7 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            onClick={() => removerAluno(aluno.id)}
+                                            onClick={() => setAlunoParaRemover(aluno)}
                                             aria-label={`Remover aluno ${aluno.nome}`}
                                         >
                                             <X size={16} />
@@ -361,7 +380,7 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                 <div className="flex justify-end gap-3 pt-4 border-t">
                     <Button 
                         variant="outline"   
-                        onClick={onClose}
+                        onClick={handleCloseModal}
                     >
                         Cancelar
                     </Button>
@@ -375,5 +394,33 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                 </div>
             </DialogContent>
         </Dialog>
+
+        <AlertDialog open={!!alunoParaRemover} onOpenChange={(open) => !open && setAlunoParaRemover(null)}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle className="text-[#0D4F97]">Atenção!</AlertDialogTitle>
+                    <AlertDialogDescription className="text-gray-600">
+                        Tem certeza de que deseja remover o aluno <strong className="text-gray-900">{alunoParaRemover?.nome}</strong> desta turma?
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => setAlunoParaRemover(null)}>
+                        Cancelar
+                    </AlertDialogCancel>
+                    <AlertDialogAction 
+                        onClick={() => {
+                            if (alunoParaRemover) {
+                                removerAluno(alunoParaRemover.id);
+                                setAlunoParaRemover(null);
+                            }
+                        }}
+                        className="bg-red-600 text-white hover:bg-red-700 hover:text-white border-0"
+                    >
+                        Remover Aluno
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+        </>
     );
 }
