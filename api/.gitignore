@@ -50,4 +50,4 @@ docker-compose.override.yml
 out/
 *.class
 
-../.env
+.env
