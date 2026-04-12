@@ -4,6 +4,7 @@ import com.apae.gestao.dto.AlunoTurmaRequestDTO;
 import com.apae.gestao.dto.AvaliacaoHistoricoResponseDTO;
 import com.apae.gestao.dto.aluno.AlunoDetalhesDTO;
 import com.apae.gestao.dto.aluno.AlunoResumoDTO;
+import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoResponseDTO;
 import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoItemDTO;
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Turma;
@@ -106,6 +107,16 @@ public class AlunoService {
 
         turmaAlunoRepository.save(vinculo);
         return new AlunoDetalhesDTO(aluno);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AlunoTurmaHistoricoResponseDTO> buscarHistoricoTurmasPorAlunoId(Long id) {
+        Aluno aluno = alunoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
+
+        return turmaAlunoRepository.findHistoricoCompletoPorAluno(aluno).stream()
+                .map(AlunoTurmaHistoricoResponseDTO::from)
+                .toList();
     }
 
     @Transactional(readOnly = true)

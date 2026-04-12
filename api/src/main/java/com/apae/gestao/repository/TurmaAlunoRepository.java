@@ -35,4 +35,12 @@ public interface TurmaAlunoRepository extends JpaRepository<TurmaAluno, Long>{
     List<TurmaAluno> findByTurmaId(Long turmaId);
 
     List<TurmaAluno> findByTurmaIdOrderByAlunoNomeAsc(Long turmaId);
+
+    @Query("""
+            SELECT ta FROM TurmaAluno ta
+            JOIN FETCH ta.turma t
+            WHERE ta.aluno = :aluno
+            ORDER BY ta.isAlunoAtivo DESC, t.anoCriacao DESC, t.nome ASC
+            """)
+    List<TurmaAluno> findHistoricoCompletoPorAluno(@Param("aluno") Aluno aluno);
 }

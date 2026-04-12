@@ -5,6 +5,7 @@ import com.apae.gestao.dto.AvaliacaoHistoricoResponseDTO;
 import com.apae.gestao.dto.aluno.AlunoDetalhesDTO;
 import com.apae.gestao.dto.aluno.AlunoResumoDTO;
 import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoItemDTO;
+import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoResponseDTO;
 import com.apae.gestao.service.AlunoService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -109,5 +110,16 @@ public class AlunoController {
             @PathVariable Long id
     ) {
         return ResponseEntity.ok(alunoService.listarHistoricoTurmasPorAlunoId(id));
+    }
+
+    @GetMapping("/{id}/turmas/historico")
+    @Operation(summary = "Buscar histórico de turmas do aluno (vínculos ativos e anteriores)")
+    public ResponseEntity<List<AlunoTurmaHistoricoResponseDTO>> buscarHistoricoTurmasPorAlunoId(
+            @PathVariable Long id
+    ) {
+        List<AlunoTurmaHistoricoResponseDTO> historico =
+                alunoService.buscarHistoricoTurmasPorAlunoId(id);
+
+        return ResponseEntity.ok(historico);
     }
 }

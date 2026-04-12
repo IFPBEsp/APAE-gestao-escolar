@@ -42,3 +42,13 @@ export const buscarAvaliacoesPorAlunoId = async (id) => {
         throw error;
     }
 };
+
+export const buscarHistoricoTurmasPorAlunoId = async (id) => {
+    try {
+        const response = await api.get(`/alunos/${id}/turmas/historico`);
+        return response.data;
+    } catch (error) {
+        console.error(`Erro ao buscar histórico de turmas do aluno ${id}:`, error);
+        throw error;
+    }
+};
