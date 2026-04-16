@@ -37,7 +37,7 @@ public class RelatorioController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Relatório criado", content = @Content(schema = @Schema(implementation = RelatorioResponseDTO.class)))
     })
-    @DocStandardErrors
+    @Doc400ValidationError
     public ResponseEntity<RelatorioResponseDTO> criar(@RequestBody RelatorioRequestDTO request) {
         RelatorioResponseDTO relatorio = relatorioService.criar(request);
         return ResponseEntity.ok(relatorio);

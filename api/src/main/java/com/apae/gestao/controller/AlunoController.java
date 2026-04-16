@@ -105,9 +105,9 @@ public class AlunoController {
         description = "Retorna todas as turmas em que o aluno possui ou possuiu vínculo (ativas ou inativas, vínculo atual ou antigo)."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Aluno não encontrado")
+            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     })
+    @Doc404NotFound
     public ResponseEntity<List<AlunoTurmaHistoricoItemDTO>> listarHistoricoTurmasPorAlunoId(
             @PathVariable Long id
     ) {
