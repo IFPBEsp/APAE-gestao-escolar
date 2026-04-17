@@ -243,7 +243,7 @@ export default function TurmaDetalhesPage() {
           </Card>
 
           {viewMode === "grid" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
               {filteredAlunos.map((aluno: any) => (
                 <Card
                   key={aluno.id}
@@ -261,13 +261,15 @@ export default function TurmaDetalhesPage() {
                     </div>
 
                     <div className="space-y-3 mb-4">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap items-center justify-between gap-2 bg-green-50/50 p-2 rounded border border-green-100">
                         <div className="flex items-center gap-2">
-                          <BarChart3 className="h-4 w-4 text-green-600" />
-                          <span className="text-gray-700">Última Avaliação:</span>
+                          <BarChart3 className="h-4 w-4 text-green-600 shrink-0" />
+                          <span className="text-gray-700 text-sm font-medium">Última Avaliação:</span>
                         </div>
-                        <div className="text-right">
-                          <div className="font-bold text-green-600">{aluno.ultimaAvaliacao}</div>
+                        <div className="text-right flex-1 min-w-0">
+                          <div className="font-bold text-green-600 truncate" title={aluno.ultimaAvaliacao}>
+                            {aluno.ultimaAvaliacao}
+                          </div>
                         </div>
                       </div>
                     </div>
