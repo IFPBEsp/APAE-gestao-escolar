@@ -121,7 +121,7 @@ export default function TurmasPage() {
 
                   <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
 
-                    <h3 className="text-[#0D4F97] font-bold text-lg md:text-xl pr-2 flex-1 min-w-0 break-words">
+                    <h3 className="text-[#0D4F97] font-bold text-lg md:text-xl pr-2 flex-1 min-w-0 break-normal">
                       {turma.nome}
                     </h3>
 
@@ -150,7 +150,7 @@ export default function TurmasPage() {
 
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex flex-wrap gap-3">
 
                     <Button
                       onClick={(e) =>
@@ -160,10 +160,10 @@ export default function TurmasPage() {
                         )
                       }
                       variant="outline"
-                      className="h-10 flex-1 border-2 border-[#0D4F97] text-[#0D4F97] font-bold hover:bg-[#0D4F97] hover:text-white"
+                      className="h-10 flex-1 min-w-[130px] border-2 border-[#0D4F97] text-[#0D4F97] font-bold hover:bg-[#0D4F97] hover:text-white"
                     >
-                      <Users className="mr-2 h-4 w-4" />
-                      Ver Alunos
+                      <Users className="mr-2 h-4 w-4 flex-shrink-0" />
+                      <span>Ver Alunos</span>
                     </Button>
 
                     <Button
@@ -173,10 +173,10 @@ export default function TurmasPage() {
                           e
                         )
                       }
-                      className="h-10 flex-1 bg-[#0D4F97] text-white font-bold hover:bg-[#FFD000] hover:text-[#0D4F97]"
+                      className="h-10 flex-1 min-w-[130px] bg-[#0D4F97] text-white font-bold hover:bg-[#FFD000] hover:text-[#0D4F97]"
                     >
-                      <ClipboardCheck className="mr-2 h-4 w-4" />
-                      Frequência
+                      <ClipboardCheck className="mr-2 h-4 w-4 flex-shrink-0" />
+                      <span>Frequência</span>
                     </Button>
 
                   </div>
