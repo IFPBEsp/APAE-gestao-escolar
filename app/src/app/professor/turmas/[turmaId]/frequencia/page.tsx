@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { format, startOfDay } from "date-fns";
+import { format, startOfDay, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { buscarTurmaPorId } from "@/services/TurmaService";
 import { 
@@ -20,7 +20,8 @@ import {
     getEstatisticasTurma, 
     contarAulasRealizadas, 
     getAlunosDaTurma, 
-    getChamadaPorTurmaEData 
+    getChamadaPorTurmaEData,
+    getDatasComChamada
 } from "@/services/ChamadaService";
 import { getAlunosComFrequencia } from "@/services/FrequenciaService";
 import ChamadaCalendar from "@/components/ChamadaCalendar";
@@ -192,6 +193,7 @@ function ChamadaContent({
     const [isSaving, setIsSaving] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [loadingChamada, setLoadingChamada] = useState(false);
+    const [savedDates, setSavedDates] = useState<Date[]>([]);
 
     const todayStart = startOfDay(new Date());
     const selectedDateStart = startOfDay(selectedDate);
@@ -204,6 +206,11 @@ function ChamadaContent({
             
             try {
                 setLoadingChamada(true);
+
+                const datasStr = await getDatasComChamada(turmaId);
+                const datesParsed = datasStr.map((d: string) => parse(d, "yyyy-MM-dd", new Date()));
+                setSavedDates(datesParsed);
+
                 const dataFormatada = format(selectedDate, "yyyy-MM-dd");
                 const chamadaExistente = await getChamadaPorTurmaEData(turmaId, dataFormatada);
                 
@@ -314,8 +321,6 @@ function ChamadaContent({
         const studentId = Number(aluno.id);
         return acc + ((attendance[studentId] ?? true) ? 1 : 0);
     }, 0);
-
-    const savedDates = [];
 
     return (
         <div className="space-y-6">
