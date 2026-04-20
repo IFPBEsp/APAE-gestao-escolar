@@ -248,22 +248,14 @@ export default function ModalEditarProfessor({
       
       // 6. Adicionar novas turmas
       for (const turma of turmasParaAdicionar) {
-        try {
-          await vincularProfessorATurma(turma.id, professor.id);
-        } catch (turmaError) {
-          console.error(`Erro ao vincular turma ${turma.id}:`, turmaError);
-        }
+        await vincularProfessorATurma(turma.id, professor.id);
       }
-      
+
       // 7. Remover turmas desvinculadas
       for (const turma of turmasParaRemover) {
-        try {
-          await desvincularProfessorDaTurma(turma.id, professor.id);
-        } catch (turmaError) {
-          console.error(`Erro ao desvincular turma ${turma.id}:`, turmaError);
-        }
+        await desvincularProfessorDaTurma(turma.id, professor.id);
       }
-      
+
       toast.success("Professor atualizado com sucesso!");
       onUpdate?.();
       onClose();
