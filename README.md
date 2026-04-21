@@ -165,12 +165,23 @@ Navegue até a pasta da API:
 cd api
 ```
 
-#### 2.1 Suba o banco de dados com Docker
+#### 2.1 Suba o banco de dados e o MinIO com Docker
 
 ```bash
 docker compose up -d
 ```
 **O banco de dados estará disponível em `localhost:5432`**
+
+O `docker compose` também sobe o serviço **MinIO** (armazenamento de arquivos S3-compatível):
+
+| Recurso | URL / Valor |
+|---------|-------------|
+| **API S3** | `http://localhost:9000` |
+| **Console Web** | `http://localhost:9001` |
+| **Usuário padrão** | `apae_admin` |
+| **Senha padrão** | `apae_secret123` |
+
+> Ao iniciar o backend, o bucket `professores` é criado automaticamente caso ainda não exista. As credenciais e a URL do MinIO são lidas do arquivo `.env` (veja `.env.example`).
 
 #### 2.2 Compile o código (opcional)
 
