@@ -35,6 +35,7 @@ import ModalEditarProfessor from "@/components/ModalEditarProfessor";
 import { format, isValid, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Professor } from "@/types/professor";
+import { ativarProfessorporId, inativarProfessorporId } from "@/services/ProfessorService";
 
 export default function DetalhesProfessor() {
   const router = useRouter();
@@ -72,12 +73,15 @@ export default function DetalhesProfessor() {
 
     try {
       setIsSubmittingToggle(true);
-      const endpoint = professor.ativo
-        ? `/professores/${professor.id}/inativar`
-        : `/professores/${professor.id}/ativar`;
+      let professorAtualizado;
 
-      const response = await api.patch(endpoint);
-      setProfessor(response.data);
+      if (professor.ativo) {
+        professorAtualizado = await inativarProfessorporId(professor.id);
+      } else {
+        professorAtualizado = await ativarProfessorporId(professor.id);
+      }
+
+      setProfessor(professorAtualizado);
       setIsAlertOpen(false);
 
       toast.success(

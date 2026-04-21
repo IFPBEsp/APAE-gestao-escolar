@@ -4,7 +4,12 @@ import com.apae.gestao.dto.AlunoTurmaRequestDTO;
 import com.apae.gestao.dto.AvaliacaoHistoricoResponseDTO;
 import com.apae.gestao.dto.aluno.AlunoDetalhesDTO;
 import com.apae.gestao.dto.aluno.AlunoResumoDTO;
+import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoItemDTO;
+import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoResponseDTO;
 import com.apae.gestao.service.AlunoService;
+import com.apae.gestao.openapi.Doc400ValidationError;
+import com.apae.gestao.openapi.Doc404NotFound;
+import com.apae.gestao.openapi.DocStandardErrors;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -55,9 +60,9 @@ public class AlunoController {
     @GetMapping("/{id}")
     @Operation(summary = "Buscar aluno por ID")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Aluno encontrado"),
-            @ApiResponse(responseCode = "404", description = "Aluno não encontrado")
+            @ApiResponse(responseCode = "200", description = "Aluno encontrado")
     })
+    @Doc404NotFound
     public ResponseEntity<AlunoDetalhesDTO> buscarPorId(@PathVariable Long id) {
         AlunoDetalhesDTO aluno = alunoService.buscarPorId(id);
         return ResponseEntity.ok(aluno);
@@ -70,10 +75,9 @@ public class AlunoController {
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Turma atualizada com sucesso"),
-        @ApiResponse(responseCode = "404", description = "Aluno ou Turma não encontrados"),
-        @ApiResponse(responseCode = "400", description = "Requisição inválida"),
         @ApiResponse(responseCode = "422", description = "Regra de negócio violada (Turma Inativa)")
     })
+    @DocStandardErrors
     public ResponseEntity<AlunoDetalhesDTO> atualizarTurma(
         @PathVariable Long alunoId,
         @Valid @RequestBody AlunoTurmaRequestDTO dto
@@ -86,6 +90,7 @@ public class AlunoController {
 
     @GetMapping("/{id}/avaliacoes")
     @Operation(summary = "Buscar histórico de avaliações do aluno")
+    @Doc404NotFound
     public ResponseEntity<List<AvaliacaoHistoricoResponseDTO>> buscarAvaliacoesPorAlunoId(
             @PathVariable Long id
     ) {
@@ -93,5 +98,31 @@ public class AlunoController {
                 alunoService.buscarAvaliacoesPorAlunoId(id);
 
         return ResponseEntity.ok(avaliacoes);
+    }
+
+    @GetMapping("/{id}/turmas")
+    @Operation(
+        summary = "Listar histórico de turmas do aluno",
+        description = "Retorna todas as turmas em que o aluno possui ou possuiu vínculo (ativas ou inativas, vínculo atual ou antigo)."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
+    })
+    @Doc404NotFound
+    public ResponseEntity<List<AlunoTurmaHistoricoItemDTO>> listarHistoricoTurmasPorAlunoId(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(alunoService.listarHistoricoTurmasPorAlunoId(id));
+    }
+
+    @GetMapping("/{id}/turmas/historico")
+    @Operation(summary = "Buscar histórico de turmas do aluno (vínculos ativos e anteriores)")
+    public ResponseEntity<List<AlunoTurmaHistoricoResponseDTO>> buscarHistoricoTurmasPorAlunoId(
+            @PathVariable Long id
+    ) {
+        List<AlunoTurmaHistoricoResponseDTO> historico =
+                alunoService.buscarHistoricoTurmasPorAlunoId(id);
+
+        return ResponseEntity.ok(historico);
     }
 }

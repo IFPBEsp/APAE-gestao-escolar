@@ -4,6 +4,8 @@ import com.apae.gestao.dto.AlunoTurmaRequestDTO;
 import com.apae.gestao.dto.AvaliacaoHistoricoResponseDTO;
 import com.apae.gestao.dto.aluno.AlunoDetalhesDTO;
 import com.apae.gestao.dto.aluno.AlunoResumoDTO;
+import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoResponseDTO;
+import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoItemDTO;
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Turma;
 import com.apae.gestao.entity.TurmaAluno;
@@ -108,6 +110,16 @@ public class AlunoService {
     }
 
     @Transactional(readOnly = true)
+    public List<AlunoTurmaHistoricoResponseDTO> buscarHistoricoTurmasPorAlunoId(Long id) {
+        Aluno aluno = alunoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
+
+        return turmaAlunoRepository.findHistoricoCompletoPorAluno(aluno).stream()
+                .map(AlunoTurmaHistoricoResponseDTO::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<AvaliacaoHistoricoResponseDTO> buscarAvaliacoesPorAlunoId(Long id) {
 
         Aluno aluno = alunoRepository.findById(id)
@@ -121,6 +133,16 @@ public class AlunoService {
                 .findByAlunoOrderByDataAvaliacaoDesc(aluno)
                 .stream()
                 .map(a -> AvaliacaoHistoricoResponseDTO.fromEntity(a, turmaAtual))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AlunoTurmaHistoricoItemDTO> listarHistoricoTurmasPorAlunoId(Long alunoId) {
+        Aluno aluno = alunoRepository.findById(alunoId)
+                .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
+
+        return turmaAlunoRepository.findAllHistoricoByAluno(aluno).stream()
+                .map(AlunoTurmaHistoricoItemDTO::new)
                 .toList();
     }
 }

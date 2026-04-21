@@ -1,11 +1,8 @@
-package com.apae.gestao.dto.turma;
+package com.apae.gestao.dto.aluno;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.apae.gestao.dto.turmaAluno.TurmaAlunoResponseDTO;
 import com.apae.gestao.entity.Turma;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import com.apae.gestao.entity.TurmaAluno;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,25 +11,25 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Representação completa das turmas retornadas pelos endpoints.")
-public class TurmaResponseDTO {
+@Schema(description = "Turma em que o aluno possui ou possuiu vínculo (histórico acadêmico).")
+public class AlunoTurmaHistoricoItemDTO {
 
-    @Schema(description = "Identificador único da turma", example = "7")
+    @Schema(description = "Identificador da turma", example = "7")
     private Long id;
 
-    @Schema(description = "Nome completo da turma", example = "Alfabetização 2025 - Manhã")
+    @Schema(description = "Nome da turma", example = "Alfabetização 2025 - Manhã")
     private String nome;
 
-    @Schema(description = "Ano de criação", example = "2025")
+    @Schema(description = "Ano de criação da turma", example = "2025")
     private Integer anoCriacao;
 
-    @Schema(description = "Turno principal (MANHA, TARDE, NOITE)", example = "MANHA")
+    @Schema(description = "Turno (MANHA, TARDE, NOITE)", example = "MANHA")
     private String turno;
 
     @Schema(description = "Tipo pedagógico", example = "Educação Especial")
     private String tipo;
 
-    @Schema(description = "Indica se a turma está ativa", example = "true")
+    @Schema(description = "Indica se a turma está ativa no sistema", example = "true")
     private Boolean isAtiva;
 
     @Schema(description = "Nome do professor responsável", example = "Maria da Silva")
@@ -41,35 +38,32 @@ public class TurmaResponseDTO {
     @Schema(description = "ID do professor responsável", example = "12")
     private Long professorId;
 
-    @ArraySchema(schema = @Schema(implementation = TurmaAlunoResponseDTO.class))
-    private List<TurmaAlunoResponseDTO> alunos;
+    @Schema(description = "Indica se este é o vínculo ativo (turma atual) do aluno", example = "false")
+    private Boolean isAlunoAtivo;
 
-    @Schema(description = "Horário de aula baseado no turno", example = "Segunda a Sexta - 8h as 12h")
+    @Schema(description = "Horário de aula conforme o turno", example = "Segunda a Sexta - 8h as 12h")
     private String horario;
 
-    public TurmaResponseDTO(Turma turma) {
+    public AlunoTurmaHistoricoItemDTO(TurmaAluno turmaAluno) {
+        Turma turma = turmaAluno.getTurma();
         this.id = turma.getId();
         this.nome = turma.getNome();
         this.anoCriacao = turma.getAnoCriacao();
         this.turno = turma.getTurno();
         this.tipo = turma.getTipo();
         this.isAtiva = turma.getIsAtiva();
-
         if (turma.getProfessor() != null) {
             this.professorNome = turma.getProfessor().getNome();
             this.professorId = turma.getProfessor().getId();
         }
-
-        if (turma.getTurmaAlunos() != null) {
-            this.alunos = turma.getTurmaAlunos().stream()
-                    .map(TurmaAlunoResponseDTO::new)
-                    .collect(Collectors.toList());
-        }
-
-        this.horario = getHorarioPorTurno(turma.getTurno());
+        this.isAlunoAtivo = turmaAluno.getIsAlunoAtivo();
+        this.horario = horarioPorTurno(turma.getTurno());
     }
 
-    private static String getHorarioPorTurno(String turno) {
+    private static String horarioPorTurno(String turno) {
+        if (turno == null) {
+            return "Horário não definido";
+        }
         switch (turno.toUpperCase()) {
             case "MANHA":
                 return "Segunda a Sexta - 8h as 12h";

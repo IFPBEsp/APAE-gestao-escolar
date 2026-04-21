@@ -12,6 +12,9 @@ import com.apae.gestao.dto.turma.TurmaRequestDTO;
 import com.apae.gestao.dto.turma.TurmaResponseDTO;
 import com.apae.gestao.dto.turmaAluno.TurmaAlunoResponseDTO;
 import com.apae.gestao.service.TurmaService;
+import com.apae.gestao.openapi.Doc400ValidationError;
+import com.apae.gestao.openapi.Doc404NotFound;
+import com.apae.gestao.openapi.DocStandardErrors;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -52,10 +55,9 @@ public class TurmaController {
                           "professor": { "id": 2, "nome": "Maria da Silva" },
                           "alunosIds": [1, 2, 3]
                         }
-                        """))),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos", content = @Content(
-                    schema = @Schema(implementation = ApiErrorResponse.class)))
+                        """)))
     })
+    @Doc400ValidationError
     public ResponseEntity<TurmaResponseDTO> criar(@Valid @RequestBody TurmaRequestDTO dto){
         TurmaResponseDTO response = service.criar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -68,9 +70,9 @@ public class TurmaController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Turma encontrada",
-                    content = @Content(schema = @Schema(implementation = TurmaResumoDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Turma não encontrada")
+                    content = @Content(schema = @Schema(implementation = TurmaResumoDTO.class)))
     })
+    @Doc404NotFound
     public ResponseEntity<TurmaResumoDTO> buscarPorId(
             @Parameter(description = "Identificador da turma", example = "7", in = ParameterIn.PATH)
             @PathVariable Long id) {
@@ -120,6 +122,11 @@ public class TurmaController {
 
     @PutMapping("/{turmaId}")
     @Operation(summary = "Atualizar turma existente")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Turma atualizada com sucesso",
+                    content = @Content(schema = @Schema(implementation = TurmaResponseDTO.class)))
+    })
+    @DocStandardErrors
     public ResponseEntity<TurmaResponseDTO> atualizar(
             @Parameter(description = "Identificador da turma", example = "5", in = ParameterIn.PATH)
             @PathVariable Long turmaId,
@@ -130,6 +137,7 @@ public class TurmaController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Excluir turma definitivamente")
+    @Doc404NotFound
     public ResponseEntity<Void> deletar(
             @Parameter(description = "Identificador da turma", example = "5", in = ParameterIn.PATH)
             @PathVariable Long id){
@@ -139,6 +147,7 @@ public class TurmaController {
 
     @PutMapping("/{turmaId}/professor/{professorId}")
     @Operation(summary = "Vincular professor a uma turma específica")
+    @Doc404NotFound
     public ResponseEntity<TurmaResponseDTO> atribuirProfessor(
             @Parameter(description = "Identificador da turma", example = "5", in = ParameterIn.PATH)
             @PathVariable Long turmaId,
@@ -151,6 +160,7 @@ public class TurmaController {
 
     @PatchMapping("/{turmaId}/ativar")
     @Operation(summary = "Ativar turma")
+    @Doc404NotFound
     public ResponseEntity<TurmaResponseDTO> ativarTurma(
             @Parameter(description = "Identificador da turma", example = "5", in = ParameterIn.PATH)
             @PathVariable Long turmaId) {
@@ -160,6 +170,7 @@ public class TurmaController {
 
     @PatchMapping("/{turmaId}/desativar")
     @Operation(summary = "Desativar turma")
+    @Doc404NotFound
     public ResponseEntity<TurmaResponseDTO> desativarTurma(
             @Parameter(description = "Identificador da turma", example = "5", in = ParameterIn.PATH)
             @PathVariable Long turmaId) {
@@ -168,36 +179,66 @@ public class TurmaController {
     }
 
     @PostMapping("/{turmaId}/alunos")
+    @Operation(
+            summary = "Adicionar alunos à turma",
+            description = "Adiciona uma lista de alunos já cadastrados a uma turma existente."
+    )
+    @DocStandardErrors
     public ResponseEntity<TurmaResponseDTO> adicionarAlunos(@RequestBody List<Long> alunosId, @PathVariable Long turmaId){
         TurmaResponseDTO response = service.adicionarAlunos(turmaId, alunosId);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{turmaId}/alunos")
+    @Operation(
+            summary = "Listar alunos da turma",
+            description = "Lista todos os alunos, ativos e inativos, vinculados à turma."
+    )
+    @Doc404NotFound
     public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosNaTurma(@PathVariable Long turmaId){
         List<TurmaAlunoResponseDTO> response = service.listarAlunos(turmaId);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{turmaId}/alunos/ativos")
+    @Operation(
+            summary = "Listar alunos ativos da turma",
+            description = "Lista apenas os alunos com vínculo ativo na turma."
+    )
+    @Doc404NotFound
     public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosAtivosNaTurma(@PathVariable Long turmaId){
         List<TurmaAlunoResponseDTO> response = service.listarAlunosAtivos(turmaId);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{turmaId}/alunos/inativos")
+    @Operation(
+            summary = "Listar alunos inativos da turma",
+            description = "Lista apenas os alunos com vínculo inativo na turma."
+    )
+    @Doc404NotFound
     public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosInativosNaTurma(@PathVariable Long turmaId){
         List<TurmaAlunoResponseDTO> response = service.listarAlunosInativos(turmaId);
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{turmaId}/alunos/{alunoId}/ativar")
+    @Operation(
+            summary = "Ativar aluno na turma",
+            description = "Reativa o vínculo do aluno com a turma para participação nas atividades."
+    )
+    @Doc404NotFound
     public ResponseEntity<TurmaAlunoResponseDTO> ativarAlunoNaTurma(@PathVariable Long turmaId, @PathVariable Long alunoId){
         service.ativarAluno(turmaId, alunoId);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{turmaId}/alunos/{alunoId}/inativar")
+    @Operation(
+            summary = "Inativar aluno na turma",
+            description = "Inativa o vínculo do aluno com a turma, mantendo o histórico preservado."
+    )
+    @Doc404NotFound
     public ResponseEntity<TurmaAlunoResponseDTO> desativarAlunoNaTurma(@PathVariable Long turmaId, @PathVariable Long alunoId){
         service.desativarAluno(turmaId, alunoId);
         return ResponseEntity.ok().build();

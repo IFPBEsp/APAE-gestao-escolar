@@ -2,6 +2,7 @@
 
 import { ArrowLeft, Clock, Calendar, Users, Briefcase, Edit, Power, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ModalHistoricoFrequencia from "@/components/frequencia/ModalHistoricoFrequencia";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Dialog,
@@ -661,65 +662,15 @@ export function DetalhesTurma({
                             </DialogContent>
                         </Dialog>
 
-                        <Dialog open={isHistoricoOpen} onOpenChange={setIsHistoricoOpen}>
-                            <DialogContent className="max-w-[95vw] sm:max-w-xl w-full">
-                                <DialogHeader>
-                                    <DialogTitle>
-                                        Histórico de Frequência - {alunoSelecionado?.nome || ""}
-                                    </DialogTitle>
-                                    <DialogDescription>
-                                        Registros individuais de presença do aluno na turma.
-                                    </DialogDescription>
-                                </DialogHeader>
-
-                                {loadingHistorico ? (
-                                    <div className="py-6 text-center text-[#0D4F97]">
-                                        Carregando histórico...
-                                    </div>
-                                ) : historicoAluno.length === 0 ? (
-                                    <div className="py-6 text-center text-[#222222]">
-                                        Nenhum registro de frequência encontrado para este aluno.
-                                    </div>
-                                ) : (
-                                    <div className="max-h-80 overflow-y-auto mt-4 space-y-2">
-                                        {historicoAluno.map((item, index) => (
-                                            <div
-                                                key={index}
-                                                className="flex items-center justify-between border-b border-[#E2E8F0] py-2"
-                                            >
-                                                <div>
-                                                    <p className="font-medium text-[#0D4F97]">{item.data}</p>
-                                                    <p className="text-sm text-[#222222]">
-                                                        {item.descricao || "Sem descrição"}
-                                                    </p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <span
-                                                        className={`px-3 py-1 rounded-full text-xs font-semibold ${item.status === "Presente"
-                                                                ? "bg-green-100 text-green-700"
-                                                                : "bg-red-100 text-red-700"
-                                                            }`}
-                                                    >
-                                                        {item.status}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-
-                                <DialogFooter className="mt-4">
-                                    <Button variant="outline" 
-                                    onClick={() => setIsHistoricoOpen(false)}
-                                    >
-                                        Fechar
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-
                     </CardContent>
                 </Card>
+                <ModalHistoricoFrequencia
+                    isOpen={isHistoricoOpen}
+                    onClose={() => setIsHistoricoOpen(false)}
+                    alunoNome={alunoSelecionado?.nome || ""}
+                    historico={historicoAluno}
+                    loading={loadingHistorico}
+                />
             </div>
         </div>
     );

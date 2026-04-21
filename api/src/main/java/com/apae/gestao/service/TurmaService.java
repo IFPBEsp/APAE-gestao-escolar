@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-
 import com.apae.gestao.dto.turma.TurmaRequestDTO;
 import com.apae.gestao.dto.turma.TurmaResponseDTO;
 import com.apae.gestao.dto.turmaAluno.TurmaAlunoResponseDTO;
@@ -157,6 +156,8 @@ public class TurmaService {
         Turma turma = turmaDAO.findById(turmaId)
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
 
+        validarProfessorUnicoPorTurno(professorId, turma);
+
         Professor professor = professorDAO.findById(professorId)
                 .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + professorId));
 
@@ -169,6 +170,10 @@ public class TurmaService {
     public TurmaResponseDTO ativarTurma(Long turmaId) {
         Turma turma = turmaDAO.findById(turmaId)
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
+
+        if (turma.getProfessor() != null) {
+            validarProfessorUnicoPorTurno(turma.getProfessor().getId(), turma);
+        }
 
         turma.setIsAtiva(true);
 
@@ -230,7 +235,6 @@ public class TurmaService {
     public List<TurmaAlunoResponseDTO> listarAlunos(Long turmaId) {
         return turmaAlunoDAO.findByTurmaIdOrderByAlunoNomeAsc(turmaId)
                 .stream()
-                .filter(ta -> Boolean.TRUE.equals(ta.getIsAlunoAtivo()))
                 .map(TurmaAlunoResponseDTO::new)
                 .toList();
     }
@@ -304,6 +308,7 @@ public class TurmaService {
         }
 
         if (dto.getProfessorId() != null) {
+            validarProfessorUnicoPorTurno(dto.getProfessorId(), turma);
             Professor professor = professorDAO.findById(dto.getProfessorId())
                     .orElseThrow(() -> new RuntimeException("Professor não encontrado"));
             turma.setProfessor(professor);
@@ -369,6 +374,32 @@ public class TurmaService {
                 turma.addAluno(aluno, true);
             }
         }
+    }
+
+    private void validarProfessorUnicoPorTurno(Long professorId, Turma turmaNova){
+        if (professorId == null || turmaNova == null) return;
+
+        Professor professor= professorDAO.findByIdWithTurmas(professorId)
+                .orElseThrow(() -> new RuntimeException("Professor não encontrado"));
+
+        if(professor.getTurmas()!=null){
+
+            boolean conflito = professor.getTurmas().stream()
+                    .anyMatch(turmaExistente -> turmaExistente.getTurno().equalsIgnoreCase(turmaNova.getTurno())
+                            && turmaExistente.getAnoCriacao().equals(turmaNova.getAnoCriacao())
+                            && Boolean.TRUE.equals(turmaExistente.getIsAtiva())
+                            && (turmaNova.getId() == null || !turmaExistente.getId().equals(turmaNova.getId())) //pra ignorar a própria turma
+                    );
+            if(conflito){
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Não é possível alocar o professor " + professor.getNome() + ", pois já possui vínculo a uma turma ativa no turno " + turmaNova.getTurno() + " nesse mesmo ano");
+            }
+
+        }
+
+
+
+
+
     }
 
 

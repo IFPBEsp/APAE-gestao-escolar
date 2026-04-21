@@ -29,7 +29,14 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/primeiro-acesso").permitAll()
+                        .requestMatchers(
+                                "/api/auth/login",
+                                "/api/auth/primeiro-acesso",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/docs/**"
+                        ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/professor/**").hasRole("TEACHER")
                         .anyRequest().authenticated()

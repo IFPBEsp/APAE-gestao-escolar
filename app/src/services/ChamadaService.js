@@ -132,3 +132,19 @@ export async function contarAulasRealizadas(turmaId) {
     const count = db.filter(r => r.turmaId == turmaId).length;
     return count;
 }
+
+export async function getDatasComChamada(turmaId) {
+    try {
+        const db = getMockDB();
+        const records = db.filter(r => r.turmaId == turmaId);
+        
+        // Em um cenário real tentaríamos buscar do backend as datas
+        // const response = await api.get(`/presencas/chamadas/turmas/${turmaId}/datas`);
+        // if (response?.data) return response.data;
+
+        return records.map(r => r.data);
+    } catch (error) {
+        console.error("ChamadaService Error (getDatasComChamada):", error);
+        return [];
+    }
+}
