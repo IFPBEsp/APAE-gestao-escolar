@@ -330,8 +330,7 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
 
               ) : (
                 <div className="overflow-x-auto max-h-80 overflow-y-auto border-2 border-[#B2D7EC] rounded-lg">
-
-                  <Table className="w-full table-fixed">
+                  <Table className="w-full table-fixed min-w-[860px]">
                       {/* Ordem das colunas: Data, Professor, Turma, Descrição, Ações*/}
                     <colgroup>
                       <col style={{ width: '130px' }} /> 
@@ -392,10 +391,15 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
 
                           <TableCell className="sticky right-0 z-10 bg-white group-hover:bg-[#B2D7EC]/10 text-center shadow-[-4px_0_8px_rgba(0,0,0,0.05)]">
                             <div className="flex items-center justify-center h-full">
-                              <Eye
-                                className="h-5 w-5 cursor-pointer hover:text-[#0D4F97] transition-colors"
+                              <button
+                                type="button"
+                                className="cursor-pointer hover:text-[#0D4F97] transition-colors"
                                 onClick={() => setSelectedAvaliacao(avaliacao)}
-                              />
+                                aria-label="Visualizar avaliação"
+                                title="Visualizar avaliação"
+                              >
+                                <Eye className="h-5 w-5" />
+                              </button>
                             </div>
                           </TableCell>
 
@@ -430,8 +434,7 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
 
             ) : (
               <div className="overflow-x-auto max-h-80 overflow-y-auto border-2 border-[#B2D7EC] rounded-lg">
-
-                <Table className="w-full table-fixed">
+                <Table className="w-full table-fixed min-w-[1440px]">
                   {/* Ordem das colunas: Data, Professor, Turma, Atividades, Habilidades, Estratégias, Recursos, Ações*/}
                   <colgroup>
                     <col style={{ width: '130px' }} /> 
@@ -537,10 +540,15 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
 
                         <TableCell className="sticky right-0 z-10 bg-white group-hover:bg-[#B2D7EC]/10 text-center shadow-[-4px_0_8px_rgba(0,0,0,0.05)]">
                           <div className="flex items-center justify-center h-full">
-                            <Eye
-                              className="h-5 w-5 cursor-pointer hover:text-[#0D4F97] transition-colors"
-                              onClick={() => setSelectedRelatorio(relatorio)}
-                            />
+                              <button
+                                type="button"
+                                className="cursor-pointer hover:text-[#0D4F97] transition-colors"
+                                onClick={() => setSelectedRelatorio(relatorio)}
+                                aria-label="Visualizar relatório"
+                                title="Visualizar relatório"
+                              >
+                                <Eye className="h-5 w-5" />
+                              </button>
                           </div>
                         </TableCell>
 

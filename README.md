@@ -43,6 +43,7 @@
 - [Modelo Entidade-Relacionamento](#-modelo-entidade-relacionamento-er)
 - [Referência da API](#-referência-da-api)
 - [Códigos de Status HTTP](#-códigos-de-status-http)
+- [Padrão de Documentação Swagger/OpenAPI](#-padrão-de-documentação-swaggeropenapi)
 - [Git Flow](#-git-flow)
 - [Style Guide](#-style-guide)
 - [Conventional Commits](#-conventional-commits)
@@ -616,6 +617,62 @@ Base URL: `http://localhost:8080/api` (desenvolvimento) | Swagger UI: `/docs`
 | `404 Not Found` | Recurso não encontrado | ID inexistente (`RecursoNaoEncontradoException`) |
 | `409 Conflict` | Conflito de dados | Dados duplicados, ex: CPF ou email já cadastrado (`ConflitoDeDadosException`) |
 | `500 Internal Server Error` | Erro interno do servidor | Exceções não tratadas |
+
+---
+
+## Padrão de Documentação Swagger/OpenAPI
+
+Para manter consistência na documentação da API, o backend utiliza **anotações customizadas** localizadas no pacote `com.apae.gestao.openapi`.
+
+### Anotações disponíveis
+
+| Anotação | Finalidade |
+|----------|-----------|
+| `@Doc400ValidationError` | Adiciona `ApiResponse(400)` com `ApiErrorResponse` para erros de validação de request body |
+| `@Doc404NotFound` | Adiciona `ApiResponse(404)` com `ApiErrorResponse` para recursos não encontrados |
+| `@DocStandardErrors` | Atalho que combina `@Doc400ValidationError` + `@Doc404NotFound` para endpoints que recebem corpo válido **e** operam sobre um recurso por ID |
+
+### Quando usar cada anotação
+
+- **`POST` / `PUT` / `PATCH` com `@Valid @RequestBody` (criação/atualização):**
+  - Use `@Doc400ValidationError` quando o endpoint **não** opera diretamente por ID (ex.: `POST /api/turmas`).
+  - Use `@DocStandardErrors` quando o endpoint recebe corpo válido **e** usa `@PathVariable` para um recurso principal (ex.: `PUT /api/professores/{id}` ou `PATCH /api/alunos/{alunoId}/turma`).
+- **`GET /{id}` ou endpoints que dependem de um ID de recurso:**
+  - Use `@Doc404NotFound` junto com `@Operation` e as respostas de sucesso (ex.: `GET /api/professores/{id}`, `GET /api/alunos/{id}`, `GET /api/turmas/{id}`).
+
+### Padrão para `summary` e `description`
+
+- **`summary`**: curto, iniciando por verbo no infinitivo, deixando claro o tipo de ação principal.
+  - Exemplos: `Criar turma`, `Listar professores`, `Buscar aluno por ID`, `Atualizar professor`, `Inativar aluno na turma`.
+- **`description`**: explica rapidamente o objetivo de negócio e detalhes relevantes.
+  - Exemplos:
+    - `"Cria uma nova turma vinculando professor e alunos por ID."`
+    - `"Desativa a turma anterior e ativa a nova turma."`
+    - `"Lista apenas os alunos com vínculo ativo na turma."`
+
+### Exemplo completo
+
+```java
+@PostMapping
+@Operation(
+        summary = "Criar turma",
+        description = "Cria uma nova turma vinculando professor e alunos por ID."
+)
+@ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Turma criada",
+                content = @Content(schema = @Schema(implementation = TurmaResponseDTO.class)))
+})
+@Doc400ValidationError
+public ResponseEntity<TurmaResponseDTO> criar(@Valid @RequestBody TurmaRequestDTO dto) {
+    TurmaResponseDTO response = service.criar(dto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+}
+```
+
+Neste exemplo:
+
+- A documentação de **sucesso (201)** é declarada no próprio método (mais específica do caso de uso).
+- Os **erros padrão (400)** são aplicados pela anotação `@Doc400ValidationError`, evitando repetir o mesmo bloco `ApiResponse` em todos os endpoints de criação/atualização com `@Valid`.
 
 ---
 

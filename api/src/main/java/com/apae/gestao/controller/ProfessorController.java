@@ -4,6 +4,9 @@ import java.util.List;
 import com.apae.gestao.dto.*;
 import com.apae.gestao.dto.turma.TurmaResponseDTO;
 import com.apae.gestao.service.ProfessorService;
+import com.apae.gestao.openapi.Doc400ValidationError;
+import com.apae.gestao.openapi.Doc404NotFound;
+import com.apae.gestao.openapi.DocStandardErrors;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -60,9 +63,9 @@ public class ProfessorController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Professor encontrado",
-                    content = @Content(schema = @Schema(implementation = ProfessorResumoDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Professor não encontrado")
+                    content = @Content(schema = @Schema(implementation = ProfessorResumoDTO.class)))
     })
+    @Doc404NotFound
     public ResponseEntity<ProfessorResumoDTO> buscarPorId(
             @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.PATH)
             @PathVariable Long id) {
@@ -77,9 +80,9 @@ public class ProfessorController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Professor encontrado",
-                    content = @Content(schema = @Schema(implementation = ProfessorResponseDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Professor não encontrado")
+                    content = @Content(schema = @Schema(implementation = ProfessorResponseDTO.class)))
     })
+    @Doc404NotFound
     public ResponseEntity<ProfessorResponseDTO> buscarPorIdCompleto(
             @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.QUERY)
             @RequestParam("id") Long id) {
@@ -93,9 +96,9 @@ public class ProfessorController {
             description = "Registra um novo professor."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Professor criado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos")
+            @ApiResponse(responseCode = "201", description = "Professor criado com sucesso")
     })
+    @Doc400ValidationError
     public ResponseEntity<ProfessorResponseDTO> criar(@Valid @RequestBody ProfessorRequestDTO dto) {
         ProfessorResponseDTO response = professorService.criar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -103,6 +106,7 @@ public class ProfessorController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar professor existente")
+    @DocStandardErrors
     public ResponseEntity<ProfessorResponseDTO> atualizar(
             @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.PATH)
             @PathVariable Long id,
@@ -113,6 +117,7 @@ public class ProfessorController {
 
     @PatchMapping("/{id}/inativar")
     @Operation(summary = "Inativar professor")
+    @Doc404NotFound
     public ResponseEntity<ProfessorResponseDTO> inativar(
             @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.PATH)
             @PathVariable Long id) {
@@ -122,6 +127,7 @@ public class ProfessorController {
 
     @PatchMapping("/{id}/ativar")
     @Operation(summary = "Reativar professor")
+    @Doc404NotFound
     public ResponseEntity<ProfessorResponseDTO> reativar(
             @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.PATH)
             @PathVariable Long id) {
@@ -131,6 +137,7 @@ public class ProfessorController {
 
     @GetMapping("/{id}/turmas")
     @Operation(summary = "Listar turmas de um professor")
+    @Doc404NotFound
     public ResponseEntity<List<TurmaResumoDTO>> getTurmasDeProfessor(
             @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.PATH)
             @PathVariable Long id) {
