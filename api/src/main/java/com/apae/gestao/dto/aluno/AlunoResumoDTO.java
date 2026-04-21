@@ -14,6 +14,9 @@ public class AlunoResumoDTO {
     private Long id;
     private String nome;
     private String nomeResponsavel;
+    private String deficiencia;
+    private java.time.LocalDate dataNascimento;
+    private String telefoneResponsavel;
 
     private String nomeTurma;
     private String turnoTurma;

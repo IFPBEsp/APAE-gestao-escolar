@@ -19,11 +19,14 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
         a.id,
         a.nome,
         a.nomeResponsavel,
+        a.deficiencia,
+        a.dataNascimento,
+        a.telefoneResponsavel,
         MAX(t.nome),
         MAX(t.turno),
         CASE 
-            WHEN COUNT(p) = 0 THEN 0
-            ELSE SUM(CASE WHEN p.faltou = false THEN 1 ELSE 0 END) * 100.0 / COUNT(p)
+            WHEN COUNT(p) = 0 THEN 0.0
+            ELSE SUM(CASE WHEN p.faltou = false THEN 1.0 ELSE 0.0 END) * 100.0 / COUNT(p)
         END,
         MAX(av.dataAvaliacao)
     )
@@ -32,7 +35,7 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     LEFT JOIN ta.turma t
     LEFT JOIN a.presencas p ON p.aula.turma.id = t.id
     LEFT JOIN a.avaliacoes av
-    GROUP BY a.id, a.nome, a.nomeResponsavel
+    GROUP BY a.id, a.nome, a.nomeResponsavel, a.deficiencia, a.dataNascimento, a.telefoneResponsavel
     """)
     Page<AlunoResumoDTO> listarAlunosResumido(Pageable pageable);
 
@@ -41,11 +44,14 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
             a.id,
             a.nome,
             a.nomeResponsavel,
+            a.deficiencia,
+            a.dataNascimento,
+            a.telefoneResponsavel,
             MAX(t.nome),
             MAX(t.turno),
             CASE 
-                WHEN COUNT(p) = 0 THEN 0
-                ELSE SUM(CASE WHEN p.faltou = false THEN 1 ELSE 0 END) * 100.0 / COUNT(p)
+                WHEN COUNT(p) = 0 THEN 0.0
+                ELSE SUM(CASE WHEN p.faltou = false THEN 1.0 ELSE 0.0 END) * 100.0 / COUNT(p)
             END,
             MAX(av.dataAvaliacao)
         )
@@ -55,7 +61,7 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
         LEFT JOIN a.presencas p ON p.aula.turma.id = t.id
         LEFT JOIN a.avaliacoes av
         WHERE LOWER(a.nome) LIKE LOWER(CONCAT('%', :nome, '%'))
-        GROUP BY a.id, a.nome, a.nomeResponsavel
+        GROUP BY a.id, a.nome, a.nomeResponsavel, a.deficiencia, a.dataNascimento, a.telefoneResponsavel
     """)
     Page<AlunoResumoDTO> listarAlunosPorNomeResumido(String nome, Pageable pageable);
 

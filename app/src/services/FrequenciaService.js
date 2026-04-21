@@ -35,15 +35,14 @@ export async function getAlunosComFrequencia(turmaId, page = 0, size = 100) {
 export async function getHistoricoIndividualAluno(alunoId, page = 0, size = 100) {
     try {
         const response = await api.get(`/frequencia/aluno/${alunoId}/historico`, {
-            params: { page, size, sort: 'dataAula,desc' }
+            params: { page, size }
         });
         
         const historico = response.data.content || response.data || [];
         
         return historico.map(item => ({
-            data: item.dataAula ? new Date(item.dataAula).toLocaleDateString('pt-BR') : '',
             descricao: item.descricaoAula || item.descricao || '',
-            status: item.presente ? 'Presente' : 'Ausente'
+            status: item.statusPresenca === true ? 'Presente' : 'Ausente'
         }));
     } catch (error) {
         console.error("FrequenciaService Error (getHistoricoIndividualAluno):", error);
