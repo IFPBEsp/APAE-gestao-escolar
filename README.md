@@ -277,3 +277,51 @@ git push origin feature/nova-funcionalidade
 - `style:` - Formatação de código
 - `refactor:` - Refatoração
 - `test:` - Testes
+
+## 📚 Padrão de Documentação de Endpoints (Swagger/OpenAPI)
+
+- **Anotações customizadas para erros**
+  - `@Doc400ValidationError`: adiciona `ApiResponse(400)` com `ApiErrorResponse` para erros de validação de request body.
+  - `@Doc404NotFound`: adiciona `ApiResponse(404)` com `ApiErrorResponse` para recursos não encontrados.
+  - `@DocStandardErrors`: atalho que combina `@Doc400ValidationError` + `@Doc404NotFound` para endpoints que recebem corpo válido **e** operam sobre um recurso por ID.
+  - Todas essas anotações estão no pacote `com.apae.gestao.openapi`.
+
+- **Quando usar cada anotação**
+  - **POST/PUT/PATCH com `@Valid @RequestBody` (criação/atualização)**:
+    - Use `@Doc400ValidationError` quando o endpoint **não** opera diretamente por ID (ex.: `POST /api/turmas`).
+    - Use `@DocStandardErrors` quando o endpoint recebe corpo válido **e** usa `@PathVariable` para um recurso principal (ex.: `PUT /api/professores/{id}` ou `PATCH /api/alunos/{alunoId}/turma`).
+  - **GET /{id} ou endpoints que dependem de um ID de recurso**:
+    - Use `@Doc404NotFound` junto com `@Operation` e as respostas de sucesso (ex.: `GET /api/professores/{id}`, `GET /api/alunos/{id}`, `GET /api/turmas/{id}`).
+
+- **Padrão para `summary` e `description`**
+  - **`summary`**:
+    - Sempre curto, iniciando por verbo no infinitivo: `Criar turma`, `Listar professores`, `Buscar aluno por ID`, `Atualizar professor`, `Inativar aluno na turma`.
+    - Deve deixar claro o **tipo de ação principal** (criar, listar, buscar, atualizar, inativar, ativar, vincular, etc.).
+  - **`description`**:
+    - Explica rapidamente o objetivo de negócio e detalhes relevantes, por exemplo:
+      - `"Cria uma nova turma vinculando professor e alunos por ID."`
+      - `"Desativa a turma anterior e ativa a nova turma."`
+      - `"Lista apenas os alunos com vínculo ativo na turma."`
+
+- **Exemplo de método de Controller após a refatoração**
+
+```java
+@PostMapping
+@Operation(
+        summary = "Criar turma",
+        description = "Cria uma nova turma vinculando professor e alunos por ID."
+)
+@ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Turma criada",
+                content = @Content(schema = @Schema(implementation = TurmaResponseDTO.class)))
+})
+@Doc400ValidationError
+public ResponseEntity<TurmaResponseDTO> criar(@Valid @RequestBody TurmaRequestDTO dto) {
+    TurmaResponseDTO response = service.criar(dto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+}
+```
+
+Neste exemplo:
+- **A documentação de sucesso (201)** continua declarada no próprio método (mais específica do caso de uso).
+- **Os erros padrão (400)** são aplicados pela anotação `@Doc400ValidationError`, evitando repetir o mesmo bloco `ApiResponse` em todos os endpoints de criação/atualização com `@Valid`.
