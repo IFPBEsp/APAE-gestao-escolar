@@ -1,5 +1,6 @@
 package com.apae.gestao.dto.aluno;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,7 +16,7 @@ public class AlunoResumoDTO {
     private String nome;
     private String nomeResponsavel;
     private String deficiencia;
-    private java.time.LocalDate dataNascimento;
+    private LocalDate dataNascimento;
     private String telefoneResponsavel;
 
     private String nomeTurma;

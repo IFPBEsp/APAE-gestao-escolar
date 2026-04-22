@@ -67,7 +67,19 @@ export default function AdminHomePage() {
 
         const turmasFormatadas: any[] = [];
 
-        for (const t of turmasList) {
+        const perTurmaStats = await Promise.all(turmasList.map(async (t: any) => {
+           try {
+              const [estatisticas, aulasRealizadasData] = await Promise.all([
+                 getEstatisticasTurma(t.id),
+                 contarAulasRealizadas(t.id),
+              ]);
+              return { t, estatisticas, aulasRealizadasData };
+           } catch {
+              return { t, estatisticas: null, aulasRealizadasData: 0 };
+           }
+        }));
+
+        for (const { t, estatisticas, aulasRealizadasData } of perTurmaStats) {
            const ocup = t.totalAlunosAtivos || 0;
            ocupacaoTotal += ocup;
            const capLine = t.capacidade || 15;
@@ -75,23 +87,15 @@ export default function AdminHomePage() {
            if (t.isAtiva) {
               ativasCount++;
               cTotal += capLine;
+              turmasAulasSum += (aulasRealizadasData || 0);
            }
            
-           try {
-              const estatisticas = await getEstatisticasTurma(t.id);
-              if (estatisticas && estatisticas.length > 0) {
-                 const avgFreqTurma = estatisticas.reduce((acc: any, curr: any) => acc + curr.frequencia, 0) / estatisticas.length;
-                 sumPorcentagemFreq += avgFreqTurma;
-                 countFreqValid++;
-              }
-              
-              const aulasRealizadasData = await contarAulasRealizadas(t.id);
-              turmasAulasSum += (aulasRealizadasData || 0);
-
-           } catch(err) {
-              // Ignore stats for this class if none exist
+           if (estatisticas && estatisticas.length > 0) {
+              const avgFreqTurma = estatisticas.reduce((acc: any, curr: any) => acc + curr.frequencia, 0) / estatisticas.length;
+              sumPorcentagemFreq += avgFreqTurma;
+              countFreqValid++;
            }
-
+           
            turmasFormatadas.push({
               ...t,
               capacidade: capLine,
@@ -109,11 +113,9 @@ export default function AdminHomePage() {
         const sortedTurmas = turmasFormatadas.sort((a: any, b: any) => b.ocupacao - a.ocupacao);
         setTopTurmas(sortedTurmas.slice(0, 4));
 
-        if (countFreqValid > 0) {
-           setFrequenciaMediaGlobal(Math.round(sumPorcentagemFreq / countFreqValid));
-        } else {
-           setFrequenciaMediaGlobal(100); 
-        }
+        setFrequenciaMediaGlobal(
+           countFreqValid > 0 ? Math.round(sumPorcentagemFreq / countFreqValid) : 0
+        );
 
         const mediaAulas = ativasCount > 0 ? Math.round(turmasAulasSum / ativasCount) : 0;
         const META_BRASIL = 200;
@@ -287,7 +289,7 @@ export default function AdminHomePage() {
 
         {!localSearchActive ? (
            <div className="space-y-8 animate-in fade-in duration-500">
-        <section className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <section className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
           <Card className="rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow bg-emerald-50 hover:border-emerald-300">
             <CardContent className="p-6">
@@ -455,8 +457,8 @@ export default function AdminHomePage() {
                          <td colSpan={4} className="px-6 py-12 text-center text-[#0D4F97]/50 font-semibold">Nenhum aluno registrado no banco de dados.</td>
                        </tr>
                     ) : (
-                      ultimosAlunos.map((aluno, i) => (
-                        <tr key={i} className="hover:bg-[#B2D7EC]/10 transition-colors group">
+                      ultimosAlunos.map((aluno) => (
+                        <tr key={aluno.id} className="hover:bg-[#B2D7EC]/10 transition-colors group">
                           <td className="px-6 py-4">
                             <p className="font-bold text-[#0D4F97] text-sm">{aluno.nome}</p>
                           </td>
@@ -511,7 +513,7 @@ export default function AdminHomePage() {
                 ) : topTurmas.length === 0 ? (
                     <p className="text-sm text-[#0D4F97]/50 text-center py-6 font-semibold">Nenhuma turma estruturada encontrada</p>
                 ) : (
-                  topTurmas.map((turma, i) => {
+                  topTurmas.map((turma) => {
                     const maxCap = turma.capacidade || 15;
                     const oc = turma.ocupacao || 0;
                     const percent = Math.min(100, Math.round((oc / maxCap) * 100));
@@ -521,7 +523,7 @@ export default function AdminHomePage() {
                     if (percent >= 100) barColor = "bg-red-500 scale-y-125"; 
 
                     return (
-                      <div key={i} className="group cursor-pointer" onClick={() => router.push('/admin/turmas')}>
+                      <div key={turma.id} className="group cursor-pointer" onClick={() => router.push('/admin/turmas')}>
                         <div className="flex justify-between items-end mb-2">
                           <div className="min-w-0 flex-1">
                             <p className="text-sm font-bold text-[#0D4F97] truncate pr-2 group-hover:text-[#1265BE] transition-colors">
@@ -568,7 +570,7 @@ export default function AdminHomePage() {
                            </div>
                            <div>
                               <h3 className="text-3xl font-extrabold text-[#0D4F97] tracking-tight">{selectedLocalAluno.nome}</h3>
-                              <p className="text-sm font-semibold text-gray-400 mt-0.5">Responsável Legal: {selectedLocalAluno.nomeResponsavel || selectedLocalAluno.telefoneResponsavel || "Não Informado"}</p>
+                              <p className="text-sm font-semibold text-gray-400 mt-0.5">Responsável Legal: {selectedLocalAluno.nomeResponsavel || "Não Informado"}</p>
                            </div>
                         </div>
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
@@ -582,7 +584,14 @@ export default function AdminHomePage() {
                            </div>
                            <div className="bg-[#F8FAFC] p-4 rounded-xl border border-gray-100 hidden lg:block">
                               <p className="text-[10px] font-bold text-[#0D4F97]/60 uppercase tracking-widest mb-1">Data de Nascimento</p>
-                              <p className="text-sm font-extrabold text-gray-800">{selectedLocalAluno.dataNascimento ? new Date(selectedLocalAluno.dataNascimento).toLocaleDateString('pt-BR') : "Não Lançado"}</p>
+                              <p className="text-sm font-extrabold text-gray-800">{
+                                 selectedLocalAluno.dataNascimento
+                                    ? (() => {
+                                         const [y, m, d] = String(selectedLocalAluno.dataNascimento).split('-').map(Number);
+                                         return new Date(y, (m || 1) - 1, d || 1).toLocaleDateString('pt-BR');
+                                      })()
+                                    : "Não Lançado"
+                              }</p>
                            </div>
                         </div>
                         <div className="pt-2">

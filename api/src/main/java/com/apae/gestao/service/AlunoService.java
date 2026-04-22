@@ -44,9 +44,7 @@ public class AlunoService {
 
     @Transactional(readOnly = true)
     public Page<AlunoResumoDTO> listarAlunosPorNome(String nome, Pageable pageable) {
-        return (nome == null || nome.isBlank())
-               ? alunoRepository.listarAlunosResumido(pageable)
-               : alunoRepository.listarAlunosPorNomeResumido(nome, pageable);
+        return alunoRepository.listarAlunosPorFiltro(nome, pageable);
     }
 
     @Transactional(readOnly = true)
