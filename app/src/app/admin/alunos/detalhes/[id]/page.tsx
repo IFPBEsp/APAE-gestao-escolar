@@ -679,6 +679,7 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
           relatorio={selectedRelatorio}
           alunoNome={alunoData.nome}
           alunoDataNascimento={alunoData.dataNascimento}
+          alunoTurma={turmaCompleta}
         />
 
         <ModalHistoricoFrequencia

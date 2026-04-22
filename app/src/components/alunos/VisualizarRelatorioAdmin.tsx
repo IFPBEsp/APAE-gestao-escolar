@@ -149,7 +149,6 @@ export default function VisualizarRelatorioAdmin({
           nome={nomeAlunoFinal}
           nascimento={dataNascimentoFinal}
           turma={turmaNome}
-          ano={format(dataRelatorio, "yyyy")}
         />
 
         <RelatorioIndividualConteudo
