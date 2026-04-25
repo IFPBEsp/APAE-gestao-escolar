@@ -36,18 +36,29 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     """)
     Page<AlunoResumoDTO> listarAlunosResumido(Pageable pageable);
 
-    @Query(value = """
-        SELECT new com.apae.gestao.dto.aluno.AlunoResumoDTO(
-            a.id, a.nome, a.nomeResponsavel, t.nome, t.turno,
-            (SELECT CASE WHEN COUNT(p) = 0 THEN 0.0 ELSE SUM(CASE WHEN p.faltou = false THEN 1.0 ELSE 0.0 END) * 100.0 / COUNT(p) END 
-             FROM Presenca p WHERE p.aluno.id = a.id AND p.aula.turma.id = t.id),
-            (SELECT MAX(av.dataAvaliacao) FROM Avaliacao av WHERE av.aluno.id = a.id)
-        )
-        FROM Aluno a
-        JOIN a.turmaAlunos ta ON ta.isAlunoAtivo = true
-        JOIN ta.turma t
-        GROUP BY a.id, a.nome, a.nomeResponsavel, t.id, t.nome, t.turno, ta
-    """, countQuery = "SELECT COUNT(a) FROM Aluno a JOIN a.turmaAlunos ta ON ta.isAlunoAtivo = true")
+    @Query(
+            value = """
+            SELECT new com.apae.gestao.dto.aluno.AlunoResumoDTO(
+                a.id,
+                a.nome,
+                a.nomeResponsavel,
+                MAX(t.nome),
+                MAX(t.turno),
+                CASE 
+                    WHEN COUNT(p) = 0 THEN 0
+                    ELSE SUM(CASE WHEN p.faltou = false THEN 1 ELSE 0 END) * 100.0 / COUNT(p)
+                END,
+                MAX(av.dataAvaliacao)
+            )
+            FROM Aluno a
+            JOIN a.turmaAlunos ta ON ta.isAlunoAtivo = true
+            JOIN ta.turma t
+            LEFT JOIN a.presencas p ON p.aula.turma.id = t.id
+            LEFT JOIN a.avaliacoes av
+            GROUP BY a.id, a.nome, a.nomeResponsavel
+        """,
+            countQuery = "SELECT COUNT(DISTINCT a) FROM Aluno a JOIN a.turmaAlunos ta ON ta.isAlunoAtivo = true"
+    )
     Page<AlunoResumoDTO> listarAlunosAtivosResumido(Pageable pageable);
 
 
@@ -75,19 +86,30 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     """)
     Page<AlunoResumoDTO> listarAlunosPorNomeResumido(String nome, Pageable pageable);
 
-    @Query(value = """
-        SELECT new com.apae.gestao.dto.aluno.AlunoResumoDTO(
-            a.id, a.nome, a.nomeResponsavel, t.nome, t.turno,
-            (SELECT CASE WHEN COUNT(p) = 0 THEN 0.0 ELSE SUM(CASE WHEN p.faltou = false THEN 1.0 ELSE 0.0 END) * 100.0 / COUNT(p) END 
-             FROM Presenca p WHERE p.aluno.id = a.id AND p.aula.turma.id = t.id),
-            (SELECT MAX(av.dataAvaliacao) FROM Avaliacao av WHERE av.aluno.id = a.id)
-        )
-        FROM Aluno a
-        JOIN a.turmaAlunos ta ON ta.isAlunoAtivo = true
-        JOIN ta.turma t
-        WHERE LOWER(a.nome) LIKE LOWER(CONCAT('%', :nome, '%'))
-        GROUP BY a.id, a.nome, a.nomeResponsavel, t.id, t.nome, t.turno, ta
-    """, countQuery = "SELECT COUNT(a) FROM Aluno a JOIN a.turmaAlunos ta ON ta.isAlunoAtivo = true WHERE LOWER(a.nome) LIKE LOWER(CONCAT('%', :nome, '%'))")
+    @Query(
+            value = """
+            SELECT new com.apae.gestao.dto.aluno.AlunoResumoDTO(
+                a.id,
+                a.nome,
+                a.nomeResponsavel,
+                MAX(t.nome),
+                MAX(t.turno),
+                CASE 
+                    WHEN COUNT(p) = 0 THEN 0
+                    ELSE SUM(CASE WHEN p.faltou = false THEN 1 ELSE 0 END) * 100.0 / COUNT(p)
+                END,
+                MAX(av.dataAvaliacao)
+            )
+            FROM Aluno a
+            JOIN a.turmaAlunos ta ON ta.isAlunoAtivo = true
+            JOIN ta.turma t
+            LEFT JOIN a.presencas p ON p.aula.turma.id = t.id
+            LEFT JOIN a.avaliacoes av
+            WHERE LOWER(a.nome) LIKE LOWER(CONCAT('%', :nome, '%'))
+            GROUP BY a.id, a.nome, a.nomeResponsavel
+        """,
+            countQuery = "SELECT COUNT(DISTINCT a) FROM Aluno a JOIN a.turmaAlunos ta ON ta.isAlunoAtivo = true WHERE LOWER(a.nome) LIKE LOWER(CONCAT('%', :nome, '%'))"
+    )
     Page<AlunoResumoDTO> listarAlunosAtivosPorNomeResumido(String nome, Pageable pageable);
 
     @Query("""
