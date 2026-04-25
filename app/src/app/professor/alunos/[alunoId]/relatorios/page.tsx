@@ -299,6 +299,7 @@ export default function RelatoriosAlunoListaPage() {
           relatorio={relatorioSelecionado}
           alunoNome={alunoData?.nome}
           alunoDataNascimento={alunoData?.dataNascimento}
+          alunoTurma={turmaData?.nome || alunoData?.turma?.nome}
           onSalvar={handleSalvarRelatorio}
         />
       )}
