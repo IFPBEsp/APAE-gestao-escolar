@@ -43,11 +43,18 @@ public class AlunoService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AlunoResumoDTO> listarAlunosPorNome(String nome, Pageable pageable) {
-        Page<AlunoResumoDTO> page =
-                (nome == null || nome.isBlank())
-                        ? alunoRepository.listarAlunosResumido(pageable)
-                        : alunoRepository.listarAlunosPorNomeResumido(nome, pageable);
+    public Page<AlunoResumoDTO> listarAlunosPorNome(String nome,Boolean apenasAtivos, Pageable pageable) {
+        Page<AlunoResumoDTO> page;
+
+        if(Boolean.TRUE.equals(apenasAtivos)){
+            page = (nome == null || nome.isBlank())
+                    ? alunoRepository.listarAlunosAtivosResumido(pageable)
+                    : alunoRepository.listarAlunosAtivosPorNomeResumido(nome, pageable);
+        }else {
+            page = (nome == null || nome.isBlank())
+                    ? alunoRepository.listarAlunosResumido(pageable)
+                    : alunoRepository.listarAlunosPorNomeResumido(nome, pageable);
+        }
 
         return page.map(dto -> new AlunoResumoDTO(
                 dto.getId(),
