@@ -95,12 +95,14 @@ public class AuthService {
         Professor professor = professorRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor com email não cadastrado"));
 
-        if(!professor.getCpf().equals(request.getCpf())){
+        String cpfRequestSomenteDigitos = request.getCpf().replaceAll("\\D", "");
+        String cpfBancoSomenteDigitos = professor.getCpf().replaceAll("\\D", "");
+
+        if(!cpfBancoSomenteDigitos.equals(cpfRequestSomenteDigitos)){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Dados inválidos");
         }
 
-        String cpfSomenteDigitos = request.getCpf().replaceAll("\\D", "");
-        professor.setSenha(passwordEncoder.encode(cpfSomenteDigitos));
+        professor.setSenha(passwordEncoder.encode(cpfRequestSomenteDigitos));
         professor.setPrimeiroAcesso(true);
         professorRepository.save(professor);
     }
