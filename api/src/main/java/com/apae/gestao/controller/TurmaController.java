@@ -2,12 +2,11 @@ package com.apae.gestao.controller;
 
 import java.util.List;
 
-import com.apae.gestao.dto.*;
+import com.apae.gestao.dto.turma.TurmaResumoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.apae.gestao.dto.ApiErrorResponse;
 import com.apae.gestao.dto.turma.TurmaRequestDTO;
 import com.apae.gestao.dto.turma.TurmaResponseDTO;
 import com.apae.gestao.dto.turmaAluno.TurmaAlunoResponseDTO;

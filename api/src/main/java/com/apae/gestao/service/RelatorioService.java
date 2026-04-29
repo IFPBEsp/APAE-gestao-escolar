@@ -1,7 +1,7 @@
 package com.apae.gestao.service;
 
-import com.apae.gestao.dto.RelatorioRequestDTO;
-import com.apae.gestao.dto.RelatorioResponseDTO;
+import com.apae.gestao.dto.relatorio.RelatorioRequestDTO;
+import com.apae.gestao.dto.relatorio.RelatorioResponseDTO;
 import com.apae.gestao.entity.*;
 import com.apae.gestao.repository.*;
 

@@ -1,4 +1,4 @@
-package com.apae.gestao.dto;
+package com.apae.gestao.dto.aula.chamada;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

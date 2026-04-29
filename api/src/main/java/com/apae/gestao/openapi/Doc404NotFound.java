@@ -1,6 +1,6 @@
 package com.apae.gestao.openapi;
 
-import com.apae.gestao.dto.ApiErrorResponse;
+import com.apae.gestao.dto.api.ApiErrorResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

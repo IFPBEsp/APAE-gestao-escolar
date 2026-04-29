@@ -1,13 +1,12 @@
 package com.apae.gestao.controller;
 
-import com.apae.gestao.dto.AlunoTurmaRequestDTO;
-import com.apae.gestao.dto.AvaliacaoHistoricoResponseDTO;
+import com.apae.gestao.dto.aluno.AlunoTurmaRequestDTO;
+import com.apae.gestao.dto.avaliacao.AvaliacaoHistoricoResponseDTO;
 import com.apae.gestao.dto.aluno.AlunoDetalhesDTO;
 import com.apae.gestao.dto.aluno.AlunoResumoDTO;
 import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoItemDTO;
 import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoResponseDTO;
 import com.apae.gestao.service.AlunoService;
-import com.apae.gestao.openapi.Doc400ValidationError;
 import com.apae.gestao.openapi.Doc404NotFound;
 import com.apae.gestao.openapi.DocStandardErrors;
 

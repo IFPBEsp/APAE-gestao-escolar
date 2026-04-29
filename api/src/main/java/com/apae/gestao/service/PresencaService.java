@@ -1,8 +1,8 @@
 package com.apae.gestao.service;
 
-import com.apae.gestao.dto.ChamadaResponseDTO;
-import com.apae.gestao.dto.PresencaAlunoDTO;
-import com.apae.gestao.dto.RegistrarChamadaRequestDTO;
+import com.apae.gestao.dto.aula.chamada.ChamadaResponseDTO;
+import com.apae.gestao.dto.aula.chamada.PresencaAlunoDTO;
+import com.apae.gestao.dto.aula.chamada.RegistrarChamadaRequestDTO;
 import com.apae.gestao.entity.*;
 import com.apae.gestao.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,8 +1,9 @@
 package com.apae.gestao.service;
 
-import com.apae.gestao.dto.LoginRequestDTO;
-import com.apae.gestao.dto.LoginResponseDTO;
-import com.apae.gestao.dto.PrimeiroAcessoRequestDTO;
+import com.apae.gestao.dto.auth.LoginRequestDTO;
+import com.apae.gestao.dto.auth.LoginResponseDTO;
+import com.apae.gestao.dto.auth.PrimeiroAcessoRequestDTO;
+import com.apae.gestao.dto.auth.RecuperarSenhaRequestDTO;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.security.JwtService;
@@ -88,4 +89,19 @@ public class AuthService {
         professor.setPrimeiroAcesso(false);
         professorRepository.save(professor);
     }
+
+    public void redefinirSenha(RecuperarSenhaRequestDTO request){
+
+        Professor professor = professorRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor com email não cadastrado"));
+
+        if(!professor.getCpf().equals(request.getCpf())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cpf errado");
+        }
+
+        professor.setSenha(null);
+        professor.setPrimeiroAcesso(true);
+        professorRepository.save(professor);
+    }
+
 }

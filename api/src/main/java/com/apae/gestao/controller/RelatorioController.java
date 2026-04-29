@@ -2,8 +2,8 @@ package com.apae.gestao.controller;
 
 import java.util.List;
 
-import com.apae.gestao.dto.RelatorioRequestDTO;
-import com.apae.gestao.dto.RelatorioResponseDTO;
+import com.apae.gestao.dto.relatorio.RelatorioRequestDTO;
+import com.apae.gestao.dto.relatorio.RelatorioResponseDTO;
 import com.apae.gestao.service.RelatorioService;
 import com.apae.gestao.openapi.Doc400ValidationError;
 import com.apae.gestao.openapi.Doc404NotFound;

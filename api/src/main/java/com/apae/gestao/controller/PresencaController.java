@@ -1,9 +1,8 @@
 package com.apae.gestao.controller;
 
-import com.apae.gestao.dto.ChamadaResponseDTO;
-import com.apae.gestao.dto.RegistrarChamadaRequestDTO;
+import com.apae.gestao.dto.aula.chamada.ChamadaResponseDTO;
+import com.apae.gestao.dto.aula.chamada.RegistrarChamadaRequestDTO;
 import com.apae.gestao.service.PresencaService;
-import com.apae.gestao.openapi.Doc400ValidationError;
 import com.apae.gestao.openapi.Doc404NotFound;
 import com.apae.gestao.openapi.DocStandardErrors;
 
