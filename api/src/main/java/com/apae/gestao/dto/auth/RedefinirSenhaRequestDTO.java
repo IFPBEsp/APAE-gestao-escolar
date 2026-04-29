@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Dados necessários para solicitar a recuperação de senha.")
-public class RecuperarSenhaRequestDTO {
+public class RedefinirSenhaRequestDTO {
 
     @NotBlank(message = "O e-mail é obrigatório")
     @Schema(description = "E-mail do professor", example = "maria.santos@apae.org.br")

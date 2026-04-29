@@ -3,7 +3,7 @@ package com.apae.gestao.service;
 import com.apae.gestao.dto.auth.LoginRequestDTO;
 import com.apae.gestao.dto.auth.LoginResponseDTO;
 import com.apae.gestao.dto.auth.PrimeiroAcessoRequestDTO;
-import com.apae.gestao.dto.auth.RecuperarSenhaRequestDTO;
+import com.apae.gestao.dto.auth.RedefinirSenhaRequestDTO;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.security.JwtService;
@@ -90,7 +90,7 @@ public class AuthService {
         professorRepository.save(professor);
     }
 
-    public void redefinirSenha(RecuperarSenhaRequestDTO request){
+    public void redefinirSenha(RedefinirSenhaRequestDTO request){
 
         Professor professor = professorRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor com email não cadastrado"));

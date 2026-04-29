@@ -3,7 +3,7 @@ package com.apae.gestao.controller;
 import com.apae.gestao.dto.auth.LoginRequestDTO;
 import com.apae.gestao.dto.auth.LoginResponseDTO;
 import com.apae.gestao.dto.auth.PrimeiroAcessoRequestDTO;
-import com.apae.gestao.dto.auth.RecuperarSenhaRequestDTO;
+import com.apae.gestao.dto.auth.RedefinirSenhaRequestDTO;
 import com.apae.gestao.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -68,7 +68,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos (CPF incorreto ou dados em branco)"),
             @ApiResponse(responseCode = "404", description = "Professor não encontrado para o e-mail informado")
     })
-    public ResponseEntity<Void> redefinirSenha(@Valid @RequestBody RecuperarSenhaRequestDTO request) {
+    public ResponseEntity<Void> redefinirSenha(@Valid @RequestBody RedefinirSenhaRequestDTO request) {
 
         authService.redefinirSenha(request);
 
