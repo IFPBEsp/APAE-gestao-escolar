@@ -36,7 +36,7 @@ export async function registerProfessor(professorData) {
  * @param {boolean} ativo - Status do professor (opcional)
  * @returns {Promise<Array>} Lista de professores
  */
-export async function listarProfessores(nome, ativo) {
+export async function listarProfessores(nome = "", ativo = undefined) {
     try {
         const params = new URLSearchParams();
         if (nome) params.append('nome', nome);

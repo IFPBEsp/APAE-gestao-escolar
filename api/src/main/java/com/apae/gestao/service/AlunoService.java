@@ -43,28 +43,12 @@ public class AlunoService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AlunoResumoDTO> listarAlunosPorNome(String nome,Boolean apenasAtivos, Pageable pageable) {
-        Page<AlunoResumoDTO> page;
-
+    public Page<AlunoResumoDTO> listarAlunosPorNome(String nome, Boolean apenasAtivos, Pageable pageable) {
         if(Boolean.TRUE.equals(apenasAtivos)){
-            page = (nome == null || nome.isBlank())
-                    ? alunoRepository.listarAlunosAtivosResumido(pageable)
-                    : alunoRepository.listarAlunosAtivosPorNomeResumido(nome, pageable);
-        }else {
-            page = (nome == null || nome.isBlank())
-                    ? alunoRepository.listarAlunosResumido(pageable)
-                    : alunoRepository.listarAlunosPorNomeResumido(nome, pageable);
+            return alunoRepository.listarAlunosAtivosPorFiltro(nome, pageable);
+        } else {
+            return alunoRepository.listarAlunosPorFiltro(nome, pageable);
         }
-
-        return page.map(dto -> new AlunoResumoDTO(
-                dto.getId(),
-                dto.getNome(),
-                dto.getNomeResponsavel(),
-                dto.getNomeTurma(),
-                dto.getTurnoTurma(),
-                dto.getPercentualPresenca(),
-                dto.getDataUltimaAvaliacao() 
-        ));
     }
 
     @Transactional(readOnly = true)
