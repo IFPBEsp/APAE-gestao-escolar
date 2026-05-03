@@ -81,12 +81,12 @@ export default function AdminHomePage() {
 
         for (const { t, estatisticas, aulasRealizadasData } of perTurmaStats) {
            const ocup = t.totalAlunosAtivos || 0;
-           ocupacaoTotal += ocup;
            const capLine = t.capacidade || 15;
            
            if (t.isAtiva) {
               ativasCount++;
               cTotal += capLine;
+              ocupacaoTotal += ocup;
               turmasAulasSum += (aulasRealizadasData || 0);
            }
            
@@ -183,9 +183,15 @@ export default function AdminHomePage() {
           const presentes = historico.filter((h:any) => h.status === 'Presente').length;
           frequenciaCalc = Math.round((presentes / historico.length) * 100);
        }
-       setSelectedLocalAluno((prev: any) => ({...prev, isMetricsLoading: false, freqHistorico: historico, frequenciaVal: historico.length > 0 ? frequenciaCalc : null}));
+       setSelectedLocalAluno((prev: any) => {
+          if (!prev || prev.id !== aluno.id) return prev;
+          return {...prev, isMetricsLoading: false, freqHistorico: historico, frequenciaVal: historico.length > 0 ? frequenciaCalc : null};
+       });
      } catch(err) {
-       setSelectedLocalAluno((prev: any) => ({...prev, isMetricsLoading: false, freqHistorico: [], frequenciaVal: null}));
+       setSelectedLocalAluno((prev: any) => {
+          if (!prev || prev.id !== aluno.id) return prev;
+          return {...prev, isMetricsLoading: false, freqHistorico: [], frequenciaVal: null};
+       });
      }
   }
 
