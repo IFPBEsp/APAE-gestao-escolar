@@ -1,4 +1,4 @@
-package com.apae.gestao.dto;
+package com.apae.gestao.dto.relatorio;
 
 import com.apae.gestao.entity.Relatorio;
 import lombok.AllArgsConstructor;

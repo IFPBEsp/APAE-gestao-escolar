@@ -1,4 +1,4 @@
-package com.apae.gestao.dto;
+package com.apae.gestao.dto.api;
 
 import java.time.LocalDateTime;
 import java.util.Map;
