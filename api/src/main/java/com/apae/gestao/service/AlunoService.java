@@ -43,8 +43,12 @@ public class AlunoService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AlunoResumoDTO> listarAlunosPorNome(String nome, Pageable pageable) {
-        return alunoRepository.listarAlunosPorFiltro(nome, pageable);
+    public Page<AlunoResumoDTO> listarAlunosPorNome(String nome, Boolean apenasAtivos, Pageable pageable) {
+        if(Boolean.TRUE.equals(apenasAtivos)){
+            return alunoRepository.listarAlunosAtivosPorFiltro(nome, pageable);
+        } else {
+            return alunoRepository.listarAlunosPorFiltro(nome, pageable);
+        }
     }
 
     @Transactional(readOnly = true)

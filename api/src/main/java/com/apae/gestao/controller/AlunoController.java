@@ -47,12 +47,12 @@ public class AlunoController {
     public ResponseEntity<Page<AlunoResumoDTO>> listarAlunosPorNome(
             @Parameter(example = "João", in = ParameterIn.QUERY)
             @RequestParam(value = "nome", required = false) String nome,
-
-            @PageableDefault(size = 12, sort = "nome")
+            @RequestParam(defaultValue = "false", required = false) Boolean apenasAtivos,
+            @PageableDefault(size = 30, sort = "nome")
             Pageable pageable
     ) {
         Page<AlunoResumoDTO> alunos =
-                alunoService.listarAlunosPorNome(nome, pageable);
+                alunoService.listarAlunosPorNome(nome,apenasAtivos, pageable);
 
         return ResponseEntity.ok(alunos);
     }
