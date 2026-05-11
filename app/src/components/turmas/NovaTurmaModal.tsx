@@ -70,13 +70,15 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
     const [alunoParaRemover, setAlunoParaRemover] = useState<Aluno | null>(null);
 
     // Gerar nome automaticamente
-    const nomeTurma = `${tipo ? formatTipo(tipo) : ""} ${ano} - ${turno ? formatTurno(turno) : ""}`;
+    const nomeTurma = [
+        tipo ? formatTipo(tipo) : null,
+        turno ? formatTurno(turno).toLowerCase() : null,
+        ano ? `- ${ano}` : null
+    ].filter(Boolean).join(" ");
 
     function formatTipo(val: string) {
-        if (val === 'alfabetizacao') return 'Alfabetização';
-        if (val === 'estimulacao') return 'Estimulação';
-        if (val === 'matematica') return 'Matemática';
-        return val;
+        if (!val) return "";
+        return `${val}° ano`;
     }
 
     function formatTurno(val: string) {
@@ -222,24 +224,17 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
 
                 <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <Label className="text-[#0D4F97]">Tipo de Turma *</Label>
+                        <Label className="text-[#0D4F97]">Série *</Label>
                         <Select onValueChange={setTipo}>
                             <SelectTrigger className="bg-white border-[#B2D7EC]">
-                                <SelectValue placeholder="Selecione o tipo de turma" />
+                                <SelectValue placeholder="Selecione a série" />
                             </SelectTrigger>
                             <SelectContent className="bg-white">
-                                <SelectItem 
-                                    value="alfabetizacao"
-                                    className="cursor-pointer hover:bg-[#D0E7FA] focus:bg-[#D0E7FA] transition-colors"
-                                >
-                                    Alfabetização
-                                </SelectItem>
-                                <SelectItem
-                                    value="estimulacao"
-                                    className="cursor-pointer hover:bg-[#D0E7FA] focus:bg-[#D0E7FA] transition-colors"
-                                >
-                                    Estimulação
-                                </SelectItem>
+                                <SelectItem value="1">1° ano</SelectItem>
+                                <SelectItem value="2">2° ano</SelectItem>
+                                <SelectItem value="3">3° ano</SelectItem>
+                                <SelectItem value="4">4° ano</SelectItem>
+                                <SelectItem value="5">5° ano</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
