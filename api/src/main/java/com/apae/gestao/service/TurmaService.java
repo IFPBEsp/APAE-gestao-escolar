@@ -301,7 +301,9 @@ public class TurmaService {
         turma.setAnoCriacao(dto.getAnoCriacao());
         turma.setTurno(dto.getTurno());
         turma.setTipo(dto.getTipo());
-        turma.setNome(dto.getTipo() + " " + dto.getTurno().toLowerCase() + " - " + dto.getAnoCriacao());
+        String tipo = dto.getTipo() != null ? dto.getTipo() : "";
+        String turno = dto.getTurno() != null ? dto.getTurno().toLowerCase() : "";
+        turma.setNome(tipo + " " + turno + " - " + dto.getAnoCriacao());
 
         if (dto.getIsAtiva() != null) {
             turma.setIsAtiva(dto.getIsAtiva());
