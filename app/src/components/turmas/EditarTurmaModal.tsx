@@ -88,14 +88,17 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     const [alunoParaRemover, setAlunoParaRemover] = useState<AlunoNaTurma | null>(null);
 
     const nomeTurma = useMemo(
-        () => `${tipo ? formatTipo(tipo) : ""} ${anoCriacao || ""} - ${turno ? formatTurno(turno) : ""}`,
+        () => [
+            tipo ? formatTipo(tipo) : null,
+            turno ? formatTurno(turno) : null,
+            anoCriacao ? `- ${anoCriacao}` : null
+        ].filter(Boolean).join(" "),
         [tipo, turno, anoCriacao]
     );
 
     function formatTipo(val: string) {
-        if (val.toUpperCase() === "ALFABETIZACAO") return "Alfabetização";
-        if (val.toUpperCase() === "ESTIMULACAO") return "Estimulação";
-        return val;
+        if (!val) return "";
+        return `${val}° ano`;
     }
 
     function formatTurno(val: string) {
@@ -111,7 +114,8 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
             try {
                 const turmaBackend = await buscarTurmaPorId(turmaData.id);
 
-                setTipo(turmaBackend.tipo);
+                const tipoApenasNumeros = turmaBackend.tipo?.replace(/\D/g, '') || "";
+                setTipo(tipoApenasNumeros);
                 setTurno(turmaBackend.turno);
                 setAnoCriacao(turmaBackend.anoCriacao?.toString() || "");
 
@@ -297,14 +301,17 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                         
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-[#0D4F97]">Tipo de Turma</Label>
-                                <Select onValueChange={setTipo} defaultValue={turmaData.tipo}>
+                                <Label className="text-[#0D4F97]">Série</Label>
+                                <Select onValueChange={setTipo} value={tipo || undefined}>
                                     <SelectTrigger className="bg-white border-[#B2D7EC]">
-                                        <SelectValue placeholder={formatTipo(tipo)} /> 
+                                        <SelectValue placeholder="Selecione a série" />
                                     </SelectTrigger>
                                     <SelectContent className="bg-white">
-                                        <SelectItem value="ALFABETIZACAO">Alfabetização</SelectItem>
-                                        <SelectItem value="ESTIMULACAO">Estimulação</SelectItem>
+                                        <SelectItem value="1">1° ano</SelectItem>
+                                        <SelectItem value="2">2° ano</SelectItem>
+                                        <SelectItem value="3">3° ano</SelectItem>
+                                        <SelectItem value="4">4° ano</SelectItem>
+                                        <SelectItem value="5">5° ano</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
