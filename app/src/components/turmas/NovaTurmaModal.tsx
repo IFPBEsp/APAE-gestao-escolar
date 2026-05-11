@@ -72,7 +72,7 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
     // Gerar nome automaticamente
     const nomeTurma = [
         tipo ? formatTipo(tipo) : null,
-        turno ? formatTurno(turno).toLowerCase() : null,
+        turno ? formatTurno(turno) : null,
         ano ? `- ${ano}` : null
     ].filter(Boolean).join(" ");
 

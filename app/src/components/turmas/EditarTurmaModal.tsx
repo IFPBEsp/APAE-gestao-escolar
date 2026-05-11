@@ -90,7 +90,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     const nomeTurma = useMemo(
         () => [
             tipo ? formatTipo(tipo) : null,
-            turno ? formatTurno(turno).toLowerCase() : null,
+            turno ? formatTurno(turno) : null,
             anoCriacao ? `- ${anoCriacao}` : null
         ].filter(Boolean).join(" "),
         [tipo, turno, anoCriacao]
