@@ -36,6 +36,11 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
+# Metadados da imagem (vincula ao repositório no GHCR)
+LABEL org.opencontainers.image.source=https://github.com/IFPBEsp/APAE-gestao-escolar
+LABEL org.opencontainers.image.description="APAE Gestão Escolar - Frontend (Next.js)"
+LABEL org.opencontainers.image.licenses=MIT
+
 # Usuário não-root para segurança em produção
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
