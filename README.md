@@ -7,6 +7,7 @@
     <strong>Sistema completo para gestão escolar da APAE</strong>
   </p>
 
+
   <p>
     <img src="https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white" alt="Render" height="25"/>
     <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel" height="25"/>
