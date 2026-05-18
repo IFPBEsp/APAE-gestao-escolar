@@ -23,7 +23,7 @@ export function EstudanteCard({
 }: EstudanteCardProps) {
     return (
         <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
-            <CardContent className="p-6">
+            <CardContent className="p-6 pt-6">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between w-full">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                         <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-[#B2D7EC]/20">
