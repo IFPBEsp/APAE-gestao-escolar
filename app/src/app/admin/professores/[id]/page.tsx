@@ -185,15 +185,22 @@ export default function DetalhesProfessor() {
                 </div>
 
                 {/* E-mail */}
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                <div className="flex items-start gap-3 min-w-0">
+                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97] shrink-0">
                     <Mail className="h-5 w-5" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-500 mb-1">
                       E-mail
                     </p>
-                    <p className="text-[#222222]">
+                    <p
+                      className="text-[#222222] truncate max-w-[200px] cursor-pointer hover:text-[#0D4F97]"
+                      title={professor.email || ""}
+                      onClick={() => {
+                        navigator.clipboard.writeText(professor.email || "");
+                        toast.success("E-mail copiado!");
+                      }}
+                    >
                       {professor.email || "—"}
                     </p>
                   </div>
