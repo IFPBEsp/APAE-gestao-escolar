@@ -75,9 +75,7 @@ export default function TurmasPage() {
           Minhas Turmas
         </h1>
 
-        <p className="text-[#222222] mt-1 text-sm md:text-lg">
-          Bem-vindo, {professor?.nome || usuario.email}!
-        </p>
+
 
         <p className="text-[#222222] mt-1 text-sm md:text-base">
           Gerencie suas turmas e alunos
