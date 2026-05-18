@@ -189,7 +189,7 @@ export default function DetalhesProfessor() {
                   <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97] shrink-0">
                     <Mail className="h-5 w-5" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm font-medium text-gray-500 mb-1">
                       E-mail
                     </p>
