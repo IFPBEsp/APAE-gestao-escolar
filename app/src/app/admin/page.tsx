@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { GraduationCap, ArrowRight, UserPlus, Search, Shield, ChevronRight, Activity, BookOpen, BarChart2, Users2 } from "lucide-react";
+import { GraduationCap, ArrowRight, UserPlus, Search, Shield, ChevronRight, Activity, BookOpen, BarChart2, Users2, Users, School } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
@@ -196,7 +196,7 @@ export default function AdminHomePage() {
   }
 
   const freqData = [
-     { name: "Presenças", value: frequenciaMediaGlobal, color: "#10B981" },
+     { name: "Presenças", value: frequenciaMediaGlobal, color: "#0D4F97" },
      { name: "Faltas Médias", value: 100 - frequenciaMediaGlobal, color: "#F1F5F9" }
   ];
 
@@ -206,14 +206,14 @@ export default function AdminHomePage() {
   ];
   
   const vagasHeroData = [
-    { name: "Alunos Ativos", value: turmasData.ocupacao || 0, color: "#10B981" }, 
-    { name: "Vagas Totais Livres", value: Math.max(0, (turmasData.capacidadeTotal || 0) - (turmasData.ocupacao || 0)), color: "#F1F5F9" } 
+    { name: "Alunos Ativos", value: turmasData.ocupacao || 0, color: "#0D4F97" }, 
+    { name: "Vagas Totais Livres", value: Math.max(0, (turmasData.capacidadeTotal || 0) - (turmasData.ocupacao || 0)), color: "#B2D7EC" } 
   ];
 
   return (
     <main className="p-4 md:p-8 w-full max-w-[1400px] mx-auto min-h-screen bg-[#F8FAFC]/50">
       <div className="space-y-8">
-        <section className="bg-gradient-to-br from-[#E6F0FC] to-[#F4F9FF] rounded-3xl p-6 md:p-8 border border-[#B2D7EC]/50 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
+        <section className="bg-white rounded-3xl p-6 md:p-8 border-2 border-[#B2D7EC] shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="w-full md:w-1/2 md:pl-4 space-y-5">
             <div>
               <div className="flex items-center gap-3 mb-3">
@@ -286,7 +286,7 @@ export default function AdminHomePage() {
                       </div>
                    </div>
                    <p className="text-[#0D4F97]/60 font-extrabold uppercase tracking-[0.2em] text-[10px] mt-6 text-center flex items-center justify-center gap-1.5">
-                      <Users2 className="w-3.5 h-3.5 text-[#10B981]" /> Ocupação Atual
+                      <Users2 className="w-3.5 h-3.5 text-[#FFD000]" /> Ocupação Atual
                    </p>
                 </div>
               )}
@@ -297,35 +297,35 @@ export default function AdminHomePage() {
            <div className="space-y-8 animate-in fade-in duration-500">
               <section className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
-          <Card className="rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow bg-emerald-50 hover:border-emerald-300">
-            <CardContent className="p-6">
+          <Card className="rounded-2xl border-2 border-[#B2D7EC] shadow-sm hover:shadow-md transition-shadow bg-white hover:border-[#0D4F97]">
+            <CardContent className="p-6 pt-6">
               <div className="flex items-center justify-between mb-4">
-                <p className="text-emerald-800/80 font-bold text-sm uppercase tracking-wide">Painel de Turmas</p>
-                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
-                  <Activity className="w-5 h-5" strokeWidth={2.5} />
+                <p className="text-[#0D4F97] font-bold text-sm uppercase tracking-wide">Painel de Turmas</p>
+                <div className="w-10 h-10 rounded-full bg-[#B2D7EC]/20 flex items-center justify-center text-[#0D4F97]">
+                  <School className="w-5 h-5" strokeWidth={2.5} />
                 </div>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-emerald-700">{loading ? "--" : turmasData.ativas}</span>
-                <span className="text-emerald-700/60 text-xs font-semibold bg-emerald-100 px-2 py-1 rounded-md">Ativas de {loading ? "--" : turmasData.total}</span>
+                <span className="text-3xl font-extrabold text-[#0D4F97]">{loading ? "--" : turmasData.ativas}</span>
+                <span className="text-[#0D4F97]/60 text-xs font-semibold bg-[#B2D7EC]/20 px-2 py-1 rounded-md">Ativas de {loading ? "--" : turmasData.total}</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border border-violet-100 shadow-sm hover:shadow-md hover:border-violet-300 transition-all bg-violet-50 cursor-pointer group" onClick={() => router.push('/admin/professores')}>
-            <CardContent className="p-6 flex flex-col justify-between h-full">
+          <Card className="rounded-2xl border-2 border-[#B2D7EC] shadow-sm hover:shadow-md hover:border-[#0D4F97] transition-all bg-white cursor-pointer group" onClick={() => router.push('/admin/professores')}>
+            <CardContent className="p-6 pt-6 flex flex-col justify-between h-full">
               <div className="flex items-center justify-between mb-4">
-                <p className="text-violet-800/80 font-bold text-sm uppercase tracking-wide">Corpo Docente</p>
-                <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-600 transition-transform group-hover:scale-110">
-                  <GraduationCap className="w-5 h-5" strokeWidth={2.5} />
+                <p className="text-[#0D4F97] font-bold text-sm uppercase tracking-wide">Corpo Docente</p>
+                <div className="w-10 h-10 rounded-full bg-[#B2D7EC]/20 flex items-center justify-center text-[#0D4F97] transition-transform group-hover:scale-110">
+                  <Users className="w-5 h-5" strokeWidth={2.5} />
                 </div>
               </div>
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-extrabold text-violet-700">{totalProfessores}</span>
-                  <span className="text-violet-700/60 text-xs font-semibold bg-violet-100 px-2 py-1 rounded-md">Professores</span>
+                  <span className="text-3xl font-extrabold text-[#0D4F97]">{totalProfessores}</span>
+                  <span className="text-[#0D4F97]/60 text-xs font-semibold bg-[#B2D7EC]/20 px-2 py-1 rounded-md">Professores</span>
                 </div>
-                <ChevronRight className="text-violet-300 group-hover:text-violet-600 transition-colors" />
+                <ChevronRight className="text-[#B2D7EC] group-hover:text-[#0D4F97] transition-colors" />
               </div>
             </CardContent>
           </Card>
@@ -333,7 +333,7 @@ export default function AdminHomePage() {
 
         <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
-          <Card className="rounded-2xl shadow-sm border border-[#B2D7EC]/40 bg-[#F8FAFC]/50 hover:shadow-md transition-shadow">
+          <Card className="rounded-2xl shadow-sm border-2 border-[#B2D7EC] bg-white hover:border-[#0D4F97] hover:shadow-md transition-all">
              <CardHeader className="pb-2 border-b border-[#B2D7EC]/20 flex flex-row items-center justify-between">
                 <div>
                    <CardTitle className="text-sm font-bold text-[#0D4F97] uppercase tracking-wider flex items-center gap-2">
@@ -377,7 +377,7 @@ export default function AdminHomePage() {
           </Card>
 
           {/* GRÁFICO 2: FREQUENCIA GLOBAL */}
-          <Card className="rounded-2xl shadow-sm border border-[#B2D7EC]/40 bg-[#F8FAFC]/50 hover:shadow-md transition-shadow">
+          <Card className="rounded-2xl shadow-sm border-2 border-[#B2D7EC] bg-white hover:border-[#0D4F97] hover:shadow-md transition-all">
              <CardHeader className="pb-2 border-b border-[#B2D7EC]/20 flex flex-row items-center justify-between">
                 <div>
                    <CardTitle className="text-sm font-bold text-[#0D4F97] uppercase tracking-wider flex items-center gap-2">
@@ -389,7 +389,7 @@ export default function AdminHomePage() {
              <CardContent className="p-0 relative min-h-[220px]">
                 {loading ? (
                    <div className="absolute inset-0 flex items-center justify-center">
-                     <div className="w-24 h-24 border-4 border-gray-100 border-t-emerald-500 rounded-full animate-spin"></div>
+                     <div className="w-24 h-24 border-4 border-gray-100 border-t-[#0D4F97] rounded-full animate-spin"></div>
                    </div>
                 ) : (
                   <>
@@ -437,7 +437,7 @@ export default function AdminHomePage() {
               </button>
             </div>
             
-            <Card className="rounded-2xl shadow-sm border border-[#B2D7EC]/50 overflow-hidden bg-white">
+            <Card className="rounded-2xl shadow-sm border-2 border-[#B2D7EC] overflow-hidden bg-white hover:border-[#0D4F97] hover:shadow-md transition-all">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
@@ -501,7 +501,7 @@ export default function AdminHomePage() {
               Painel de Lotação
             </h2>
             
-            <Card className="rounded-2xl shadow-sm border border-[#B2D7EC]/50 bg-white h-[calc(100%-2.75rem)]">
+            <Card className="rounded-2xl shadow-sm border-2 border-[#B2D7EC] bg-white h-[calc(100%-2.75rem)] hover:border-[#0D4F97] hover:shadow-md transition-all">
               <CardHeader className="pb-4 pt-5 border-b border-[#B2D7EC]/30">
                 <CardTitle className="text-xs font-bold text-[#0D4F97] uppercase tracking-widest">
                   Turmas Mais Preenchidas
@@ -524,9 +524,9 @@ export default function AdminHomePage() {
                     const oc = turma.ocupacao || 0;
                     const percent = Math.min(100, Math.round((oc / maxCap) * 100));
                     
-                    let barColor = "bg-emerald-500 scale-y-100";
-                    if (percent > 60) barColor = "bg-[#0D4F97] scale-y-110"; 
-                    if (percent >= 100) barColor = "bg-red-500 scale-y-125"; 
+                    let barColor = "bg-[#B2D7EC] scale-y-100";
+                    if (percent > 60) barColor = "bg-[#FFD000] scale-y-110"; 
+                    if (percent >= 100) barColor = "bg-[#0D4F97] scale-y-125"; 
 
                     return (
                       <div key={turma.id} className="group cursor-pointer" onClick={() => router.push('/admin/turmas')}>
@@ -618,17 +618,17 @@ export default function AdminHomePage() {
                                    <ResponsiveContainer width="100%" height="100%">
                                       <PieChart>
                                          <Pie data={[
-                                           {value: selectedLocalAluno.frequenciaVal, fill: '#10B981'},
+                                           {value: selectedLocalAluno.frequenciaVal, fill: '#0D4F97'},
                                            {value: 100 - selectedLocalAluno.frequenciaVal, fill: '#F1F5F9'}
                                          ]} cx="50%" cy="50%" innerRadius={55} outerRadius={75} dataKey="value" stroke="none" />
                                       </PieChart>
                                    </ResponsiveContainer>
                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                      <span className="text-3xl font-extrabold text-emerald-600">{selectedLocalAluno.frequenciaVal}%</span>
+                                      <span className="text-3xl font-extrabold text-[#0D4F97]">{selectedLocalAluno.frequenciaVal}%</span>
                                    </div>
                                 </div>
-                                <div className="text-center mt-3 bg-white border border-emerald-100 shadow-sm px-4 py-2 rounded-xl">
-                                  <p className="text-xs text-emerald-800 font-bold">Assiduidade Ativa</p>
+                                <div className="text-center mt-3 bg-white border border-[#B2D7EC] shadow-sm px-4 py-2 rounded-xl">
+                                  <p className="text-xs text-[#0D4F97] font-bold">Assiduidade Ativa</p>
                                   <p className="text-[10px] text-gray-400 mt-1">Registrada baseada nas aulas da turma.</p>
                                 </div>
                               </>
