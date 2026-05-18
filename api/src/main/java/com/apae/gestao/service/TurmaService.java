@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.apae.gestao.dto.*;
+import com.apae.gestao.dto.turma.TurmaResumoDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -301,7 +301,14 @@ public class TurmaService {
         turma.setAnoCriacao(dto.getAnoCriacao());
         turma.setTurno(dto.getTurno());
         turma.setTipo(dto.getTipo());
-        turma.setNome(dto.getTipo() + " " + dto.getAnoCriacao() + " - " + dto.getTurno());
+
+        String tipo = dto.getTipo() != null ? dto.getTipo() : "";
+        String turno = dto.getTurno() != null
+        ? dto.getTurno().substring(0, 1).toUpperCase()
+            + dto.getTurno().substring(1).toLowerCase()
+        : "";
+
+        turma.setNome(tipo + " " + turno + " - " + dto.getAnoCriacao());
 
         if (dto.getIsAtiva() != null) {
             turma.setIsAtiva(dto.getIsAtiva());

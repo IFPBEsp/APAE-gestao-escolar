@@ -1,8 +1,11 @@
 package com.apae.gestao.controller;
 
 import java.util.List;
-import com.apae.gestao.dto.*;
-import com.apae.gestao.dto.turma.TurmaResponseDTO;
+
+import com.apae.gestao.dto.professor.ProfessorRequestDTO;
+import com.apae.gestao.dto.professor.ProfessorResponseDTO;
+import com.apae.gestao.dto.professor.ProfessorResumoDTO;
+import com.apae.gestao.dto.turma.TurmaResumoDTO;
 import com.apae.gestao.service.ProfessorService;
 import com.apae.gestao.openapi.Doc400ValidationError;
 import com.apae.gestao.openapi.Doc404NotFound;

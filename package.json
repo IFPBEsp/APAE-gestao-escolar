@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "react-to-print": "^3.2.0"
+    "react-to-print": "^3.2.0",
+    "recharts": "^3.8.1"
   }
 }

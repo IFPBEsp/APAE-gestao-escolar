@@ -137,7 +137,7 @@ export default function FrequenciaPage() {
                 </div>
 
                 <div id="secao-chamada">
-                <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
+                <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white overflow-hidden">
                     <CardHeader className="bg-[#F8F9FA] border-b-2 border-[#B2D7EC]">
                         <CardTitle className="text-[#0D4F97]">
                             Registrar Chamada
@@ -147,7 +147,7 @@ export default function FrequenciaPage() {
                     </CardDescription>
                         </CardHeader>
 
-                        <CardContent className="p-6">
+                        <CardContent className="p-6 pt-6">
                     <ChamadaContent
                         turmaId={turmaId}
                         alunos={alunos}
@@ -500,7 +500,7 @@ function HistoricoContent({
     });
 
     return (
-        <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
+        <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white overflow-hidden">
             <CardHeader className="bg-[#F8F9FA] border-b-2 border-[#B2D7EC]">
                 <div className="flex justify-between items-center">
                     <div>
@@ -511,8 +511,8 @@ function HistoricoContent({
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="p-6 space-y-6">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mt-6">
+            <CardContent className="p-6 pt-6 space-y-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
                         <CardContent className="p-6 pt-12 text-center flex flex-col items-center justify-start h-full">
                             <p className="text-[#0D4F97] text-2xl font-bold">{mediaFrequencia}%</p>

@@ -1,4 +1,4 @@
-package com.apae.gestao.dto;
+package com.apae.gestao.dto.avaliacao;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

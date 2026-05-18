@@ -1,7 +1,7 @@
 package com.apae.gestao.service;
 
-import com.apae.gestao.dto.AvaliacaoRequestDTO;
-import com.apae.gestao.dto.AvaliacaoResponseDTO;
+import com.apae.gestao.dto.avaliacao.AvaliacaoRequestDTO;
+import com.apae.gestao.dto.avaliacao.AvaliacaoResponseDTO;
 import com.apae.gestao.entity.Avaliacao;
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Professor;

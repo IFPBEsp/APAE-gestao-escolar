@@ -125,6 +125,16 @@ export default function LoginComponent({ tipoPredefinido }: LoginProps) {
                 </button>
               </div>
             </div>
+            
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => router.push("/esqueci-senha")}
+                className="text-sm text-[#0D4F97] hover:text-[#FFD000] transition-colors font-medium"
+              >
+                Esqueci minha senha
+              </button>
+            </div>
 
             {erro && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">

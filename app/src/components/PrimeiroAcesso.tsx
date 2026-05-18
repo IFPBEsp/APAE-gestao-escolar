@@ -9,6 +9,8 @@ export default function PrimeiroAcessoComponent() {
   const router = useRouter();
   const params = useSearchParams();
   const email = params.get("email") || "";
+  const mode = params.get("mode");
+  const isReset = mode === "reset";
 
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
@@ -28,6 +30,16 @@ export default function PrimeiroAcessoComponent() {
     setCarregando(true);
 
     try {
+      if (isReset) {
+      // 🚫 NÃO chama backend
+      console.log("Fluxo de reset (mock)");
+
+      alert("Senha redefinida com sucesso!");
+      router.push("/login?tipo=professor");
+      return;
+    }
+
+      // fluxo normal (já existente)
       await primeiroAcesso(email, senha);
       alert("Senha cadastrada com sucesso!");
       router.push("/login?tipo=professor");
@@ -40,7 +52,6 @@ export default function PrimeiroAcessoComponent() {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center">
-      {/* Background igual ao login */}
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url('/apae-background.png')" }}
@@ -56,7 +67,7 @@ export default function PrimeiroAcessoComponent() {
               <div className="h-1.5 w-32 bg-[#FFD000] mx-auto rounded-full"></div>
             </div>
             <h2 className="text-2xl md:text-3xl font-semibold text-gray-800">
-              Primeiro acesso do Professor
+              {isReset ? "Redefinir senha" : "Primeiro acesso do Professor"}
             </h2>
           </div>
 
@@ -118,7 +129,7 @@ export default function PrimeiroAcessoComponent() {
                 <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
                 <>
-                  <LogIn size={24} /> Cadastrar senha
+                  <LogIn size={24} /> {isReset ? "Salvar nova senha" : "Cadastrar senha"}
                 </>
               )}
             </button>

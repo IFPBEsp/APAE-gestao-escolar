@@ -1,8 +1,9 @@
 package com.apae.gestao.service;
 
-import com.apae.gestao.dto.LoginRequestDTO;
-import com.apae.gestao.dto.LoginResponseDTO;
-import com.apae.gestao.dto.PrimeiroAcessoRequestDTO;
+import com.apae.gestao.dto.auth.LoginRequestDTO;
+import com.apae.gestao.dto.auth.LoginResponseDTO;
+import com.apae.gestao.dto.auth.PrimeiroAcessoRequestDTO;
+import com.apae.gestao.dto.auth.RedefinirSenhaRequestDTO;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.security.JwtService;
@@ -88,4 +89,22 @@ public class AuthService {
         professor.setPrimeiroAcesso(false);
         professorRepository.save(professor);
     }
+
+    public void redefinirSenha(RedefinirSenhaRequestDTO request){
+
+        Professor professor = professorRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor com email não cadastrado"));
+
+        String cpfRequestSomenteDigitos = request.getCpf().replaceAll("\\D", "");
+        String cpfBancoSomenteDigitos = professor.getCpf().replaceAll("\\D", "");
+
+        if(!cpfBancoSomenteDigitos.equals(cpfRequestSomenteDigitos)){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Dados inválidos");
+        }
+
+        professor.setSenha(passwordEncoder.encode(cpfRequestSomenteDigitos));
+        professor.setPrimeiroAcesso(true);
+        professorRepository.save(professor);
+    }
+
 }

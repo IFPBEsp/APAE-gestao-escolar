@@ -1,4 +1,4 @@
-package com.apae.gestao.dto;
+package com.apae.gestao.dto.aula.chamada;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;

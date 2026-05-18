@@ -1,7 +1,7 @@
 package com.apae.gestao.controller;
 
-import com.apae.gestao.dto.AvaliacaoRequestDTO;
-import com.apae.gestao.dto.AvaliacaoResponseDTO;
+import com.apae.gestao.dto.avaliacao.AvaliacaoRequestDTO;
+import com.apae.gestao.dto.avaliacao.AvaliacaoResponseDTO;
 import com.apae.gestao.service.AvaliacaoService;
 import com.apae.gestao.openapi.Doc400ValidationError;
 import com.apae.gestao.openapi.Doc404NotFound;

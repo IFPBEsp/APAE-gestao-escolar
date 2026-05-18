@@ -1,7 +1,9 @@
 package com.apae.gestao.service;
 
-import com.apae.gestao.dto.*;
-import com.apae.gestao.dto.turma.TurmaResponseDTO;
+import com.apae.gestao.dto.professor.ProfessorRequestDTO;
+import com.apae.gestao.dto.professor.ProfessorResponseDTO;
+import com.apae.gestao.dto.professor.ProfessorResumoDTO;
+import com.apae.gestao.dto.turma.TurmaResumoDTO;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Turma;
 import com.apae.gestao.exception.ConflitoDeDadosException;
