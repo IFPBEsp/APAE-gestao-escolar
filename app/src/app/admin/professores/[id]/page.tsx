@@ -194,7 +194,7 @@ export default function DetalhesProfessor() {
                       E-mail
                     </p>
                     <p
-                      className="text-[#222222] truncate max-w-[200px] cursor-pointer hover:text-[#0D4F97]"
+                      className="text-[#222222] truncate max-w-[220px] cursor-pointer hover:text-[#0D4F97]"
                       title={professor.email || ""}
                       onClick={() => {
                         navigator.clipboard.writeText(professor.email || "");
