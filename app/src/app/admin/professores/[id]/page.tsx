@@ -196,9 +196,18 @@ export default function DetalhesProfessor() {
                     <p
                       className="text-[#222222] truncate max-w-[220px] cursor-pointer hover:text-[#0D4F97]"
                       title={professor.email || ""}
-                      onClick={() => {
-                        navigator.clipboard.writeText(professor.email || "");
-                        toast.success("E-mail copiado!");
+                      onClick={async () => {
+                        if (!professor.email) {
+                          toast.error("E-mail não disponível.");
+                          return;
+                        }
+
+                        try {
+                          await navigator.clipboard.writeText(professor.email);
+                          toast.success("E-mail copiado!");
+                        } catch (error) {
+                          toast.error("Erro ao copiar e-mail.");
+                        }
                       }}
                     >
                       {professor.email || "—"}
