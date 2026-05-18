@@ -74,9 +74,6 @@ export default function TurmasPage() {
         <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
           Minhas Turmas
         </h1>
-
-
-
         <p className="text-[#222222] mt-1 text-sm md:text-base">
           Gerencie suas turmas e alunos
         </p>
