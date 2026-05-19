@@ -15,7 +15,7 @@ RUN npm ci --frozen-lockfile
 COPY . .
 
 # NEXT_PUBLIC_* são resolvidas em build-time no Next.js
-ARG NEXT_PUBLIC_API_URL=/api
+ARG NEXT_PUBLIC_API_URL=/gestao-escolar/api
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 # URL do backend usada nas rewrites do next.config.js
@@ -53,6 +53,6 @@ USER appuser
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD wget -qO- http://localhost:3000 || exit 1
+  CMD wget -qO- http://localhost:3000/gestao-escolar || exit 1
 
 CMD ["node", "server.js"]

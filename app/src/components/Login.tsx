@@ -41,9 +41,9 @@ export default function LoginComponent({ tipoPredefinido }: LoginProps) {
 
       // Redirecionamento
       if (role === "ADMIN") {
-        window.location.href = "/admin";
+        router.replace("/admin");
       } else if (role === "TEACHER") {
-        window.location.href = "/professor";
+        router.replace("/professor");
       }
 
     } catch (err: any) {

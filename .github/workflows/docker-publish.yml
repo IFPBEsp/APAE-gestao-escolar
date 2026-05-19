@@ -31,6 +31,7 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/apae-gestao-escolar-frontend:latest
           build-args: |
+            NEXT_PUBLIC_API_URL=/gestao-escolar/api
             BACKEND_URL=${{ secrets.BACKEND_URL }}
 
   build-and-push-backend:

@@ -5,7 +5,7 @@ import api from './api';
  * Cadastra um novo professor na API.
  *
  * A chamada POST será direcionada para: [baseURL do api.ts] + '/professores'
- * O que resulta na URL lógica: /api/professores
+ * O que resulta na URL lógica: /gestao-escolar/api/professores
  *
  * @param {object} professorData - Os dados do professor (nome, email, etc.)
  * @returns {Promise<object>} O objeto de resposta da API (ProfessorResponseDTO).
