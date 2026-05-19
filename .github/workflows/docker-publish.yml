@@ -1,0 +1,59 @@
+name: Publicar imagens no GHCR
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build-and-push-frontend:
+    name: Build e push do Frontend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Login no GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build e push da imagem do Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/apae-gestao-escolar-frontend:latest
+          build-args: |
+            BACKEND_URL=${{ secrets.BACKEND_URL }}
+
+  build-and-push-backend:
+    name: Build e push do Backend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Login no GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build e push da imagem do Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./api
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/apae-gestao-escolar-backend:latest
