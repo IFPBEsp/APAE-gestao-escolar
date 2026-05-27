@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { primeiroAcesso } from "@/services/authService";
+import { assetPath } from "@/utils/constants";
 
 export default function PrimeiroAcessoComponent() {
   const router = useRouter();
@@ -54,7 +55,7 @@ export default function PrimeiroAcessoComponent() {
     <div className="min-h-screen relative flex items-center justify-center">
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/apae-background.png')" }}
+        style={{ backgroundImage: `url('${assetPath('/apae-background.png')}')` }}
       >
         <div className="absolute inset-0 bg-[#0D4F97] opacity-75"></div>
       </div>
