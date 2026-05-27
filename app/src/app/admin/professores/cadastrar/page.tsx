@@ -121,7 +121,7 @@ export default function CadastrarProfessorPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-[#E5E5E5] p-4 md:p-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-[#F4F6FB] p-4 md:p-8">
       <div className="mx-auto max-w-2xl">
 
         <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">

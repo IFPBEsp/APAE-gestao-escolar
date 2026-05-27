@@ -5,6 +5,7 @@ import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { login as loginService } from "@/services/authService";
 import { useAuth } from "@/contexts/AuthContext";
+import { assetPath } from "@/utils/constants";
 
 interface LoginProps {
   tipoPredefinido?: string | null;
@@ -41,9 +42,9 @@ export default function LoginComponent({ tipoPredefinido }: LoginProps) {
 
       // Redirecionamento
       if (role === "ADMIN") {
-        window.location.href = "/admin";
+        router.replace("/admin");
       } else if (role === "TEACHER") {
-        window.location.href = "/professor";
+        router.replace("/professor");
       }
 
     } catch (err: any) {
@@ -68,7 +69,7 @@ export default function LoginComponent({ tipoPredefinido }: LoginProps) {
       {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/apae-background.png')" }}
+        style={{ backgroundImage: `url('${assetPath('/apae-background.png')}')` }}
       >
         <div className="absolute inset-0 bg-[#0D4F97] opacity-75"></div>
       </div>
