@@ -24,12 +24,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Normalizar owner para lowercase
+        id: owner
+        env:
+          IMAGE_OWNER: ${{ github.repository_owner }}
+        run: echo "value=${IMAGE_OWNER,,}" >> "$GITHUB_OUTPUT"
+
       - name: Build e push da imagem do Frontend
         uses: docker/build-push-action@v5
         with:
           context: ./app
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/apae-gestao-escolar-frontend:latest
+          tags: ghcr.io/${{ steps.owner.outputs.value }}/apae-gestao-escolar-frontend:latest
           build-args: |
             NEXT_PUBLIC_API_URL=/gestao-escolar/api
             BACKEND_URL=${{ secrets.BACKEND_URL }}
@@ -52,9 +58,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Normalizar owner para lowercase
+        id: owner
+        env:
+          IMAGE_OWNER: ${{ github.repository_owner }}
+        run: echo "value=${IMAGE_OWNER,,}" >> "$GITHUB_OUTPUT"
+
       - name: Build e push da imagem do Backend
         uses: docker/build-push-action@v5
         with:
           context: ./api
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/apae-gestao-escolar-backend:latest
+          tags: ghcr.io/${{ steps.owner.outputs.value }}/apae-gestao-escolar-backend:latest
