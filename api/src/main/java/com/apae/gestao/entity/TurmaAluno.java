@@ -12,7 +12,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "turma_aluno", schema = "gestao_escoler")
+@Table(name = "turma_aluno", schema = "gestao_escolar")
 public class TurmaAluno {
 
     @Id
@@ -22,8 +22,7 @@ public class TurmaAluno {
     @JoinColumn(name = "turma_id", nullable = false)
     private Turma turma;
 
-    @ManyToOne
-    @JoinColumn(name = "paciente_id", nullable = false)
+    @Column(name = "paciente_id", nullable = false)
     private UUID pacienteId;
 
     private Boolean ativo = true;

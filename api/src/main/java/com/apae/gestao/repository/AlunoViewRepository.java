@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -67,7 +68,7 @@ public interface AlunoViewRepository extends JpaRepository<AlunoView, UUID> {
                 AND (:nome IS NULL OR TRIM(:nome) = '' OR LOWER(a.nomeCompleto) LIKE LOWER(CONCAT('%', TRIM(:nome), '%')))
                 GROUP BY a.id, a.nomeCompleto, a.cpf, a.dataDeNascimento, a.contato
             """, countQuery = "SELECT COUNT(DISTINCT a.id) FROM AlunoView a JOIN TurmaAluno ta ON ta.pacienteId = a.id WHERE ta.ativo = true  AND (:nome IS NULL OR TRIM(:nome) = '' OR LOWER(a.nomeCompleto) LIKE LOWER(CONCAT('%', TRIM(:nome), '%')))")
-    Page<AlunoResumoDTO> listarAlunosAtivosPorFiltro(String nome, Pageable pageable);
+    Page<AlunoResumoDTO> listarAlunosAtivosPorFiltro(@Param("nome") String nome, Pageable pageable);
 
     @Query(
             value = """
@@ -95,7 +96,7 @@ public interface AlunoViewRepository extends JpaRepository<AlunoView, UUID> {
                 AND ta.ativo = true
                 GROUP BY a.id, a.nomeCompleto
             """, countQuery = "SELECT COUNT(DISTINCT a.id) FROM AlunoView a JOIN TurmaAluno ta ON ta.pacienteId = a.id JOIN ta.turma t WHERE t.id = :turmaId AND ta.ativo = true")
-    Page<AlunoFrequenciaResumoDTO> listarFrequenciaAlunosDaTurma(UUID turmaId, Pageable pageable);
+    Page<AlunoFrequenciaResumoDTO> listarFrequenciaAlunosDaTurma(@Param("turmaId") UUID turmaId, Pageable pageable);
 
     @Query("""
                 SELECT new com.apae.gestao.dto.aula.AulaPresencaAlunoResponseDTO(
@@ -111,7 +112,7 @@ public interface AlunoViewRepository extends JpaRepository<AlunoView, UUID> {
                 ORDER BY au.data DESC
             """)
     Page<AulaPresencaAlunoResponseDTO> listarHistoricoAluno(
-            UUID pacienteId,
+            @Param("pacienteId") UUID pacienteId,
             Pageable pageable);
 
     List<AlunoView> findByNomeCompletoContainingIgnoreCase(String nomeCompleto);
