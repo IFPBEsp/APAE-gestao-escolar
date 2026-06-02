@@ -16,11 +16,17 @@ import java.util.UUID;
 public class Turma {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String nome;
 
+    @Column(name = "ano_criacao")
+    private Integer anoCriacao;
+
     private String turno;
+
+    private String tipo;
 
     private Boolean ativa = true;
 

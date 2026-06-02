@@ -3,9 +3,7 @@ package com.apae.gestao.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -17,11 +15,11 @@ import java.util.UUID;
 public class Professor {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne
-    @JoinColumn(name = "usuario_id", referencedColumnName = "id")
-    private Usuario usuarioId;
+    @Column(name = "usuario_id", nullable = false, unique = true)
+    private UUID usuarioId;
 
     private String formacao;
 
