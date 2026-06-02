@@ -21,7 +21,7 @@ public class Professor {
 
     @OneToOne
     @JoinColumn(name = "usuario_id", referencedColumnName = "id")
-    private UUID usuarioId;
+    private Usuario usuarioId;
 
     private String formacao;
 
