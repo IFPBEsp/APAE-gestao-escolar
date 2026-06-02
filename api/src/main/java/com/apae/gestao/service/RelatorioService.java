@@ -15,12 +15,12 @@ import java.util.stream.Collectors;
 public class RelatorioService {
 
     private final RelatorioRepository relatorioRepository;
-    private final AlunoRepository alunoRepository;
+    private final AlunoViewRepository alunoRepository;
     private final ProfessorRepository professorRepository;
     private final TurmaRepository turmaRepository;
 
     public RelatorioService(RelatorioRepository relatorioRepository,
-                            AlunoRepository alunoRepository,
+                            AlunoViewRepository alunoRepository,
                             ProfessorRepository professorRepository,
                             TurmaRepository turmaRepository) {
         this.relatorioRepository = relatorioRepository;

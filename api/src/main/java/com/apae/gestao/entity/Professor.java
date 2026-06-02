@@ -3,97 +3,41 @@ package com.apae.gestao.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import java.util.UUID;
 
 @Entity
-@Table(name = "professores")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@Table(name = "professores", schema = "gestao_escolar")
 public class Professor {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
 
-    @Column(nullable = false, length = 100)
-    private String nome;
+    @OneToOne
+    @JoinColumn(name = "usuario_id", referencedColumnName = "id")
+    private UUID usuarioId;
 
-    @Column(nullable = false, unique = true, length = 14)
-    private String cpf;
-
-    @Column(nullable = true, unique = true, length = 100)
-    private String email;
-
-    @Column(nullable = true)
-    private String senha;
-
-    @Column(length = 15)
-    private String telefone;
-
-    @Column(name = "data_nascimento")
-    private LocalDate dataNascimento;
-
-    @Column(name = "formacao", length = 100)
     private String formacao;
 
     @Column(name = "data_contratacao")
     private LocalDate dataContratacao;
 
-    @Column(length = 255)
-    private String endereco;
-
-    @Column(nullable = false)
-    private Boolean ativo = true;
-
-    @Column(name = "link_foto", length = 500)
-    private String linkFoto;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(nullable = false)
-    private Boolean primeiroAcesso = true;
-
-    @OneToMany(mappedBy = "professor", fetch = FetchType.LAZY)
-    @JsonIgnoreProperties({"professor", "turmaAlunos", "aulas"})
-    private Set<Turma> turmas = new HashSet<>();
-
-    @OneToMany(mappedBy = "professor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Relatorio> relatorios = new HashSet<>();
-
-    @OneToMany(mappedBy = "professor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Avaliacao> avaliacoes = new HashSet<>();
+    @Column(name = "primeiro_acesso")
+    private Boolean primeiroAcesso;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-        if (ativo == null) {
-            ativo = true;
-        }
         if (primeiroAcesso == null) {
             primeiroAcesso = true;
         }
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 
     @Override
     public boolean equals(Object o) {

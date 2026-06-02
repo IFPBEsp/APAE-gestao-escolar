@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.apae.gestao.dto.turma.TurmaResumoFrequenciaDTO;
-import com.apae.gestao.repository.AlunoRepository;
+import com.apae.gestao.repository.AlunoViewRepository;
 import com.apae.gestao.repository.TurmaRepository;
 import com.apae.gestao.dto.aluno.AlunoFrequenciaResumoDTO;
 import com.apae.gestao.dto.aula.AulaPresencaAlunoResponseDTO;
@@ -20,7 +20,7 @@ public class FrequenciaService {
     private TurmaRepository turmaRepository;
 
     @Autowired
-    private AlunoRepository alunoRepository;
+    private AlunoViewRepository alunoRepository;
 
     @Transactional
     public TurmaResumoFrequenciaDTO getResumoTurma(Long turmaId) {
