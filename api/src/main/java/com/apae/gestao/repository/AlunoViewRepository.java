@@ -33,8 +33,8 @@ public interface AlunoViewRepository extends JpaRepository<AlunoView, UUID> {
             )
             FROM AlunoView a
             LEFT JOIN TurmaAluno ta ON ta.pacienteId = a.id AND ta.ativo = true
-            LEFT JOIN Turma t ON ta.turmaId = t.id
-            LEFT JOIN Presenca p ON p.pacienteId = a.id AND p.aulaId IN (SELECT au.id FROM Aula au WHERE au.turmaId = t.id)
+            LEFT JOIN ta.turma t
+            LEFT JOIN Presenca p ON p.pacienteId = a.id AND p.aulaId IN (SELECT au.id FROM Aula au WHERE au.turma.id = t.id)
             LEFT JOIN Avaliacao av ON av.pacienteId = a.id
             WHERE (:nome IS NULL OR TRIM(:nome) = '' OR LOWER(a.nomeCompleto) LIKE LOWER(CONCAT('%', TRIM(:nome), '%')))
             GROUP BY a.id, a.nomeCompleto, a.cpf , a.dataDeNascimento, a.contato
@@ -60,7 +60,7 @@ public interface AlunoViewRepository extends JpaRepository<AlunoView, UUID> {
                 )
                 FROM AlunoView a
                 JOIN TurmaAluno ta ON ta.pacienteId = a.id
-                JOIN Turma t ON ta.turmaId = t.id
+                JOIN ta.turma t
                 LEFT JOIN Presenca p ON p.pacienteId = a.id
                 LEFT JOIN Avaliacao av ON av.pacienteId = a.id
                 WHERE ta.ativo = true
@@ -75,26 +75,26 @@ public interface AlunoViewRepository extends JpaRepository<AlunoView, UUID> {
                     a.id,
                     a.nomeCompleto,
                     CASE
-                        WHEN COUNT(p) = 0 THEN 0
-                        ELSE SUM(CASE WHEN p.faltou = false THEN 1 ELSE 0 END) * 100.0 / COUNT(p)
+                        WHEN COUNT(p) = 0 THEN 0.0
+                        ELSE SUM(CASE WHEN p.faltou = false THEN 1.0 ELSE 0.0 END) * 100.0 / COUNT(p)
                     END,
                     CASE
                         WHEN (
                             CASE
-                                WHEN COUNT(p) = 0 THEN 0
-                                ELSE SUM(CASE WHEN p.faltou = false THEN 1 ELSE 0 END) * 100.0 / COUNT(p)
+                                WHEN COUNT(p) = 0 THEN 0.0
+                                ELSE SUM(CASE WHEN p.faltou = false THEN 1.0 ELSE 0.0 END) * 100.0 / COUNT(p)
                             END
                         ) < 75 THEN true ELSE false
                     END
                 )
                 FROM AlunoView a
                 JOIN TurmaAluno ta ON ta.pacienteId = a.id
-                JOIN Turma t ON ta.turmaId = t.id
-                LEFT JOIN Presenca p ON p.pacienteId = a.id AND p.aulaId IN (SELECT au.id FROM Aula au WHERE au.turmaId = :turmaId)
+                JOIN ta.turma t
+                LEFT JOIN Presenca p ON p.pacienteId = a.id AND p.aulaId IN (SELECT au.id FROM Aula au WHERE au.turma.id = :turmaId)
                 WHERE t.id = :turmaId
                 AND ta.ativo = true
                 GROUP BY a.id, a.nomeCompleto
-            """, countQuery = "SELECT COUNT(DISTINCT a.id) FROM AlunoView a JOIN TurmaAluno ta ON ta.pacienteId = a.id JOIN Turma t ON ta.turmaId = t.id WHERE t.id = :turmaId AND ta.ativo = true")
+            """, countQuery = "SELECT COUNT(DISTINCT a.id) FROM AlunoView a JOIN TurmaAluno ta ON ta.pacienteId = a.id JOIN ta.turma t WHERE t.id = :turmaId AND ta.ativo = true")
     Page<AlunoFrequenciaResumoDTO> listarFrequenciaAlunosDaTurma(UUID turmaId, Pageable pageable);
 
     @Query("""
