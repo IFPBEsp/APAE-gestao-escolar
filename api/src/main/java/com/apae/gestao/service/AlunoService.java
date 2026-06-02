@@ -9,7 +9,7 @@ import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoItemDTO;
 import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Turma;
 import com.apae.gestao.entity.TurmaAluno;
-import com.apae.gestao.repository.AlunoRepository;
+import com.apae.gestao.repository.AlunoViewRepository;
 import com.apae.gestao.repository.AvaliacaoRepository;
 import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.TurmaRepository;
@@ -25,13 +25,13 @@ import java.util.List;
 @Service
 public class AlunoService {
 
-    private final AlunoRepository alunoRepository;
+    private final AlunoViewRepository alunoRepository;
     private final TurmaRepository turmaRepository;
     private final TurmaAlunoRepository turmaAlunoRepository;
     private final AvaliacaoRepository avaliacaoRepository;
 
     public AlunoService(
-            AlunoRepository alunoRepository,
+            AlunoViewRepository alunoRepository,
             TurmaRepository turmaRepository,
             TurmaAlunoRepository turmaAlunoRepository,
             AvaliacaoRepository avaliacaoRepository

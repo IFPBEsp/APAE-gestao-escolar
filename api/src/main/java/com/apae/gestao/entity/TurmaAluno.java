@@ -2,35 +2,30 @@ package com.apae.gestao.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.Objects;
+import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 
 @Entity
-@Table(name = "turma_aluno")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@Table(name = "turma_aluno", schema = "gestao_escolar")
 public class TurmaAluno {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "turma_id", nullable = false)
     private Turma turma;
 
-    @ManyToOne
-    @JoinColumn(name = "aluno_id", nullable = false)
-    private Aluno aluno;
+    @Column(name = "paciente_id", nullable = false)
+    private UUID pacienteId;
 
-    @Column(name = "is_aluno_ativo", nullable = false)
-    private Boolean isAlunoAtivo = true;
+    private Boolean ativo = true;
 
     @Override
     public boolean equals(Object o) {
@@ -38,11 +33,11 @@ public class TurmaAluno {
         if (o == null || getClass() != o.getClass()) return false;
         TurmaAluno that = (TurmaAluno) o;
         return Objects.equals(turma, that.turma) &&
-                Objects.equals(aluno, that.aluno);
+                Objects.equals(pacienteId, that.pacienteId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(turma, aluno);
+        return Objects.hash(turma, pacienteId);
     }
 }

@@ -5,62 +5,48 @@ import lombok.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import java.util.UUID;
 
 @Entity
-@Table(name = "turmas")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@Table(name = "turmas", schema = "gestao_escolar")
 public class Turma {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-    @Column(nullable = false)
     private String nome;
 
-    @Column(nullable = false)
+    @Column(name = "ano_criacao")
     private Integer anoCriacao;
 
-    @Column(nullable = false)
     private String turno;
 
-    @Column(length = 50)
     private String tipo;
 
-    @Column(nullable = false)
-    private Boolean isAtiva = true;
+    private Boolean ativa = true;
 
     @OneToMany(mappedBy = "turma", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TurmaAluno> turmaAlunos = new HashSet<>();
 
-    @ManyToOne
-    @JoinColumn(name = "professor_id", nullable = true)
-    @JsonIgnoreProperties({"turmas", "relatorios", "avaliacoes"})
-    private Professor professor;
 
     @OneToMany(mappedBy = "turma", cascade = CascadeType.ALL)
     private Set<Aula> aulas = new HashSet<>();
 
-    public void addAluno(Aluno aluno, Boolean isAlunoAtivo) {
+    public void addAluno(UUID pacienteId, Boolean ativo) {
         TurmaAluno turmaAluno = new TurmaAluno();
         turmaAluno.setTurma(this);
-        turmaAluno.setAluno(aluno);
-        turmaAluno.setIsAlunoAtivo(isAlunoAtivo != null ? isAlunoAtivo : true);
+        turmaAluno.setPacienteId(pacienteId);
+        turmaAluno.setAtivo(ativo != null ? ativo : true);
         turmaAlunos.add(turmaAluno);
-        aluno.getTurmaAlunos().add(turmaAluno);
     }
 
-    public void removeAluno(Aluno aluno) {
-        turmaAlunos.removeIf(ta -> ta.getAluno().equals(aluno));
-        aluno.getTurmaAlunos().removeIf(ta -> ta.getTurma().equals(this));
+    public void removeAluno(UUID pacienteId) {
+        turmaAlunos.removeIf(ta -> ta.getPacienteId().equals(pacienteId));
     }
 
     @Override

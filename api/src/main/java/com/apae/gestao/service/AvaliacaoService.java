@@ -7,7 +7,7 @@ import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Turma;
 import com.apae.gestao.repository.AvaliacaoRepository;
-import com.apae.gestao.repository.AlunoRepository;
+import com.apae.gestao.repository.AlunoViewRepository;
 import com.apae.gestao.repository.ProfessorRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class AvaliacaoService {
 
     private final AvaliacaoRepository avaliacaoRepository;
-    private final AlunoRepository alunoRepository;
+    private final AlunoViewRepository alunoRepository;
     private final ProfessorRepository professorRepository;
 
     private String getTurmaCompleta(Avaliacao avaliacao) {

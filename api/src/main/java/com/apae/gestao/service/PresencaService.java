@@ -23,7 +23,7 @@ public class PresencaService {
     private final PresencaRepository presencaRepository;
     private final AulaRepository aulaRepository;
     private final TurmaRepository turmaRepository;
-    private final AlunoRepository alunoRepository;
+    private final AlunoViewRepository alunoRepository;
     private final ObjectMapper objectMapper;
 
 
