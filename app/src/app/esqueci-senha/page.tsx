@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { redefinirSenha } from '@services/authService';
+import { assetPath } from "@/utils/constants";
 
 export default function EsqueciSenhaPage() {
   const router = useRouter();
@@ -39,7 +40,7 @@ export default function EsqueciSenhaPage() {
     <div className="min-h-screen relative flex items-center justify-center">
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/apae-background.png')" }}
+        style={{ backgroundImage: `url('${assetPath('/apae-background.png')}')` }}
       >
         <div className="absolute inset-0 bg-[#0D4F97] opacity-75"></div>
       </div>

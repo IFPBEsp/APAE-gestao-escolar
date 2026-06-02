@@ -1,3 +1,7 @@
+x-frontend-defaults:
+  environment:
+    NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/gestao-escolar/api}
+
 services:
   postgres:
     image: postgres:13

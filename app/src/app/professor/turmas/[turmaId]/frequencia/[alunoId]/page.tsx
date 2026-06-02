@@ -23,7 +23,7 @@ export default function HistoricoAlunoPage() {
     const [loading, setLoading] = useState(true);
 
     // Mock History Data
-    // In a real implementation, we would fetch this from an API endpoint like /api/alunos/{id}/frequencia
+    // In a real implementation, we would fetch this from an API endpoint like /gestao-escolar/api/alunos/{id}/frequencia
     // Mock History Data - Generated deterministically based on ID to match the list page
     const [historico, setHistorico] = useState<any[]>([]);
 
