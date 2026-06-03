@@ -21,6 +21,7 @@ import java.util.UUID;
 public class Aula {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private LocalDate data;

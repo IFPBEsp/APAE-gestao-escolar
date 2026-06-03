@@ -22,6 +22,7 @@ import lombok.*;
 public class Avaliacao {
     
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String descricao; 

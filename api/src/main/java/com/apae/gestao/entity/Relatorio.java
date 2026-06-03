@@ -18,6 +18,7 @@ import lombok.*;
 public class Relatorio {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(columnDefinition = "TEXT")
