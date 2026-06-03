@@ -233,7 +233,7 @@ public class TurmaService {
 
     @Transactional(readOnly = true)
     public List<TurmaAlunoResponseDTO> listarAlunos(Long turmaId) {
-        return turmaAlunoDAO.findByTurmaIdOrderByAlunoNomeAsc(turmaId)
+        return turmaAlunoDAO.findByTurmaIdOrderByPacienteNomeAsc(turmaId)
                 .stream()
                 .map(TurmaAlunoResponseDTO::new)
                 .toList();
@@ -283,7 +283,7 @@ public class TurmaService {
         Aluno aluno = alunoDAO.findById(alunoId)
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado."));
 
-        TurmaAluno turmaAluno = turmaAlunoDAO.findByTurmaAndAluno(turma, aluno)
+        TurmaAluno turmaAluno = turmaAlunoDAO.findByTurmaAndPacienteId(turma, aluno)
                 .orElseThrow(() -> new RuntimeException("O aluno não pertence a esta turma."));
 
         if(ativo){
@@ -348,7 +348,7 @@ public class TurmaService {
     }
 
     private boolean isAlunoAtivoEmOutraTurma(Aluno aluno, Long turmaIdAtual) {
-        List<TurmaAluno> matriculasAtivas = turmaAlunoDAO.findAllByAlunoAndIsAlunoAtivoTrue(aluno);
+        List<TurmaAluno> matriculasAtivas = turmaAlunoDAO.findAllByPacienteIdAndAtivoTrue(aluno);
 
         return matriculasAtivas.stream()
                 .anyMatch(ta -> turmaIdAtual == null || !ta.getTurma().getId().equals(turmaIdAtual));

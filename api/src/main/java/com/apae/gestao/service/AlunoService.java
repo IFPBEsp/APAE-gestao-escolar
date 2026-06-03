@@ -72,7 +72,7 @@ public class AlunoService {
 
 
         turmaAlunoRepository
-                .findAllByAlunoAndIsAlunoAtivoTrue(aluno)
+                .findAllByPacienteIdAndAtivoTrue(aluno)
                 .forEach(ta -> ta.setIsAlunoAtivo(false));
 
         //busca se o aluno já tem registro no novaTurma para não criar uma nova instância de aluno no bd
@@ -105,7 +105,7 @@ public class AlunoService {
         Aluno aluno = alunoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
 
-        return turmaAlunoRepository.findHistoricoCompletoPorAluno(aluno).stream()
+        return turmaAlunoRepository.findHistoricoCompletoPorPaciente(aluno).stream()
                 .map(AlunoTurmaHistoricoResponseDTO::from)
                 .toList();
     }
@@ -121,7 +121,7 @@ public class AlunoService {
                         .orElse("Sem turma ativa");
 
         return avaliacaoRepository
-                .findByAlunoOrderByDataAvaliacaoDesc(aluno)
+                .findByPacienteIdOrderByDataAvaliacaoDesc(aluno)
                 .stream()
                 .map(a -> AvaliacaoHistoricoResponseDTO.fromEntity(a, turmaAtual))
                 .toList();

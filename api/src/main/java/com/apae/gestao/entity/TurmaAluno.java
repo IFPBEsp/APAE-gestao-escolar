@@ -16,6 +16,7 @@ import java.util.UUID;
 public class TurmaAluno {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne

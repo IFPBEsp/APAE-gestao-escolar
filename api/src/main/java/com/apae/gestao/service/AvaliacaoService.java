@@ -83,7 +83,7 @@ public class AvaliacaoService {
         Aluno aluno = alunoRepository.findById(alunoId)
                 .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado"));
         
-        return avaliacaoRepository.findByAlunoOrderByDataAvaliacaoDesc(aluno)
+        return avaliacaoRepository.findByPacienteIdOrderByDataAvaliacaoDesc(aluno)
                 .stream()
                 .map(avaliacao -> {
                     String turmaCompleta = getTurmaCompleta(avaliacao);

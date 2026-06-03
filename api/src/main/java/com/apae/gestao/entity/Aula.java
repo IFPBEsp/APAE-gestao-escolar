@@ -9,28 +9,27 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
-@Table(name = "aulas")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-
+@Table(name = "aulas", schema = "gestao_escolar")
 public class Aula {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-    @Column(name = "data_da_aula", nullable = false)
-    private LocalDate dataDaAula;
+    private LocalDate data;
 
-    @Column(nullable = false)
     private String descricao;
 
     @ManyToOne
-    @JoinColumn(name = "turmas_id")
+    @JoinColumn(name = "turma_id")
     private Turma turma;
 
     @OneToMany(mappedBy = "aula", cascade = CascadeType.ALL)

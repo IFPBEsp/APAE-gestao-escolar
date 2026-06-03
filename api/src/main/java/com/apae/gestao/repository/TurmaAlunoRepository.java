@@ -2,45 +2,46 @@ package com.apae.gestao.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.apae.gestao.entity.Aluno;
 import com.apae.gestao.entity.Turma;
 import com.apae.gestao.entity.TurmaAluno;
 
 @Repository
-public interface TurmaAlunoRepository extends JpaRepository<TurmaAluno, Long>{
+public interface TurmaAlunoRepository extends JpaRepository<TurmaAluno, UUID>{
 
-    List<TurmaAluno> findByTurmaAndIsAlunoAtivo(Turma turma, Boolean isAlunoAtivo);
+    List<TurmaAluno> findByTurmaAndAtivo(Turma turma, Boolean ativo);
 
-    List<TurmaAluno> findByTurmaAndIsAlunoAtivoOrderByAlunoNomeAsc(Turma turma, Boolean isAlunoAtivo);
+    @Query("SELECT ta FROM TurmaAluno ta JOIN AlunoView a ON ta.pacienteId = a.id WHERE ta.turma = :turma AND ta.ativo = :ativo ORDER BY a.nomeCompleto ASC")
+    List<TurmaAluno> findByTurmaAndAtivoOrderByPacienteNomeAsc(@Param("turma") Turma turma, @Param("ativo") Boolean ativo);
 
-    Optional<TurmaAluno> findByTurmaAndAluno(Turma turma, Aluno aluno);
+    Optional<TurmaAluno> findByTurmaAndPacienteId(Turma turma, UUID pacienteId);
 
-    List<TurmaAluno> findAllByAlunoAndIsAlunoAtivoTrue(Aluno aluno);
+    List<TurmaAluno> findAllByPacienteIdAndAtivoTrue(UUID pacienteId);
 
     @Query("""
             SELECT DISTINCT ta FROM TurmaAluno ta
             JOIN FETCH ta.turma t
-            LEFT JOIN FETCH t.professor
-            WHERE ta.aluno = :aluno
+            WHERE ta.pacienteId = :pacienteId
             ORDER BY t.anoCriacao DESC, t.nome ASC
             """)
-    List<TurmaAluno> findAllHistoricoByAluno(@Param("aluno") Aluno aluno);
+    List<TurmaAluno> findAllHistoricoByPaciente(@Param("pacienteId") UUID pacienteId);
 
-    List<TurmaAluno> findByTurmaId(Long turmaId);
+    List<TurmaAluno> findByTurmaId(UUID turmaId);
 
-    List<TurmaAluno> findByTurmaIdOrderByAlunoNomeAsc(Long turmaId);
+    @Query("SELECT ta FROM TurmaAluno ta JOIN AlunoView a ON ta.pacienteId = a.id WHERE ta.turma.id = :turmaId ORDER BY a.nomeCompleto ASC")
+    List<TurmaAluno> findByTurmaIdOrderByPacienteNomeAsc(@Param("turmaId") UUID turmaId);
 
     @Query("""
             SELECT ta FROM TurmaAluno ta
             JOIN FETCH ta.turma t
-            WHERE ta.aluno = :aluno
-            ORDER BY ta.isAlunoAtivo DESC, t.anoCriacao DESC, t.nome ASC
+            WHERE ta.pacienteId = :pacienteId
+            ORDER BY ta.ativo DESC, t.anoCriacao DESC, t.nome ASC
             """)
-    List<TurmaAluno> findHistoricoCompletoPorAluno(@Param("aluno") Aluno aluno);
+    List<TurmaAluno> findHistoricoCompletoPorPaciente(@Param("pacienteId") UUID pacienteId);
 }
