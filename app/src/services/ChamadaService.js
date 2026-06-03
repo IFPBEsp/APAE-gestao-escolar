@@ -13,10 +13,20 @@ function saveToMockDB(records) {
     localStorage.setItem(MOCK_DB_KEY, JSON.stringify(records));
 }
 
+function normalizarAlunoTurma(aluno) {
+    const id = aluno.pacienteId || aluno.alunoId || aluno.id;
+    return {
+        ...aluno,
+        id,
+        alunoId: id,
+        pacienteId: id,
+    };
+}
+
 export async function getAlunosDaTurma(turmaId) {
     try {
         const response = await api.get(`/turmas/${turmaId}/alunos`);
-        return response.data;
+        return response.data.map(normalizarAlunoTurma);
     } catch (error) {
         const apiMessage = error.response?.data?.message;
         const errorMessage =
@@ -32,7 +42,7 @@ export async function getAlunosDaTurma(turmaId) {
 export async function getChamadaPorTurmaEData(turmaId, data) {
     try {
         const db = getMockDB();
-        const localRecord = db.find(r => r.turmaId == turmaId && r.data === data);
+        const localRecord = db.find(r => String(r.turmaId) === String(turmaId) && r.data === data);
 
         if (localRecord) {
             return {
@@ -58,7 +68,7 @@ export async function getChamadaPorTurmaEData(turmaId, data) {
 export async function registrarChamada(turmaId, data, chamadaRequest) {
     try {
         const db = getMockDB();
-        const filteredDb = db.filter(r => !(r.turmaId == turmaId && r.data === data));
+        const filteredDb = db.filter(r => !(String(r.turmaId) === String(turmaId) && r.data === data));
 
         const newRecord = {
             turmaId,
@@ -85,9 +95,9 @@ export async function registrarChamada(turmaId, data, chamadaRequest) {
 export async function getHistoricoAluno(turmaId, alunoId) {
     const db = getMockDB();
     const studentHistory = db
-        .filter(r => r.turmaId == turmaId && r.presencas.some(p => p.alunoId == alunoId))
+        .filter(r => String(r.turmaId) === String(turmaId) && r.presencas.some(p => String(p.alunoId) === String(alunoId)))
         .map(r => {
-            const presenca = r.presencas.find(p => p.alunoId == alunoId);
+            const presenca = r.presencas.find(p => String(p.alunoId) === String(alunoId));
             return {
                 data: r.data.split('-').reverse().join('/'),
                 descricao: r.descricao,
@@ -101,7 +111,7 @@ export async function getHistoricoAluno(turmaId, alunoId) {
 
 export async function getEstatisticasTurma(turmaId) {
     const db = getMockDB();
-    const turmaRecords = db.filter(r => r.turmaId == turmaId);
+    const turmaRecords = db.filter(r => String(r.turmaId) === String(turmaId));
 
     if (turmaRecords.length === 0) return [];
 
@@ -119,7 +129,7 @@ export async function getEstatisticasTurma(turmaId) {
         const { total, present } = statsMap[alunoId];
         const percent = total > 0 ? Math.round((present / total) * 100) : 0;
         return {
-            alunoId: isNaN(alunoId) ? alunoId : Number(alunoId),
+            alunoId,
             frequencia: percent,
             totalAulas: total,
             totalPresencas: present
@@ -129,14 +139,14 @@ export async function getEstatisticasTurma(turmaId) {
 
 export async function contarAulasRealizadas(turmaId) {
     const db = getMockDB();
-    const count = db.filter(r => r.turmaId == turmaId).length;
+    const count = db.filter(r => String(r.turmaId) === String(turmaId)).length;
     return count;
 }
 
 export async function getDatasComChamada(turmaId) {
     try {
         const db = getMockDB();
-        const records = db.filter(r => r.turmaId == turmaId);
+        const records = db.filter(r => String(r.turmaId) === String(turmaId));
         
         // Em um cenário real tentaríamos buscar do backend as datas
         // const response = await api.get(`/presencas/chamadas/turmas/${turmaId}/datas`);

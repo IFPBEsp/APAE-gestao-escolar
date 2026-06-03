@@ -1,6 +1,7 @@
 package com.apae.gestao.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.apae.gestao.dto.relatorio.RelatorioRequestDTO;
 import com.apae.gestao.dto.relatorio.RelatorioResponseDTO;
@@ -57,7 +58,7 @@ public class RelatorioController {
     })
     @Doc404NotFound
     public ResponseEntity<RelatorioResponseDTO> buscarPorId(
-            @Parameter(description = "Identificador do relatório", example = "1", in = ParameterIn.PATH) @PathVariable Long id) {
+            @Parameter(description = "Identificador do relatório", in = ParameterIn.PATH) @PathVariable UUID id) {
         RelatorioResponseDTO relatorio = relatorioService.buscarPorId(id);
         return ResponseEntity.ok(relatorio);
     }
@@ -65,7 +66,7 @@ public class RelatorioController {
     @GetMapping("/alunos/{alunoId}")
     @Operation(summary = "Listar relatórios de um aluno específico")
     @Doc404NotFound
-    public ResponseEntity<List<RelatorioResponseDTO>> listarPorAluno(@PathVariable Long alunoId) {
+    public ResponseEntity<List<RelatorioResponseDTO>> listarPorAluno(@PathVariable UUID alunoId) {
         List<RelatorioResponseDTO> relatorios = relatorioService.buscarPorAluno(alunoId);
         return ResponseEntity.ok(relatorios);
     }
@@ -77,7 +78,7 @@ public class RelatorioController {
     })
     @DocStandardErrors
     public ResponseEntity<RelatorioResponseDTO> atualizar(
-            @Parameter(description = "Identificador do relatório", example = "1", in = ParameterIn.PATH) @PathVariable Long id,
+            @Parameter(description = "Identificador do relatório", in = ParameterIn.PATH) @PathVariable UUID id,
             @RequestBody RelatorioRequestDTO request) {
         RelatorioResponseDTO relatorio = relatorioService.atualizar(id, request);
         return ResponseEntity.ok(relatorio);
@@ -90,7 +91,7 @@ public class RelatorioController {
     })
     @Doc404NotFound
     public ResponseEntity<Void> deletar(
-            @Parameter(description = "Identificador do relatório", example = "1", in = ParameterIn.PATH) @PathVariable Long id) {
+            @Parameter(description = "Identificador do relatório", in = ParameterIn.PATH) @PathVariable UUID id) {
         relatorioService.deletar(id);
         return ResponseEntity.noContent().build();
     }

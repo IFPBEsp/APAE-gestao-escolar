@@ -48,11 +48,11 @@ export default function RelatoriosAlunoListaPage() {
 
   useEffect(() => {
     const carregarAluno = async () => {
-      if (!alunoIdFromUrl || isNaN(Number(alunoIdFromUrl))) return;
+      if (!alunoIdFromUrl) return;
 
       try {
         setLoadingAluno(true);
-        const data = await buscarAlunoPorId(Number(alunoIdFromUrl));
+        const data = await buscarAlunoPorId(alunoIdFromUrl);
         setAlunoData(data);
       } catch (error) {
         console.error("Erro ao carregar aluno:", error);
@@ -69,7 +69,7 @@ export default function RelatoriosAlunoListaPage() {
     const carregarTurma = async () => {
       if (!turmaId) return;
       try {
-        const data = await buscarTurmaPorId(Number(turmaId));
+        const data = await buscarTurmaPorId(turmaId);
         setTurmaData(data);
       } catch (error) {
         console.error("Erro ao carregar turma:", error);
@@ -84,7 +84,7 @@ export default function RelatoriosAlunoListaPage() {
     try {
       const dados = await listarRelatorios();
       const filtrados = dados.filter((r: any) =>
-        Number(r.alunoId) === Number(alunoIdFromUrl)
+        String(r.alunoId) === String(alunoIdFromUrl)
       );
       setRelatorios(filtrados);
     } catch {
@@ -103,18 +103,15 @@ export default function RelatoriosAlunoListaPage() {
     }
 
     try {
-      const isNovo =
-        !dadosDoModal.id ||
-        dadosDoModal.id === 0 ||
-        Number(dadosDoModal.id) > 999999;
+      const isNovo = !dadosDoModal.id || dadosDoModal.id === "novo";
 
       const payload = {
         atividades: dadosDoModal.atividades,
         habilidades: dadosDoModal.habilidades,
         estrategias: dadosDoModal.estrategias,
         recursos: dadosDoModal.recursos,
-        alunoId: Number(alunoIdFromUrl),
-        turmaId: Number(turmaId) || 1,
+        alunoId: alunoIdFromUrl,
+        turmaId,
         professorId: professorId
       };
 
@@ -186,7 +183,7 @@ export default function RelatoriosAlunoListaPage() {
               action={
                 <Button
                   onClick={() => {
-                    setRelatorioSelecionado({ id: 0, alunoId: Number(alunoIdFromUrl) });
+                    setRelatorioSelecionado({ id: "novo", alunoId: alunoIdFromUrl });
                     setIsModalRelatorioOpen(true);
                   }}
                   variant="primary"

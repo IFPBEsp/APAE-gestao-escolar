@@ -15,8 +15,16 @@ import { getHistoricoAluno } from "@/services/ChamadaService";
 export default function HistoricoAlunoPage() {
     const router = useRouter();
     const params = useParams();
-    const turmaId = params?.turmaId ? Number(params.turmaId) : 0;
-    const alunoId = params?.alunoId ? Number(params.alunoId) : 0;
+    const turmaId = params?.turmaId
+        ? Array.isArray(params.turmaId)
+            ? params.turmaId[0]
+            : params.turmaId
+        : "";
+    const alunoId = params?.alunoId
+        ? Array.isArray(params.alunoId)
+            ? params.alunoId[0]
+            : params.alunoId
+        : "";
 
     const [aluno, setAluno] = useState<any>(null);
     const [turma, setTurma] = useState<any>(null);

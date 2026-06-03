@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -23,11 +24,11 @@ public class RelatorioRequestDTO {
     private String recursos;
 
     @Schema(description = "ID do aluno", example = "1")
-    private Long alunoId;
+    private UUID alunoId;
 
     @Schema(description = "ID da turma à qual o relatório está associado", example = "3")
-    private Long turmaId; 
+    private UUID turmaId;
 
     @Schema(description = "ID do professor", example = "2")
-    private Long professorId;
+    private UUID professorId;
 }

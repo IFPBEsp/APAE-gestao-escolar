@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UserPlus, UserCircle, BookOpen, Search } from "lucide-react";
+import { UserPlus, UserCircle, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import api from "@/services/api";
 
@@ -159,27 +159,9 @@ export default function Professores() {
                     </div>
                   </div>
 
-                  <div className="mt-3 md:mt-4">
-                    <div className="mb-2 flex items-center gap-2">
-                      <BookOpen className="h-4 w-4 text-[#0D4F97]" />
-                      <span className="text-xs md:text-sm font-medium text-[#0D4F97]">Turmas</span>
-                    </div>
-                    {professor.turmas && professor.turmas.length > 0 ? (
-                      <ul className="space-y-1">
-                        {professor.turmas.slice(0, 2).map((turma, index) => (
-                          <li key={index} className="text-xs md:text-sm text-[#222222] truncate">
-                            • {typeof turma === 'object' ? turma.nome || turma.name : turma}
-                          </li>
-                        ))}
-                        {professor.turmas.length > 2 && (
-                          <li className="text-xs md:text-sm text-[#0D4F97] font-medium">
-                            +{professor.turmas.length - 2} mais
-                          </li>
-                        )}
-                      </ul>
-                    ) : (
-                      <p className="text-xs md:text-sm text-gray-400">Nenhuma turma vinculada</p>
-                    )}
+                  <div className="mt-3 md:mt-4 text-xs md:text-sm text-[#222222] space-y-1">
+                    <p className="truncate">{professor.email}</p>
+                    {professor.formacao && <p className="truncate">{professor.formacao}</p>}
                   </div>
                 </CardContent>
               </Card>
@@ -190,5 +172,4 @@ export default function Professores() {
     </main>
   );
 }
-
 

@@ -2,8 +2,12 @@ package com.apae.gestao.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +24,7 @@ import java.util.UUID;
 public class Usuario {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String email;
@@ -33,5 +38,20 @@ public class Usuario {
 
     private String cargo;
 
+    @Column(name = "contato")
+    private String telefone;
+
+    @Transient
+    private String endereco;
+
+    @Transient
+    private Boolean ativo = true;
+
+    @PrePersist
+    private void init() {
+        if (ativo == null) {
+            ativo = true;
+        }
+    }
 
 }

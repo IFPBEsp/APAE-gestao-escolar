@@ -17,12 +17,12 @@ import { buscarAlunoPorId } from "@/services/AlunoService";
 import { EstudanteCard } from "@/components/alunos/EstudanteCard";
 
 interface Avaliacao {
-  id: number;
+  id: string;
   descricao: string;
   dataAvaliacao: string;
-  alunoId: number;
+  alunoId: string;
   alunoNome: string;
-  professorId: number;
+  professorId: string;
   professorNome: string;
 }
 
@@ -32,7 +32,11 @@ export default function AvaliacoesAlunoPage() {
   const router = useRouter();
   const { professorId } = useAuth();
 
-  const alunoId = params?.alunoId ? parseInt(Array.isArray(params.alunoId) ? params.alunoId[0] : params.alunoId) : 0;
+  const alunoId = params?.alunoId
+    ? Array.isArray(params.alunoId)
+      ? params.alunoId[0]
+      : params.alunoId
+    : "";
   const turmaId = searchParams?.get('turmaId') || '';
   
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
@@ -53,13 +57,13 @@ export default function AvaliacoesAlunoPage() {
 
   useEffect(() => {
     const carregarDadosIniciais = async () => {
-      if (!alunoId || isNaN(alunoId)) return;
+      if (!alunoId) return;
 
       try {
         setLoadingAluno(true);
         const [aluno, turma] = await Promise.all([
           buscarAlunoPorId(alunoId),
-          turmaId ? buscarTurmaPorId(Number(turmaId)) : Promise.resolve(null)
+          turmaId ? buscarTurmaPorId(turmaId) : Promise.resolve(null)
         ]);
         setAlunoData(aluno);
         setTurmaData(turma);
@@ -105,6 +109,7 @@ export default function AvaliacoesAlunoPage() {
 
   const handleAdicionarAvaliacao = async () => {
     if (!descricaoAvaliacao.trim()) return toast.error("Preencha a descrição!");
+    if (!professorId) return toast.error("Usuário não autenticado");
     try {
       setSaving(true);
       await AvaliacaoService.criarAvaliacao({
@@ -124,6 +129,7 @@ export default function AvaliacoesAlunoPage() {
 
   const handleEditarAvaliacao = async () => {
     if (!avaliacaoEditando || !descricaoAvaliacao.trim()) return;
+    if (!professorId) return toast.error("Usuário não autenticado");
     try {
       setSaving(true);
       await AvaliacaoService.atualizarAvaliacao(avaliacaoEditando.id, {

@@ -1,87 +1,56 @@
 package com.apae.gestao.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.apae.gestao.dto.turma.TurmaResumoDTO;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-
 import com.apae.gestao.dto.turma.TurmaRequestDTO;
 import com.apae.gestao.dto.turma.TurmaResponseDTO;
+import com.apae.gestao.dto.turma.TurmaResumoDTO;
 import com.apae.gestao.dto.turmaAluno.TurmaAlunoResponseDTO;
-import com.apae.gestao.entity.Aluno;
-import com.apae.gestao.entity.Professor;
+import com.apae.gestao.entity.AlunoView;
 import com.apae.gestao.entity.Turma;
 import com.apae.gestao.entity.TurmaAluno;
 import com.apae.gestao.repository.AlunoViewRepository;
-import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.TurmaRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 @Service
 public class TurmaService {
-    @Autowired
-    private TurmaRepository turmaDAO;
 
-    @Autowired
-    private ProfessorRepository professorDAO;
+    private final TurmaRepository turmaRepository;
+    private final AlunoViewRepository alunoRepository;
+    private final TurmaAlunoRepository turmaAlunoRepository;
 
-    @Autowired
-    private AlunoViewRepository alunoDAO;
-
-    @Autowired
-    private TurmaAlunoRepository turmaAlunoDAO;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @Transactional(readOnly = true)
-    public List<TurmaResumoDTO> listarTurmas(
-            Long id,
-            String nome,
-            Integer anoCriacao,
-            String turno,
-            String tipo,
-            Boolean isAtiva,
-            Long professorId) {
-
-        String jsonResult = turmaDAO.listarTurmasJson(
-                id, nome, anoCriacao, turno, tipo, isAtiva, professorId
-        );
-
-        return parseJsonToList(jsonResult);
+    public TurmaService(TurmaRepository turmaRepository,
+                        AlunoViewRepository alunoRepository,
+                        TurmaAlunoRepository turmaAlunoRepository) {
+        this.turmaRepository = turmaRepository;
+        this.alunoRepository = alunoRepository;
+        this.turmaAlunoRepository = turmaAlunoRepository;
     }
 
     @Transactional(readOnly = true)
-    public TurmaResumoDTO buscarTurmaResumidaPorId(Long id) {
-        String jsonResult = turmaDAO.listarTurmasJson(
-                id, null, null, null, null, null, null
-        );
-
-        List<TurmaResumoDTO> turmas = parseJsonToList(jsonResult);
-
-        if (turmas.isEmpty()) {
-            throw new RuntimeException("Turma não encontrada com ID: " + id);
-        }
-
-        return turmas.get(0);
+    public List<TurmaResumoDTO> listarTurmas(UUID id, String nome, Integer anoCriacao, String turno, String tipo, Boolean ativa) {
+        return turmaRepository.findAll()
+                .stream()
+                .filter(turma -> id == null || id.equals(turma.getId()))
+                .filter(turma -> nome == null || turma.getNome().toLowerCase().contains(nome.toLowerCase()))
+                .filter(turma -> anoCriacao == null || anoCriacao.equals(turma.getAnoCriacao()))
+                .filter(turma -> turno == null || turno.equalsIgnoreCase(turma.getTurno()))
+                .filter(turma -> tipo == null || tipo.equalsIgnoreCase(turma.getTipo()))
+                .filter(turma -> ativa == null || ativa.equals(turma.getAtiva()))
+                .map(this::toResumo)
+                .toList();
     }
 
-    private List<TurmaResumoDTO> parseJsonToList(String json) {
-        try {
-            return objectMapper.readValue(json, new TypeReference<List<TurmaResumoDTO>>() {});
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Erro ao processar JSON de turmas", e);
-        }
+    @Transactional(readOnly = true)
+    public TurmaResumoDTO buscarTurmaResumidaPorId(UUID id) {
+        return toResumo(buscarTurma(id));
     }
 
     @Transactional
@@ -89,20 +58,218 @@ public class TurmaService {
         Turma turma = new Turma();
         mapearDtoParaEntity(dto, turma);
         turma.setNome(obterNomeUnicoParaTurma(turma.getNome(), null));
-        Turma salvo = turmaDAO.save(turma);
-        return new TurmaResponseDTO(salvo);
+        Turma salvo = turmaRepository.save(turma);
+        vincularAlunosDoDto(salvo, dto.getAlunosIds());
+        return buscarPorId(salvo.getId());
     }
 
-    /**
-     * Garante um nome único para a turma. Se já existir turma com o mesmo nome,
-     * adiciona sufixo numérico (2), (3), ... até encontrar um nome disponível.
-     *
-     * @param excludeId ID da turma a ser ignorada na verificação (usado na edição). Pode ser null na criação.
-     */
-    private String obterNomeUnicoParaTurma(String nomeBase, Long excludeId) {
+    @Transactional(readOnly = true)
+    public List<TurmaResponseDTO> listarTodas() {
+        return turmaRepository.findAll()
+                .stream()
+                .map(TurmaResponseDTO::new)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public TurmaResponseDTO buscarPorId(UUID turmaId) {
+        return new TurmaResponseDTO(buscarTurma(turmaId));
+    }
+
+    @Transactional
+    public TurmaResponseDTO atualizar(UUID turmaId, TurmaRequestDTO dto) {
+        Turma turma = buscarTurma(turmaId);
+        mapearDtoParaEntity(dto, turma);
+        turma.setNome(obterNomeUnicoParaTurma(turma.getNome(), turma.getId()));
+        Turma atualizado = turmaRepository.save(turma);
+        vincularAlunosDoDto(atualizado, dto.getAlunosIds());
+        return buscarPorId(atualizado.getId());
+    }
+
+    @Transactional
+    public void deletarPorId(UUID turmaId) {
+        turmaRepository.delete(buscarTurma(turmaId));
+    }
+
+    @Transactional
+    public TurmaResponseDTO ativarTurma(UUID turmaId) {
+        Turma turma = buscarTurma(turmaId);
+        turma.setAtiva(true);
+
+        if (turma.getTurmaAlunos() != null) {
+            turma.getTurmaAlunos().forEach(turmaAluno -> {
+                if (!isPacienteAtivoEmOutraTurma(turmaAluno.getPacienteId(), turmaId)) {
+                    turmaAluno.setAtivo(true);
+                }
+            });
+        }
+
+        return new TurmaResponseDTO(turmaRepository.save(turma));
+    }
+
+    @Transactional
+    public TurmaResponseDTO desativarTurma(UUID turmaId) {
+        Turma turma = buscarTurma(turmaId);
+        turma.setAtiva(false);
+
+        if (turma.getTurmaAlunos() != null) {
+            turma.getTurmaAlunos().forEach(turmaAluno -> turmaAluno.setAtivo(false));
+        }
+
+        return new TurmaResponseDTO(turmaRepository.save(turma));
+    }
+
+    @Transactional
+    public TurmaResponseDTO adicionarAlunos(UUID turmaId, List<UUID> pacienteIds) {
+        Turma turma = buscarTurma(turmaId);
+        validarTurmaAtiva(turma);
+        validarPacientesExistem(pacienteIds);
+        validarPacientesNaoAtivosEmOutrasTurmas(pacienteIds, turmaId);
+        vincularOuReativarPacientes(turma, pacienteIds);
+        return new TurmaResponseDTO(turmaRepository.save(turma));
+    }
+
+    @Transactional(readOnly = true)
+    public List<TurmaAlunoResponseDTO> listarAlunos(UUID turmaId) {
+        return turmaAlunoRepository.findByTurmaIdOrderByPacienteNomeAsc(turmaId)
+                .stream()
+                .map(this::toTurmaAlunoResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<TurmaAlunoResponseDTO> listarAlunosAtivos(UUID turmaId) {
+        Turma turma = buscarTurma(turmaId);
+        return turmaAlunoRepository.findByTurmaAndAtivoOrderByPacienteNomeAsc(turma, true)
+                .stream()
+                .map(this::toTurmaAlunoResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<TurmaAlunoResponseDTO> listarAlunosInativos(UUID turmaId) {
+        Turma turma = buscarTurma(turmaId);
+        return turmaAlunoRepository.findByTurmaAndAtivoOrderByPacienteNomeAsc(turma, false)
+                .stream()
+                .map(this::toTurmaAlunoResponse)
+                .toList();
+    }
+
+    @Transactional
+    public void ativarAluno(UUID turmaId, UUID pacienteId) {
+        alterarStatus(turmaId, pacienteId, true);
+    }
+
+    @Transactional
+    public void desativarAluno(UUID turmaId, UUID pacienteId) {
+        alterarStatus(turmaId, pacienteId, false);
+    }
+
+    private void alterarStatus(UUID turmaId, UUID pacienteId, boolean ativo) {
+        Turma turma = buscarTurma(turmaId);
+        if (ativo) {
+            validarTurmaAtiva(turma);
+            if (isPacienteAtivoEmOutraTurma(pacienteId, turmaId)) {
+                String nome = alunoRepository.findById(pacienteId).map(AlunoView::getNomeCompleto).orElse(pacienteId.toString());
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                        "Não foi possível ativar. O aluno " + nome + " já está ativo em outra turma.");
+            }
+        }
+
+        TurmaAluno turmaAluno = turmaAlunoRepository.findByTurmaAndPacienteId(turma, pacienteId)
+                .orElseThrow(() -> new RuntimeException("O aluno não pertence a esta turma."));
+        turmaAluno.setAtivo(ativo);
+        turmaAlunoRepository.save(turmaAluno);
+    }
+
+    private void mapearDtoParaEntity(TurmaRequestDTO dto, Turma turma) {
+        turma.setAnoCriacao(dto.getAnoCriacao());
+        turma.setTurno(dto.getTurno());
+        turma.setTipo(dto.getTipo());
+
+        String tipo = dto.getTipo() != null ? dto.getTipo() : "";
+        String turno = dto.getTurno() != null && !dto.getTurno().isBlank()
+                ? dto.getTurno().substring(0, 1).toUpperCase() + dto.getTurno().substring(1).toLowerCase()
+                : "";
+        turma.setNome(tipo + " " + turno + " - " + dto.getAnoCriacao());
+
+        if (dto.getAtiva() != null) {
+            turma.setAtiva(dto.getAtiva());
+        }
+    }
+
+    private void vincularAlunosDoDto(Turma turma, Set<UUID> novosIds) {
+        if (novosIds == null) {
+            return;
+        }
+
+        if (!novosIds.isEmpty()) {
+            validarTurmaAtiva(turma);
+            validarPacientesExistem(novosIds.stream().toList());
+            validarPacientesNaoAtivosEmOutrasTurmas(novosIds.stream().toList(), turma.getId());
+        }
+
+        turma.getTurmaAlunos().stream()
+                .filter(ta -> Boolean.TRUE.equals(ta.getAtivo()))
+                .filter(ta -> !novosIds.contains(ta.getPacienteId()))
+                .forEach(ta -> ta.setAtivo(false));
+
+        vincularOuReativarPacientes(turma, novosIds.stream().toList());
+        turmaRepository.save(turma);
+    }
+
+    private void vincularOuReativarPacientes(Turma turma, List<UUID> pacienteIds) {
+        for (UUID pacienteId : pacienteIds) {
+            TurmaAluno vinculo = turmaAlunoRepository.findByTurmaAndPacienteId(turma, pacienteId).orElse(null);
+            if (vinculo != null) {
+                vinculo.setAtivo(true);
+            } else {
+                turma.addAluno(pacienteId, true);
+            }
+        }
+    }
+
+    private boolean isPacienteAtivoEmOutraTurma(UUID pacienteId, UUID turmaIdAtual) {
+        return turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(pacienteId)
+                .stream()
+                .anyMatch(ta -> turmaIdAtual == null || !ta.getTurma().getId().equals(turmaIdAtual));
+    }
+
+    private void validarPacientesNaoAtivosEmOutrasTurmas(List<UUID> pacienteIds, UUID turmaIdAtual) {
+        List<String> alunosInvalidos = pacienteIds.stream()
+                .filter(pacienteId -> isPacienteAtivoEmOutraTurma(pacienteId, turmaIdAtual))
+                .map(pacienteId -> alunoRepository.findById(pacienteId).map(AlunoView::getNomeCompleto).orElse(pacienteId.toString()))
+                .toList();
+
+        if (!alunosInvalidos.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Operação cancelada. Os seguintes alunos já estão ativos em outra turma: " + String.join(", ", alunosInvalidos)
+            );
+        }
+    }
+
+    private void validarPacientesExistem(List<UUID> pacienteIds) {
+        if (alunoRepository.findAllById(pacienteIds).size() != pacienteIds.size()) {
+            throw new RuntimeException("Um ou mais IDs de aluno não foram encontrados.");
+        }
+    }
+
+    private void validarTurmaAtiva(Turma turma) {
+        if (!Boolean.TRUE.equals(turma.getAtiva())) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Não é possível adicionar aluno em uma turma inativa");
+        }
+    }
+
+    private Turma buscarTurma(UUID turmaId) {
+        return turmaRepository.findById(turmaId)
+                .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
+    }
+
+    private String obterNomeUnicoParaTurma(String nomeBase, UUID excludeId) {
         boolean nomeExiste = excludeId == null
-                ? turmaDAO.existsByNome(nomeBase)
-                : turmaDAO.existsByNomeAndIdNot(nomeBase, excludeId);
+                ? turmaRepository.existsByNome(nomeBase)
+                : turmaRepository.existsByNomeAndIdNot(nomeBase, excludeId);
 
         if (!nomeExiste) {
             return nomeBase;
@@ -113,301 +280,41 @@ public class TurmaService {
             nomeCandidato = nomeBase + " (" + sufixo + ")";
             sufixo++;
             nomeExiste = excludeId == null
-                    ? turmaDAO.existsByNome(nomeCandidato)
-                    : turmaDAO.existsByNomeAndIdNot(nomeCandidato, excludeId);
+                    ? turmaRepository.existsByNome(nomeCandidato)
+                    : turmaRepository.existsByNomeAndIdNot(nomeCandidato, excludeId);
         } while (nomeExiste);
         return nomeCandidato;
     }
 
-    @Transactional(readOnly = true)
-    public List<TurmaResponseDTO> listarTodas() {
-        return turmaDAO.findAll()
-                .stream()
-                .map(TurmaResponseDTO::new)
-                .collect(Collectors.toList());
+    private TurmaResumoDTO toResumo(Turma turma) {
+        long totalAlunos = turma.getTurmaAlunos() == null ? 0 : turma.getTurmaAlunos().size();
+        long totalAtivos = turma.getTurmaAlunos() == null ? 0 : turma.getTurmaAlunos().stream().filter(ta -> Boolean.TRUE.equals(ta.getAtivo())).count();
+        return new TurmaResumoDTO(
+                turma.getId(),
+                turma.getNome(),
+                turma.getAnoCriacao(),
+                turma.getTurno(),
+                turma.getTipo(),
+                turma.getAtiva(),
+                totalAlunos,
+                totalAtivos,
+                horarioPorTurno(turma.getTurno())
+        );
     }
 
-    @Transactional(readOnly = true)
-    public TurmaResponseDTO buscarPorId(Long turmaId) {
-        Turma turma = turmaDAO.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
-        return new TurmaResponseDTO(turma);
+    private TurmaAlunoResponseDTO toTurmaAlunoResponse(TurmaAluno turmaAluno) {
+        AlunoView aluno = alunoRepository.findById(turmaAluno.getPacienteId()).orElse(null);
+        return new TurmaAlunoResponseDTO(turmaAluno, aluno);
     }
 
-    @Transactional
-    public TurmaResponseDTO atualizar(Long turmaId, TurmaRequestDTO dto) {
-        Turma turma = turmaDAO.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
-        mapearDtoParaEntity(dto, turma);
-        turma.setNome(obterNomeUnicoParaTurma(turma.getNome(), turma.getId()));
-        Turma atualizado = turmaDAO.save(turma);
-        return new TurmaResponseDTO(atualizado);
-    }
-
-    @Transactional
-    public void deletarPorId(Long turmaId) {
-        Turma turma = turmaDAO.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
-        turmaDAO.delete(turma);
-    }
-
-    @Transactional
-    public TurmaResponseDTO vincularProfessoresATurma(Long turmaId, Long professorId) {
-        Turma turma = turmaDAO.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
-
-        validarProfessorUnicoPorTurno(professorId, turma);
-
-        Professor professor = professorDAO.findById(professorId)
-                .orElseThrow(() -> new RuntimeException("Professor não encontrado com ID: " + professorId));
-
-        turma.setProfessor(professor);
-        Turma atualizado = turmaDAO.save(turma);
-        return new TurmaResponseDTO(atualizado);
-    }
-
-    @Transactional
-    public TurmaResponseDTO ativarTurma(Long turmaId) {
-        Turma turma = turmaDAO.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
-
-        if (turma.getProfessor() != null) {
-            validarProfessorUnicoPorTurno(turma.getProfessor().getId(), turma);
+    private static String horarioPorTurno(String turno) {
+        if (turno == null) {
+            return "Horário não definido";
         }
-
-        turma.setIsAtiva(true);
-
-        if (turma.getTurmaAlunos() != null) {
-            turma.getTurmaAlunos().forEach(turmaAluno -> {
-                if (!isAlunoAtivoEmOutraTurma(turmaAluno.getAluno(), turmaId)) {
-                    turmaAluno.setIsAlunoAtivo(true);
-                }
-            });
-        }
-
-        Turma atualizado = turmaDAO.save(turma);
-        return new TurmaResponseDTO(atualizado);
+        return switch (turno.toUpperCase()) {
+            case "MANHA" -> "Segunda a Sexta - 8h as 12h";
+            case "TARDE" -> "Segunda a Sexta - 14h as 18h";
+            default -> "Horário não definido";
+        };
     }
-
-    @Transactional
-    public TurmaResponseDTO desativarTurma(Long turmaId) {
-        Turma turma = turmaDAO.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
-
-        turma.setIsAtiva(false);
-
-        if (turma.getTurmaAlunos() != null) {
-            turma.getTurmaAlunos().forEach(turmaAluno -> {
-                turmaAluno.setIsAlunoAtivo(false);
-            });
-        }
-
-        Turma atualizado = turmaDAO.save(turma);
-        return new TurmaResponseDTO(atualizado);
-    }
-
-    @Transactional
-    public TurmaResponseDTO adicionarAlunos(Long turmaId, List<Long> alunoIds) {
-        Turma turma = turmaDAO.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
-
-        if(!turma.getIsAtiva()){
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,"Não é possível adicionar aluno em uma turma inativa");
-        }
-
-        List<Aluno> alunos = alunoDAO.findAllById(alunoIds);
-
-        if (alunos.size() != alunoIds.size()) {
-            throw new RuntimeException("Um ou mais IDs de aluno não foram encontrados.");
-        }
-
-        validarAlunosNaoAtivosEmOutrasTurmas(alunos, turma.getId());
-        vincularOuReativarAlunos(turma, alunos);
-
-        Turma atualizada = turmaDAO.save(turma);
-
-        return turmaDAO.findByIdWithDetails(atualizada.getId())
-                .map(TurmaResponseDTO::new)
-                .orElse(new TurmaResponseDTO(atualizada));
-    }
-
-    @Transactional(readOnly = true)
-    public List<TurmaAlunoResponseDTO> listarAlunos(Long turmaId) {
-        return turmaAlunoDAO.findByTurmaIdOrderByPacienteNomeAsc(turmaId)
-                .stream()
-                .map(TurmaAlunoResponseDTO::new)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<TurmaAlunoResponseDTO> listarAlunosAtivos(Long turmaId) {
-        Turma turma = turmaDAO.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada."));
-
-        return turmaAlunoDAO.findByTurmaAndIsAlunoAtivoOrderByAlunoNomeAsc(turma, true)
-                .stream()
-                .map(TurmaAlunoResponseDTO::new)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<TurmaAlunoResponseDTO> listarAlunosInativos(Long turmaId) {
-        Turma turma = turmaDAO.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada."));
-
-        return turmaAlunoDAO.findByTurmaAndIsAlunoAtivoOrderByAlunoNomeAsc(turma, false)
-                .stream()
-                .map(TurmaAlunoResponseDTO::new)
-                .toList();
-    }
-
-    @Transactional
-    public void ativarAluno(Long turmaId, Long alunoId) {
-        alterarStatus(turmaId, alunoId, true);
-    }
-
-    @Transactional
-    public void desativarAluno(Long turmaId, Long alunoId) {
-        alterarStatus(turmaId, alunoId, false);
-    }
-
-    private void alterarStatus(Long turmaId, Long alunoId, boolean ativo) {
-
-        Turma turma = turmaDAO.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada."));
-
-        if (ativo && !turma.getIsAtiva()){
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,"Não é possível adicionar aluno em uma turma inativa");
-        }
-
-        Aluno aluno = alunoDAO.findById(alunoId)
-                .orElseThrow(() -> new RuntimeException("Aluno não encontrado."));
-
-        TurmaAluno turmaAluno = turmaAlunoDAO.findByTurmaAndPacienteId(turma, aluno)
-                .orElseThrow(() -> new RuntimeException("O aluno não pertence a esta turma."));
-
-        if(ativo){
-            if(isAlunoAtivoEmOutraTurma(aluno, turmaId)){
-                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                        "Não foi possível ativar. O aluno "+ aluno.getNome() +" já está ativo em outra turma.");
-            }
-        }
-
-        turmaAluno.setIsAlunoAtivo(ativo);
-        turmaAlunoDAO.save(turmaAluno);
-    }
-
-    private void mapearDtoParaEntity(TurmaRequestDTO dto, Turma turma) {
-        turma.setAnoCriacao(dto.getAnoCriacao());
-        turma.setTurno(dto.getTurno());
-        turma.setTipo(dto.getTipo());
-
-        String tipo = dto.getTipo() != null ? dto.getTipo() : "";
-        String turno = dto.getTurno() != null
-        ? dto.getTurno().substring(0, 1).toUpperCase()
-            + dto.getTurno().substring(1).toLowerCase()
-        : "";
-
-        turma.setNome(tipo + " " + turno + " - " + dto.getAnoCriacao());
-
-        if (dto.getIsAtiva() != null) {
-            turma.setIsAtiva(dto.getIsAtiva());
-        }
-
-        if (dto.getProfessorId() != null) {
-            validarProfessorUnicoPorTurno(dto.getProfessorId(), turma);
-            Professor professor = professorDAO.findById(dto.getProfessorId())
-                    .orElseThrow(() -> new RuntimeException("Professor não encontrado"));
-            turma.setProfessor(professor);
-        }
-
-
-        if (dto.getAlunosIds() != null) {
-            Set<Long> novosIds = dto.getAlunosIds();
-
-            if (turma.getTurmaAlunos() != null) {
-                List<Aluno> alunosParaRemover = turma.getTurmaAlunos().stream()
-                        .filter(ta -> Boolean.TRUE.equals(ta.getIsAlunoAtivo()))
-                        .filter(ta -> !novosIds.contains(ta.getAluno().getId()))
-                        .map(TurmaAluno::getAluno)
-                        .toList();
-                alunosParaRemover.forEach(turma::removeAluno);
-            }
-
-            if (!novosIds.isEmpty()) {
-                if (!turma.getIsAtiva()) {
-                    throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Não é possível adicionar aluno em uma turma inativa");
-                }
-
-                List<Aluno> alunos = alunoDAO.findAllById(novosIds);
-                validarAlunosNaoAtivosEmOutrasTurmas(alunos, turma.getId());
-                vincularOuReativarAlunos(turma, alunos);
-            }
-        }
-
-    }
-
-    private boolean isAlunoAtivoEmOutraTurma(Aluno aluno, Long turmaIdAtual) {
-        List<TurmaAluno> matriculasAtivas = turmaAlunoDAO.findAllByPacienteIdAndAtivoTrue(aluno);
-
-        return matriculasAtivas.stream()
-                .anyMatch(ta -> turmaIdAtual == null || !ta.getTurma().getId().equals(turmaIdAtual));
-    }
-
-    private void validarAlunosNaoAtivosEmOutrasTurmas(List<Aluno> alunos, Long turmaIdAtual) {
-        List<String> alunosInvalidos = new ArrayList<>();
-        for (Aluno aluno : alunos) {
-            if (isAlunoAtivoEmOutraTurma(aluno, turmaIdAtual)) {
-                alunosInvalidos.add(aluno.getNome());
-            }
-        }
-
-        if (!alunosInvalidos.isEmpty()) {
-            String mensagemErro = "Operação cancelada. Os seguintes alunos já estão ativos em outra turma: "
-                    + String.join(", ", alunosInvalidos);
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, mensagemErro);
-        }
-    }
-
-    private void vincularOuReativarAlunos(Turma turma, List<Aluno> alunos) {
-        for (Aluno aluno : alunos) {
-            Optional<TurmaAluno> vinculoExistente = turma.getTurmaAlunos().stream()
-                    .filter(ta -> ta.getAluno().getId().equals(aluno.getId()))
-                    .findFirst();
-
-            if (vinculoExistente.isPresent()) {
-                vinculoExistente.get().setIsAlunoAtivo(true);
-            } else {
-                turma.addAluno(aluno, true);
-            }
-        }
-    }
-
-    private void validarProfessorUnicoPorTurno(Long professorId, Turma turmaNova){
-        if (professorId == null || turmaNova == null) return;
-
-        Professor professor= professorDAO.findByIdWithTurmas(professorId)
-                .orElseThrow(() -> new RuntimeException("Professor não encontrado"));
-
-        if(professor.getTurmas()!=null){
-
-            boolean conflito = professor.getTurmas().stream()
-                    .anyMatch(turmaExistente -> turmaExistente.getTurno().equalsIgnoreCase(turmaNova.getTurno())
-                            && turmaExistente.getAnoCriacao().equals(turmaNova.getAnoCriacao())
-                            && Boolean.TRUE.equals(turmaExistente.getIsAtiva())
-                            && (turmaNova.getId() == null || !turmaExistente.getId().equals(turmaNova.getId())) //pra ignorar a própria turma
-                    );
-            if(conflito){
-                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Não é possível alocar o professor " + professor.getNome() + ", pois já possui vínculo a uma turma ativa no turno " + turmaNova.getTurno() + " nesse mesmo ano");
-            }
-
-        }
-
-
-
-
-
-    }
-
-
 }

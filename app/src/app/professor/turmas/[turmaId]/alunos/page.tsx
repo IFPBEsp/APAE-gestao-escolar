@@ -44,7 +44,11 @@ const ActionButton = ({ variant, onClick, label, extraClass = "" }: ActionButton
 
 export default function TurmaDetalhesPage() {
   const params = useParams();
-  const turmaId = params?.turmaId ? Number(params.turmaId) : null;
+  const turmaId = params?.turmaId
+    ? Array.isArray(params.turmaId)
+      ? params.turmaId[0]
+      : params.turmaId
+    : null;
   const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -54,7 +58,7 @@ export default function TurmaDetalhesPage() {
   const [alunos, setAlunos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  async function carregarUltimaAvaliacao(alunoId: number) {
+  async function carregarUltimaAvaliacao(alunoId: string) {
     if (!alunoId) {
       return { ultimaAvaliacao: "—" };
     }
@@ -121,11 +125,11 @@ export default function TurmaDetalhesPage() {
     aluno.nome?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAvaliacoes = (alunoId: number) => {
+  const handleAvaliacoes = (alunoId: string) => {
     router.push(`/professor/alunos/${alunoId}/avaliacoes?turmaId=${turmaId}`);
   };
 
-  const handleRelatorios = (alunoId: number) => {
+  const handleRelatorios = (alunoId: string) => {
     router.push(`/professor/alunos/${alunoId}/relatorios?turmaId=${turmaId}`);
   };
 

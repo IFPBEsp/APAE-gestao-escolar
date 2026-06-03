@@ -29,7 +29,11 @@ import ChamadaCalendar from "@/components/ChamadaCalendar";
 export default function FrequenciaPage() {
     const router = useRouter();
     const params = useParams();
-    const turmaId = params?.turmaId ? Number(params.turmaId) : 0;
+    const turmaId = params?.turmaId
+        ? Array.isArray(params.turmaId)
+            ? params.turmaId[0]
+            : params.turmaId
+        : "";
 
     const [turma, setTurma] = useState<any>(null);
     const [alunos, setAlunos] = useState<any[]>([]);
@@ -181,14 +185,14 @@ function ChamadaContent({
     data,
     descricao,
 }: {
-    turmaId: number;
+    turmaId: string;
     alunos: any[];
     onSalvarChamada?: () => void;
     data?: Date;
     descricao?: string;
 }) {
     const [selectedDate, setSelectedDate] = useState<Date>(data || new Date());
-    const [attendance, setAttendance] = useState<Record<number, boolean>>({});
+    const [attendance, setAttendance] = useState<Record<string, boolean>>({});
     const [descricaoAula, setDescricaoAula] = useState(descricao || "");
     const [isSaving, setIsSaving] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -217,15 +221,15 @@ function ChamadaContent({
                 if (chamadaExistente.listaPresencas && chamadaExistente.listaPresencas.length > 0) {
                     setDescricaoAula(chamadaExistente.descricao || "");
                     
-                    const novaAttendance: Record<number, boolean> = {};
+                    const novaAttendance: Record<string, boolean> = {};
                     
                     chamadaExistente.listaPresencas.forEach(presenca => {
-                        const alunoId = Number(presenca.alunoId);
+                        const alunoId = String(presenca.alunoId);
                         novaAttendance[alunoId] = presenca.status === 'PRESENTE';
                     });
                     
                     alunos.forEach(aluno => {
-                        const alunoId = Number(aluno.id);
+                        const alunoId = String(aluno.id);
                         if (novaAttendance[alunoId] === undefined) {
                             novaAttendance[alunoId] = true;
                         }
@@ -236,9 +240,9 @@ function ChamadaContent({
                     
                     toast.info("Chamada existente carregada.");
                 } else {
-                    const novaAttendance: Record<number, boolean> = {};
+                    const novaAttendance: Record<string, boolean> = {};
                     alunos.forEach(aluno => {
-                        const alunoId = Number(aluno.id);
+                        const alunoId = String(aluno.id);
                         novaAttendance[alunoId] = true;
                     });
                     setAttendance(novaAttendance);
@@ -246,9 +250,9 @@ function ChamadaContent({
                 }
             } catch (error) {
                 console.log("Nenhuma chamada encontrada para esta data.");
-                const novaAttendance: Record<number, boolean> = {};
+                const novaAttendance: Record<string, boolean> = {};
                 alunos.forEach(aluno => {
-                    const alunoId = Number(aluno.id);
+                    const alunoId = String(aluno.id);
                     novaAttendance[alunoId] = true;
                 });
                 setAttendance(novaAttendance);
@@ -261,7 +265,7 @@ function ChamadaContent({
         carregarChamadaExistente();
     }, [turmaId, selectedDate, JSON.stringify(alunos)]);
 
-    const toggleAttendance = (studentId: number) => {
+    const toggleAttendance = (studentId: string) => {
         setAttendance((prev) => ({
             ...prev,
             [studentId]: !(prev[studentId] ?? true),
@@ -289,7 +293,7 @@ function ChamadaContent({
             const chamadaRequest = {
                 descricao: descricaoAula,
                 presencas: alunos.map((aluno) => {
-                    const studentId = Number(aluno.id);
+                    const studentId = String(aluno.id);
                     const isPresent = attendance[studentId] ?? true;
                     
                     return {
@@ -318,7 +322,7 @@ function ChamadaContent({
 
     const totalCount = alunos.length;
     const presentCount = alunos.reduce((acc, aluno) => {
-        const studentId = Number(aluno.id);
+        const studentId = String(aluno.id);
         return acc + ((attendance[studentId] ?? true) ? 1 : 0);
     }, 0);
 
@@ -400,7 +404,7 @@ function ChamadaContent({
                     </TableHeader>
                     <TableBody>
                         {alunos.map((student) => {
-                            const studentId = Number(student.id);
+                            const studentId = String(student.id);
                             const isPresent = attendance[studentId] ?? true;
 
                             return (
@@ -458,13 +462,17 @@ function HistoricoContent({
     turmaNome: string;
     alunos: any[];
     estatisticas?: any[];
-    onViewAlunoHistorico: (alunoId: number) => void;
+    onViewAlunoHistorico: (alunoId: string) => void;
     onNovaChamada?: () => void;
     totalAulasRealizadas?: number;
 }) {
     const params = useParams();
     const router = useRouter();
-    const turmaId = params?.turmaId ? Number(params.turmaId) : 0;
+    const turmaId = params?.turmaId
+        ? Array.isArray(params.turmaId)
+            ? params.turmaId[0]
+            : params.turmaId
+        : "";
 
     const [searchTerm, setSearchTerm] = useState("");
     const [showAlertsOnly, setShowAlertsOnly] = useState(false);

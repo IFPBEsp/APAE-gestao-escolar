@@ -3,21 +3,22 @@
 import { useEffect, useState } from "react";
 import { BookOpen, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { buscarProfessorPorId, listarTurmasDeProfessor } from "@/services/ProfessorService";
+import { buscarProfessorPorId } from "@/services/ProfessorService";
+import { listarTurmas } from "@/services/TurmaService";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface Turma {
-  id: number;
+  id: string;
   nome: string;
   horario: string;
   turno: string;
   tipo: string;
-  isAtiva: boolean;
+  ativa: boolean;
   totalAlunosAtivos?: number;
 }
 
 interface Professor {
-  id: number;
+  id: string;
   nome: string;
   email: string;
 }
@@ -31,10 +32,11 @@ export default function ProfessorDashboardPage() {
 
   useEffect(() => {
     if (!professorId) return;
+    const id: string = professorId;
 
     async function carregarProfessor() {
       try {
-        const response = await buscarProfessorPorId(professorId);
+        const response = await buscarProfessorPorId(id);
         setProfessor(response);
       } catch (err: any) {
         setError(err.message || "Erro ao carregar dados do professor.");
@@ -51,8 +53,8 @@ export default function ProfessorDashboardPage() {
 
     async function carregarTurmas() {
       try {
-        const response = await listarTurmasDeProfessor(professorId);
-        setTurmas(response.filter(t => t.isAtiva));
+        const response = await listarTurmas();
+        setTurmas(response.filter((t: Turma) => t.ativa));
       } catch (err: any) {
         console.error(err);
       }

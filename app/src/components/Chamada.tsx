@@ -22,7 +22,7 @@ import {
 } from "@/services/ChamadaService"; 
 
 interface StudentAttendance {
-    id: number;
+    id: string;
     name: string; 
     isAbsent: boolean;
 }
@@ -35,7 +35,7 @@ interface ChamadaProps {
   data?: Date; 
   descricao?: string; 
   
-  turmaIdProp?: number | string;
+  turmaIdProp?: string;
   turmaNomeProp?: string;
   onSaveSuccess?: () => void;
 }
@@ -71,20 +71,16 @@ export default function Chamada({
 
   const { turmaId, turmaNome } = useMemo(() => {
       if (turmaIdProp && turmaNomeProp) {
-          const id = typeof turmaIdProp === 'string' ? parseInt(turmaIdProp, 10) : turmaIdProp;
           return { 
-              turmaId: isNaN(id as number) ? undefined : id as number, 
+              turmaId: String(turmaIdProp),
               turmaNome: turmaNomeProp 
           };
       }
       
       if (initialClass) {
-          const parts = initialClass.split('-');
-          const id = parseInt(parts[0], 10);
-          const name = parts.slice(1).join('-').trim();
           return { 
-              turmaId: isNaN(id) ? undefined : id, 
-              turmaNome: name || "Turma Selecionada" 
+              turmaId: initialClass,
+              turmaNome: "Turma Selecionada" 
           };
       }
 
@@ -157,7 +153,7 @@ export default function Chamada({
   }, [turmaId, dateFormatted]);
 
 
-  const handleAttendanceChange = (studentId: number, isPresent: boolean) => {
+  const handleAttendanceChange = (studentId: string, isPresent: boolean) => {
     const newIsAbsent = !isPresent; 
 
     setStudents(prevStudents => 

@@ -35,14 +35,14 @@ public interface AlunoViewRepository extends JpaRepository<AlunoView, UUID> {
             FROM AlunoView a
             LEFT JOIN TurmaAluno ta ON ta.pacienteId = a.id AND ta.ativo = true
             LEFT JOIN ta.turma t
-            LEFT JOIN Presenca p ON p.pacienteId = a.id AND p.aulaId IN (SELECT au.id FROM Aula au WHERE au.turma.id = t.id)
+            LEFT JOIN Presenca p ON p.pacienteId = a.id AND p.aula.id IN (SELECT au.id FROM Aula au WHERE au.turma.id = t.id)
             LEFT JOIN Avaliacao av ON av.pacienteId = a.id
             WHERE (:nome IS NULL OR TRIM(:nome) = '' OR LOWER(a.nomeCompleto) LIKE LOWER(CONCAT('%', TRIM(:nome), '%')))
             GROUP BY a.id, a.nomeCompleto, a.cpf , a.dataDeNascimento, a.contato
             """,
             countQuery = "SELECT COUNT(DISTINCT a.id) FROM AlunoView a WHERE (:nome IS NULL OR TRIM(:nome) = '' OR LOWER(a.nomeCompleto) LIKE LOWER(CONCAT('%', TRIM(:nome), '%')))"
     )
-    Page<AlunoResumoDTO> listarAlunosPorFiltro(String nome, Pageable pageable);
+    Page<AlunoResumoDTO> listarAlunosPorFiltro(@Param("nome") String nome, Pageable pageable);
 
     @Query(value = """
                 SELECT new com.apae.gestao.dto.aluno.AlunoResumoDTO(
@@ -91,7 +91,7 @@ public interface AlunoViewRepository extends JpaRepository<AlunoView, UUID> {
                 FROM AlunoView a
                 JOIN TurmaAluno ta ON ta.pacienteId = a.id
                 JOIN ta.turma t
-                LEFT JOIN Presenca p ON p.pacienteId = a.id AND p.aulaId IN (SELECT au.id FROM Aula au WHERE au.turma.id = :turmaId)
+                LEFT JOIN Presenca p ON p.pacienteId = a.id AND p.aula.id IN (SELECT au.id FROM Aula au WHERE au.turma.id = :turmaId)
                 WHERE t.id = :turmaId
                 AND ta.ativo = true
                 GROUP BY a.id, a.nomeCompleto
@@ -106,7 +106,7 @@ public interface AlunoViewRepository extends JpaRepository<AlunoView, UUID> {
                     CASE WHEN p.faltou = false THEN true ELSE false END
                 )
                 FROM Presenca p
-                JOIN Aula au ON p.aulaId = au.id
+                JOIN Aula au ON p.aula.id = au.id
                 JOIN AlunoView a ON p.pacienteId = a.id
                 WHERE a.id = :pacienteId
                 ORDER BY au.data DESC

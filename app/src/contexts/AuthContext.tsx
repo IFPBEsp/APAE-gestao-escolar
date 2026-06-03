@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface Usuario {
-  id: number;
+  id: string;
   nome?: string;
   email: string;
   role: string;
@@ -11,7 +11,7 @@ interface Usuario {
 
 interface AuthContextType {
   usuario: Usuario | null;
-  professorId: number;
+  professorId: string | null;
   loading: boolean;
   login: (usuario: Usuario) => void;
   logout: () => void;
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         usuario,
-        professorId: usuario?.id || 0,
+        professorId: usuario?.id ?? null,
         loading,
         login,
         logout,

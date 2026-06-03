@@ -83,7 +83,7 @@ export default function AdminHomePage() {
            const ocup = t.totalAlunosAtivos || 0;
            const capLine = t.capacidade || 15;
            
-           if (t.isAtiva) {
+           if (t.ativa) {
               ativasCount++;
               cTotal += capLine;
               ocupacaoTotal += ocup;
@@ -535,7 +535,7 @@ export default function AdminHomePage() {
                             <p className="text-sm font-bold text-[#0D4F97] truncate pr-2 group-hover:text-[#1265BE] transition-colors">
                                {turma.nome}
                             </p>
-                            <p className="text-xs font-semibold text-gray-500 truncate mt-0.5">{turma.professorNome || "Sem Docente"}</p>
+                            <p className="text-xs font-semibold text-gray-500 truncate mt-0.5">{turma.turno || turma.tipo || "Turma"}</p>
                           </div>
                           <div className="text-right pl-2">
                              <span className="text-sm font-extrabold text-[#0D4F97]">{oc}</span>

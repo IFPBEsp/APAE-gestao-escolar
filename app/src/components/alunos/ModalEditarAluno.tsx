@@ -9,13 +9,13 @@ import { atualizarTurmaAluno } from "@/services/AlunoService";
 import { listarTurmas } from "@/services/TurmaService";
 
 interface TurmaDTO {
-    id: number;
+    id: string;
     nome: string;
     turno: string;
 }
 
 interface AlunoModalProps {
-    id: number;
+    id: string;
     nome: string;
     nomeTurmaAtual: string | null;
     turnoTurmaAtual: string | null;
@@ -83,10 +83,8 @@ export default function ModalEditarAluno({ isOpen, onClose, onSave, aluno }: Mod
             return;
         }
 
-        const novaTurmaId = parseInt(turmaIdSelecionada);
-        
         try {
-            const alunoAtualizado = await atualizarTurmaAluno(aluno!.id, novaTurmaId);
+            const alunoAtualizado = await atualizarTurmaAluno(aluno!.id, turmaIdSelecionada);
             onSave(alunoAtualizado); 
             toast.success(`Turma alterada com sucesso!`);
             onClose();

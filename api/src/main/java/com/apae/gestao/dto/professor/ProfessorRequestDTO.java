@@ -1,9 +1,6 @@
 package com.apae.gestao.dto.professor;
 
 import java.time.LocalDate;
-import java.util.Set;
-
-import com.apae.gestao.entity.Turma;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -40,7 +37,6 @@ public class ProfessorRequestDTO {
     @Schema(description = "Telefone de contato no formato (11) 99999-8888", example = "(11) 99888-7766")
     private String telefone;
 
-    @NotNull(message = "Data de nascimento é obrigatória")
     private LocalDate dataNascimento;
 
     @Size(max = 100, message = "Formação deve ter no máximo 100 caracteres")
@@ -54,7 +50,6 @@ public class ProfessorRequestDTO {
     @Schema(description = "Endereço completo para correspondência", example = "Av. Brasil, 1000 - Centro, Recife/PE")
     private String endereco;
 
-    @Schema(description = "Turmas vinculadas ao professor (somente leitura)", accessMode = Schema.AccessMode.READ_ONLY)
-    private Set<Turma> turmas;
+    @Schema(description = "Status do usuário do professor", example = "true")
+    private Boolean ativo;
 }
-

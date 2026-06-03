@@ -23,6 +23,9 @@ public class Professor {
 
     private String formacao;
 
+    @Column(name = "data_nascimento")
+    private LocalDate dataNascimento;
+
     @Column(name = "data_contratacao")
     private LocalDate dataContratacao;
 

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -11,8 +12,8 @@ import lombok.NoArgsConstructor;
 @Schema(description = "DTO resumido para listagem de turmas.")
 public class TurmaResumoDTO {
 
-    @Schema(description = "Identificador único da turma", example = "7")
-    private Long id;
+    @Schema(description = "Identificador único da turma")
+    private UUID id;
 
     @Schema(description = "Nome completo da turma", example = "Alfabetização 2025 - Manhã")
     private String nome;
@@ -27,13 +28,7 @@ public class TurmaResumoDTO {
     private String tipo;
 
     @Schema(description = "Indica se a turma está ativa", example = "true")
-    private Boolean isAtiva;
-
-    @Schema(description = "Nome do professor responsável", example = "Maria da Silva")
-    private String professorNome;
-
-    @Schema(description = "ID do professor responsável", example = "1")
-    private Long professorId;
+    private Boolean ativa;
 
     @Schema(description = "Total de alunos matriculados", example = "25")
     private Long totalAlunos;

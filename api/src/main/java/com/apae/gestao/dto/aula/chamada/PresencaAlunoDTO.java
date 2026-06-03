@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -11,10 +12,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PresencaAlunoDTO {
 
-    private Long alunoId;
+    private UUID alunoId;
     private String alunoNome;
     private StatusPresenca status;
-    private Long presencaId;
+    private UUID presencaId;
 
     public enum StatusPresenca {
         PRESENTE,

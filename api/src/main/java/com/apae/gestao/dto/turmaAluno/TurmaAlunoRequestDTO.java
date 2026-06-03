@@ -1,12 +1,10 @@
 package com.apae.gestao.dto.turmaAluno;
 
-import com.apae.gestao.entity.Aluno;
-import com.apae.gestao.entity.Turma;
-
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -14,9 +12,9 @@ import lombok.NoArgsConstructor;
 public class TurmaAlunoRequestDTO {
 
     @NotNull
-    private Turma turma;
+    private UUID turmaId;
 
     @NotNull
-    private Aluno aluno;
+    private UUID pacienteId;
 
 }

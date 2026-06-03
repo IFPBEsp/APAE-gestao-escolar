@@ -1,6 +1,7 @@
 package com.apae.gestao.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.apae.gestao.dto.turma.TurmaResumoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/turmas")
-@Tag(name = "Turmas", description = "Gerenciamento de turmas e vínculos com professores/alunos.")
+@Tag(name = "Turmas", description = "Gerenciamento de turmas e vínculos com alunos.")
 @SecurityRequirement(name = "bearerAuth")
 public class TurmaController {
 
@@ -39,7 +40,7 @@ public class TurmaController {
     private TurmaService service;
 
     @PostMapping
-    @Operation(summary = "Criar turma", description = "Cria uma nova turma vinculando professor e alunos por ID.")
+    @Operation(summary = "Criar turma", description = "Cria uma nova turma e vincula pacientes por ID.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Turma criada", content = @Content(
                     schema = @Schema(implementation = TurmaResponseDTO.class),
@@ -50,9 +51,8 @@ public class TurmaController {
                           "anoCriacao": 2025,
                           "turno": "MANHA",
                           "tipo": "Educação Especial",
-                          "isAtiva": true,
-                          "professor": { "id": 2, "nome": "Maria da Silva" },
-                          "alunosIds": [1, 2, 3]
+                          "ativa": true,
+                          "alunosIds": ["9de17e76-0b98-4751-9331-5f39e4bcb534"]
                         }
                         """)))
     })
@@ -73,24 +73,23 @@ public class TurmaController {
     })
     @Doc404NotFound
     public ResponseEntity<TurmaResumoDTO> buscarPorId(
-            @Parameter(description = "Identificador da turma", example = "7", in = ParameterIn.PATH)
-            @PathVariable Long id) {
+            @Parameter(description = "Identificador da turma", in = ParameterIn.PATH)
+            @PathVariable UUID id) {
         TurmaResumoDTO response = service.buscarTurmaResumidaPorId(id);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
     @Operation(
-            summary = "Listar turmas (OTIMIZADO com PostgreSQL)",
-            description = "Usa função PostgreSQL nativa. Retorna dados resumidos: id, nome, turno, professorNome, totalAlunos. " +
-                    "Suporta filtros por: id, nome, anoCriacao, turno, tipo, isAtiva, professorId."
+            summary = "Listar turmas",
+            description = "Retorna dados resumidos. Suporta filtros por: id, nome, anoCriacao, turno, tipo e ativa."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista de turmas retornada com sucesso")
     })
     public ResponseEntity<List<TurmaResumoDTO>> listarTodas(
-            @Parameter(description = "ID da turma", example = "7", in = ParameterIn.QUERY)
-            @RequestParam(value = "id", required = false) Long id,
+            @Parameter(description = "ID da turma", in = ParameterIn.QUERY)
+            @RequestParam(value = "id", required = false) UUID id,
 
             @Parameter(description = "Nome da turma para busca", example = "Alfabetização", in = ParameterIn.QUERY)
             @RequestParam(value = "nome", required = false) String nome,
@@ -105,13 +104,10 @@ public class TurmaController {
             @RequestParam(value = "tipo", required = false) String tipo,
 
             @Parameter(description = "Filtrar por status ativo/inativo", example = "true", in = ParameterIn.QUERY)
-            @RequestParam(value = "isAtiva", required = false) Boolean isAtiva,
-
-            @Parameter(description = "ID do professor", example = "12", in = ParameterIn.QUERY)
-            @RequestParam(value = "professorId", required = false) Long professorId) {
+            @RequestParam(value = "ativa", required = false) Boolean ativa) {
 
         List<TurmaResumoDTO> turmas = service.listarTurmas(
-                id, nome, anoCriacao, turno, tipo, isAtiva, professorId
+                id, nome, anoCriacao, turno, tipo, ativa
         );
 
         return ResponseEntity.ok(turmas);
@@ -127,8 +123,8 @@ public class TurmaController {
     })
     @DocStandardErrors
     public ResponseEntity<TurmaResponseDTO> atualizar(
-            @Parameter(description = "Identificador da turma", example = "5", in = ParameterIn.PATH)
-            @PathVariable Long turmaId,
+            @Parameter(description = "Identificador da turma", in = ParameterIn.PATH)
+            @PathVariable UUID turmaId,
             @Valid @RequestBody TurmaRequestDTO dto){
         TurmaResponseDTO response = service.atualizar(turmaId, dto);
         return ResponseEntity.ok(response);
@@ -138,31 +134,18 @@ public class TurmaController {
     @Operation(summary = "Excluir turma definitivamente")
     @Doc404NotFound
     public ResponseEntity<Void> deletar(
-            @Parameter(description = "Identificador da turma", example = "5", in = ParameterIn.PATH)
-            @PathVariable Long id){
+            @Parameter(description = "Identificador da turma", in = ParameterIn.PATH)
+            @PathVariable UUID id){
         service.deletarPorId(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/{turmaId}/professor/{professorId}")
-    @Operation(summary = "Vincular professor a uma turma específica")
-    @Doc404NotFound
-    public ResponseEntity<TurmaResponseDTO> atribuirProfessor(
-            @Parameter(description = "Identificador da turma", example = "5", in = ParameterIn.PATH)
-            @PathVariable Long turmaId,
-            @Parameter(description = "Identificador do professor", example = "12", in = ParameterIn.PATH)
-            @PathVariable Long professorId
-    ){
-        TurmaResponseDTO atualizado = service.vincularProfessoresATurma(turmaId, professorId);
-        return ResponseEntity.ok(atualizado);
     }
 
     @PatchMapping("/{turmaId}/ativar")
     @Operation(summary = "Ativar turma")
     @Doc404NotFound
     public ResponseEntity<TurmaResponseDTO> ativarTurma(
-            @Parameter(description = "Identificador da turma", example = "5", in = ParameterIn.PATH)
-            @PathVariable Long turmaId) {
+            @Parameter(description = "Identificador da turma", in = ParameterIn.PATH)
+            @PathVariable UUID turmaId) {
         TurmaResponseDTO response = service.ativarTurma(turmaId);
         return ResponseEntity.ok(response);
     }
@@ -171,8 +154,8 @@ public class TurmaController {
     @Operation(summary = "Desativar turma")
     @Doc404NotFound
     public ResponseEntity<TurmaResponseDTO> desativarTurma(
-            @Parameter(description = "Identificador da turma", example = "5", in = ParameterIn.PATH)
-            @PathVariable Long turmaId) {
+            @Parameter(description = "Identificador da turma", in = ParameterIn.PATH)
+            @PathVariable UUID turmaId) {
         TurmaResponseDTO response = service.desativarTurma(turmaId);
         return ResponseEntity.ok(response);
     }
@@ -183,7 +166,7 @@ public class TurmaController {
             description = "Adiciona uma lista de alunos já cadastrados a uma turma existente."
     )
     @DocStandardErrors
-    public ResponseEntity<TurmaResponseDTO> adicionarAlunos(@RequestBody List<Long> alunosId, @PathVariable Long turmaId){
+    public ResponseEntity<TurmaResponseDTO> adicionarAlunos(@RequestBody List<UUID> alunosId, @PathVariable UUID turmaId){
         TurmaResponseDTO response = service.adicionarAlunos(turmaId, alunosId);
         return ResponseEntity.ok(response);
     }
@@ -194,7 +177,7 @@ public class TurmaController {
             description = "Lista todos os alunos, ativos e inativos, vinculados à turma."
     )
     @Doc404NotFound
-    public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosNaTurma(@PathVariable Long turmaId){
+    public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosNaTurma(@PathVariable UUID turmaId){
         List<TurmaAlunoResponseDTO> response = service.listarAlunos(turmaId);
         return ResponseEntity.ok(response);
     }
@@ -205,7 +188,7 @@ public class TurmaController {
             description = "Lista apenas os alunos com vínculo ativo na turma."
     )
     @Doc404NotFound
-    public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosAtivosNaTurma(@PathVariable Long turmaId){
+    public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosAtivosNaTurma(@PathVariable UUID turmaId){
         List<TurmaAlunoResponseDTO> response = service.listarAlunosAtivos(turmaId);
         return ResponseEntity.ok(response);
     }
@@ -216,7 +199,7 @@ public class TurmaController {
             description = "Lista apenas os alunos com vínculo inativo na turma."
     )
     @Doc404NotFound
-    public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosInativosNaTurma(@PathVariable Long turmaId){
+    public ResponseEntity<List<TurmaAlunoResponseDTO>> listarAlunosInativosNaTurma(@PathVariable UUID turmaId){
         List<TurmaAlunoResponseDTO> response = service.listarAlunosInativos(turmaId);
         return ResponseEntity.ok(response);
     }
@@ -227,7 +210,7 @@ public class TurmaController {
             description = "Reativa o vínculo do aluno com a turma para participação nas atividades."
     )
     @Doc404NotFound
-    public ResponseEntity<TurmaAlunoResponseDTO> ativarAlunoNaTurma(@PathVariable Long turmaId, @PathVariable Long alunoId){
+    public ResponseEntity<TurmaAlunoResponseDTO> ativarAlunoNaTurma(@PathVariable UUID turmaId, @PathVariable UUID alunoId){
         service.ativarAluno(turmaId, alunoId);
         return ResponseEntity.ok().build();
     }
@@ -238,7 +221,7 @@ public class TurmaController {
             description = "Inativa o vínculo do aluno com a turma, mantendo o histórico preservado."
     )
     @Doc404NotFound
-    public ResponseEntity<TurmaAlunoResponseDTO> desativarAlunoNaTurma(@PathVariable Long turmaId, @PathVariable Long alunoId){
+    public ResponseEntity<TurmaAlunoResponseDTO> desativarAlunoNaTurma(@PathVariable UUID turmaId, @PathVariable UUID alunoId){
         service.desativarAluno(turmaId, alunoId);
         return ResponseEntity.ok().build();
     }

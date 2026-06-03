@@ -1,15 +1,13 @@
 package com.apae.gestao.dto.professor;
 
 import com.apae.gestao.entity.Professor;
-import com.apae.gestao.entity.Turma;
+import com.apae.gestao.entity.Usuario;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -17,8 +15,11 @@ import java.util.stream.Collectors;
 @Schema(description = "Dados completos retornados após operações com professores.")
 public class ProfessorResponseDTO {
 
-    @Schema(description = "Identificador único do professor", example = "42")
-    private Long id;
+    @Schema(description = "Identificador único do professor")
+    private UUID id;
+
+    @Schema(description = "Identificador do usuário vinculado ao professor")
+    private UUID usuarioId;
 
     @Schema(description = "Nome completo do professor", example = "Maria da Silva")
     private String nome;
@@ -47,36 +48,21 @@ public class ProfessorResponseDTO {
     @Schema(description = "Indica se o professor está ativo no sistema", example = "true")
     private Boolean ativo;
 
-    @Schema(description = "Data de criação do registro", example = "2024-01-10T15:30:00")
-    private LocalDateTime createdAt;
+    @Schema(description = "Indica se o professor ainda precisa concluir o primeiro acesso", example = "true")
+    private Boolean primeiroAcesso;
 
-    @Schema(description = "Data da última atualização do registro", example = "2024-03-01T12:00:00")
-    private LocalDateTime updatedAt;
-
-    @Schema(description = "Lista com nomes das turmas vinculadas ao professor",
-            example = "[\"Alfabetização 2025 - Manhã\", \"Matemática Básica 2025\"]")
-    private List<String> turmas;
-
-    public ProfessorResponseDTO(Professor professor) {
+    public ProfessorResponseDTO(Professor professor, Usuario usuario) {
         this.id = professor.getId();
-        this.nome = professor.getNome();
-        this.cpf = professor.getCpf();
-        this.email = professor.getEmail();
-        this.telefone = professor.getTelefone();
+        this.usuarioId = professor.getUsuarioId();
+        this.nome = usuario.getNomeCompleto();
+        this.cpf = usuario.getCpf();
+        this.email = usuario.getEmail();
+        this.telefone = usuario.getTelefone();
         this.dataNascimento = professor.getDataNascimento();
         this.formacao = professor.getFormacao();
         this.dataContratacao = professor.getDataContratacao();
-        this.endereco = professor.getEndereco();
-        this.ativo = professor.getAtivo();
-        this.createdAt = professor.getCreatedAt();
-        this.updatedAt = professor.getUpdatedAt();
-
-        this.turmas = professor.getTurmas() != null
-                ? professor.getTurmas().stream()
-                .map(Turma::getNome)
-                .sorted()
-                .collect(Collectors.toList())
-                : List.of();
+        this.endereco = usuario.getEndereco();
+        this.ativo = usuario.getAtivo();
+        this.primeiroAcesso = professor.getPrimeiroAcesso();
     }
 }
-

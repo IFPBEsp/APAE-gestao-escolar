@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.NotBlank;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -19,8 +20,8 @@ public class AvaliacaoRequestDTO {
     private String descricao;
 
     @NotNull(message = "O ID do aluno é obrigatório")
-    private Long alunoId;
+    private UUID alunoId;
 
     @NotNull(message = "O ID do professor é obrigatório")
-    private Long professorId;
+    private UUID professorId;
 }

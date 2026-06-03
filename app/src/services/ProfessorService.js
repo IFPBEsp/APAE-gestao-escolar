@@ -53,7 +53,7 @@ export async function listarProfessores(nome = "", ativo = undefined) {
 /**
  * Busca um professor por ID.
  * 
- * @param {number} id - ID do professor
+ * @param {string} id - ID UUID do professor
  * @returns {Promise<object>} Dados do professor
  */
 export async function buscarProfessorPorId(id) {
@@ -69,7 +69,7 @@ export async function buscarProfessorPorId(id) {
 /**
  * Atualiza um professor existente.
  * 
- * @param {number} id - ID do professor
+ * @param {string} id - ID UUID do professor
  * @param {object} professorData - Dados atualizados
  * @returns {Promise<object>} Professor atualizado
  */
@@ -83,25 +83,10 @@ export async function atualizarProfessor(id, professorData) {
     }
 }
 
-export async function listarTurmasDeProfessor(id) {
-    try {
-        const response = await api.get(`/professores/${id}/turmas`);
-        return response.data;
-    } catch (error) {
-        const apiMessage = error.response?.data?.message;
-        const errorMessage = apiMessage
-            || error.message
-            || "Erro ao buscar turmas do professor.";
-        console.error("ProfessorService Error:", error.response || error);
-        throw new Error(errorMessage);
-    }
-    
-}
-
 /**
  * Reativa um professor inativo pelo ID.
  *
- * @param {number} id - ID do professor
+ * @param {string} id - ID UUID do professor
  * @returns {Promise<object>} Professor atualizado (ativo)
  */
 export async function ativarProfessorporId(id) {
@@ -122,7 +107,7 @@ export async function ativarProfessorporId(id) {
 /**
  * Inativa um professor pelo ID.
  *
- * @param {number} id - ID do professor
+ * @param {string} id - ID UUID do professor
  * @returns {Promise<object>} Professor atualizado (inativo)
  */
 export async function inativarProfessorporId(id) {

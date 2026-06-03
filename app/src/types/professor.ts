@@ -1,5 +1,6 @@
 export interface Professor {
-  id: number;
+  id: string;
+  usuarioId?: string;
   nome: string;
   cpf: string;
   email: string;
@@ -9,21 +10,20 @@ export interface Professor {
   dataContratacao: string;
   endereco?: string;
   ativo: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  turmas: string[];
+  primeiroAcesso?: boolean;
 }
 
 export interface ProfessorResumo {
-  id: number;
+  id: string;
+  usuarioId?: string;
   nome: string;
   cpf: string;
   email: string;
   ativo: boolean;
-  turmas: string[];
   telefone?: string;
   formacao?: string;
   dataContratacao?: string;
   dataNascimento?: string;
   endereco?: string;
+  primeiroAcesso?: boolean;
 }

@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -12,39 +11,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/services/api";
-import { ptBR } from "date-fns/locale";
-import { listarTurmas } from "@/services/TurmaService";
-import { listarTurmasDeProfessor, ativarProfessorporId } from "@/services/ProfessorService";
-
-interface Turma {
-  id: number;
-  nome: string;
-  anoCriacao: number;
-  turno: string;
-  tipo: string;
-  isAtiva: boolean;
-  professor?: {
-    id: number;
-    nome: string;
-  };
-}
-
-interface Professor {
-  id: number;
-  nome: string;
-  cpf?: string;
-  email: string;
-  telefone?: string;
-  endereco?: string;
-  dataNascimento?: string;
-  formacao?: string;
-  dataContratacao?: string;
-  turmas?: Turma[] | string[];
-  ativo: boolean;
-}
+import { atualizarProfessor, ativarProfessorporId } from "@/services/ProfessorService";
+import { Professor } from "@/types/professor";
 
 interface ModalEditarProfessorProps {
   isOpen: boolean;
@@ -68,135 +37,41 @@ export default function ModalEditarProfessor({
     dataNascimento: "",
     formacao: "",
     dataContratacao: "",
+    ativo: true,
   });
-  
-  const [turmasDisponiveis, setTurmasDisponiveis] = useState<Turma[]>([]);
-  const [turmasVinculadas, setTurmasVinculadas] = useState<Turma[]>([]);
-  const [novaTurma, setNovaTurma] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [sugestoesTurmas, setSugestoesTurmas] = useState<Turma[]>([]);
-  const [loadingTurmas, setLoadingTurmas] = useState(false);
 
-  const extrairData = (dataString?: string) => {
-      if (!dataString) return "";
-      return dataString.split('T')[0];
-  };
+  const extrairData = (dataString?: string) => dataString ? dataString.split("T")[0] : "";
 
   useEffect(() => {
-    if (professor && isOpen) {
-
-      setFormData({
-        nome: professor.nome || "",
-        cpf: professor.cpf || "",
-        email: professor.email || "",
-        telefone: professor.telefone || "",
-        endereco: professor.endereco || "",
-        dataNascimento: extrairData(professor.dataNascimento),
-        formacao: professor.formacao || "",
-        dataContratacao: extrairData(professor.dataContratacao),
-      });
-
-      // Buscar turmas do professor
-      fetchTurmasProfessor(professor.id);
-      
-      // Buscar todas as turmas disponíveis
-      fetchTurmasDisponiveis();
-    }
+    if (!professor || !isOpen) return;
+    setFormData({
+      nome: professor.nome || "",
+      cpf: professor.cpf || "",
+      email: professor.email || "",
+      telefone: professor.telefone || "",
+      endereco: professor.endereco || "",
+      dataNascimento: extrairData(professor.dataNascimento),
+      formacao: professor.formacao || "",
+      dataContratacao: extrairData(professor.dataContratacao),
+      ativo: professor.ativo,
+    });
   }, [professor, isOpen]);
-
-  const fetchTurmasDisponiveis = async () => {
-    try {
-      setLoadingTurmas(true);
-      const turmas = await listarTurmas();
-      // Filtrar apenas turmas ativas
-      const turmasAtivas = turmas.filter((turma: Turma) => turma.isAtiva);
-      setTurmasDisponiveis(turmasAtivas);
-    } catch (error) {
-      console.error("Erro ao buscar turmas disponíveis:", error);
-      toast.error("Erro ao carregar turmas disponíveis");
-    } finally {
-      setLoadingTurmas(false);
-    }
-  };
-
-  const fetchTurmasProfessor = async (professorId: number) => {
-    try {
-      const turmas = await listarTurmasDeProfessor(professorId);
-      setTurmasVinculadas(turmas);
-    } catch (error) {
-      console.error("Erro ao buscar turmas do professor:", error);
-      // Se der erro, usa as turmas que já vieram no objeto professor
-      const turmas = professor.turmas || [];
-      const turmasNormalizadas = turmas.map((t: any) => 
-        typeof t === "object" ? t : { 
-          id: Math.random(), 
-          nome: t, 
-          anoCriacao: new Date().getFullYear(), 
-          turno: "", 
-          tipo: "", 
-          isAtiva: true 
-        }
-      );
-      setTurmasVinculadas(turmasNormalizadas);
-    }
-  };
 
   const applyCPFMask = (value: string) => {
     const numbers = value.replace(/\D/g, "");
     if (numbers.length <= 3) return numbers;
-    if (numbers.length <= 6)
-      return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
-    if (numbers.length <= 9)
-      return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
-    return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(
-      6,
-      9
-    )}-${numbers.slice(9, 11)}`;
+    if (numbers.length <= 6) return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
+    if (numbers.length <= 9) return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
+    return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6, 9)}-${numbers.slice(9, 11)}`;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    if (name === "cpf") {
-      const masked = applyCPFMask(value);
-      setFormData((prev) => ({ ...prev, cpf: masked }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleAddTurma = () => {
-    if (novaTurma.trim()) {
-      // Encontrar a turma pelo nome nas sugestões
-      const turmaEncontrada = sugestoesTurmas.find(
-        t => t.nome.toLowerCase() === novaTurma.toLowerCase()
-      );
-      
-      if (turmaEncontrada && !turmasVinculadas.some(t => t.id === turmaEncontrada.id)) {
-        setTurmasVinculadas([...turmasVinculadas, turmaEncontrada]);
-        setNovaTurma("");
-        setSugestoesTurmas([]);
-      }
-    }
-  };
-
-  const vincularProfessorATurma = async (turmaId: number, professorId: number) => {
-    try {
-      await api.put(`/turmas/${turmaId}/professor/${professorId}`);
-    } catch (error) {
-      console.error(`Erro ao vincular turma ${turmaId}:`, error);
-      throw error;
-    }
-  };
-
-  const desvincularProfessorDaTurma = async (turmaId: number, professorId: number) => {
-    try {
-      // Nota: Este endpoint pode precisar ser criado no backend
-      await api.delete(`/turmas/${turmaId}/professor/${professorId}`);
-    } catch (error) {
-      console.error(`Erro ao desvincular turma ${turmaId}:`, error);
-      // Se não existir o endpoint, apenas loga o erro
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "cpf" ? applyCPFMask(value) : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -204,66 +79,35 @@ export default function ModalEditarProfessor({
     setIsSubmitting(true);
 
     try {
-      
-      // 1. Buscar turmas atuais do professor para comparar
-      const turmasAtuais = await listarTurmasDeProfessor(professor.id);
-      const turmasAtuaisIds = turmasAtuais.map((t: Turma) => t.id);
-      const turmasVinculadasIds = turmasVinculadas.map(t => t.id);
-      
-      // 2. Turmas para adicionar (estão em turmasVinculadas mas não em turmasAtuais)
-      const turmasParaAdicionar = turmasVinculadas.filter(
-        t => !turmasAtuaisIds.includes(t.id)
-      );
-      
-      // 3. Turmas para remover (estão em turmasAtuais mas não em turmasVinculadas)
-      const turmasParaRemover = turmasAtuais.filter(
-        (t: Turma) => !turmasVinculadasIds.includes(t.id)
-      );
+      const payload = {
+        ...formData,
+        dataNascimento: formData.dataNascimento || null,
+        dataContratacao: formData.dataContratacao || null,
+        telefone: formData.telefone || null,
+        endereco: formData.endereco || null,
+        formacao: formData.formacao || null,
+      };
 
-      // 4. Checagem se o professor estiver inativo para possível reativação ao vincular numa nova turma
-      if (!professor.ativo && turmasParaAdicionar.length > 0) {
-          const confirmarReativacao = window.confirm(
-            "Este professor está INATIVO, ao vinculá-lo a uma turma, ele será REATIVADO automaticamente no sistema. Deseja confirmar esta ação?"
-          );
-
-          if (!confirmarReativacao) {
-            setIsSubmitting(false);
-            return;
-          }
-
-          //reativação do professor pela api
-          try{
-              await ativarProfessorporId(professor.id);
-          } catch (reactivationError: any){
-              toast.error(reactivationError.message);
-              setIsSubmitting(false);
-              return;
-          }
-
-      }
-
-
-      // 5. Atualizar dados básicos do professor
-      await api.put(`/professores/${professor.id}`, formData);
-      
-      // 6. Adicionar novas turmas
-      for (const turma of turmasParaAdicionar) {
-        await vincularProfessorATurma(turma.id, professor.id);
-      }
-
-      // 7. Remover turmas desvinculadas
-      for (const turma of turmasParaRemover) {
-        await desvincularProfessorDaTurma(turma.id, professor.id);
-      }
-
+      await atualizarProfessor(professor.id, payload);
       toast.success("Professor atualizado com sucesso!");
       onUpdate?.();
       onClose();
     } catch (error: any) {
-      console.error("Erro ao atualizar professor:", error);
-      const errorMessage =
-        error.response?.data?.message || "Erro ao atualizar professor";
-      toast.error(errorMessage);
+      toast.error(error.message || "Erro ao atualizar professor");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleReativar = async () => {
+    setIsSubmitting(true);
+    try {
+      await ativarProfessorporId(professor.id);
+      toast.success("Professor reativado com sucesso!");
+      onUpdate?.();
+      onClose();
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao reativar professor");
     } finally {
       setIsSubmitting(false);
     }
@@ -273,304 +117,58 @@ export default function ModalEditarProfessor({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-[#0D4F97]">
-            Editar Informações do Professor
+          <DialogTitle className="text-[#0D4F97] text-xl">
+            Editar Professor
           </DialogTitle>
-          <DialogDescription className="text-[#222222]">
-            Atualize as informações do professor conforme necessário.
-          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Informações Pessoais e de Contato */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-[#0D4F97]">
-              Informações Pessoais e de Contato
-            </h3>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="nome" className="text-[#0D4F97]">
-                  Nome Completo <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="nome"
-                  name="nome"
-                  value={formData.nome}
-                  onChange={handleChange}
-                  required
-                  className="h-12 border-2 border-[#B2D7EC]"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="cpf" className="text-[#0D4F97]">
-                  CPF <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="cpf"
-                  name="cpf"
-                  value={formData.cpf}
-                  onChange={handleChange}
-                  required
-                  className="h-12 border-2 border-[#B2D7EC]"
-                  placeholder="123.456.789-00"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="dataNascimento" className="text-[#0D4F97]">
-                  Data de Nascimento <span className="text-red-500">*</span>
-                </Label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#0D4F97]" />
-                  <Input
-                    id="dataNascimento"
-                    name="dataNascimento"
-                    type="date"
-                    value={formData.dataNascimento}
-                    onChange={handleChange}
-                    required
-                    className="h-12 pl-10 border-2 border-[#B2D7EC]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="email" className="text-[#0D4F97]">
-                  E-mail <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="h-12 border-2 border-[#B2D7EC]"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="telefone" className="text-[#0D4F97]">
-                  Telefone
-                </Label>
-                <Input
-                  id="telefone"
-                  name="telefone"
-                  value={formData.telefone}
-                  onChange={handleChange}
-                  className="h-12 border-2 border-[#B2D7EC]"
-                  placeholder="(11) 98765-4321"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="endereco" className="text-[#0D4F97]">
-                  Endereço <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="endereco"
-                  name="endereco"
-                  value={formData.endereco}
-                  onChange={handleChange}
-                  required
-                  className="h-12 border-2 border-[#B2D7EC]"
-                  placeholder="Rua das Flores, 123 - São Paulo/SP"
-                />
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Nome</Label>
+              <Input name="nome" value={formData.nome} onChange={handleChange} />
+            </div>
+            <div className="space-y-2">
+              <Label>CPF</Label>
+              <Input name="cpf" value={formData.cpf} onChange={handleChange} />
+            </div>
+            <div className="space-y-2">
+              <Label>E-mail</Label>
+              <Input name="email" value={formData.email} onChange={handleChange} />
+            </div>
+            <div className="space-y-2">
+              <Label>Telefone</Label>
+              <Input name="telefone" value={formData.telefone} onChange={handleChange} />
+            </div>
+            <div className="space-y-2">
+              <Label>Data de nascimento</Label>
+              <Input type="date" name="dataNascimento" value={formData.dataNascimento} onChange={handleChange} />
+            </div>
+            <div className="space-y-2">
+              <Label>Data de contratação</Label>
+              <Input type="date" name="dataContratacao" value={formData.dataContratacao} onChange={handleChange} />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label>Formação</Label>
+              <Input name="formacao" value={formData.formacao} onChange={handleChange} />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label>Endereço</Label>
+              <Input name="endereco" value={formData.endereco} onChange={handleChange} />
             </div>
           </div>
 
-          {/* Informações Profissionais */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-[#0D4F97]">
-              Informações Profissionais
-            </h3>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="formacao" className="text-[#0D4F97]">
-                  Formação
-                </Label>
-                <Input
-                  id="formacao"
-                  name="formacao"
-                  value={formData.formacao}
-                  onChange={handleChange}
-                  className="h-12 border-2 border-[#B2D7EC]"
-                  placeholder="Pedagogia Especial"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="dataContratacao" className="text-[#0D4F97]">
-                  Data de Contratação <span className="text-red-500">*</span>
-                </Label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#0D4F97]" />
-                  <Input
-                    id="dataContratacao"
-                    name="dataContratacao"
-                    type="date"
-                    value={formData.dataContratacao}
-                    onChange={handleChange}
-                    required
-                    className="h-12 pl-10 border-2 border-[#B2D7EC]"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Turmas que Leciona */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-[#0D4F97]">
-              Turmas que Leciona
-            </h3>
-
-            <div>
-              <Label htmlFor="novaTurma" className="text-[#0D4F97]">
-                Adicionar Turma
-              </Label>
-              <div className="relative">
-                <div className="flex gap-2">
-                  <Input
-                    id="novaTurma"
-                    value={novaTurma}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setNovaTurma(value);
-                      if (value.trim().length > 0) {
-                        const searchLower = value.toLowerCase();
-                        const filtradas = turmasDisponiveis.filter(
-                          (t) =>
-                            t.nome.toLowerCase().includes(searchLower) &&
-                            !turmasVinculadas.some(tv => tv.id === t.id)
-                        );
-                        setSugestoesTurmas(filtradas);
-                      } else {
-                        setSugestoesTurmas([]);
-                      }
-                    }}
-                    onFocus={() => {
-                      if (novaTurma.trim().length > 0) {
-                        const searchLower = novaTurma.toLowerCase();
-                        const filtradas = turmasDisponiveis.filter(
-                          (t) =>
-                            t.nome.toLowerCase().includes(searchLower) &&
-                            !turmasVinculadas.some(tv => tv.id === t.id)
-                        );
-                        setSugestoesTurmas(filtradas);
-                      } else {
-                        // Mostrar todas as turmas disponíveis que não estão vinculadas
-                        const filtradas = turmasDisponiveis.filter(t => 
-                          !turmasVinculadas.some(tv => tv.id === t.id)
-                        );
-                        setSugestoesTurmas(filtradas);
-                      }
-                    }}
-                    onBlur={() => {
-                      setTimeout(() => setSugestoesTurmas([]), 200);
-                    }}
-                    onKeyPress={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleAddTurma();
-                      }
-                    }}
-                    className="h-12 border-2 border-[#B2D7EC]"
-                    placeholder="Busque e selecione a turma..."
-                    autoComplete="off"
-                    disabled={loadingTurmas}
-                  />
-                  <Button
-                    type="button"
-                    onClick={handleAddTurma}
-                    variant="primary"
-                    className="h-12"
-                    disabled={loadingTurmas || !novaTurma.trim()}
-                  >
-                    {loadingTurmas ? "Carregando..." : "Adicionar"}
-                  </Button>
-                </div>
-                {/* Lista de Sugestões de Autocomplete */}
-                {sugestoesTurmas.length > 0 && (
-                  <div className="absolute z-10 mt-1 w-full max-w-[calc(100%-100px)] rounded-md border border-[#B2D7EC] bg-white shadow-lg">
-                    <ul className="max-h-60 overflow-auto py-1">
-                      {sugestoesTurmas.map((turma) => (
-                        <li
-                          key={turma.id}
-                          className="cursor-pointer px-4 py-2 hover:bg-[#E8F3FF] text-[#222222]"
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                          }}
-                          onClick={() => {
-                            setTurmasVinculadas([...turmasVinculadas, turma]);
-                            setNovaTurma("");
-                            setSugestoesTurmas([]);
-                          }}
-                        >
-                          <div>
-                            <div className="font-medium">{turma.nome}</div>
-                            <div className="text-sm text-gray-500">
-                              {turma.turno} • {turma.tipo}
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-              
-              {loadingTurmas && (
-                <div className="mt-2 text-sm text-gray-500">
-                  Carregando turmas disponíveis...
-                </div>
-              )}
-            </div>
-
-            {turmasVinculadas.length > 0 && (
-              <div>
-                <p className="text-sm font-medium text-[#0D4F97] mb-2">
-                  Turmas Vinculadas ({turmasVinculadas.length})
-                </p>
-                <div className="space-y-2">
-                  {turmasVinculadas.map((turma) => (
-                    <div
-                      key={turma.id}
-                      className="flex items-center justify-between rounded-lg border-2 border-[#B2D7EC] bg-white p-3"
-                    >
-                      <div>
-                        <span className="text-[#222222] font-medium">{turma.nome}</span>
-                        <div className="text-sm text-gray-500">
-                          {turma.turno} • {turma.tipo}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          <DialogFooter className="gap-2">
+            {!professor.ativo && (
+              <Button type="button" variant="outline" onClick={handleReativar} disabled={isSubmitting}>
+                Reativar Professor
+              </Button>
             )}
-          </div>
-
-          <DialogFooter className="gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="h-12"
-            >
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancelar
             </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={isSubmitting}
-              className="h-12"
-            >
-              {isSubmitting ? "Salvando..." : "Salvar Alterações"}
+            <Button type="submit" variant="primary" disabled={isSubmitting}>
+              {isSubmitting ? "Salvando..." : "Salvar"}
             </Button>
           </DialogFooter>
         </form>

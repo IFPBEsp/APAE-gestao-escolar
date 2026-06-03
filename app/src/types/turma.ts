@@ -1,25 +1,29 @@
-import { Professor } from './professor';
-
 export interface TurmaAluno {
-  alunoId: number;
+  pacienteId: string;
   nome: string;
-  isAtivo: boolean;
+  ativo: boolean;
 }
 
 export interface Turma {
-  id: number;
+  id: string;
   nome: string;
   anoCriacao: number;
   turno: string;
   tipo: string;
-  isAtiva: boolean;
-  professor?: Professor;
+  ativa: boolean;
   alunos: TurmaAluno[];
   horario: string;
   totalAlunosAtivos?: number;
 }
 
 export interface TurmaResumo {
-  id: number;
+  id: string;
   nome: string;
+  anoCriacao?: number;
+  turno?: string;
+  tipo?: string;
+  ativa?: boolean;
+  horario?: string;
+  totalAlunos?: number;
+  totalAlunosAtivos?: number;
 }

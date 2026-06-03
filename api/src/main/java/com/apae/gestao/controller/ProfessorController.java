@@ -1,11 +1,11 @@
 package com.apae.gestao.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.apae.gestao.dto.professor.ProfessorRequestDTO;
 import com.apae.gestao.dto.professor.ProfessorResponseDTO;
 import com.apae.gestao.dto.professor.ProfessorResumoDTO;
-import com.apae.gestao.dto.turma.TurmaResumoDTO;
 import com.apae.gestao.service.ProfessorService;
 import com.apae.gestao.openapi.Doc400ValidationError;
 import com.apae.gestao.openapi.Doc404NotFound;
@@ -38,8 +38,8 @@ public class ProfessorController {
     @Operation(summary = "Listar professores")
     @ApiResponse(responseCode = "200", description = "Lista de professores retornada com sucesso")
     public ResponseEntity<List<ProfessorResumoDTO>> listarTodos(
-            @Parameter(description = "ID do professor", example = "42", in = ParameterIn.QUERY)
-            @RequestParam(value = "id", required = false) Long id,
+            @Parameter(description = "ID do professor", in = ParameterIn.QUERY)
+            @RequestParam(value = "id", required = false) UUID id,
 
             @Parameter(description = "Nome do professor para busca", example = "Maria", in = ParameterIn.QUERY)
             @RequestParam(value = "nome", required = false) String nome,
@@ -70,8 +70,8 @@ public class ProfessorController {
     })
     @Doc404NotFound
     public ResponseEntity<ProfessorResumoDTO> buscarPorId(
-            @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.PATH)
-            @PathVariable Long id) {
+            @Parameter(description = "Identificador do professor", in = ParameterIn.PATH)
+            @PathVariable UUID id) {
         ProfessorResumoDTO response = professorService.buscarPorIdResumido(id);
         return ResponseEntity.ok(response);
     }
@@ -87,8 +87,8 @@ public class ProfessorController {
     })
     @Doc404NotFound
     public ResponseEntity<ProfessorResponseDTO> buscarPorIdCompleto(
-            @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.QUERY)
-            @RequestParam("id") Long id) {
+            @Parameter(description = "Identificador do professor", in = ParameterIn.QUERY)
+            @RequestParam("id") UUID id) {
         ProfessorResponseDTO response = professorService.buscarPorId(id);
         return ResponseEntity.ok(response);
     }
@@ -111,8 +111,8 @@ public class ProfessorController {
     @Operation(summary = "Atualizar professor existente")
     @DocStandardErrors
     public ResponseEntity<ProfessorResponseDTO> atualizar(
-            @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.PATH)
-            @PathVariable Long id,
+            @Parameter(description = "Identificador do professor", in = ParameterIn.PATH)
+            @PathVariable UUID id,
             @Valid @RequestBody ProfessorRequestDTO dto) {
         ProfessorResponseDTO response = professorService.atualizar(id, dto);
         return ResponseEntity.ok(response);
@@ -122,8 +122,8 @@ public class ProfessorController {
     @Operation(summary = "Inativar professor")
     @Doc404NotFound
     public ResponseEntity<ProfessorResponseDTO> inativar(
-            @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.PATH)
-            @PathVariable Long id) {
+            @Parameter(description = "Identificador do professor", in = ParameterIn.PATH)
+            @PathVariable UUID id) {
         ProfessorResponseDTO response = professorService.inativar(id);
         return ResponseEntity.ok(response);
     }
@@ -132,20 +132,10 @@ public class ProfessorController {
     @Operation(summary = "Reativar professor")
     @Doc404NotFound
     public ResponseEntity<ProfessorResponseDTO> reativar(
-            @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.PATH)
-            @PathVariable Long id) {
+            @Parameter(description = "Identificador do professor", in = ParameterIn.PATH)
+            @PathVariable UUID id) {
         ProfessorResponseDTO response = professorService.reativarProfessor(id);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}/turmas")
-    @Operation(summary = "Listar turmas de um professor")
-    @Doc404NotFound
-    public ResponseEntity<List<TurmaResumoDTO>> getTurmasDeProfessor(
-            @Parameter(description = "Identificador do professor", example = "10", in = ParameterIn.PATH)
-            @PathVariable Long id) {
-        List<TurmaResumoDTO> response = professorService.getTurmasDeProfessor(id);
-        return ResponseEntity.ok(response);
-    }
 }
-

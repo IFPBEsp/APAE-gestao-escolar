@@ -1,43 +1,40 @@
 package com.apae.gestao.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.apae.gestao.dto.aluno.AlunoFrequenciaResumoDTO;
+import com.apae.gestao.dto.aula.AulaPresencaAlunoResponseDTO;
+import com.apae.gestao.dto.turma.TurmaResumoFrequenciaDTO;
+import com.apae.gestao.repository.AlunoViewRepository;
+import com.apae.gestao.repository.TurmaRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.apae.gestao.dto.turma.TurmaResumoFrequenciaDTO;
-import com.apae.gestao.repository.AlunoViewRepository;
-import com.apae.gestao.repository.TurmaRepository;
-import com.apae.gestao.dto.aluno.AlunoFrequenciaResumoDTO;
-import com.apae.gestao.dto.aula.AulaPresencaAlunoResponseDTO;
-
-import jakarta.transaction.Transactional;
+import java.util.UUID;
 
 @Service
 public class FrequenciaService {
 
-    @Autowired
-    private TurmaRepository turmaRepository;
+    private final TurmaRepository turmaRepository;
+    private final AlunoViewRepository alunoRepository;
 
-    @Autowired
-    private AlunoViewRepository alunoRepository;
+    public FrequenciaService(TurmaRepository turmaRepository, AlunoViewRepository alunoRepository) {
+        this.turmaRepository = turmaRepository;
+        this.alunoRepository = alunoRepository;
+    }
 
     @Transactional
-    public TurmaResumoFrequenciaDTO getResumoTurma(Long turmaId) {
+    public TurmaResumoFrequenciaDTO getResumoTurma(UUID turmaId) {
         return turmaRepository.getResumoFrequenciaTurma(turmaId);
     }
 
     @Transactional
-    public Page<AlunoFrequenciaResumoDTO> listarAlunos(Long turmaId, Pageable pageable) {
+    public Page<AlunoFrequenciaResumoDTO> listarAlunos(UUID turmaId, Pageable pageable) {
         return alunoRepository.listarFrequenciaAlunosDaTurma(turmaId, pageable);
     }
 
     @Transactional
-    public Page<AulaPresencaAlunoResponseDTO> getHistoricoIndividualAluno(
-        Long alunoId,
-        Pageable pageable
-    ) {
+    public Page<AulaPresencaAlunoResponseDTO> getHistoricoIndividualAluno(UUID alunoId, Pageable pageable) {
         return alunoRepository.listarHistoricoAluno(alunoId, pageable);
     }
 }
-

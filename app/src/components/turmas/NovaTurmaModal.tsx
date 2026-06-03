@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  criarTurma,
-  adicionarAlunosATurma
-} from "@/services/TurmaService";
+import { criarTurma } from "@/services/TurmaService";
 import { toast } from "sonner";
 import { listarAlunos } from "@/services/AlunoService";
 import { useState, useEffect } from "react";
@@ -34,18 +31,11 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Search, X } from "lucide-react";
-import { listarProfessores } from "@/services/ProfessorService";
-
 
 interface Aluno {
-    id: number;
+    id: string;
     nome: string;
     deficiencia?: string;
-}
-
-interface Professor {
-    id: number;
-    nome: string;
 }
 
 interface NovaTurmaModalProps {
@@ -58,10 +48,6 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
     const [tipo, setTipo] = useState("");
     const [ano, setAno] = useState(new Date().getFullYear().toString());
     const [turno, setTurno] = useState("");
-
-    const [buscaProfessor, setBuscaProfessor] = useState("");
-    const [professoresEncontrados, setProfessoresEncontrados] = useState<Professor[]>([]);
-    const [professorSelecionado, setProfessorSelecionado] = useState<Professor | null>(null);
 
     // Estados dos Alunos - mecher depois que criar o service de alunos!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     const [buscaAluno, setBuscaAluno] = useState("");
@@ -85,34 +71,6 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
         if (val === 'manha') return 'Manhã';
         if (val === 'tarde') return 'Tarde';
         return val;
-    }
-
-    useEffect(() => {
-        if (buscaProfessor.length > 0 && !professorSelecionado) {
-            const delayDebounceFn = setTimeout(() => {
-                fetchProfessores(buscaProfessor);
-            }, 300); 
-            return () => clearTimeout(delayDebounceFn);
-        } else {
-            setProfessoresEncontrados([]);
-        }
-    }, [buscaProfessor, professorSelecionado]);
-
-    async function fetchProfessores(nome: string) {
-        try {
-            const data = await listarProfessores(nome, true);
-            setProfessoresEncontrados(data);
-        } catch (error: any) {
-            toast.error(error.message || "Erro ao buscar professores");
-            setProfessoresEncontrados([]);
-        }
-    }
-
-
-    function selecionarProfessor(prof: Professor) {
-        setProfessorSelecionado(prof);
-        setBuscaProfessor(prof.nome);
-        setProfessoresEncontrados([]);
     }
 
     useEffect(() => {
@@ -144,7 +102,7 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
         setAlunosEncontrados([]);
     }
 
-    function removerAluno(id: number) {
+    function removerAluno(id: string) {
         setAlunosSelecionados(alunosSelecionados.filter(a => a.id !== id));
     }
 
@@ -154,17 +112,11 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
             return;
         }
 
-        if (!professorSelecionado) {
-            toast.error("Selecione um professor responsável");
-            return;
-        }
-
         const dadosNovaTurma = {
             tipo: formatTipo(tipo),
             anoCriacao: Number(ano),
             turno: formatTurno(turno),
-            professorId: professorSelecionado.id,
-            isAtiva: true,
+            ativa: true,
             alunosIds: alunosSelecionados.map(a => a.id)
         };
 
@@ -177,7 +129,6 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
             if (onSave) {
                 onSave({
                     ...turmaCriada,
-                    professor: professorSelecionado,
                     alunos: alunosSelecionados,
                 });
             }
@@ -196,9 +147,6 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
         setTipo("");
         setAno(new Date().getFullYear().toString());
         setTurno("");
-        setBuscaProfessor("");
-        setProfessorSelecionado(null);
-        setProfessoresEncontrados([]);
         setBuscaAluno("");
         setAlunosEncontrados([]);
         setAlunosSelecionados([]);
@@ -283,34 +231,6 @@ export function NovaTurmaModal({ isOpen, onClose, onSave }: NovaTurmaModalProps)
                         <p className="text-xs text-[#0D4F97]">
                             Este campo é gerado automaticamente a partir do Tipo, Ano e Turno selecionados.
                         </p>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label className="text-[#0D4F97]">Professor Responsável *</Label>
-                        <div className="relative">
-                            <Input
-                                placeholder="Digite o nome do professor..."
-                                value={buscaProfessor}
-                                onChange={(e) => {
-                                    setBuscaProfessor(e.target.value);
-                                    setProfessorSelecionado(null);
-                                }}
-                                className="bg-white border-[#B2D7EC]"
-                            />
-                            {professoresEncontrados.length > 0 && (
-                                <div className="absolute z-10 w-full border rounded-md max-h-40 overflow-y-auto bg-white shadow-lg mt-1">
-                                    {professoresEncontrados.map(prof => (
-                                        <div
-                                            key={prof.id}
-                                            className="p-2 hover:bg-gray-50 cursor-pointer text-sm"
-                                            onClick={() => selecionarProfessor(prof)}
-                                        >
-                                            {prof.nome}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
                     </div>
 
                     <div className="space-y-4">

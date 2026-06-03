@@ -9,12 +9,10 @@ import {
   Edit,
   Power,
   UserCircle,
-  BookOpen,
   Mail,
   Phone,
   GraduationCap,
   Calendar,
-  Users,
   FileText,
   MapPin,
   CalendarDays,
@@ -40,7 +38,11 @@ import { ativarProfessorporId, inativarProfessorporId } from "@/services/Profess
 export default function DetalhesProfessor() {
   const router = useRouter();
   const params = useParams();
-  const professorId = params?.id ? Number(params.id) : null;
+  const professorId = params?.id
+    ? Array.isArray(params.id)
+      ? params.id[0]
+      : params.id
+    : null;
 
   const [professor, setProfessor] = useState<Professor | null>(null);
   const [loading, setLoading] = useState(true);
@@ -293,45 +295,6 @@ export default function DetalhesProfessor() {
                     </p>
                   </div>
                 </div>
-
-                {/* Número de Turmas */}
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
-                    <Users className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">
-                      Número de Turmas
-                    </p>
-                    <p className="text-[#222222]">
-                      {professor.turmas?.length || 0}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Turmas que Leciona */}
-              <div className="mt-6 border-t-8 border-[#E2E8F0] pt-6">
-                <div className="mb-3 flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-[#0D4F97]" />
-                  <h3 className="text-lg font-semibold text-[#0D4F97]">
-                    Turmas que leciona
-                  </h3>
-                </div>
-                {professor.turmas && professor.turmas.length > 0 ? (
-                  <div className="space-y-2">
-                    {professor.turmas.map((turmaNome, index) => (
-                      <div
-                        key={index}
-                        className="rounded-lg border-2 border-[#B2D7EC] bg-white p-3 text-[#222222]"
-                      >
-                        {turmaNome}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-[#222222]">Nenhuma turma vinculada</p>
-                )}
               </div>
 
               {/* Botões de Ação */}
