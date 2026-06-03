@@ -2,6 +2,7 @@ package com.apae.gestao.entity;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -10,33 +11,29 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "avaliacoes")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@Table(name = "avaliacoes", schema = "gestao_escolar")
 public class Avaliacao {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(nullable = false, columnDefinition = "TEXT")
+    private UUID id;
+
     private String descricao; 
     
-    @Column(name = "data_avaliacao", nullable = false)
+    @Column(name = "data_avaliacao")
     private LocalDateTime dataAvaliacao;
+
+    @Column(name = "paciente_id")
+    private UUID pacienteId;
     
     @ManyToOne
-    @JoinColumn(name = "aluno_id", nullable = false)
-    private Aluno aluno;
-    
-    @ManyToOne
-    @JoinColumn(name = "professor_id", nullable = false)
+    @JoinColumn(name = "professor_id" )
     private Professor professor;
     
     @PrePersist

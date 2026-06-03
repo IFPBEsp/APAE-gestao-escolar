@@ -125,7 +125,7 @@ public class RelatorioService {
 
     @Transactional(readOnly = true)
         public List<RelatorioResponseDTO> buscarPorAluno(Long alunoId) {
-        return relatorioRepository.findByAlunoId(alunoId)
+        return relatorioRepository.findByPacienteId(alunoId)
                 .stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());

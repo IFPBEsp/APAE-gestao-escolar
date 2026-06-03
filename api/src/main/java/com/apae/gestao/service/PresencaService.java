@@ -50,7 +50,7 @@ public class PresencaService {
         Turma turma = turmaRepository.findById(turmaId)
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada com id: " + turmaId));
 
-        Aula aula = aulaRepository.findByTurmaAndDataDaAula(turma, data)
+        Aula aula = aulaRepository.findByTurmaAndData(turma, data)
                 .orElseGet(() -> criarNovaAula(turma, data, request.getDescricao()));
 
         if (request.getDescricao() != null && !request.getDescricao().isBlank()) {
@@ -93,7 +93,7 @@ public class PresencaService {
         Aluno aluno = alunoRepository.findById(item.getAlunoId())
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado com id: " + item.getAlunoId()));
 
-        Presenca presenca = presencaRepository.findByAulaAndAluno(aula, aluno)
+        Presenca presenca = presencaRepository.findByAulaAndPacienteId(aula, aluno)
                 .orElseGet(() -> Presenca.builder()
                         .aula(aula)
                         .aluno(aluno)

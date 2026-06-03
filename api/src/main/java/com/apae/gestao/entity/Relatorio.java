@@ -1,6 +1,7 @@
 package com.apae.gestao.entity;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -9,41 +10,40 @@ import lombok.*;
 
 
 @Entity
-@Table(name = "relatorios")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@Table(name = "relatorios", schema = "gestao_escolar")
 public class Relatorio {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @Column(length = 1000)
+    @Id
+    private UUID id;
+
+    @Column(columnDefinition = "TEXT")
     private String atividades;
 
-    @Column(length = 1000)
+    @Column(columnDefinition = "TEXT")
     private String habilidades;
 
-    @Column(length = 1000)
+    @Column(columnDefinition = "TEXT")
     private String estrategias;
 
-    @Column(length = 1000)
+    @Column(columnDefinition = "TEXT")
     private String recursos;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "aluno_id", nullable = false)
-    private Aluno aluno;
+    @Column(name = "paciente_id")
+    private UUID pacienteId;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "professor_id", nullable = false)
+    @JoinColumn(name = "professor_id" )
     private Professor professor;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "turma_id", nullable = false)
+    @JoinColumn(name = "turma_id" )
     private Turma turma;
 
     @PrePersist
