@@ -32,7 +32,7 @@ import api from "@/services/api";
 import ModalEditarProfessor from "@/components/ModalEditarProfessor";
 import { format, isValid, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Professor } from "@/types/professor";
+import { Endereco, Professor } from "@/types/professor";
 import { ativarProfessorporId, inativarProfessorporId } from "@/services/ProfessorService";
 
 export default function DetalhesProfessor() {
@@ -103,6 +103,20 @@ export default function DetalhesProfessor() {
       if (!isValid(date)) return dateString;
       return format(date, "dd/MM/yyyy", { locale: ptBR });
 
+  };
+
+  const formatEndereco = (endereco?: Endereco | null) => {
+    if (!endereco) return "—";
+    const linha = [
+      endereco.rua,
+      endereco.numero,
+      endereco.bairro,
+      endereco.cidade,
+      endereco.estado,
+      endereco.cep,
+    ].filter(Boolean).join(", ");
+
+    return endereco.complemento ? `${linha} - ${endereco.complemento}` : linha || "—";
   };
 
   const activateButtonStyles = "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700";
@@ -291,7 +305,7 @@ export default function DetalhesProfessor() {
                       Endereço
                     </p>
                     <p className="text-[#222222]">
-                      {professor.endereco || "—"}
+                      {formatEndereco(professor.endereco)}
                     </p>
                   </div>
                 </div>

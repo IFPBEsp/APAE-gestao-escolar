@@ -1,12 +1,15 @@
 package com.apae.gestao.service;
 
+import com.apae.gestao.dto.professor.EnderecoDTO;
 import com.apae.gestao.dto.professor.ProfessorRequestDTO;
 import com.apae.gestao.dto.professor.ProfessorResponseDTO;
 import com.apae.gestao.dto.professor.ProfessorResumoDTO;
+import com.apae.gestao.entity.Endereco;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Usuario;
 import com.apae.gestao.exception.ConflitoDeDadosException;
 import com.apae.gestao.exception.RecursoNaoEncontradoException;
+import com.apae.gestao.repository.EnderecoRepository;
 import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.repository.UsuarioRepository;
 import org.springframework.dao.DataAccessException;
@@ -26,13 +29,16 @@ public class ProfessorService {
 
     private final ProfessorRepository professorRepository;
     private final UsuarioRepository usuarioRepository;
+    private final EnderecoRepository enderecoRepository;
     private final PasswordEncoder passwordEncoder;
 
     public ProfessorService(ProfessorRepository professorRepository,
                             UsuarioRepository usuarioRepository,
+                            EnderecoRepository enderecoRepository,
                             PasswordEncoder passwordEncoder) {
         this.professorRepository = professorRepository;
         this.usuarioRepository = usuarioRepository;
+        this.enderecoRepository = enderecoRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -41,25 +47,30 @@ public class ProfessorService {
         return professorRepository.findAll()
                 .stream()
                 .filter(professor -> id == null || id.equals(professor.getId()))
-                .map(professor -> new ProfessorUsuario(professor, buscarUsuario(professor)))
+                .map(professor -> {
+                    Usuario usuario = buscarUsuario(professor);
+                    return new ProfessorUsuario(professor, usuario, buscarEndereco(usuario));
+                })
                 .filter(item -> nome == null || item.usuario().getNomeCompleto().toLowerCase().contains(nome.toLowerCase()))
                 .filter(item -> cpf == null || cpf.equals(item.usuario().getCpf()))
                 .filter(item -> email == null || email.equalsIgnoreCase(item.usuario().getEmail()))
                 .filter(item -> ativo == null || ativo.equals(item.usuario().getAtivo()))
-                .map(item -> toResumo(item.professor(), item.usuario()))
+                .map(item -> toResumo(item.professor(), item.usuario(), item.endereco()))
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public ProfessorResumoDTO buscarPorIdResumido(UUID id) {
         Professor professor = buscarProfessor(id);
-        return toResumo(professor, buscarUsuario(professor));
+        Usuario usuario = buscarUsuario(professor);
+        return toResumo(professor, usuario, buscarEndereco(usuario));
     }
 
     @Transactional(readOnly = true)
     public ProfessorResponseDTO buscarPorId(UUID id) {
         Professor professor = buscarProfessor(id);
-        return new ProfessorResponseDTO(professor, buscarUsuario(professor));
+        Usuario usuario = buscarUsuario(professor);
+        return new ProfessorResponseDTO(professor, usuario, buscarEndereco(usuario));
     }
 
     @Transactional
@@ -69,6 +80,10 @@ public class ProfessorService {
 
         Usuario usuario = new Usuario();
         mapearUsuario(dto, usuario);
+        Endereco endereco = salvarEndereco(dto.getEndereco(), null);
+        if (endereco != null) {
+            usuario.setEnderecoId(endereco.getId());
+        }
         usuario.setCargo(CARGO_GESTAO_ESCOLAR);
         usuario.setAtivo(dto.getAtivo() == null ? true : dto.getAtivo());
         usuario.setSenha(passwordEncoder.encode(cpfSomenteDigitos(dto.getCpf())));
@@ -83,7 +98,7 @@ public class ProfessorService {
         professor.setPrimeiroAcesso(true);
 
         Professor salvo = professorRepository.save(professor);
-        return new ProfessorResponseDTO(salvo, usuarioSalvo);
+        return new ProfessorResponseDTO(salvo, usuarioSalvo, endereco);
     }
 
     @Transactional
@@ -95,6 +110,10 @@ public class ProfessorService {
         validarEmailUnico(dto.getEmail(), usuario.getId());
 
         mapearUsuario(dto, usuario);
+        Endereco endereco = salvarEndereco(dto.getEndereco(), usuario.getEnderecoId());
+        if (endereco != null) {
+            usuario.setEnderecoId(endereco.getId());
+        }
         if (dto.getAtivo() != null) {
             usuario.setAtivo(dto.getAtivo());
         }
@@ -104,7 +123,7 @@ public class ProfessorService {
         professor.setDataNascimento(dto.getDataNascimento());
         professor.setDataContratacao(dto.getDataContratacao());
         Professor atualizado = professorRepository.save(professor);
-        return new ProfessorResponseDTO(atualizado, usuario);
+        return new ProfessorResponseDTO(atualizado, usuario, endereco);
     }
 
     @Transactional
@@ -113,7 +132,7 @@ public class ProfessorService {
         Usuario usuario = buscarUsuario(professor);
         usuario.setAtivo(false);
         salvarUsuarioComErroClaro(usuario);
-        return new ProfessorResponseDTO(professor, usuario);
+        return new ProfessorResponseDTO(professor, usuario, buscarEndereco(usuario));
     }
 
     @Transactional
@@ -122,7 +141,7 @@ public class ProfessorService {
         Usuario usuario = buscarUsuario(professor);
         usuario.setAtivo(true);
         salvarUsuarioComErroClaro(usuario);
-        return new ProfessorResponseDTO(professor, usuario);
+        return new ProfessorResponseDTO(professor, usuario, buscarEndereco(usuario));
     }
 
     private Professor buscarProfessor(UUID id) {
@@ -135,12 +154,74 @@ public class ProfessorService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário do professor não encontrado com ID: " + professor.getUsuarioId()));
     }
 
+    private Endereco buscarEndereco(Usuario usuario) {
+        if (usuario.getEnderecoId() == null) {
+            return null;
+        }
+        return enderecoRepository.findById(usuario.getEnderecoId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Endereço do usuário não encontrado com ID: " + usuario.getEnderecoId()));
+    }
+
     private void mapearUsuario(ProfessorRequestDTO dto, Usuario usuario) {
         usuario.setNomeCompleto(dto.getNome());
         usuario.setCpf(dto.getCpf());
         usuario.setEmail(dto.getEmail());
         usuario.setTelefone(dto.getTelefone());
-        usuario.setEndereco(dto.getEndereco());
+    }
+
+    private Endereco salvarEndereco(EnderecoDTO dto, UUID enderecoIdAtual) {
+        if (dto == null || enderecoVazio(dto)) {
+            return enderecoIdAtual == null ? null : buscarEnderecoPorId(enderecoIdAtual);
+        }
+
+        validarEnderecoCompleto(dto);
+
+        Endereco endereco = enderecoIdAtual == null
+                ? new Endereco()
+                : enderecoRepository.findById(enderecoIdAtual).orElseGet(Endereco::new);
+
+        endereco.setCidade(dto.getCidade());
+        endereco.setCep(dto.getCep());
+        endereco.setEstado(dto.getEstado());
+        endereco.setBairro(dto.getBairro());
+        endereco.setRua(dto.getRua());
+        endereco.setNumero(dto.getNumero());
+        endereco.setComplemento(dto.getComplemento());
+
+        return salvarEnderecoComErroClaro(endereco);
+    }
+
+    private Endereco buscarEnderecoPorId(UUID enderecoId) {
+        return enderecoRepository.findById(enderecoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Endereço não encontrado com ID: " + enderecoId));
+    }
+
+    private void validarEnderecoCompleto(EnderecoDTO dto) {
+        if (isBlank(dto.getCidade())
+                || isBlank(dto.getCep())
+                || isBlank(dto.getEstado())
+                || isBlank(dto.getBairro())
+                || isBlank(dto.getRua())
+                || isBlank(dto.getNumero())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Endereço incompleto: cidade, cep, estado, bairro, rua e número são obrigatórios"
+            );
+        }
+    }
+
+    private boolean enderecoVazio(EnderecoDTO dto) {
+        return isBlank(dto.getCidade())
+                && isBlank(dto.getCep())
+                && isBlank(dto.getEstado())
+                && isBlank(dto.getBairro())
+                && isBlank(dto.getRua())
+                && isBlank(dto.getNumero())
+                && isBlank(dto.getComplemento());
+    }
+
+    private boolean isBlank(String valor) {
+        return valor == null || valor.isBlank();
     }
 
     private Usuario salvarUsuarioComErroClaro(Usuario usuario) {
@@ -151,6 +232,21 @@ public class ProfessorService {
                 throw new ResponseStatusException(
                         HttpStatus.FORBIDDEN,
                         "Sem permissão para inserir ou atualizar apae_geral.usuarios",
+                        e
+                );
+            }
+            throw e;
+        }
+    }
+
+    private Endereco salvarEnderecoComErroClaro(Endereco endereco) {
+        try {
+            return enderecoRepository.save(endereco);
+        } catch (DataAccessException e) {
+            if (isErroDePermissao(e)) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "Sem permissão para inserir ou atualizar apae_geral.enderecos",
                         e
                 );
             }
@@ -193,7 +289,7 @@ public class ProfessorService {
         return cpf == null ? "" : cpf.replaceAll("\\D", "");
     }
 
-    private ProfessorResumoDTO toResumo(Professor professor, Usuario usuario) {
+    private ProfessorResumoDTO toResumo(Professor professor, Usuario usuario, Endereco endereco) {
         return new ProfessorResumoDTO(
                 professor.getId(),
                 usuario.getId(),
@@ -205,11 +301,11 @@ public class ProfessorService {
                 professor.getFormacao(),
                 professor.getDataContratacao(),
                 professor.getDataNascimento(),
-                usuario.getEndereco(),
+                EnderecoDTO.fromEntity(endereco),
                 professor.getPrimeiroAcesso()
         );
     }
 
-    private record ProfessorUsuario(Professor professor, Usuario usuario) {
+    private record ProfessorUsuario(Professor professor, Usuario usuario, Endereco endereco) {
     }
 }

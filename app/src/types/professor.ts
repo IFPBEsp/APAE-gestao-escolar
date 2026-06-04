@@ -1,3 +1,13 @@
+export interface Endereco {
+  cidade: string;
+  cep: string;
+  estado: string;
+  bairro: string;
+  rua: string;
+  numero: string;
+  complemento?: string | null;
+}
+
 export interface Professor {
   id: string;
   usuarioId?: string;
@@ -8,7 +18,7 @@ export interface Professor {
   dataNascimento?: string;
   formacao?: string;
   dataContratacao: string;
-  endereco?: string;
+  endereco?: Endereco | null;
   ativo: boolean;
   primeiroAcesso?: boolean;
 }
@@ -24,6 +34,6 @@ export interface ProfessorResumo {
   formacao?: string;
   dataContratacao?: string;
   dataNascimento?: string;
-  endereco?: string;
+  endereco?: Endereco | null;
   primeiroAcesso?: boolean;
 }

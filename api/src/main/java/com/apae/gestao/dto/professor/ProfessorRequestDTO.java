@@ -3,6 +3,7 @@ package com.apae.gestao.dto.professor;
 import java.time.LocalDate;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -46,9 +47,9 @@ public class ProfessorRequestDTO {
     @NotNull(message = "Data de contratação é obrigatória")
     private LocalDate dataContratacao;
 
-    @Size(max = 255, message = "Endereço deve ter no máximo 255 caracteres")
-    @Schema(description = "Endereço completo para correspondência", example = "Av. Brasil, 1000 - Centro, Recife/PE")
-    private String endereco;
+    @Valid
+    @Schema(description = "Endereço vinculado ao usuário do professor")
+    private EnderecoDTO endereco;
 
     @Schema(description = "Status do usuário do professor", example = "true")
     private Boolean ativo;

@@ -1,5 +1,6 @@
 package com.apae.gestao.dto.professor;
 
+import com.apae.gestao.entity.Endereco;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Usuario;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -42,8 +43,8 @@ public class ProfessorResponseDTO {
     @Schema(description = "Data de contratação", example = "2024-02-01")
     private LocalDate dataContratacao;
 
-    @Schema(description = "Endereço completo", example = "Av. Brasil, 1000 - Centro, Recife/PE")
-    private String endereco;
+    @Schema(description = "Endereço vinculado ao usuário")
+    private EnderecoDTO endereco;
 
     @Schema(description = "Indica se o professor está ativo no sistema", example = "true")
     private Boolean ativo;
@@ -51,7 +52,7 @@ public class ProfessorResponseDTO {
     @Schema(description = "Indica se o professor ainda precisa concluir o primeiro acesso", example = "true")
     private Boolean primeiroAcesso;
 
-    public ProfessorResponseDTO(Professor professor, Usuario usuario) {
+    public ProfessorResponseDTO(Professor professor, Usuario usuario, Endereco endereco) {
         this.id = professor.getId();
         this.usuarioId = professor.getUsuarioId();
         this.nome = usuario.getNomeCompleto();
@@ -61,7 +62,7 @@ public class ProfessorResponseDTO {
         this.dataNascimento = professor.getDataNascimento();
         this.formacao = professor.getFormacao();
         this.dataContratacao = professor.getDataContratacao();
-        this.endereco = usuario.getEndereco();
+        this.endereco = EnderecoDTO.fromEntity(endereco);
         this.ativo = usuario.getAtivo();
         this.primeiroAcesso = professor.getPrimeiroAcesso();
     }

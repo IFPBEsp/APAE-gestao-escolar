@@ -17,13 +17,23 @@ import { useRouter } from "next/navigation";
 import { registerProfessor } from "@/services/ProfessorService";
 
 export default function CadastrarProfessorPage() {
+  const enderecoInicial = {
+    cidade: "",
+    cep: "",
+    estado: "",
+    bairro: "",
+    rua: "",
+    numero: "",
+    complemento: "",
+  };
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     nome: "",
     cpf: "",
     email: "",
     telefone: "",
-    endereco: "",
+    endereco: enderecoInicial,
     dataNascimento: "",
     formacao: "",
     dataContratacao: "",
@@ -71,12 +81,26 @@ export default function CadastrarProfessorPage() {
       const masked = applyCPFMask(value);
       setFormData((prev) => ({ ...prev, cpf: masked }));
       if (errors.cpf) setErrors((prev) => ({ ...prev, cpf: "" }));
-    } else if (name === "endereco") {
-      setFormData((prev) => ({ ...prev, endereco: value }));
-      if (errors.endereco) setErrors((prev) => ({ ...prev, endereco: "" }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleEnderecoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      endereco: {
+        ...prev.endereco,
+        [name]: value,
+      },
+    }));
+    if (errors.endereco) setErrors((prev) => ({ ...prev, endereco: "" }));
+  };
+
+  const enderecoCompleto = () => {
+    const { cidade, cep, estado, bairro, rua, numero } = formData.endereco;
+    return [cidade, cep, estado, bairro, rua, numero].every((valor) => valor.trim());
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,9 +111,9 @@ export default function CadastrarProfessorPage() {
       toast.error("Por favor, corrija o CPF antes de enviar.");
       return;
     }
-    if (!formData.endereco.trim()) {
-      setErrors((prev) => ({ ...prev, endereco: "Endereço é obrigatório" }));
-      toast.error("Por favor, preencha o endereço.");
+    if (!enderecoCompleto()) {
+      setErrors((prev) => ({ ...prev, endereco: "Preencha os campos obrigatórios do endereço" }));
+      toast.error("Por favor, preencha o endereço completo.");
       return;
     }
 
@@ -105,7 +129,7 @@ export default function CadastrarProfessorPage() {
         cpf: "",
         email: "",
         telefone: "",
-        endereco: "",
+        endereco: enderecoInicial,
         dataNascimento: "",
         formacao: "",
         dataContratacao: "",
@@ -206,21 +230,121 @@ export default function CadastrarProfessorPage() {
               </div>
 
               {/* Endereço */}
-              <div className="space-y-2">
-                <Label htmlFor="endereco" className="text-[#0D4F97]">Endereço *</Label>
-                <Input
-                  id="endereco"
-                  name="endereco"
-                  value={formData.endereco}
-                  onChange={handleChange}
-                  required
-                  placeholder="Digite o endereço completo"
-                  className={`border-2 ${errors.endereco
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                    : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
-                    }`}
-                />
-                {errors.endereco && <p className="text-red-500">{errors.endereco}</p>}
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-[#0D4F97]">Endereço *</Label>
+                  {errors.endereco && <p className="mt-1 text-red-500">{errors.endereco}</p>}
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="cep" className="text-[#0D4F97]">CEP *</Label>
+                    <Input
+                      id="cep"
+                      name="cep"
+                      value={formData.endereco.cep}
+                      onChange={handleEnderecoChange}
+                      required
+                      placeholder="00000-000"
+                      className={`border-2 ${errors.endereco
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                        : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                        }`}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="estado" className="text-[#0D4F97]">Estado *</Label>
+                    <Input
+                      id="estado"
+                      name="estado"
+                      value={formData.endereco.estado}
+                      onChange={handleEnderecoChange}
+                      required
+                      placeholder="PE"
+                      className={`border-2 ${errors.endereco
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                        : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                        }`}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="cidade" className="text-[#0D4F97]">Cidade *</Label>
+                    <Input
+                      id="cidade"
+                      name="cidade"
+                      value={formData.endereco.cidade}
+                      onChange={handleEnderecoChange}
+                      required
+                      placeholder="Recife"
+                      className={`border-2 ${errors.endereco
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                        : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                        }`}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="bairro" className="text-[#0D4F97]">Bairro *</Label>
+                    <Input
+                      id="bairro"
+                      name="bairro"
+                      value={formData.endereco.bairro}
+                      onChange={handleEnderecoChange}
+                      required
+                      placeholder="Centro"
+                      className={`border-2 ${errors.endereco
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                        : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                        }`}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="rua" className="text-[#0D4F97]">Rua *</Label>
+                    <Input
+                      id="rua"
+                      name="rua"
+                      value={formData.endereco.rua}
+                      onChange={handleEnderecoChange}
+                      required
+                      placeholder="Av. Brasil"
+                      className={`border-2 ${errors.endereco
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                        : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                        }`}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="numero" className="text-[#0D4F97]">Número *</Label>
+                    <Input
+                      id="numero"
+                      name="numero"
+                      value={formData.endereco.numero}
+                      onChange={handleEnderecoChange}
+                      required
+                      placeholder="1000"
+                      className={`border-2 ${errors.endereco
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                        : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                        }`}
+                    />
+                  </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="complemento" className="text-[#0D4F97]">Complemento</Label>
+                    <Input
+                      id="complemento"
+                      name="complemento"
+                      value={formData.endereco.complemento}
+                      onChange={handleEnderecoChange}
+                      placeholder="Sala, bloco ou referência"
+                      className="border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Data de Nascimento */}

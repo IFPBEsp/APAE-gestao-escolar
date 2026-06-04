@@ -44,8 +44,8 @@ public class ProfessorResumoDTO {
     @Schema(description = "Data de nascimento", example = "1985-10-15")
     private LocalDate dataNascimento;
 
-    @Schema(description = "Endereço cadastrado", example = "Rua das Flores, 123")
-    private String endereco;
+    @Schema(description = "Endereço vinculado ao usuário")
+    private EnderecoDTO endereco;
 
     @Schema(description = "Indica se o professor ainda precisa concluir o primeiro acesso")
     private Boolean primeiroAcesso;

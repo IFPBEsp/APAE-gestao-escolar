@@ -41,8 +41,8 @@ public class Usuario {
     @Column(name = "contato")
     private String telefone;
 
-    @Transient
-    private String endereco;
+    @Column(name = "endereco_id")
+    private UUID enderecoId;
 
     @Transient
     private Boolean ativo = true;
