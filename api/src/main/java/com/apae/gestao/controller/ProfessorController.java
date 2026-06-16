@@ -3,6 +3,7 @@ package com.apae.gestao.controller;
 import java.util.List;
 import java.util.UUID;
 
+import com.apae.gestao.dto.professor.ProfessorListagemDTO;
 import com.apae.gestao.dto.professor.ProfessorRequestDTO;
 import com.apae.gestao.dto.professor.ProfessorResponseDTO;
 import com.apae.gestao.dto.professor.ProfessorResumoDTO;
@@ -37,15 +38,12 @@ public class ProfessorController {
     @GetMapping
     @Operation(summary = "Listar professores")
     @ApiResponse(responseCode = "200", description = "Lista de professores retornada com sucesso")
-    public ResponseEntity<List<ProfessorResumoDTO>> listarTodos(
+    public ResponseEntity<List<ProfessorListagemDTO>> listarTodos(
             @Parameter(description = "ID do professor", in = ParameterIn.QUERY)
             @RequestParam(value = "id", required = false) UUID id,
 
             @Parameter(description = "Nome do professor para busca", example = "Maria", in = ParameterIn.QUERY)
             @RequestParam(value = "nome", required = false) String nome,
-
-            @Parameter(description = "CPF do professor", example = "12345678901", in = ParameterIn.QUERY)
-            @RequestParam(value = "cpf", required = false) String cpf,
 
             @Parameter(description = "Email do professor", example = "maria@escola.com", in = ParameterIn.QUERY)
             @RequestParam(value = "email", required = false) String email,
@@ -53,8 +51,8 @@ public class ProfessorController {
             @Parameter(description = "Filtrar por status ativo/inativo", example = "true", in = ParameterIn.QUERY)
             @RequestParam(value = "ativo", required = false) Boolean ativo) {
 
-        List<ProfessorResumoDTO> professores = professorService
-                .listarProfessores(id, nome, cpf, email, ativo);
+        List<ProfessorListagemDTO> professores = professorService
+                .listarProfessores(id, nome, email, ativo);
 
         return ResponseEntity.ok(professores);
     }

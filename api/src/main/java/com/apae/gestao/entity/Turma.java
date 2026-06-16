@@ -33,6 +33,10 @@ public class Turma {
     @OneToMany(mappedBy = "turma", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TurmaAluno> turmaAlunos = new HashSet<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "professor_id")
+    private Professor professor;
+
 
     @OneToMany(mappedBy = "turma", cascade = CascadeType.ALL)
     private Set<Aula> aulas = new HashSet<>();

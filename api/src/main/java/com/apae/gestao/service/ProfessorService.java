@@ -1,9 +1,6 @@
 package com.apae.gestao.service;
 
-import com.apae.gestao.dto.professor.EnderecoDTO;
-import com.apae.gestao.dto.professor.ProfessorRequestDTO;
-import com.apae.gestao.dto.professor.ProfessorResponseDTO;
-import com.apae.gestao.dto.professor.ProfessorResumoDTO;
+import com.apae.gestao.dto.professor.*;
 import com.apae.gestao.entity.Endereco;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Usuario;
@@ -43,20 +40,22 @@ public class ProfessorService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProfessorResumoDTO> listarProfessores(UUID id, String nome, String cpf, String email, Boolean ativo) {
-        return professorRepository.findAll()
-                .stream()
-                .filter(professor -> id == null || id.equals(professor.getId()))
-                .map(professor -> {
-                    Usuario usuario = buscarUsuario(professor);
-                    return new ProfessorUsuario(professor, usuario, buscarEndereco(usuario));
-                })
-                .filter(item -> nome == null || item.usuario().getNomeCompleto().toLowerCase().contains(nome.toLowerCase()))
-                .filter(item -> cpf == null || cpf.equals(item.usuario().getCpf()))
-                .filter(item -> email == null || email.equalsIgnoreCase(item.usuario().getEmail()))
-                .filter(item -> ativo == null || ativo.equals(item.usuario().getAtivo()))
-                .map(item -> toResumo(item.professor(), item.usuario(), item.endereco()))
-                .toList();
+    public List<ProfessorListagemDTO> listarProfessores(UUID id, String nome, String email, Boolean ativo) {
+
+        List<Object[]> resultados = professorRepository.listarProfessoresOtimizadoNativo(nome, email);
+
+        List<ProfessorListagemDTO> lista = resultados.stream().map(row -> new ProfessorListagemDTO(
+                UUID.fromString((String) row[0]),
+                (String) row[1],
+                (String) row[2],
+                (String) row[3]
+        )).toList();
+
+        if (id != null) {
+            return lista.stream().filter(p -> p.getId().equals(id)).toList();
+        }
+
+        return lista;
     }
 
     @Transactional(readOnly = true)
