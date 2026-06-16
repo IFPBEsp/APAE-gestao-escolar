@@ -152,7 +152,13 @@ export default function TurmaDetalhesPage() {
     <div className="container mx-auto">
       <div className="p-4 md:p-8">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
+                Acompanhe seus Alunos - {turma?.nome}
+              </h1>
+              <p className="text-[#222222] text-lg">{turma?.descricao}</p>
+            </div>
             <Button
               onClick={() => router.push("/professor/turmas")}
               variant="outline"
@@ -160,13 +166,6 @@ export default function TurmaDetalhesPage() {
               <ArrowLeft className="mr-2 h-5 w-5" />
               Voltar
             </Button>
-          </div>
-
-          <div className="mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
-              Acompanhe seus Alunos - {turma?.nome}
-            </h1>
-            <p className="text-[#222222] text-lg">{turma?.descricao}</p>
           </div>
 
           <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">

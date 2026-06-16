@@ -121,23 +121,24 @@ export default function FrequenciaPage() {
     }
 
     return (
-        <>
+        <div className="p-4 md:p-8">
             <div className="mx-auto max-w-7xl space-y-6">
-                <Button
-                    onClick={() => router.back()}
-                    variant="outline"
-                >
-                    <ArrowLeft className="mr-2 h-5 w-5" />
-                    Voltar
-                </Button>
-
-                <div className="mb-6">
-                    <h1 className="text-[#0D4F97] text-2xl md:text-3xl font-bold mb-2">
-                        Gestão de Frequência - {turma?.nome}
-                    </h1>
-                    <p className="text-[#222222]">
-                        Registre chamadas e consulte o histórico de presença
-                    </p>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-[#0D4F97] text-2xl md:text-3xl font-bold mb-2">
+                            Gestão de Frequência - {turma?.nome}
+                        </h1>
+                        <p className="text-[#222222]">
+                            Registre chamadas e consulte o histórico de presença
+                        </p>
+                    </div>
+                    <Button
+                        onClick={() => router.back()}
+                        variant="outline"
+                    >
+                        <ArrowLeft className="mr-2 h-5 w-5" />
+                        Voltar
+                    </Button>
                 </div>
 
                 <div id="secao-chamada">
@@ -174,7 +175,7 @@ export default function FrequenciaPage() {
                 />
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 

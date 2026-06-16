@@ -231,14 +231,15 @@ export default function Chamada({
 
   return (
     <div className="max-w-5xl mx-auto p-4">
-      <Button onClick={onBack} variant="outline" className="mb-6 border-[#B2D7EC] text-[#0D4F97] hover:bg-[#B2D7EC]/20 h-12">
-        <ArrowLeft className="mr-2 h-5 w-5" /> Voltar
-      </Button>
-
       <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
-        <CardHeader>
-          <CardTitle className="text-[#0D4F97] text-2xl">Registro de Presença</CardTitle>
-          <CardDescription className="text-[#222222] font-semibold text-lg">{turmaNome}</CardDescription>
+        <CardHeader className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <CardTitle className="text-[#0D4F97] text-2xl">Registro de Presença</CardTitle>
+            <CardDescription className="text-[#222222] font-semibold text-lg">{turmaNome}</CardDescription>
+          </div>
+          <Button onClick={onBack} variant="outline" className="border-[#B2D7EC] text-[#0D4F97] hover:bg-[#B2D7EC]/20 h-12">
+            <ArrowLeft className="mr-2 h-5 w-5" /> Voltar
+          </Button>
         </CardHeader>
         
         <CardContent className="space-y-6">

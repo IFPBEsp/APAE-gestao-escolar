@@ -175,24 +175,24 @@ export default function AvaliacoesAlunoPage() {
       {/* Main Content */}
       <div className="p-4 md:p-8">
         <div className="mx-auto max-w-6xl">
-          {/* Botão Voltar */}
-          <Button
-            onClick={() => router.push(turmaId ? `/professor/turmas/${turmaId}/alunos` : "/professor/turmas")}
-            variant="outline"
-          >
-            <ArrowLeft className="mr-2 h-5 w-5" />
-            Voltar
-          </Button>
-
-          {/* Título Principal da Página */}
-          <div className="flex items-start gap-3 mb-6 mt-6">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D4F97]/10">
-              <FileText className="h-5 w-5 text-[#0D4F97]" />
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D4F97]/10">
+                <FileText className="h-5 w-5 text-[#0D4F97]" />
+              </div>
+              <div>
+                <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho do Aluno</h2>
+                <p className="text-[#222222]">Acompanhe o progresso e histórico de avaliações de {alunoData?.nome || "..."}</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho do Aluno</h2>
-              <p className="text-[#222222]">Acompanhe o progresso e histórico de avaliações de {alunoData?.nome || "..."}</p>
-            </div>
+            <Button
+              onClick={() => router.push(turmaId ? `/professor/turmas/${turmaId}/alunos` : "/professor/turmas")}
+              variant="outline"
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Voltar
+            </Button>
           </div>
 
             <EstudanteCard
