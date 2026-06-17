@@ -23,17 +23,19 @@ public interface ProfessorRepository extends JpaRepository<Professor, UUID> {
             u.ativo AS ativo,
             u.nome_completo AS nome,
             u.email AS email,
-            COALESCE(STRING_AGG(t.nome, ', '), 'Sem turma vinculada') AS turmas
+            COALESCE(STRING_AGG(t.nome, ', ' ORDER BY t.nome), 'Sem turma vinculada') AS turmas
         FROM gestao_escolar.professores p
         JOIN apae_geral.usuarios u ON p.usuario_id = u.id
         LEFT JOIN gestao_escolar.turmas t ON t.professor_id = p.id
         WHERE (:nome IS NULL OR TRIM(:nome) = '' OR LOWER(u.nome_completo) LIKE LOWER(CONCAT('%', TRIM(:nome), '%')))
           AND (:email IS NULL OR TRIM(:email) = '' OR LOWER(u.email) LIKE LOWER(CONCAT('%', TRIM(:email), '%')))
           AND (:ativo IS NULL OR u.ativo = :ativo)
+          AND (:id IS NULL OR p.id = :id)        
         GROUP BY p.id, u.ativo, u.nome_completo, u.email
         ORDER BY u.ativo DESC, u.nome_completo ASC
     """, nativeQuery = true)
     List<Object[]> listarProfessoresOtimizado(
+            @Param("id") UUID id,
             @Param("nome") String nome,
             @Param("email") String email,
             @Param("ativo") Boolean ativo
