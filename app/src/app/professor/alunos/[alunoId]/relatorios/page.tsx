@@ -148,17 +148,8 @@ export default function RelatoriosAlunoListaPage() {
       <div className="p-4 md:p-8">
         <div className="mx-auto max-w-6xl space-y-6">
 
-          {/* BOTÃO VOLTAR */}
-          <Button
-            onClick={() => router.back()}
-            variant="outline"
-          >
-            <ArrowLeft className="mr-2 h-5 w-5" />
-            Voltar
-          </Button>
-
-          {/* SEÇÃO RELATÓRIOS */}
-          <div className="space-y-4">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D4F97]/10">
                 <FileText className="h-5 w-5 text-[#0D4F97]" />
@@ -172,7 +163,16 @@ export default function RelatoriosAlunoListaPage() {
                 </p>
               </div>
             </div>
+            <Button
+              onClick={() => router.back()}
+              variant="outline"
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Voltar
+            </Button>
+          </div>
 
+          <div className="space-y-4">
             <EstudanteCard
               nome={alunoData?.nome || "Nome não encontrado"}
               turma={turmaData?.nome || alunoData?.turma?.nome || "Turma não encontrada"}
