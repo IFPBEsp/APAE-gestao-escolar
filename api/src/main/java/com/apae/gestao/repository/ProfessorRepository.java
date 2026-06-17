@@ -1,6 +1,5 @@
 package com.apae.gestao.repository;
 
-import com.apae.gestao.dto.professor.ProfessorListagemDTO;
 import com.apae.gestao.entity.Professor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,17 +19,23 @@ public interface ProfessorRepository extends JpaRepository<Professor, UUID> {
 
     @Query(value = """
         SELECT 
-            CAST(p.id AS VARCHAR) AS id,
+            p.id AS id,
+            u.ativo AS ativo,
             u.nome_completo AS nome,
             u.email AS email,
             COALESCE(STRING_AGG(t.nome, ', '), 'Sem turma vinculada') AS turmas
         FROM gestao_escolar.professores p
         JOIN apae_geral.usuarios u ON p.usuario_id = u.id
         LEFT JOIN gestao_escolar.turmas t ON t.professor_id = p.id
-        GROUP BY p.id, u.nome_completo, u.email
+        WHERE (:nome IS NULL OR TRIM(:nome) = '' OR LOWER(u.nome_completo) LIKE LOWER(CONCAT('%', TRIM(:nome), '%')))
+          AND (:email IS NULL OR TRIM(:email) = '' OR LOWER(u.email) LIKE LOWER(CONCAT('%', TRIM(:email), '%')))
+          AND (:ativo IS NULL OR u.ativo = :ativo)
+        GROUP BY p.id, u.ativo, u.nome_completo, u.email
+        ORDER BY u.ativo DESC, u.nome_completo ASC
     """, nativeQuery = true)
-    List<Object[]> listarProfessoresOtimizadoNativo(
+    List<Object[]> listarProfessoresOtimizado(
             @Param("nome") String nome,
-            @Param("email") String email
+            @Param("email") String email,
+            @Param("ativo") Boolean ativo
     );
 }

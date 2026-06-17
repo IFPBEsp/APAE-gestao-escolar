@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -16,6 +15,9 @@ public class ProfessorListagemDTO {
 
     @Schema(description = "Identificador único do professor")
     private UUID id;
+
+    @Schema(description = "Campo para saber se o professor está ativo", example = "false")
+    private Boolean ativo;
 
     @Schema(description = "Nome completo do professor", example = "Luan lorêto")
     private String nome;

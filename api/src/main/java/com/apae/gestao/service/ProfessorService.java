@@ -42,13 +42,14 @@ public class ProfessorService {
     @Transactional(readOnly = true)
     public List<ProfessorListagemDTO> listarProfessores(UUID id, String nome, String email, Boolean ativo) {
 
-        List<Object[]> resultados = professorRepository.listarProfessoresOtimizadoNativo(nome, email);
+        List<Object[]> resultados = professorRepository.listarProfessoresOtimizado(nome, email, ativo);
 
         List<ProfessorListagemDTO> lista = resultados.stream().map(row -> new ProfessorListagemDTO(
-                UUID.fromString((String) row[0]),
-                (String) row[1],
-                (String) row[2],
-                (String) row[3]
+                (UUID) row[0],
+                (Boolean) row[1], //ativo
+                (String) row[2], //nome
+                (String) row[3], //email
+                (String) row[4] //turmas
         )).toList();
 
         if (id != null) {
