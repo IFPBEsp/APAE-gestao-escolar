@@ -19,26 +19,17 @@ public interface AlunoViewRepository extends JpaRepository<AlunoView, UUID> {
     @Query(
             value = """
                 SELECT new com.apae.gestao.dto.aluno.AlunoResumoDTO(
-                a.id,
-                a.nomeCompleto,
-                a.cpf,
-                a.dataDeNascimento,
-                a.contato,
-                MAX(t.nome),
-                MAX(t.turno),
-                CASE
-                    WHEN COUNT(p) = 0 THEN 0.0
-                    ELSE SUM(CASE WHEN p.faltou = false THEN 1.0 ELSE 0.0 END) * 100.0 / COUNT(p)
-                END,
-                MAX(av.dataAvaliacao)
-            )
-            FROM AlunoView a
-            LEFT JOIN TurmaAluno ta ON ta.pacienteId = a.id AND ta.ativo = true
-            LEFT JOIN ta.turma t
-            LEFT JOIN Presenca p ON p.pacienteId = a.id AND p.aula.id IN (SELECT au.id FROM Aula au WHERE au.turma.id = t.id)
-            LEFT JOIN Avaliacao av ON av.pacienteId = a.id
-            WHERE (:nome IS NULL OR TRIM(:nome) = '' OR LOWER(a.nomeCompleto) LIKE LOWER(CONCAT('%', TRIM(:nome), '%')))
-            GROUP BY a.id, a.nomeCompleto, a.cpf , a.dataDeNascimento, a.contato
+                    a.id,
+                    a.nomeCompleto,
+                    MAX(r.nome),
+                    MAX(t.nome)
+                )
+                FROM AlunoView a
+                LEFT JOIN Responsavel r ON r.pacienteId = a.id
+                LEFT JOIN TurmaAluno ta ON ta.pacienteId = a.id AND ta.ativo = true
+                LEFT JOIN ta.turma t
+                WHERE (:nome IS NULL OR TRIM(:nome) = '' OR LOWER(a.nomeCompleto) LIKE LOWER(CONCAT('%', TRIM(:nome), '%')))
+                GROUP BY a.id, a.nomeCompleto
             """,
             countQuery = "SELECT COUNT(DISTINCT a.id) FROM AlunoView a WHERE (:nome IS NULL OR TRIM(:nome) = '' OR LOWER(a.nomeCompleto) LIKE LOWER(CONCAT('%', TRIM(:nome), '%')))"
     )
@@ -48,25 +39,16 @@ public interface AlunoViewRepository extends JpaRepository<AlunoView, UUID> {
                 SELECT new com.apae.gestao.dto.aluno.AlunoResumoDTO(
                     a.id,
                     a.nomeCompleto,
-                    a.cpf,
-                    a.dataDeNascimento,
-                    a.contato,
-                    MAX(t.nome),
-                    MAX(t.turno),
-                    CASE
-                        WHEN COUNT(p) = 0 THEN 0.0
-                        ELSE SUM(CASE WHEN p.faltou = false THEN 1.0 ELSE 0.0 END) * 100.0 / COUNT(p)
-                    END,
-                    MAX(av.dataAvaliacao)
+                    MAX(r.nome),
+                    MAX(t.nome)
                 )
                 FROM AlunoView a
+                LEFT JOIN Responsavel r ON r.pacienteId = a.id
                 JOIN TurmaAluno ta ON ta.pacienteId = a.id
                 JOIN ta.turma t
-                LEFT JOIN Presenca p ON p.pacienteId = a.id
-                LEFT JOIN Avaliacao av ON av.pacienteId = a.id
                 WHERE ta.ativo = true
                 AND (:nome IS NULL OR TRIM(:nome) = '' OR LOWER(a.nomeCompleto) LIKE LOWER(CONCAT('%', TRIM(:nome), '%')))
-                GROUP BY a.id, a.nomeCompleto, a.cpf, a.dataDeNascimento, a.contato
+                GROUP BY a.id, a.nomeCompleto
             """, countQuery = "SELECT COUNT(DISTINCT a.id) FROM AlunoView a JOIN TurmaAluno ta ON ta.pacienteId = a.id WHERE ta.ativo = true  AND (:nome IS NULL OR TRIM(:nome) = '' OR LOWER(a.nomeCompleto) LIKE LOWER(CONCAT('%', TRIM(:nome), '%')))")
     Page<AlunoResumoDTO> listarAlunosAtivosPorFiltro(@Param("nome") String nome, Pageable pageable);
 
