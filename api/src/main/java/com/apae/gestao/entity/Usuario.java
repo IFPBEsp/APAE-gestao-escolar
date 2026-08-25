@@ -44,7 +44,7 @@ public class Usuario {
     @Column(name = "endereco_id")
     private UUID enderecoId;
 
-    @Transient
+    @Column(name = "ativo", nullable = false)
     private Boolean ativo = true;
 
     @PrePersist
