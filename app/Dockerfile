@@ -1,34 +1,35 @@
-# =======================================================
-# APAE - Gestão Escolar — Frontend (Next.js)
-# =======================================================
+# syntax=docker/dockerfile:1.7
 
-# -------------------------------------------------------
-# Stage 1: Build
-# -------------------------------------------------------
-FROM node:20-alpine AS builder
+FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 AS builder
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci --frozen-lockfile
+
+RUN npm ci
 
 COPY . .
 
-# NEXT_PUBLIC_* são resolvidas em build-time no Next.js
 ARG NEXT_PUBLIC_API_URL=/gestao-escolar/api
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-# URL do backend usada nas rewrites do next.config.js
-# Resolvida em build-time no modo standalone
 ARG BACKEND_URL=http://localhost:8080
 ENV BACKEND_URL=$BACKEND_URL
 
 RUN npm run build
 
-# -------------------------------------------------------
-# Stage 2: Produção
-# -------------------------------------------------------
-FROM node:20-alpine AS runner
+
+FROM gcr.io/distroless/nodejs20-debian13:nonroot@sha256:c8da1b6cccb5c6cc4b8826c67353f31c5f7b2719c5517b1312d191b337d8bd99 AS runner
+
+ARG APP_VERSION
+ARG VCS_REF
+
+LABEL org.opencontainers.image.title="APAE Gestão Escolar Frontend" \
+      org.opencontainers.image.description="Frontend do APAE Gestão Escolar" \
+      org.opencontainers.image.source="https://github.com/IFPBEsp/APAE-gestao-escolar" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.version=$APP_VERSION \
+      org.opencontainers.image.revision=$VCS_REF
 
 WORKDIR /app
 
@@ -36,23 +37,12 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-# Metadados da imagem (vincula ao repositório no GHCR)
-LABEL org.opencontainers.image.source=https://github.com/IFPBEsp/APAE-gestao-escolar
-LABEL org.opencontainers.image.description="APAE Gestão Escolar - Frontend (Next.js)"
-LABEL org.opencontainers.image.licenses=MIT
+COPY --from=builder --chown=65532:65532 /app/.next/standalone ./
+COPY --from=builder --chown=65532:65532 /app/.next/static ./.next/static/
+COPY --from=builder --chown=65532:65532 /app/public ./public/
 
-# Usuário não-root para segurança em produção
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-COPY --from=builder --chown=appuser:appgroup /app/.next/standalone ./
-COPY --from=builder --chown=appuser:appgroup /app/.next/static ./.next/static/
-COPY --from=builder --chown=appuser:appgroup /app/public ./public/
-
-USER appuser
+USER 65532:65532
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD wget -qO- http://localhost:3000/gestao-escolar || exit 1
-
-CMD ["node", "server.js"]
+CMD ["server.js"]
