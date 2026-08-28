@@ -1,28 +1,85 @@
-x-frontend-defaults:
-  environment:
-    NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/gestao-escolar/api}
+name: apae-gestao-escolar
 
 services:
   postgres:
-    image: postgres:13
+    image: postgres:15
+    container_name: postgres-gestao-escolar
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: apae_db
-      POSTGRES_USER: apae_user
-      POSTGRES_PASSWORD: apae_pass
+      POSTGRES_DB: ${POSTGRES_DB:-gestao_escolar_local}
+      POSTGRES_USER: ${POSTGRES_USER:-gestao_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gestao_pass}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5400}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gestao_user} -d ${POSTGRES_DB:-gestao_escolar_local}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  db-contract:
+    image: postgres:15
+    profiles: ["tools"]
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: ${POSTGRES_DB:-gestao_escolar_local}
+      PGUSER: ${POSTGRES_USER:-gestao_user}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-gestao_pass}
+    command: ["psql", "-v", "ON_ERROR_STOP=1", "-f", "/contracts/apae-geral.sql"]
+    volumes:
+      - ../.scripts/db/apae-geral-contract.sql:/contracts/apae-geral.sql:ro,z
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  db-migrate:
+    image: flyway/flyway:9.22.3
+    profiles: ["tools"]
+    command:
+      - -url=jdbc:postgresql://postgres:5432/${POSTGRES_DB:-gestao_escolar_local}
+      - -user=${POSTGRES_USER:-gestao_user}
+      - -password=${POSTGRES_PASSWORD:-gestao_pass}
+      - -schemas=gestao_escolar
+      - -defaultSchema=gestao_escolar
+      - -createSchemas=true
+      - -locations=filesystem:/flyway/sql
+      - -connectRetries=20
+      - migrate
+    volumes:
+      - ./src/main/resources/db/migration:/flyway/sql:ro,z
+    depends_on:
+      db-contract:
+        condition: service_completed_successfully
+
+  db-seed:
+    image: postgres:15
+    profiles: ["tools"]
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: ${POSTGRES_DB:-gestao_escolar_local}
+      PGUSER: ${POSTGRES_USER:-gestao_user}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-gestao_pass}
+    command: ["psql", "-v", "ON_ERROR_STOP=1", "-f", "/seed/local-development.sql"]
+    volumes:
+      - ../.scripts/seed/local-development.sql:/seed/local-development.sql:ro,z
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
 
   minio:
     image: minio/minio:latest
-    container_name: minio
+    container_name: minio-gestao-escolar
+    restart: unless-stopped
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "${MINIO_API_PORT:-9200}:9000"
+      - "${MINIO_CONSOLE_PORT:-9201}:9001"
     environment:
-      MINIO_ROOT_USER: apae_admin
-      MINIO_ROOT_PASSWORD: apae_secret123
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-gestao_minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-gestao_minio_123}
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
