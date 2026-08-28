@@ -1,4 +1,19 @@
 {
+  "name": "@apae/gestao-escolar",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:infra": "bash ./.scripts/setup.sh --no-seed",
+    "dev:backend": "bash ./.scripts/run-app.sh backend",
+    "dev:frontend": "bash ./.scripts/run-app.sh frontend",
+    "dev": "npm run db:prepare && bash ./.scripts/run-app.sh both",
+    "db:contract": "docker compose --env-file .env -f api/docker-compose.yml --profile tools run --rm db-contract",
+    "db:migrate": "docker compose --env-file .env -f api/docker-compose.yml --profile tools run --rm db-migrate",
+    "db:seed": "docker compose --env-file .env -f api/docker-compose.yml --profile tools run --rm db-seed",
+    "db:prepare": "bash ./.scripts/setup.sh",
+    "docker:down": "docker compose --env-file .env -f api/docker-compose.yml down",
+    "docker:drop": "docker compose --env-file .env -f api/docker-compose.yml down -v"
+  },
   "dependencies": {
     "react-to-print": "^3.2.0",
     "recharts": "^3.8.1"

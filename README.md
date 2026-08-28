@@ -181,6 +181,52 @@ APAE-gestao-escolar/
 
 ## Quick Start
 
+### Desenvolvimento local autonomo
+
+O Gestao Escolar pode ser executado sem iniciar o APAE-Geral ou o Atendimento.
+O PostgreSQL local reproduz os tres schemas do Neon:
+
+- `gestao_escolar`: schema real do produto, versionado pelas migrations Flyway V1-V6;
+- `apae_geral`: contrato minimo mockado com usuarios, enderecos, pacientes e responsaveis;
+- `atendimento`: schema presente, mas vazio, pois o Gestao Escolar nao o consulta.
+
+Na raiz do repositorio:
+
+```bash
+cp .env.example .env
+npm --prefix app install
+npm run db:prepare
+npm run dev
+```
+
+Servicos locais:
+
+- Frontend: `http://localhost:3002`
+- Backend: `http://localhost:8081/gestao-escolar`
+- Swagger: `http://localhost:8081/gestao-escolar/docs`
+- Health check: `http://localhost:8081/gestao-escolar/actuator/health`
+- PostgreSQL: `localhost:5400`
+- MinIO: `http://localhost:9200` (console em `http://localhost:9201`)
+
+Credenciais ficticias:
+
+- Administrador: `admin@teste.local` / `12345678`
+- Professor: `professor@teste.local` / `12345678`
+
+Comandos uteis:
+
+```bash
+npm run db:prepare    # contratos, migrations, seed e MinIO
+npm run db:migrate    # reaplica apenas as migrations pendentes
+npm run db:seed       # reaplica o seed idempotente
+npm run docker:down   # para containers e preserva volumes
+npm run docker:drop   # apaga os volumes e todos os dados locais
+```
+
+Os objetos de `apae_geral` sao contratos locais de desenvolvimento, nao uma copia
+do schema pertencente ao APAE-Geral. Alteracoes reais desse contrato devem ser
+sincronizadas manualmente quando o produto de origem mudar.
+
 ### Pré-requisitos
 
 | Ferramenta | Versão | Finalidade |
