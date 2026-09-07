@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -146,86 +147,258 @@ export default function ModalEditarProfessor({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-[#0D4F97] text-xl">
+          <DialogTitle className="text-2xl font-bold text-[#0D4F97]">
             Editar Professor
           </DialogTitle>
+          <DialogDescription className="text-[#222222]">
+            Atualize as informações do professor conforme necessário.
+          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Nome</Label>
-              <Input name="nome" value={formData.nome} onChange={handleChange} />
-            </div>
-            <div className="space-y-2">
-              <Label>CPF</Label>
-              <Input name="cpf" value={formData.cpf} onChange={handleChange} />
-            </div>
-            <div className="space-y-2">
-              <Label>E-mail</Label>
-              <Input name="email" value={formData.email} onChange={handleChange} />
-            </div>
-            <div className="space-y-2">
-              <Label>Telefone</Label>
-              <Input name="telefone" value={formData.telefone} onChange={handleChange} />
-            </div>
-            <div className="space-y-2">
-              <Label>Data de nascimento</Label>
-              <Input type="date" name="dataNascimento" value={formData.dataNascimento} onChange={handleChange} />
-            </div>
-            <div className="space-y-2">
-              <Label>Data de contratação</Label>
-              <Input type="date" name="dataContratacao" value={formData.dataContratacao} onChange={handleChange} />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label>Formação</Label>
-              <Input name="formacao" value={formData.formacao} onChange={handleChange} />
-            </div>
-            <div className="space-y-3 md:col-span-2">
-              <Label>Endereço</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>CEP</Label>
-                  <Input name="cep" value={formData.endereco.cep} onChange={handleEnderecoChange} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Estado</Label>
-                  <Input name="estado" value={formData.endereco.estado} onChange={handleEnderecoChange} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Cidade</Label>
-                  <Input name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Bairro</Label>
-                  <Input name="bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Rua</Label>
-                  <Input name="rua" value={formData.endereco.rua} onChange={handleEnderecoChange} required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Número</Label>
-                  <Input name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} required />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Complemento</Label>
-                  <Input name="complemento" value={formData.endereco.complemento || ""} onChange={handleEnderecoChange} />
-                </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Informações Pessoais e de Contato */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-[#0D4F97]">
+              Informações Pessoais e de Contato
+            </h3>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <Label htmlFor="nome" className="text-[#0D4F97]">
+                  Nome <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="nome"
+                  name="nome"
+                  value={formData.nome}
+                  onChange={handleChange}
+                  required
+                  className="h-12 border-2 border-[#B2D7EC]"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="cpf" className="text-[#0D4F97]">
+                  CPF <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="cpf"
+                  name="cpf"
+                  value={formData.cpf}
+                  onChange={handleChange}
+                  required
+                  maxLength={14}
+                  placeholder="123.456.789-00"
+                  className="h-12 border-2 border-[#B2D7EC]"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="email" className="text-[#0D4F97]">
+                  E-mail <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="h-12 border-2 border-[#B2D7EC]"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="telefone" className="text-[#0D4F97]">
+                  Telefone
+                </Label>
+                <Input
+                  id="telefone"
+                  name="telefone"
+                  value={formData.telefone}
+                  onChange={handleChange}
+                  placeholder="(11) 98765-4321"
+                  className="h-12 border-2 border-[#B2D7EC]"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="dataNascimento" className="text-[#0D4F97]">
+                  Data de Nascimento
+                </Label>
+                <Input
+                  id="dataNascimento"
+                  type="date"
+                  name="dataNascimento"
+                  value={formData.dataNascimento}
+                  onChange={handleChange}
+                  className="h-12 border-2 border-[#B2D7EC]"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="dataContratacao" className="text-[#0D4F97]">
+                  Data de Contratação
+                </Label>
+                <Input
+                  id="dataContratacao"
+                  type="date"
+                  name="dataContratacao"
+                  value={formData.dataContratacao}
+                  onChange={handleChange}
+                  className="h-12 border-2 border-[#B2D7EC]"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <Label htmlFor="formacao" className="text-[#0D4F97]">
+                  Formação
+                </Label>
+                <Input
+                  id="formacao"
+                  name="formacao"
+                  value={formData.formacao}
+                  onChange={handleChange}
+                  placeholder="Pedagogia Especial"
+                  className="h-12 border-2 border-[#B2D7EC]"
+                />
               </div>
             </div>
           </div>
 
-          <DialogFooter className="gap-2">
+          {/* Endereço */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-[#0D4F97]">
+              Endereço
+            </h3>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <Label htmlFor="cep" className="text-[#0D4F97]">
+                  CEP <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="cep"
+                  name="cep"
+                  value={formData.endereco.cep}
+                  onChange={handleEnderecoChange}
+                  required
+                  className="h-12 border-2 border-[#B2D7EC]"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="estado" className="text-[#0D4F97]">
+                  Estado <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="estado"
+                  name="estado"
+                  value={formData.endereco.estado}
+                  onChange={handleEnderecoChange}
+                  required
+                  className="h-12 border-2 border-[#B2D7EC]"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="cidade" className="text-[#0D4F97]">
+                  Cidade <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="cidade"
+                  name="cidade"
+                  value={formData.endereco.cidade}
+                  onChange={handleEnderecoChange}
+                  required
+                  className="h-12 border-2 border-[#B2D7EC]"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="bairro" className="text-[#0D4F97]">
+                  Bairro <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="bairro"
+                  name="bairro"
+                  value={formData.endereco.bairro}
+                  onChange={handleEnderecoChange}
+                  required
+                  className="h-12 border-2 border-[#B2D7EC]"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="rua" className="text-[#0D4F97]">
+                  Rua <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="rua"
+                  name="rua"
+                  value={formData.endereco.rua}
+                  onChange={handleEnderecoChange}
+                  required
+                  className="h-12 border-2 border-[#B2D7EC]"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="numero" className="text-[#0D4F97]">
+                  Número <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="numero"
+                  name="numero"
+                  value={formData.endereco.numero}
+                  onChange={handleEnderecoChange}
+                  required
+                  className="h-12 border-2 border-[#B2D7EC]"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <Label htmlFor="complemento" className="text-[#0D4F97]">
+                  Complemento
+                </Label>
+                <Input
+                  id="complemento"
+                  name="complemento"
+                  value={formData.endereco.complemento || ""}
+                  onChange={handleEnderecoChange}
+                  className="h-12 border-2 border-[#B2D7EC]"
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-3">
             {!professor.ativo && (
-              <Button type="button" variant="outline" onClick={handleReativar} disabled={isSubmitting}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleReativar}
+                disabled={isSubmitting}
+                className="h-12"
+              >
                 Reativar Professor
               </Button>
             )}
-            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="h-12"
+            >
               Cancelar
             </Button>
-            <Button type="submit" variant="primary" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={isSubmitting}
+              className="h-12"
+            >
               {isSubmitting ? "Salvando..." : "Salvar"}
             </Button>
           </DialogFooter>
