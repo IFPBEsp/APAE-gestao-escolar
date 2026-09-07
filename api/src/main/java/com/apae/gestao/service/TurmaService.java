@@ -10,6 +10,11 @@ import com.apae.gestao.entity.TurmaAluno;
 import com.apae.gestao.repository.AlunoViewRepository;
 import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.TurmaRepository;
+import com.apae.gestao.repository.ProfessorRepository;
+import com.apae.gestao.repository.UsuarioRepository;
+import com.apae.gestao.entity.Professor;
+import com.apae.gestao.entity.Usuario;
+import com.apae.gestao.dto.professor.ProfessorResumoDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,13 +30,19 @@ public class TurmaService {
     private final TurmaRepository turmaRepository;
     private final AlunoViewRepository alunoRepository;
     private final TurmaAlunoRepository turmaAlunoRepository;
+    private final ProfessorRepository professorRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public TurmaService(TurmaRepository turmaRepository,
                         AlunoViewRepository alunoRepository,
-                        TurmaAlunoRepository turmaAlunoRepository) {
+                        TurmaAlunoRepository turmaAlunoRepository,
+                        ProfessorRepository professorRepository,
+                        UsuarioRepository usuarioRepository) {
         this.turmaRepository = turmaRepository;
         this.alunoRepository = alunoRepository;
         this.turmaAlunoRepository = turmaAlunoRepository;
+        this.professorRepository = professorRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Transactional(readOnly = true)
@@ -60,20 +71,20 @@ public class TurmaService {
         turma.setNome(obterNomeUnicoParaTurma(turma.getNome(), null));
         Turma salvo = turmaRepository.save(turma);
         vincularAlunosDoDto(salvo, dto.getAlunosIds());
-        return buscarPorId(salvo.getId());
+        return toResponse(buscarTurma(salvo.getId()));
     }
 
     @Transactional(readOnly = true)
     public List<TurmaResponseDTO> listarTodas() {
         return turmaRepository.findAll()
                 .stream()
-                .map(TurmaResponseDTO::new)
+                .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public TurmaResponseDTO buscarPorId(UUID turmaId) {
-        return new TurmaResponseDTO(buscarTurma(turmaId));
+        return toResponse(buscarTurma(turmaId));
     }
 
     @Transactional
@@ -83,7 +94,7 @@ public class TurmaService {
         turma.setNome(obterNomeUnicoParaTurma(turma.getNome(), turma.getId()));
         Turma atualizado = turmaRepository.save(turma);
         vincularAlunosDoDto(atualizado, dto.getAlunosIds());
-        return buscarPorId(atualizado.getId());
+        return toResponse(buscarTurma(atualizado.getId()));
     }
 
     @Transactional
@@ -104,7 +115,7 @@ public class TurmaService {
             });
         }
 
-        return new TurmaResponseDTO(turmaRepository.save(turma));
+        return toResponse(turmaRepository.save(turma));
     }
 
     @Transactional
@@ -116,7 +127,7 @@ public class TurmaService {
             turma.getTurmaAlunos().forEach(turmaAluno -> turmaAluno.setAtivo(false));
         }
 
-        return new TurmaResponseDTO(turmaRepository.save(turma));
+        return toResponse(turmaRepository.save(turma));
     }
 
     @Transactional
@@ -126,7 +137,26 @@ public class TurmaService {
         validarPacientesExistem(pacienteIds);
         validarPacientesNaoAtivosEmOutrasTurmas(pacienteIds, turmaId);
         vincularOuReativarPacientes(turma, pacienteIds);
-        return new TurmaResponseDTO(turmaRepository.save(turma));
+        return toResponse(turmaRepository.save(turma));
+    }
+
+    @Transactional
+    public TurmaResponseDTO adicionarProfessor(UUID turmaId, UUID professorId) {
+        Turma turma = buscarTurma(turmaId);
+        validarTurmaAtiva(turma);
+        
+        Professor professor = professorRepository.findById(professorId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor não encontrado"));
+                
+        turma.setProfessor(professor);
+        return toResponse(turmaRepository.save(turma));
+    }
+
+    @Transactional
+    public TurmaResponseDTO removerProfessor(UUID turmaId) {
+        Turma turma = buscarTurma(turmaId);
+        turma.setProfessor(null);
+        return toResponse(turmaRepository.save(turma));
     }
 
     @Transactional(readOnly = true)
@@ -298,7 +328,36 @@ public class TurmaService {
                 turma.getAtiva(),
                 totalAlunos,
                 totalAtivos,
-                horarioPorTurno(turma.getTurno())
+                horarioPorTurno(turma.getTurno()),
+                mapProfessorResumo(turma.getProfessor())
+        );
+    }
+
+    private TurmaResponseDTO toResponse(Turma turma) {
+        return new TurmaResponseDTO(turma, mapProfessorResumo(turma.getProfessor()));
+    }
+
+    private ProfessorResumoDTO mapProfessorResumo(Professor professor) {
+        if (professor == null) {
+            return null;
+        }
+        Usuario usuario = usuarioRepository.findById(professor.getUsuarioId()).orElse(null);
+        if (usuario == null) {
+            return null;
+        }
+        return new ProfessorResumoDTO(
+                professor.getId(),
+                usuario.getId(),
+                usuario.getNomeCompleto(),
+                usuario.getCpf(),
+                usuario.getEmail(),
+                usuario.getAtivo(),
+                usuario.getTelefone(),
+                professor.getFormacao(),
+                professor.getDataContratacao(),
+                professor.getDataNascimento(),
+                null,
+                professor.getPrimeiroAcesso()
         );
     }
 

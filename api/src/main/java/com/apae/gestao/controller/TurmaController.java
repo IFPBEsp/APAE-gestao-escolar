@@ -160,6 +160,25 @@ public class TurmaController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{turmaId}/professor/{professorId}")
+    @Operation(summary = "Atribuir professor à turma", description = "Associa um professor responsável por uma turma.")
+    @DocStandardErrors
+    public ResponseEntity<TurmaResponseDTO> adicionarProfessor(
+            @Parameter(description = "Identificador da turma", in = ParameterIn.PATH) @PathVariable UUID turmaId,
+            @Parameter(description = "Identificador do professor", in = ParameterIn.PATH) @PathVariable UUID professorId) {
+        TurmaResponseDTO response = service.adicionarProfessor(turmaId, professorId);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{turmaId}/professor")
+    @Operation(summary = "Remover professor da turma", description = "Remove o professor responsável por uma turma.")
+    @DocStandardErrors
+    public ResponseEntity<TurmaResponseDTO> removerProfessor(
+            @Parameter(description = "Identificador da turma", in = ParameterIn.PATH) @PathVariable UUID turmaId) {
+        TurmaResponseDTO response = service.removerProfessor(turmaId);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/{turmaId}/alunos")
     @Operation(
             summary = "Adicionar alunos à turma",
