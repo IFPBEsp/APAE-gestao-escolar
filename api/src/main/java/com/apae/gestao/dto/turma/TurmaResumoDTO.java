@@ -38,4 +38,7 @@ public class TurmaResumoDTO {
 
     @Schema(description = "Horário de aula baseado no turno", example = "Segunda a Sexta - 8h as 12h")
     private String horario;
+
+    @Schema(description = "Dados resumidos do professor responsável")
+    private com.apae.gestao.dto.professor.ProfessorResumoDTO professor;
 }

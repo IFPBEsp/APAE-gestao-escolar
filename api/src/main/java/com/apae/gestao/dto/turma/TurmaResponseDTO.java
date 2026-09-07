@@ -42,6 +42,9 @@ public class TurmaResponseDTO {
     @Schema(description = "Horário de aula baseado no turno", example = "Segunda a Sexta - 8h as 12h")
     private String horario;
 
+    @Schema(description = "Dados resumidos do professor responsável")
+    private com.apae.gestao.dto.professor.ProfessorResumoDTO professor;
+
     public TurmaResponseDTO(Turma turma) {
         this.id = turma.getId();
         this.nome = turma.getNome();
@@ -68,5 +71,10 @@ public class TurmaResponseDTO {
             default:
                 return "Horário não definido";
         }
+    }
+
+    public TurmaResponseDTO(Turma turma, com.apae.gestao.dto.professor.ProfessorResumoDTO professor) {
+        this(turma);
+        this.professor = professor;
     }
 }
