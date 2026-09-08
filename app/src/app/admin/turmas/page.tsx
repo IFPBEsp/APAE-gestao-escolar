@@ -4,17 +4,17 @@ import { useState, useEffect } from "react";
 import { Plus, Search, BookOpen} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { NovaTurmaModal } from "@/components/turmas/NovaTurmaModal";
 import { DetalhesTurma } from "@/components/turmas/DetalhesTurma";
 import { EditarTurmaModal } from "@/components/turmas/EditarTurmaModal";
-import { listarTurmas, listarAlunosAtivos, buscarTurmaPorId } from "@/services/TurmaService";
+import { listarTurmas, buscarTurmaPorId } from "@/services/TurmaService";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function GerenciarTurmasPage() {
+  const router = useRouter();
   const [turmas, setTurmas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isNovaTurmaOpen, setIsNovaTurmaOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<"listar-turmas" | "detalhes-turma">("listar-turmas");
   const [selectedTurma, setSelectedTurma] = useState<any>(null);
   const [isEditarTurmaOpen, setIsEditarTurmaOpen] = useState(false);
@@ -74,11 +74,6 @@ export default function GerenciarTurmasPage() {
     }
   };
 
-  const handleSaveNovaTurma = async () => {
-    const data = await listarTurmas();
-    setTurmas(data);
-  };
-
   const handleUpdateTurma = async (updatedTurma: any) => {
     try {
       // Recarrega todas as turmas para garantir contadores e dados agregados atualizados
@@ -131,16 +126,11 @@ export default function GerenciarTurmasPage() {
               <div className="flex gap-4 items-center">
                 <Button
                   variant="primary"
-                  onClick={() => setIsNovaTurmaOpen(true)}
+                  onClick={() => router.push("/admin/turmas/cadastrar")}
                 >
                   <Plus size={18} />
                   Nova Turma
                 </Button>
-                <NovaTurmaModal
-                  isOpen={isNovaTurmaOpen}
-                  onClose={() => setIsNovaTurmaOpen(false)}
-                  onSave={handleSaveNovaTurma}
-                />
               </div>
             </div>
 
