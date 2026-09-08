@@ -151,7 +151,6 @@ export default function CadastrarTurmaPage() {
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Série */}
               <div className="space-y-2">
                 <Label className="text-[#0D4F97]">Série *</Label>
                 <Select onValueChange={setTipo}>
@@ -168,7 +167,6 @@ export default function CadastrarTurmaPage() {
                 </Select>
               </div>
 
-              {/* Ano e Turno */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-[#0D4F97]">Ano de Criação *</Label>
@@ -203,7 +201,6 @@ export default function CadastrarTurmaPage() {
                 </div>
               </div>
 
-              {/* Nome da Turma (gerado automaticamente) */}
               <div className="space-y-2">
                 <Label className="text-[#0D4F97]">Nome da Turma *</Label>
                 <Input
@@ -217,7 +214,6 @@ export default function CadastrarTurmaPage() {
                 </p>
               </div>
 
-              {/* Gerenciar Alunos */}
               <div className="space-y-4">
                 <Label className="text-[#0D4F97] font-medium border-b border-[#B2D7EC] pb-2 block">
                   Gerenciar Alunos na Turma
@@ -306,7 +302,6 @@ export default function CadastrarTurmaPage() {
                 </div>
               </div>
 
-              {/* Botões */}
               <div className="flex justify-end gap-4 pt-4">
                 <Button
                   type="button"
@@ -331,7 +326,6 @@ export default function CadastrarTurmaPage() {
         </Card>
       </div>
 
-      {/* Alert de confirmação de remoção */}
       <AlertDialog
         open={!!alunoParaRemover}
         onOpenChange={(open) => !open && setAlunoParaRemover(null)}

@@ -74,11 +74,6 @@ export default function GerenciarTurmasPage() {
     }
   };
 
-  const handleSaveNovaTurma = async () => {
-    const data = await listarTurmas();
-    setTurmas(data);
-  };
-
   const handleUpdateTurma = async (updatedTurma: any) => {
     try {
       // Recarrega todas as turmas para garantir contadores e dados agregados atualizados
