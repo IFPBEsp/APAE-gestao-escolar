@@ -29,15 +29,23 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { BookOpen, Loader2, Search, X } from "lucide-react";
+import { BookOpen, GraduationCap, Loader2, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { criarTurma } from "@/services/TurmaService";
+import { criarTurma, adicionarProfessor } from "@/services/TurmaService";
 import { listarAlunos } from "@/services/AlunoService";
+import { listarProfessores } from "@/services/ProfessorService";
 
 interface Aluno {
   id: string;
   nome: string;
   deficiencia?: string;
+}
+
+interface Professor {
+  id: string;
+  nome: string;
+  email?: string;
+  ativo?: boolean;
 }
 
 export default function CadastrarTurmaPage() {
@@ -47,6 +55,11 @@ export default function CadastrarTurmaPage() {
   const [tipo, setTipo] = useState("");
   const [ano, setAno] = useState(new Date().getFullYear().toString());
   const [turno, setTurno] = useState("");
+
+  const [buscaProfessor, setBuscaProfessor] = useState("");
+  const [professoresEncontrados, setProfessoresEncontrados] = useState<Professor[]>([]);
+  const [professorSelecionado, setProfessorSelecionado] = useState<Professor | null>(null);
+  const [isBuscandoProfessores, setIsBuscandoProfessores] = useState(false);
 
   const [buscaAluno, setBuscaAluno] = useState("");
   const [alunosEncontrados, setAlunosEncontrados] = useState<Aluno[]>([]);
@@ -70,6 +83,41 @@ export default function CadastrarTurmaPage() {
     if (val === "manha") return "Manhã";
     if (val === "tarde") return "Tarde";
     return val;
+  }
+
+  useEffect(() => {
+    const termo = buscaProfessor.trim();
+    if (termo.length > 0) {
+      const delayDebounceFn = setTimeout(() => {
+        fetchProfessores(termo);
+      }, 300);
+      return () => clearTimeout(delayDebounceFn);
+    } else {
+      setProfessoresEncontrados([]);
+    }
+  }, [buscaProfessor]);
+
+  async function fetchProfessores(nome: string) {
+    setIsBuscandoProfessores(true);
+    try {
+      const data = await listarProfessores(nome, true);
+      setProfessoresEncontrados(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Erro ao buscar professores:", error);
+      setProfessoresEncontrados([]);
+    } finally {
+      setIsBuscandoProfessores(false);
+    }
+  }
+
+  function selecionarProfessor(prof: Professor) {
+    setProfessorSelecionado(prof);
+    setBuscaProfessor("");
+    setProfessoresEncontrados([]);
+  }
+
+  function removerProfessor() {
+    setProfessorSelecionado(null);
   }
 
   useEffect(() => {
@@ -114,13 +162,24 @@ export default function CadastrarTurmaPage() {
 
     setIsSubmitting(true);
     try {
-      await criarTurma({
+      const novaTurma = await criarTurma({
         tipo: formatTipo(tipo),
         anoCriacao: Number(ano),
         turno: formatTurno(turno),
         ativa: true,
         alunosIds: alunosSelecionados.map((a) => a.id),
       });
+
+      if (professorSelecionado && novaTurma?.id) {
+        try {
+          await adicionarProfessor(novaTurma.id, professorSelecionado.id);
+        } catch (profError: any) {
+          console.error("Erro ao vincular professor:", profError);
+          toast.warning("Turma criada, mas ocorreu um erro ao vincular o professor.");
+          router.push("/admin/turmas");
+          return;
+        }
+      }
 
       toast.success("Turma criada com sucesso!");
       router.push("/admin/turmas");
@@ -212,6 +271,90 @@ export default function CadastrarTurmaPage() {
                   Este campo é gerado automaticamente a partir do Tipo, Ano e
                   Turno selecionados.
                 </p>
+              </div>
+
+              <div className="space-y-4">
+                <Label className="text-[#0D4F97] font-medium border-b border-[#B2D7EC] pb-2 block">
+                  Professor Responsável
+                </Label>
+
+                {professorSelecionado ? (
+                  <div className="flex justify-between items-center bg-white p-3 rounded-lg border-2 border-[#B2D7EC] shadow-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 bg-[#E8F3FF] rounded-full flex items-center justify-center text-[#0D4F97]">
+                        <GraduationCap className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[#0D4F97]">
+                          {professorSelecionado.nome}
+                        </p>
+                        {professorSelecionado.email && (
+                          <p className="text-xs text-gray-500">
+                            {professorSelecionado.email}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="hover:text-red-600 hover:bg-red-50"
+                      onClick={removerProfessor}
+                      title="Remover Professor"
+                      aria-label={`Remover professor ${professorSelecionado.nome}`}
+                    >
+                      <X size={16} />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                      <Input
+                        placeholder="Buscar professor por nome..."
+                        className="pl-10 bg-white border-2 border-[#B2D7EC] focus:border-[#0D4F97]"
+                        value={buscaProfessor}
+                        onChange={(e) => setBuscaProfessor(e.target.value)}
+                      />
+                    </div>
+
+                    {isBuscandoProfessores && (
+                      <div className="flex items-center gap-2 text-xs text-gray-500 p-2">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        <span>Buscando professores...</span>
+                      </div>
+                    )}
+
+                    {!isBuscandoProfessores && buscaProfessor.trim().length > 0 && professoresEncontrados.length === 0 && (
+                      <p className="text-xs text-gray-500 p-2">Nenhum professor encontrado.</p>
+                    )}
+
+                    {professoresEncontrados.length > 0 && (
+                      <div className="border rounded-md max-h-40 overflow-y-auto bg-white shadow-sm mt-1 divide-y divide-gray-100">
+                        {professoresEncontrados.map((prof) => (
+                          <div
+                            key={prof.id}
+                            className="p-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center transition-colors"
+                            onClick={() => selecionarProfessor(prof)}
+                          >
+                            <div>
+                              <span className="text-sm font-medium text-gray-800 block">
+                                {prof.nome}
+                              </span>
+                              {prof.email && (
+                                <span className="text-xs text-gray-500">{prof.email}</span>
+                              )}
+                            </div>
+                            <span className="text-xs text-[#0D4F97] font-medium">
+                              Selecionar
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-4">
