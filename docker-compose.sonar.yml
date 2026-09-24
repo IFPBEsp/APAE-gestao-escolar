@@ -1,0 +1,21 @@
+services:
+  sonarqube:
+    image: sonarqube:26.9.0.129388-community
+    container_name: sonarqube-gestao-escolar
+    ports:
+      - "${SONAR_PORT:-9502}:9000"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    networks:
+      - sonar-net
+
+networks:
+  sonar-net:
+    name: sonar-gestao-escolar-net
+
+volumes:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
