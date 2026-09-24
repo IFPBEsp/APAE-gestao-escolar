@@ -7,6 +7,7 @@ import com.apae.gestao.entity.Usuario;
 import com.apae.gestao.exception.ConflitoDeDadosException;
 import com.apae.gestao.exception.RecursoNaoEncontradoException;
 import com.apae.gestao.repository.EnderecoRepository;
+import com.apae.gestao.repository.ProfessorDashboardRepository;
 import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.repository.UsuarioRepository;
 import org.springframework.dao.DataAccessException;
@@ -25,15 +26,18 @@ public class ProfessorService {
     private static final String CARGO_GESTAO_ESCOLAR = "GESTAO_ESCOLAR";
 
     private final ProfessorRepository professorRepository;
+    private final ProfessorDashboardRepository professorDashboardRepository;
     private final UsuarioRepository usuarioRepository;
     private final EnderecoRepository enderecoRepository;
     private final PasswordEncoder passwordEncoder;
 
     public ProfessorService(ProfessorRepository professorRepository,
+                            ProfessorDashboardRepository professorDashboardRepository,
                             UsuarioRepository usuarioRepository,
                             EnderecoRepository enderecoRepository,
                             PasswordEncoder passwordEncoder) {
         this.professorRepository = professorRepository;
+        this.professorDashboardRepository = professorDashboardRepository;
         this.usuarioRepository = usuarioRepository;
         this.enderecoRepository = enderecoRepository;
         this.passwordEncoder = passwordEncoder;
@@ -140,6 +144,40 @@ public class ProfessorService {
         return new ProfessorResponseDTO(professor, usuario, buscarEndereco(usuario));
     }
 
+    @Transactional(readOnly = true)
+    public ProfessorDashboardDTO buscarDashboard(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RecursoNaoEncontradoException("Usuário autenticado não encontrado"));
+
+        Professor professor = professorRepository.findByUsuarioId(usuario.getId())
+                .orElseThrow(() ->
+                        new RecursoNaoEncontradoException("Professor autenticado não encontrado"));
+
+        Object[] resumo = professorDashboardRepository
+                .buscarResumoDashboard(professor.getId())
+                .get(0);
+
+        return new ProfessorDashboardDTO(
+                professor.getId(),
+                usuario.getNomeCompleto(),
+                toLong(resumo[0]),
+                toLong(resumo[1]),
+                toDouble(resumo[2]),
+                toLong(resumo[3]),
+                toLong(resumo[4]),
+                toLong(resumo[5]),
+                toLong(resumo[6])
+        );
+    }
+
+    private Long toLong(Object valor) {
+        return valor == null ? 0L : ((Number) valor).longValue();
+    }
+
+    private Double toDouble(Object valor) {
+        return valor == null ? 0.0 : ((Number) valor).doubleValue();
+    }
     private Professor buscarProfessor(UUID id) {
         return professorRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Professor não encontrado com ID: " + id));

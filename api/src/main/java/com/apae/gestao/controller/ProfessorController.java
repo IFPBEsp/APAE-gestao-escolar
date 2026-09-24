@@ -3,6 +3,7 @@ package com.apae.gestao.controller;
 import java.util.List;
 import java.util.UUID;
 
+import com.apae.gestao.dto.professor.ProfessorDashboardDTO;
 import com.apae.gestao.dto.professor.ProfessorListagemDTO;
 import com.apae.gestao.dto.professor.ProfessorRequestDTO;
 import com.apae.gestao.dto.professor.ProfessorResponseDTO;
@@ -21,6 +22,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -57,6 +59,20 @@ public class ProfessorController {
         return ResponseEntity.ok(professores);
     }
 
+    @GetMapping("/me/dashboard")
+    @Operation(
+            summary = "Consultar dashboard do professor autenticado",
+            description = "Retorna os dados consolidados somente das turmas vinculadas ao professor autenticado."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Dashboard retornada com sucesso",
+            content = @Content(schema = @Schema(implementation = ProfessorDashboardDTO.class))
+    )
+    public ResponseEntity<ProfessorDashboardDTO> buscarDashboard(Authentication authentication) {
+        ProfessorDashboardDTO response = professorService.buscarDashboard(authentication.getName());
+        return ResponseEntity.ok(response);
+    }
     @GetMapping("/{id}")
     @Operation(
             summary = "Buscar professor por ID (resumido)",
