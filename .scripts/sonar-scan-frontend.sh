@@ -7,7 +7,7 @@ if [ -z "$SONAR_TOKEN" ]; then
   exit 1
 fi
 
-SONAR_HOST_URL="${SONAR_HOST_URL:-http://localhost:9502}"
+SONAR_HOST_URL="${SONAR_HOST_URL:-http://localhost:9500}"
 FRONTEND_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../app" && pwd)"
 
 echo "Iniciando análise do SonarQube para o Frontend..."
