@@ -16,6 +16,7 @@ public interface ProfessorDashboardRepository extends Repository<Professor, UUID
                 SELECT t.id, t.ativa
                 FROM gestao_escolar.turmas t
                 WHERE t.professor_id = :professorId
+                  AND t.ativa = true
             ),
 
             alunos_ativos AS (
@@ -71,11 +72,8 @@ public interface ProfessorDashboardRepository extends Repository<Professor, UUID
 
                 COALESCE(
                     (
-                        SELECT
-                            SUM(CASE WHEN faltou = false THEN 1.0 ELSE 0.0 END)
-                            * 100.0
-                            / NULLIF(COUNT(*), 0)
-                        FROM presencas_professor
+                        SELECT AVG(percentual_frequencia)
+                        FROM frequencia_por_aluno
                     ),
                     0.0
                 ) AS frequencia_media,
