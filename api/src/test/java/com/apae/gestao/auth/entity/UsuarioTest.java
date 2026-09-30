@@ -21,7 +21,7 @@ class UsuarioTest {
                 "Usuário Teste",
                 "senha123",
                 "12345678900",
-                "Professor",
+                "GESTAO_ESCOLAR",
                 "(83) 99999-9999",
                 enderecoId,
                 true
@@ -31,7 +31,7 @@ class UsuarioTest {
         assertEquals("Usuário Teste", usuario.getNomeCompleto());
         assertEquals("senha123", usuario.getSenha());
         assertEquals("12345678900", usuario.getCpf());
-        assertEquals("Professor", usuario.getCargo());
+        assertEquals("GESTAO_ESCOLAR", usuario.getCargo());
         assertEquals("(83) 99999-9999", usuario.getTelefone());
         assertEquals(enderecoId, usuario.getEnderecoId());
         assertTrue(usuario.getAtivo());
