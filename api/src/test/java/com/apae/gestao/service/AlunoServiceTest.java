@@ -44,20 +44,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-/**
- * Testes unitários para {@link AlunoService}.
- *
- * Estratégia: todas as dependências são isoladas com @Mock do Mockito.
- * Cada grupo de cenários fica dentro de uma @Nested class para organização
- * e leitura fluente dos resultados no relatório do Maven.
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AlunoService - Testes Unitários")
 class AlunoServiceTest {
-
-    // -------------------------------------------------------------------------
-    // Dependências mockadas
-    // -------------------------------------------------------------------------
 
     @Mock
     private AlunoViewRepository alunoRepository;
@@ -77,10 +66,6 @@ class AlunoServiceTest {
     @InjectMocks
     private AlunoService alunoService;
 
-    // -------------------------------------------------------------------------
-    // Fixtures reutilizáveis (criadas antes de cada teste)
-    // -------------------------------------------------------------------------
-
     private UUID alunoId;
     private UUID turmaAtivaId;
     private UUID turmaInativaId;
@@ -97,14 +82,12 @@ class AlunoServiceTest {
 
     @BeforeEach
     void setUp() {
-        // IDs
         alunoId            = UUID.randomUUID();
         turmaAtivaId       = UUID.randomUUID();
         turmaInativaId     = UUID.randomUUID();
         professorId        = UUID.randomUUID();
         professorUsuarioId = UUID.randomUUID();
 
-        // AlunoView – visão somente-leitura do paciente
         alunoView = new AlunoView(
                 alunoId,
                 "Lucas Andrade",
@@ -116,7 +99,6 @@ class AlunoServiceTest {
                 false
         );
 
-        // Turma ativa
         turmaAtiva = new Turma();
         turmaAtiva.setId(turmaAtivaId);
         turmaAtiva.setNome("Alfabetização 2025");
@@ -125,7 +107,6 @@ class AlunoServiceTest {
         turmaAtiva.setAnoCriacao(2025);
         turmaAtiva.setAtiva(true);
 
-        // Turma inativa
         turmaInativa = new Turma();
         turmaInativa.setId(turmaInativaId);
         turmaInativa.setNome("Turma Encerrada 2023");
@@ -134,14 +115,12 @@ class AlunoServiceTest {
         turmaInativa.setAnoCriacao(2023);
         turmaInativa.setAtiva(false);
 
-        // Vínculo ativo do aluno com a turma ativa
         vinculoAtivo = new TurmaAluno();
         vinculoAtivo.setId(UUID.randomUUID());
         vinculoAtivo.setTurma(turmaAtiva);
         vinculoAtivo.setPacienteId(alunoId);
         vinculoAtivo.setAtivo(true);
 
-        // Professor e seu usuário (para nomeProfessor)
         professor = new Professor();
         professor.setId(professorId);
         professor.setUsuarioId(professorUsuarioId);
@@ -149,7 +128,6 @@ class AlunoServiceTest {
         usuarioProfessor = new Usuario();
         usuarioProfessor.setNomeCompleto("Prof. João Silva");
 
-        // Avaliação associada ao aluno
         avaliacao = Avaliacao.builder()
                 .id(UUID.randomUUID())
                 .pacienteId(alunoId)
@@ -159,9 +137,41 @@ class AlunoServiceTest {
                 .build();
     }
 
-    // =========================================================================
-    // 1. listarAlunosPorNome
-    // =========================================================================
+    @Nested
+    @DisplayName("buscarPorId")
+    class BuscarPorId {
+
+        @Test
+        @DisplayName("Deve retornar AlunoDetalhesDTO com turma atual quando aluno existe")
+        void deveRetornarDetalhesDTOComTurmaAtualQuandoAlunoExiste() {
+
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId))
+                    .thenReturn(List.of(vinculoAtivo));
+
+            AlunoDetalhesDTO resultado = alunoService.buscarPorId(alunoId);
+
+            assertThat(resultado).isNotNull();
+            assertThat(resultado.getId()).isEqualTo(alunoId);
+            assertThat(resultado.getNome()).isEqualTo("Lucas Andrade");
+            assertThat(resultado.getNomeTurmaAtual()).isEqualTo("Alfabetização 2025");
+            assertThat(resultado.getTurnoTurmaAtual()).isEqualTo("MANHA");
+            verify(alunoRepository).findById(alunoId);
+            verify(turmaAlunoRepository).findAllByPacienteIdAndAtivoTrue(alunoId);
+        }
+
+        @Test
+        @DisplayName("Deve lançar RuntimeException quando aluno não for encontrado pelo id")
+        void deveLancarExcecaoQuandoAlunoNaoForEncontrado() {
+
+            UUID idInexistente = UUID.randomUUID();
+            when(alunoRepository.findById(idInexistente)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> alunoService.buscarPorId(idInexistente))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Aluno não encontrado");
+        }
+    }
 
     @Nested
     @DisplayName("listarAlunosPorNome")
@@ -170,7 +180,7 @@ class AlunoServiceTest {
         @Test
         @DisplayName("Deve delegar ao repositório de ativos quando apenasAtivos=true")
         void deveListarSomenteAtivosQuandoFlagForTrue() {
-            // Given
+
             Pageable pageable = PageRequest.of(0, 10);
             Page<AlunoResumoDTO> paginaMock = new PageImpl<>(
                     List.of(new AlunoResumoDTO(alunoId, "Lucas Andrade", null, "Alfabetização 2025"))
@@ -178,10 +188,8 @@ class AlunoServiceTest {
             when(alunoRepository.listarAlunosAtivosPorFiltro("lucas", pageable))
                     .thenReturn(paginaMock);
 
-            // When
             Page<AlunoResumoDTO> resultado = alunoService.listarAlunosPorNome("lucas", true, pageable);
 
-            // Then
             assertThat(resultado.getTotalElements()).isEqualTo(1);
             assertThat(resultado.getContent().get(0).getNome()).isEqualTo("Lucas Andrade");
             verify(alunoRepository).listarAlunosAtivosPorFiltro("lucas", pageable);
@@ -191,7 +199,7 @@ class AlunoServiceTest {
         @Test
         @DisplayName("Deve delegar ao repositório geral quando apenasAtivos=false")
         void deveListarTodosQuandoFlagForFalse() {
-            // Given
+        
             Pageable pageable = PageRequest.of(0, 10);
             Page<AlunoResumoDTO> paginaMock = new PageImpl<>(
                     List.of(new AlunoResumoDTO(alunoId, "Lucas Andrade", null, null))
@@ -199,10 +207,8 @@ class AlunoServiceTest {
             when(alunoRepository.listarAlunosPorFiltro("lucas", pageable))
                     .thenReturn(paginaMock);
 
-            // When
             Page<AlunoResumoDTO> resultado = alunoService.listarAlunosPorNome("lucas", false, pageable);
 
-            // Then
             assertThat(resultado.getTotalElements()).isEqualTo(1);
             verify(alunoRepository).listarAlunosPorFiltro("lucas", pageable);
             verify(alunoRepository, never()).listarAlunosAtivosPorFiltro(any(), any());
@@ -211,67 +217,71 @@ class AlunoServiceTest {
         @Test
         @DisplayName("Deve tratar nome nulo convertendo para string vazia no filtro")
         void deveTratarNomeNuloComoStringVazia() {
-            // Given
+
             Pageable pageable = PageRequest.of(0, 10);
             when(alunoRepository.listarAlunosPorFiltro("", pageable))
                     .thenReturn(Page.empty());
 
-            // When
             alunoService.listarAlunosPorNome(null, false, pageable);
 
-            // Then
             verify(alunoRepository).listarAlunosPorFiltro("", pageable);
         }
 
         @Test
         @DisplayName("Deve fazer trim do nome recebido antes de repassar ao repositório")
         void deveFazerTrimDoNome() {
-            // Given
+
             Pageable pageable = PageRequest.of(0, 10);
             when(alunoRepository.listarAlunosPorFiltro("lucas", pageable))
                     .thenReturn(Page.empty());
 
-            // When
             alunoService.listarAlunosPorNome("  lucas  ", false, pageable);
 
-            // Then
             verify(alunoRepository).listarAlunosPorFiltro("lucas", pageable);
         }
     }
-
-    // =========================================================================
-    // 2. atualizarTurma
-    // =========================================================================
 
     @Nested
     @DisplayName("atualizarTurma")
     class AtualizarTurma {
 
         @Test
-        @DisplayName("Cenário de Sucesso: deve inativar vínculo anterior e salvar novo vínculo ativo")
+        @DisplayName("Cenário de Sucesso: deve inativar vínculo da turma de origem e criar novo vínculo na turma destino")
         void deveInativarVinculoAntigoECriarNovoVinculoAtivo() {
-            // Given
-            AlunoTurmaRequestDTO dto = new AlunoTurmaRequestDTO();
-            dto.setNovaTurmaId(turmaAtivaId);
 
-            TurmaAluno vinculoAntigo = new TurmaAluno();
-            vinculoAntigo.setId(UUID.randomUUID());
-            vinculoAntigo.setTurma(turmaAtiva);
-            vinculoAntigo.setPacienteId(alunoId);
-            vinculoAntigo.setAtivo(true);
+            // Turma onde o aluno está atualmente matriculado
+            Turma turmaOrigem = turmaAtiva;
+
+            // Turma destino — diferente da origem, para refletir uma transição real
+            UUID turmaDestinoId = UUID.randomUUID();
+            Turma turmaDestino = new Turma();
+            turmaDestino.setId(turmaDestinoId);
+            turmaDestino.setNome("Inclusão Social 2025");
+            turmaDestino.setTurno("TARDE");
+            turmaDestino.setTipo("Educação Especial");
+            turmaDestino.setAnoCriacao(2025);
+            turmaDestino.setAtiva(true);
+
+            AlunoTurmaRequestDTO dto = new AlunoTurmaRequestDTO();
+            dto.setNovaTurmaId(turmaDestinoId);
+
+            // Vínculo ativo atual do aluno (turma de origem)
+            TurmaAluno vinculoOrigem = new TurmaAluno();
+            vinculoOrigem.setId(UUID.randomUUID());
+            vinculoOrigem.setTurma(turmaOrigem);
+            vinculoOrigem.setPacienteId(alunoId);
+            vinculoOrigem.setAtivo(true);
 
             when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
-            when(turmaRepository.findById(turmaAtivaId)).thenReturn(Optional.of(turmaAtiva));
+            when(turmaRepository.findById(turmaDestinoId)).thenReturn(Optional.of(turmaDestino));
             when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId))
-                    .thenReturn(List.of(vinculoAntigo));
-            // Simula que o aluno ainda não possui vínculo com a nova turma (orElseGet cria um novo)
-            when(turmaAlunoRepository.findByTurmaAndPacienteId(turmaAtiva, alunoId))
+                    .thenReturn(List.of(vinculoOrigem));
+            // Aluno ainda não tem vínculo com a turma destino — orElseGet criará um novo
+            when(turmaAlunoRepository.findByTurmaAndPacienteId(turmaDestino, alunoId))
                     .thenReturn(Optional.empty());
 
-            // When
             AlunoDetalhesDTO resultado = alunoService.atualizarTurma(alunoId, dto);
 
-            // Then
             ArgumentCaptor<TurmaAluno> captor = ArgumentCaptor.forClass(TurmaAluno.class);
             verify(turmaAlunoRepository, atLeast(2)).save(captor.capture());
 
@@ -279,16 +289,24 @@ class AlunoServiceTest {
             TurmaAluno vinculoSalvoComoInativo = salvos.get(0);
             TurmaAluno novoVinculo             = salvos.get(1);
 
+            // Vínculo da turma de origem deve ter sido inativado
             assertThat(vinculoSalvoComoInativo.getAtivo()).isFalse();
+            assertThat(vinculoSalvoComoInativo.getTurma()).isEqualTo(turmaOrigem);
+
+            // Novo vínculo deve apontar para a turma destino e estar ativo
             assertThat(novoVinculo.getAtivo()).isTrue();
             assertThat(novoVinculo.getPacienteId()).isEqualTo(alunoId);
-            assertThat(resultado.getNomeTurmaAtual()).isEqualTo("Alfabetização 2025");
+            assertThat(novoVinculo.getTurma()).isEqualTo(turmaDestino);
+
+            // DTO retornado reflete a turma destino
+            assertThat(resultado.getNomeTurmaAtual()).isEqualTo("Inclusão Social 2025");
+            assertThat(resultado.getTurnoTurmaAtual()).isEqualTo("TARDE");
         }
 
         @Test
         @DisplayName("Cenário de Sucesso: deve reativar vínculo existente quando aluno já passou pela turma")
         void deveReativarVinculoExistenteQuandoAlunoJaEstevaNaTurma() {
-            // Given
+
             UUID novaTurmaId = UUID.randomUUID();
             Turma novaTurma = new Turma();
             novaTurma.setId(novaTurmaId);
@@ -311,10 +329,8 @@ class AlunoServiceTest {
             when(turmaAlunoRepository.findByTurmaAndPacienteId(novaTurma, alunoId))
                     .thenReturn(Optional.of(vinculoAnteriorInativo));
 
-            // When
             AlunoDetalhesDTO resultado = alunoService.atualizarTurma(alunoId, dto);
 
-            // Then
             ArgumentCaptor<TurmaAluno> captor = ArgumentCaptor.forClass(TurmaAluno.class);
             verify(turmaAlunoRepository).save(captor.capture());
 
@@ -327,14 +343,13 @@ class AlunoServiceTest {
         @Test
         @DisplayName("Cenário de Falha: deve lançar 422 ao tentar matricular em turma inativa")
         void deveLancarExcecaoAoTentarMatricularEmTurmaInativa() {
-            // Given
+
             AlunoTurmaRequestDTO dto = new AlunoTurmaRequestDTO();
             dto.setNovaTurmaId(turmaInativaId);
 
             when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
             when(turmaRepository.findById(turmaInativaId)).thenReturn(Optional.of(turmaInativa));
 
-            // When / Then
             assertThatThrownBy(() -> alunoService.atualizarTurma(alunoId, dto))
                     .isInstanceOf(ResponseStatusException.class)
                     .satisfies(ex -> {
@@ -350,7 +365,7 @@ class AlunoServiceTest {
         @Test
         @DisplayName("Cenário de Falha: deve lançar RuntimeException quando turma não for encontrada")
         void deveLancarExcecaoQuandoTurmaNaoForEncontrada() {
-            // Given
+
             UUID turmaInexistenteId = UUID.randomUUID();
             AlunoTurmaRequestDTO dto = new AlunoTurmaRequestDTO();
             dto.setNovaTurmaId(turmaInexistenteId);
@@ -358,7 +373,6 @@ class AlunoServiceTest {
             when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
             when(turmaRepository.findById(turmaInexistenteId)).thenReturn(Optional.empty());
 
-            // When / Then
             assertThatThrownBy(() -> alunoService.atualizarTurma(alunoId, dto))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Turma não encontrada");
@@ -369,23 +383,18 @@ class AlunoServiceTest {
         @Test
         @DisplayName("Cenário de Falha: deve lançar RuntimeException quando aluno não existir")
         void deveLancarExcecaoQuandoAlunoNaoForEncontrado() {
-            // Given
+
             UUID alunoInexistenteId = UUID.randomUUID();
             AlunoTurmaRequestDTO dto = new AlunoTurmaRequestDTO();
             dto.setNovaTurmaId(turmaAtivaId);
 
             when(alunoRepository.findById(alunoInexistenteId)).thenReturn(Optional.empty());
 
-            // When / Then
             assertThatThrownBy(() -> alunoService.atualizarTurma(alunoInexistenteId, dto))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Aluno não encontrado");
         }
     }
-
-    // =========================================================================
-    // 3. buscarHistoricoTurmasPorAlunoId
-    // =========================================================================
 
     @Nested
     @DisplayName("buscarHistoricoTurmasPorAlunoId")
@@ -394,16 +403,14 @@ class AlunoServiceTest {
         @Test
         @DisplayName("Deve retornar lista mapeada de AlunoTurmaHistoricoResponseDTO para o aluno")
         void deveRetornarHistoricoMapeadoParaDTO() {
-            // Given
+
             when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
             when(turmaAlunoRepository.findHistoricoCompletoPorPaciente(alunoId))
                     .thenReturn(List.of(vinculoAtivo));
 
-            // When
             List<AlunoTurmaHistoricoResponseDTO> resultado =
                     alunoService.buscarHistoricoTurmasPorAlunoId(alunoId);
 
-            // Then
             assertThat(resultado).hasSize(1);
             AlunoTurmaHistoricoResponseDTO item = resultado.get(0);
             assertThat(item.getTurmaId()).isEqualTo(turmaAtivaId);
@@ -416,36 +423,29 @@ class AlunoServiceTest {
         @Test
         @DisplayName("Deve retornar lista vazia quando aluno não possui histórico")
         void deveRetornarListaVaziaQuandoSemHistorico() {
-            // Given
+
             when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
             when(turmaAlunoRepository.findHistoricoCompletoPorPaciente(alunoId))
                     .thenReturn(List.of());
 
-            // When
             List<AlunoTurmaHistoricoResponseDTO> resultado =
                     alunoService.buscarHistoricoTurmasPorAlunoId(alunoId);
 
-            // Then
             assertThat(resultado).isEmpty();
         }
 
         @Test
         @DisplayName("Deve lançar exceção quando aluno não existir ao buscar histórico")
         void deveLancarExcecaoQuandoAlunoNaoExistir() {
-            // Given
+
             UUID idInexistente = UUID.randomUUID();
             when(alunoRepository.findById(idInexistente)).thenReturn(Optional.empty());
 
-            // When / Then
             assertThatThrownBy(() -> alunoService.buscarHistoricoTurmasPorAlunoId(idInexistente))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Aluno não encontrado");
         }
     }
-
-    // =========================================================================
-    // 4. buscarAvaliacoesPorAlunoId
-    // =========================================================================
 
     @Nested
     @DisplayName("buscarAvaliacoesPorAlunoId")
@@ -454,7 +454,7 @@ class AlunoServiceTest {
         @Test
         @DisplayName("Deve retornar avaliações mapeadas com nome do professor e turma atual")
         void deveRetornarAvaliacoesMapeadasComNomeProfessorETurma() {
-            // Given
+
             when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
             when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId))
                     .thenReturn(List.of(vinculoAtivo));
@@ -463,11 +463,9 @@ class AlunoServiceTest {
             when(usuarioRepository.findById(professorUsuarioId))
                     .thenReturn(Optional.of(usuarioProfessor));
 
-            // When
             List<AvaliacaoHistoricoResponseDTO> resultado =
                     alunoService.buscarAvaliacoesPorAlunoId(alunoId);
 
-            // Then
             assertThat(resultado).hasSize(1);
             AvaliacaoHistoricoResponseDTO item = resultado.get(0);
             assertThat(item.getDescricao()).isEqualTo("Avaliação pedagógica semestral");
@@ -478,7 +476,7 @@ class AlunoServiceTest {
         @Test
         @DisplayName("Deve usar 'Sem turma ativa' quando aluno não possui turma vinculada")
         void deveUsarTextoDefaultQuandoSemTurmaAtiva() {
-            // Given
+
             when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
             when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId))
                     .thenReturn(List.of());
@@ -487,11 +485,9 @@ class AlunoServiceTest {
             when(usuarioRepository.findById(professorUsuarioId))
                     .thenReturn(Optional.of(usuarioProfessor));
 
-            // When
             List<AvaliacaoHistoricoResponseDTO> resultado =
                     alunoService.buscarAvaliacoesPorAlunoId(alunoId);
 
-            // Then
             assertThat(resultado).hasSize(1);
             assertThat(resultado.get(0).getTurmaNomeCompleto()).isEqualTo("Sem turma ativa");
         }
@@ -499,38 +495,31 @@ class AlunoServiceTest {
         @Test
         @DisplayName("Deve retornar lista vazia quando aluno não possui avaliações")
         void deveRetornarListaVaziaQuandoSemAvaliacoes() {
-            // Given
+
             when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
             when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId))
                     .thenReturn(List.of());
             when(avaliacaoRepository.findByPacienteIdOrderByDataAvaliacaoDesc(alunoId))
                     .thenReturn(List.of());
 
-            // When
             List<AvaliacaoHistoricoResponseDTO> resultado =
                     alunoService.buscarAvaliacoesPorAlunoId(alunoId);
 
-            // Then
             assertThat(resultado).isEmpty();
         }
 
         @Test
         @DisplayName("Deve lançar exceção quando aluno não existir ao buscar avaliações")
         void deveLancarExcecaoQuandoAlunoNaoExistir() {
-            // Given
+
             UUID idInexistente = UUID.randomUUID();
             when(alunoRepository.findById(idInexistente)).thenReturn(Optional.empty());
 
-            // When / Then
             assertThatThrownBy(() -> alunoService.buscarAvaliacoesPorAlunoId(idInexistente))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Aluno não encontrado");
         }
     }
-
-    // =========================================================================
-    // 5. listarHistoricoTurmasPorAlunoId
-    // =========================================================================
 
     @Nested
     @DisplayName("listarHistoricoTurmasPorAlunoId")
@@ -539,16 +528,14 @@ class AlunoServiceTest {
         @Test
         @DisplayName("Deve retornar lista mapeada de AlunoTurmaHistoricoItemDTO corretamente")
         void deveRetornarHistoricoItemDTOMapeadoCorretamente() {
-            // Given
+
             when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
             when(turmaAlunoRepository.findAllHistoricoByPaciente(alunoId))
                     .thenReturn(List.of(vinculoAtivo));
 
-            // When
             List<AlunoTurmaHistoricoItemDTO> resultado =
                     alunoService.listarHistoricoTurmasPorAlunoId(alunoId);
 
-            // Then
             assertThat(resultado).hasSize(1);
             AlunoTurmaHistoricoItemDTO item = resultado.get(0);
             assertThat(item.getId()).isEqualTo(turmaAtivaId);
@@ -563,16 +550,14 @@ class AlunoServiceTest {
         @Test
         @DisplayName("Deve retornar lista vazia quando aluno não possui nenhum histórico")
         void deveRetornarListaVaziaQuandoSemHistorico() {
-            // Given
+
             when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
             when(turmaAlunoRepository.findAllHistoricoByPaciente(alunoId))
                     .thenReturn(List.of());
 
-            // When
             List<AlunoTurmaHistoricoItemDTO> resultado =
                     alunoService.listarHistoricoTurmasPorAlunoId(alunoId);
 
-            // Then
             assertThat(resultado).isEmpty();
         }
     }
