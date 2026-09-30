@@ -1,4 +1,4 @@
-package com.apae.gestao.service;
+package com.apae.gestao.auth.service;
 
 import com.apae.gestao.dto.auth.LoginRequestDTO;
 import com.apae.gestao.dto.auth.LoginResponseDTO;
@@ -154,6 +154,38 @@ class AuthServiceTest {
 
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
         assertEquals("Professor não encontrado", exception.getReason());
+    }
+
+    @Test
+    void deveRecusarLoginQuandoProfessorNaoForEncontradoNoRepositorio() {
+        UUID usuarioId = UUID.randomUUID();
+
+        Usuario usuario = new Usuario();
+        usuario.setId(usuarioId);
+        usuario.setEmail("professor@teste.com");
+        usuario.setCargo("GESTAO_ESCOLAR");
+        usuario.setAtivo(true);
+        usuario.setSenha("senha-hash");
+
+        LoginRequestDTO request =
+               new LoginRequestDTO("professor@teste.com", "senha");
+
+        when(usuarioRepository.findByEmail("professor@teste.com"))
+            .thenReturn(Optional.of(usuario));
+        when(passwordEncoder.matches("senha", "senha-hash"))
+            .thenReturn(true);
+        when(professorRepository.findByUsuarioId(usuarioId))
+            .thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> authService.login(request)
+        );
+
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
+        assertEquals("Professor não encontrado", exception.getReason());
+
+        verify(professorRepository).findByUsuarioId(usuarioId);
     }
 
     @Test
@@ -314,6 +346,41 @@ class AuthServiceTest {
         verify(passwordEncoder).encode("nova-senha");
         verify(usuarioRepository).save(usuario);
         verify(professorRepository).save(professor);
+    }
+
+    @Test
+    void deveRetornarErroClaroQuandoSalvarUsuarioFalharPorPermissao() {
+        Usuario usuario = new Usuario();
+        usuario.setId(UUID.randomUUID());
+        usuario.setEmail("professor@teste.com");
+        usuario.setSenha("senha-antiga");
+
+        Professor professor = new Professor();
+        professor.setPrimeiroAcesso(true);
+
+        PrimeiroAcessoRequestDTO request =
+                new PrimeiroAcessoRequestDTO("professor@teste.com", "nova-senha");
+
+        when(usuarioRepository.findByEmail("professor@teste.com"))
+               .thenReturn(Optional.of(usuario));
+        when(professorRepository.findByUsuarioId(usuario.getId()))
+               .thenReturn(Optional.of(professor));
+        when(passwordEncoder.encode("nova-senha"))
+               .thenReturn("senha-hash");
+
+        when(usuarioRepository.save(usuario))
+               .thenThrow(new org.springframework.dao.DataAccessException("permission denied") {});
+
+        ResponseStatusException exception = assertThrows(
+               ResponseStatusException.class,
+               () -> authService.primeiroAcesso(request)
+        );
+
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+        assertEquals(
+            "Sem permissão para inserir ou atualizar apae_geral.usuarios",
+            exception.getReason()
+        );
     }
 
     @Test

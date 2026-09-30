@@ -1,4 +1,4 @@
-package com.apae.gestao.service;
+package com.apae.gestao.auth.service;
 
 import com.apae.gestao.dto.auth.LoginRequestDTO;
 import com.apae.gestao.dto.auth.LoginResponseDTO;
