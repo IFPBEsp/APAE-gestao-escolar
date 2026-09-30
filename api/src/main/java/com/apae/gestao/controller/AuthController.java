@@ -4,7 +4,7 @@ import com.apae.gestao.dto.auth.LoginRequestDTO;
 import com.apae.gestao.dto.auth.LoginResponseDTO;
 import com.apae.gestao.dto.auth.PrimeiroAcessoRequestDTO;
 import com.apae.gestao.dto.auth.RedefinirSenhaRequestDTO;
-import com.apae.gestao.service.AuthService;
+import com.apae.gestao.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
