@@ -1040,11 +1040,11 @@ para impedir duplicação quando a chamada é registrada mais de uma vez."
 
 ## Como Contribuir
 
-O fluxo completo está detalhado na seção [Git Flow](#-git-flow). Em resumo:
+O fluxo completo está detalhado na seção [Git Flow](#git-flow). Em resumo:
 
 1. Escolha uma issue na coluna **Ready** do [board](https://github.com/orgs/IFPBEsp/projects/14).
 2. Assine a issue, preencha **Estimate** e **Start date**, crie a branch via GitHub e mova para **In Progress**.
-3. Implemente seguindo o [Style Guide](#-style-guide) e faça commits com [Conventional Commits](#-conventional-commits).
+3. Implemente seguindo o [Style Guide](#style-guide) e faça commits com [Conventional Commits](#conventional-commits).
 4. Abra um **Pull Request** para `dev` usando o [template de PR](.github/pull_request_template.md), adicione PO e Scrum Master como revisores, mova para **Code Review** e envie o link no Discord.
 5. Aguarde revisão — o autor não realiza o merge.
 
