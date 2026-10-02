@@ -34,21 +34,21 @@
 
 ## Sumário
 
-- [Sobre o Projeto](#-sobre-o-projeto)
-- [Stack Tecnológica](#-stack-tecnológica)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Quick Start](#-quick-start)
-- [Infraestrutura e Deploy](#-infraestrutura-e-deploy)
-- [Deploy com Docker e GHCR](#-deploy-com-docker-e-ghcr)
-- [Diagrama de Classes](#-diagrama-de-classes)
-- [Modelo Entidade-Relacionamento](#-modelo-entidade-relacionamento-er)
-- [Referência da API](#-referência-da-api)
-- [Códigos de Status HTTP](#-códigos-de-status-http)
-- [Padrão de Documentação Swagger/OpenAPI](#-padrão-de-documentação-swaggeropenapi)
-- [Git Flow](#-git-flow)
-- [Style Guide](#-style-guide)
-- [Conventional Commits](#-conventional-commits)
-- [Como Contribuir](#-como-contribuir)
+- [Sobre o Projeto](#sobre-o-projeto)
+- [Stack Tecnológica](#stack-tecnológica)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Quick Start](#quick-start)
+- [Infraestrutura e Deploy](#infraestrutura-e-deploy)
+- [Deploy com Docker e GHCR](#deploy-com-docker-e-ghcr)
+- [Diagrama de Classes](#diagrama-de-classes)
+- [Modelo Entidade-Relacionamento](#modelo-entidade-relacionamento-er)
+- [Referência da API](#referência-da-api)
+- [Códigos de Status HTTP](#códigos-de-status-http)
+- [Padrão de Documentação Swagger/OpenAPI](#padrão-de-documentação-swaggeropenapi)
+- [Git Flow](#git-flow)
+- [Style Guide](#style-guide)
+- [Conventional Commits](#conventional-commits)
+- [Como Contribuir](#como-contribuir)
 
 ---
 
