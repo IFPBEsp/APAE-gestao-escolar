@@ -4,14 +4,17 @@ import com.apae.gestao.dto.turma.TurmaRequestDTO;
 import com.apae.gestao.dto.turma.TurmaResponseDTO;
 import com.apae.gestao.dto.turma.TurmaResumoDTO;
 import com.apae.gestao.entity.AlunoView;
+import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Turma;
 import com.apae.gestao.entity.TurmaAluno;
+import com.apae.gestao.entity.Usuario;
 import com.apae.gestao.repository.AlunoViewRepository;
 import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.TurmaRepository;
 import com.apae.gestao.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -83,7 +86,8 @@ public class TurmaServiceTest {
     }
 
     @Test
-    void criar_DeveCriarComNomeBaseQuandoNomeNaoExiste() {
+    @DisplayName("Deve criar turma com o nome base e horário da manhã quando não existe turma com o mesmo nome")
+    void criar_Sucesso() {
         when(turmaRepository.existsByNome("Artes Manha - 2024")).thenReturn(false);
 
         when(turmaRepository.save(any(Turma.class))).thenAnswer(invocation -> {
@@ -111,7 +115,8 @@ public class TurmaServiceTest {
     }
 
     @Test
-    void criar_DeveGerarNomeIncrementalQuandoNomeJaExiste() {
+    @DisplayName("Deve gerar o nome com sufixo (2) quando já existe uma turma com o nome base")
+    void criar_SucessoNomeIncremental() {
         when(turmaRepository.existsByNome("Artes Manha - 2024")).thenReturn(true);
         when(turmaRepository.existsByNome("Artes Manha - 2024 (2)")).thenReturn(false);
 
@@ -140,7 +145,8 @@ public class TurmaServiceTest {
     }
 
     @Test
-    void criar_DeveGerarNomeSufixo3QuandoSufixo2TambemExiste() {
+    @DisplayName("Deve gerar o nome com sufixo (3) quando o nome base e o sufixo (2) já existem")
+    void criar_SucessoNomeSufixo3() {
         when(turmaRepository.existsByNome("Artes Manha - 2024")).thenReturn(true);
         when(turmaRepository.existsByNome("Artes Manha - 2024 (2)")).thenReturn(true);
         when(turmaRepository.existsByNome("Artes Manha - 2024 (3)")).thenReturn(false);
@@ -169,7 +175,8 @@ public class TurmaServiceTest {
     }
 
     @Test
-    void criar_DeveDeduzirHorarioPorTurnoTarde() {
+    @DisplayName("Deve deduzir o horário 'Segunda a Sexta - 14h as 18h' quando o turno da turma é TARDE")
+    void criar_SucessoHorarioTarde() {
         turmaRequestDTO.setTurno("TARDE");
         turmaRequestDTO.setAlunosIds(new HashSet<>());
 
@@ -192,11 +199,16 @@ public class TurmaServiceTest {
 
         TurmaResponseDTO response = turmaService.criar(turmaRequestDTO);
 
+        ArgumentCaptor<Turma> captor = ArgumentCaptor.forClass(Turma.class);
+        verify(turmaRepository, times(2)).save(captor.capture());
+        assertEquals("Artes Tarde - 2024", captor.getAllValues().get(0).getNome());
+        assertEquals("TARDE", captor.getAllValues().get(0).getTurno());
         assertEquals("Segunda a Sexta - 14h as 18h", response.getHorario());
     }
 
     @Test
-    void atualizar_DeveAtualizarCamposEManterNomeQuandoNaoHaColisao() {
+    @DisplayName("Deve atualizar os campos da turma e manter o nome quando não há colisão com outra turma")
+    void atualizar_Sucesso() {
         when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
         when(turmaRepository.existsByNomeAndIdNot("Artes Manha - 2024", turmaId)).thenReturn(false);
         when(turmaRepository.save(any(Turma.class))).thenReturn(turma);
@@ -214,7 +226,8 @@ public class TurmaServiceTest {
     }
 
     @Test
-    void atualizar_DeveGerarNomeIncrementalQuandoNomeColideComOutraTurma() {
+    @DisplayName("Deve gerar nome incremental com sufixo (2) quando o nome atualizado colide com outra turma")
+    void atualizar_SucessoNomeIncremental() {
         turma.setNome("Artes Manha - 2024");
         when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
         when(turmaRepository.existsByNomeAndIdNot("Artes Manha - 2024", turmaId)).thenReturn(true);
@@ -234,7 +247,8 @@ public class TurmaServiceTest {
     }
 
     @Test
-    void adicionarAlunos_DeveVincularAlunoNovoNaTurma() {
+    @DisplayName("Deve vincular o aluno como ativo na turma quando ele existe e não pertence a nenhuma turma ativa")
+    void adicionarAlunos_Sucesso() {
         AlunoView alunoMock = new AlunoView(pacienteId, "Joao", "123", LocalDate.now(), "11999", UUID.randomUUID(), true, false);
         when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
         when(alunoRepository.findAllById(anyList())).thenReturn(List.of(alunoMock));
@@ -252,7 +266,8 @@ public class TurmaServiceTest {
     }
 
     @Test
-    void adicionarAlunos_DeveReativarVinculoExistenteInativo() {
+    @DisplayName("Deve reativar o vínculo existente inativo em vez de criar um novo quando o aluno já pertenceu à turma")
+    void adicionarAlunos_SucessoReativaVinculo() {
         TurmaAluno vinculoExistente = new TurmaAluno();
         vinculoExistente.setTurma(turma);
         vinculoExistente.setPacienteId(pacienteId);
@@ -268,11 +283,13 @@ public class TurmaServiceTest {
         turmaService.adicionarAlunos(turmaId, List.of(pacienteId));
 
         assertTrue(vinculoExistente.getAtivo());
+        assertTrue(turma.getTurmaAlunos().isEmpty());
         verify(turmaRepository, times(1)).save(turma);
     }
 
     @Test
-    void adicionarAlunos_DeveLancarExcecaoQuandoAlunoJaAtivoEmOutraTurma() {
+    @DisplayName("Deve lançar exceção 422 contendo o nome do aluno quando ele já está ativo em outra turma")
+    void adicionarAlunos_FalhaAlunoAtivoEmOutraTurma() {
         Turma outraTurma = new Turma();
         outraTurma.setId(UUID.randomUUID());
         TurmaAluno taOutro = new TurmaAluno();
@@ -291,11 +308,14 @@ public class TurmaServiceTest {
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
         assertTrue(exception.getReason().contains("Joao"));
+        assertTrue(turma.getTurmaAlunos().isEmpty());
         verify(turmaRepository, never()).save(any());
+        verify(turmaAlunoRepository, never()).findByTurmaAndPacienteId(any(), any());
     }
 
     @Test
-    void adicionarAlunos_DeveLancarExcecaoQuandoTurmaInativa() {
+    @DisplayName("Deve lançar exceção 422 e não salvar nada quando a turma está inativa")
+    void adicionarAlunos_FalhaTurmaInativa() {
         turma.setAtiva(false);
         when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
 
@@ -304,11 +324,254 @@ public class TurmaServiceTest {
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
         assertTrue(exception.getReason().contains("turma inativa"));
+        assertTrue(turma.getTurmaAlunos().isEmpty());
         verify(turmaRepository, never()).save(any());
+        verifyNoInteractions(alunoRepository);
+        verifyNoInteractions(turmaAlunoRepository);
     }
 
     @Test
-    void ativarAluno_DeveAtivarComSucessoQuandoAlunoNaoEstaEmOutraTurma() {
+    @DisplayName("Deve lançar exceção e não vincular nem salvar nada quando algum ID de aluno informado não existe")
+    void adicionarAlunos_FalhaAlunoNaoEncontrado() {
+        when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
+        when(alunoRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                turmaService.adicionarAlunos(turmaId, List.of(pacienteId)));
+
+        assertTrue(exception.getMessage().contains("Um ou mais IDs de aluno não foram encontrados"));
+        assertTrue(turma.getTurmaAlunos().isEmpty());
+        verify(turmaRepository, never()).save(any());
+        verifyNoInteractions(turmaAlunoRepository);
+    }
+
+    @Test
+    @DisplayName("Deve vincular o professor à turma e retornar seus dados no response quando a turma está ativa e o professor existe")
+    void adicionarProfessor_Sucesso() {
+        UUID professorId = UUID.randomUUID();
+        UUID usuarioId = UUID.randomUUID();
+
+        Professor professor = new Professor();
+        professor.setId(professorId);
+        professor.setUsuarioId(usuarioId);
+        professor.setFormacao("Pedagogia");
+        professor.setPrimeiroAcesso(false);
+
+        Usuario usuario = new Usuario();
+        usuario.setId(usuarioId);
+        usuario.setNomeCompleto("Maria da Silva");
+        usuario.setCpf("12345678901");
+        usuario.setEmail("maria@apae.org.br");
+        usuario.setTelefone("11988880000");
+        usuario.setAtivo(true);
+
+        when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
+        when(professorRepository.findById(professorId)).thenReturn(Optional.of(professor));
+        when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuario));
+        when(turmaRepository.save(any(Turma.class))).thenReturn(turma);
+
+        assertNull(turma.getProfessor());
+
+        TurmaResponseDTO response = turmaService.adicionarProfessor(turmaId, professorId);
+
+        assertSame(professor, turma.getProfessor());
+        assertEquals(turmaId, response.getId());
+        assertNotNull(response.getProfessor());
+        assertEquals(professorId, response.getProfessor().getId());
+        assertEquals(usuarioId, response.getProfessor().getUsuarioId());
+        assertEquals("Maria da Silva", response.getProfessor().getNome());
+        assertEquals("12345678901", response.getProfessor().getCpf());
+        assertEquals("maria@apae.org.br", response.getProfessor().getEmail());
+        assertEquals("11988880000", response.getProfessor().getTelefone());
+        assertEquals("Pedagogia", response.getProfessor().getFormacao());
+        assertTrue(response.getProfessor().getAtivo());
+
+        ArgumentCaptor<Turma> captor = ArgumentCaptor.forClass(Turma.class);
+        verify(turmaRepository, times(1)).save(captor.capture());
+        assertSame(turma, captor.getValue());
+        assertSame(professor, captor.getValue().getProfessor());
+        verify(turmaRepository, times(1)).findById(turmaId);
+        verify(professorRepository, times(1)).findById(professorId);
+        verify(usuarioRepository, times(1)).findById(usuarioId);
+    }
+
+    @Test
+    @DisplayName("Deve substituir o professor anterior pelo novo professor quando a turma já possui um professor vinculado")
+    void adicionarProfessor_SucessoSubstituiProfessor() {
+        UUID professorAnteriorId = UUID.randomUUID();
+        UUID usuarioAnteriorId = UUID.randomUUID();
+        Professor professorAnterior = new Professor();
+        professorAnterior.setId(professorAnteriorId);
+        professorAnterior.setUsuarioId(usuarioAnteriorId);
+        turma.setProfessor(professorAnterior);
+
+        UUID professorNovoId = UUID.randomUUID();
+        UUID usuarioNovoId = UUID.randomUUID();
+        Professor professorNovo = new Professor();
+        professorNovo.setId(professorNovoId);
+        professorNovo.setUsuarioId(usuarioNovoId);
+
+        Usuario usuarioNovo = new Usuario();
+        usuarioNovo.setId(usuarioNovoId);
+        usuarioNovo.setNomeCompleto("Ana Souza");
+
+        when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
+        when(professorRepository.findById(professorNovoId)).thenReturn(Optional.of(professorNovo));
+        when(usuarioRepository.findById(usuarioNovoId)).thenReturn(Optional.of(usuarioNovo));
+        when(turmaRepository.save(any(Turma.class))).thenReturn(turma);
+
+        TurmaResponseDTO response = turmaService.adicionarProfessor(turmaId, professorNovoId);
+
+        assertSame(professorNovo, turma.getProfessor());
+        assertNotSame(professorAnterior, turma.getProfessor());
+        assertEquals(professorNovoId, response.getProfessor().getId());
+        assertEquals("Ana Souza", response.getProfessor().getNome());
+        verify(turmaRepository, times(1)).save(turma);
+        verify(professorRepository, never()).findById(professorAnteriorId);
+        verify(usuarioRepository, never()).findById(usuarioAnteriorId);
+    }
+
+    @Test
+    @DisplayName("Deve vincular o professor, mas retornar professor nulo no response quando o usuário associado ao professor não é encontrado")
+    void adicionarProfessor_SucessoSemUsuario() {
+        UUID professorId = UUID.randomUUID();
+        UUID usuarioId = UUID.randomUUID();
+
+        Professor professor = new Professor();
+        professor.setId(professorId);
+        professor.setUsuarioId(usuarioId);
+
+        when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
+        when(professorRepository.findById(professorId)).thenReturn(Optional.of(professor));
+        when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.empty());
+        when(turmaRepository.save(any(Turma.class))).thenReturn(turma);
+
+        TurmaResponseDTO response = turmaService.adicionarProfessor(turmaId, professorId);
+
+        assertSame(professor, turma.getProfessor());
+        assertNull(response.getProfessor());
+        verify(turmaRepository, times(1)).save(turma);
+        verify(usuarioRepository, times(1)).findById(usuarioId);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção 404 'Professor não encontrado' e não salvar a turma quando o professor não existe")
+    void adicionarProfessor_FalhaProfessorNaoEncontrado() {
+        UUID professorId = UUID.randomUUID();
+        when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
+        when(professorRepository.findById(professorId)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                turmaService.adicionarProfessor(turmaId, professorId));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals("Professor não encontrado", exception.getReason());
+        assertNull(turma.getProfessor());
+        verify(turmaRepository, times(1)).findById(turmaId);
+        verify(professorRepository, times(1)).findById(professorId);
+        verifyNoMoreInteractions(turmaRepository);
+        verifyNoInteractions(usuarioRepository);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção 422 sem consultar o professor nem salvar a turma quando a turma está inativa")
+    void adicionarProfessor_FalhaTurmaInativa() {
+        turma.setAtiva(false);
+        UUID professorId = UUID.randomUUID();
+        when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                turmaService.adicionarProfessor(turmaId, professorId));
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
+        assertTrue(exception.getReason().contains("turma inativa"));
+        assertNull(turma.getProfessor());
+        verify(turmaRepository, times(1)).findById(turmaId);
+        verifyNoMoreInteractions(turmaRepository);
+        verifyNoInteractions(professorRepository);
+        verifyNoInteractions(usuarioRepository);
+    }
+
+    @Test
+    @DisplayName("Deve lançar RuntimeException 'Turma não encontrada' sem consultar o professor quando a turma não existe")
+    void adicionarProfessor_FalhaTurmaNaoEncontrada() {
+        UUID professorId = UUID.randomUUID();
+        when(turmaRepository.findById(turmaId)).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                turmaService.adicionarProfessor(turmaId, professorId));
+
+        assertTrue(exception.getMessage().contains("Turma não encontrada"));
+        verify(turmaRepository, times(1)).findById(turmaId);
+        verifyNoMoreInteractions(turmaRepository);
+        verifyNoInteractions(professorRepository);
+        verifyNoInteractions(usuarioRepository);
+    }
+
+    @Test
+    @DisplayName("Deve remover o professor da turma e retornar professor nulo no response quando a turma possui professor vinculado")
+    void removerProfessor_Sucesso() {
+        Professor professor = new Professor();
+        professor.setId(UUID.randomUUID());
+        professor.setUsuarioId(UUID.randomUUID());
+        turma.setProfessor(professor);
+
+        when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
+        when(turmaRepository.save(any(Turma.class))).thenReturn(turma);
+
+        assertNotNull(turma.getProfessor());
+
+        TurmaResponseDTO response = turmaService.removerProfessor(turmaId);
+
+        assertNull(turma.getProfessor());
+        assertNull(response.getProfessor());
+        assertEquals(turmaId, response.getId());
+
+        ArgumentCaptor<Turma> captor = ArgumentCaptor.forClass(Turma.class);
+        verify(turmaRepository, times(1)).save(captor.capture());
+        assertSame(turma, captor.getValue());
+        assertNull(captor.getValue().getProfessor());
+        verify(turmaRepository, times(1)).findById(turmaId);
+        verifyNoInteractions(professorRepository);
+        verifyNoInteractions(usuarioRepository);
+    }
+
+    @Test
+    @DisplayName("Deve manter a turma sem professor e salvar normalmente quando a turma já não possuía professor vinculado")
+    void removerProfessor_SucessoSemProfessor() {
+        when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
+        when(turmaRepository.save(any(Turma.class))).thenReturn(turma);
+
+        assertNull(turma.getProfessor());
+
+        TurmaResponseDTO response = turmaService.removerProfessor(turmaId);
+
+        assertNull(turma.getProfessor());
+        assertNull(response.getProfessor());
+        verify(turmaRepository, times(1)).save(turma);
+        verifyNoInteractions(professorRepository);
+        verifyNoInteractions(usuarioRepository);
+    }
+
+    @Test
+    @DisplayName("Deve lançar RuntimeException 'Turma não encontrada' e não salvar nada quando a turma não existe")
+    void removerProfessor_FalhaTurmaNaoEncontrada() {
+        when(turmaRepository.findById(turmaId)).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                turmaService.removerProfessor(turmaId));
+
+        assertTrue(exception.getMessage().contains("Turma não encontrada"));
+        assertTrue(exception.getMessage().contains(turmaId.toString()));
+        verify(turmaRepository, times(1)).findById(turmaId);
+        verifyNoMoreInteractions(turmaRepository);
+        verifyNoInteractions(professorRepository);
+        verifyNoInteractions(usuarioRepository);
+    }
+
+    @Test
+    @DisplayName("Deve ativar o vínculo do aluno e salvar quando o aluno não está ativo em nenhuma outra turma")
+    void ativarAluno_Sucesso() {
         TurmaAluno turmaAluno = new TurmaAluno();
         turmaAluno.setTurma(turma);
         turmaAluno.setPacienteId(pacienteId);
@@ -326,7 +589,8 @@ public class TurmaServiceTest {
     }
 
     @Test
-    void ativarAluno_DeveLancarExcecaoSeAlunoAtivoEmOutraTurma() {
+    @DisplayName("Deve lançar exceção 422 'já está ativo em outra turma' e não salvar quando o aluno está ativo em outra turma")
+    void ativarAluno_FalhaAlunoAtivoEmOutraTurma() {
         when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
 
         Turma outraTurma = new Turma();
@@ -349,7 +613,8 @@ public class TurmaServiceTest {
     }
 
     @Test
-    void ativarTurma_DeveAtivarTurmaECascatearStatusParaAlunos() {
+    @DisplayName("Deve ativar a turma e reativar em cascata os alunos quando eles não estão ativos em outra turma")
+    void ativarTurma_Sucesso() {
         turma.setAtiva(false);
         TurmaAluno ta = new TurmaAluno();
         ta.setPacienteId(pacienteId);
@@ -370,7 +635,8 @@ public class TurmaServiceTest {
     }
 
     @Test
-    void ativarTurma_NaoDeveAtivarAlunoQueJaEstaAtivoEmOutraTurma() {
+    @DisplayName("Deve ativar a turma sem reativar o vínculo do aluno quando ele já está ativo em outra turma")
+    void ativarTurma_SucessoAlunoEmOutraTurma() {
         turma.setAtiva(false);
         TurmaAluno ta = new TurmaAluno();
         ta.setPacienteId(pacienteId);
@@ -396,7 +662,8 @@ public class TurmaServiceTest {
     }
 
     @Test
-    void desativarTurma_DeveDesativarTurmaECascatearStatusParaAlunos() {
+    @DisplayName("Deve desativar a turma e desativar em cascata todos os vínculos de alunos quando a turma é desativada")
+    void desativarTurma_Sucesso() {
         TurmaAluno ta = new TurmaAluno();
         ta.setPacienteId(pacienteId);
         ta.setAtivo(true);
@@ -415,7 +682,8 @@ public class TurmaServiceTest {
     }
 
     @Test
-    void listarTurmas_DeveRetornarResumoComContadoresCorretos() {
+    @DisplayName("Deve retornar resumo com total de alunos, total de ativos e horário corretos quando listar turmas sem filtros")
+    void listarTurmas_Sucesso() {
         TurmaAluno taAtivo = new TurmaAluno();
         taAtivo.setPacienteId(UUID.randomUUID());
         taAtivo.setAtivo(true);
@@ -448,7 +716,8 @@ public class TurmaServiceTest {
     }
 
     @Test
-    void listarTurmas_DeveFiltrarPorTurnoCorretamente() {
+    @DisplayName("Deve retornar apenas as turmas do turno informado quando listar turmas filtrando por turno")
+    void listarTurmas_SucessoFiltroTurno() {
         Turma outraTurma = new Turma();
         outraTurma.setId(UUID.randomUUID());
         outraTurma.setNome("Artes Tarde - 2024");
@@ -467,7 +736,8 @@ public class TurmaServiceTest {
     }
 
     @Test
-    void listarTurmas_DeveFiltrarPorStatusAtiva() {
+    @DisplayName("Deve retornar apenas as turmas ativas quando listar turmas filtrando por status ativa verdadeiro")
+    void listarTurmas_SucessoFiltroStatusAtiva() {
         turma.setAtiva(false);
         Turma turmaAtiva = new Turma();
         turmaAtiva.setId(UUID.randomUUID());
