@@ -1,14 +1,16 @@
 package com.apae.gestao.controller;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
+import com.apae.gestao.dto.aluno.AlunoDetalhesDTO;
+import com.apae.gestao.dto.aluno.AlunoResumoDTO;
+import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoItemDTO;
+import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoResponseDTO;
+import com.apae.gestao.dto.aluno.AlunoTurmaRequestDTO;
+import com.apae.gestao.dto.avaliacao.AvaliacaoHistoricoResponseDTO;
+import com.apae.gestao.exception.RecursoNaoEncontradoException;
+import com.apae.gestao.service.AlunoService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -23,20 +25,20 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import com.apae.gestao.dto.aluno.AlunoDetalhesDTO;
-import com.apae.gestao.dto.aluno.AlunoResumoDTO;
-import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoItemDTO;
-import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoResponseDTO;
-import com.apae.gestao.dto.aluno.AlunoTurmaRequestDTO;
-import com.apae.gestao.dto.avaliacao.AvaliacaoHistoricoResponseDTO;
-import com.apae.gestao.service.AlunoService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 
 @WebMvcTest(
         controllers = AlunoController.class,
@@ -91,6 +93,19 @@ class AlunoControllerTest {
     }
 
     @Test
+    @DisplayName("Deve retornar status 404 Not Found quando o aluno não for encontrado por ID")
+    void deveRetornar404QuandoAlunoNaoEncontradoPorId() throws Exception {
+        
+        UUID alunoId = UUID.randomUUID();
+        Mockito.when(alunoService.buscarPorId(alunoId))
+               .thenThrow(new RecursoNaoEncontradoException("Aluno não encontrado"));
+
+        mockMvc.perform(get("/api/alunos/{id}", alunoId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     @DisplayName("Deve atualizar turma do aluno e retornar status 200 OK")
     void deveAtualizarTurma() throws Exception {
         UUID alunoId = UUID.randomUUID();
@@ -106,6 +121,20 @@ class AlunoControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Deve retornar status 400 Bad Request ao tentar atualizar turma com payload inválido (@Valid)")
+    void deveRetornar400AoAtualizarTurmaComPayloadInvalido() throws Exception {
+        UUID alunoId = UUID.randomUUID();
+        String payloadInvalido = "{}"; 
+
+        mockMvc.perform(patch("/api/alunos/{alunoId}/turma", alunoId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payloadInvalido))
+                .andExpect(status().isBadRequest());
+
+        verify(alunoService, never()).atualizarTurma(any(), any());
     }
 
     @Test
