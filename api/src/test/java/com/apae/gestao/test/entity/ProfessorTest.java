@@ -1,4 +1,4 @@
-package com.apae.gestao.auth.entity;
+package com.apae.gestao.test.entity;
 
 import com.apae.gestao.entity.Professor;
 import org.junit.jupiter.api.Test;
