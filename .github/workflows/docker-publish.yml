@@ -1,73 +1,35 @@
-name: Publicar imagens no GHCR
+name: Docker Build & Publish
 
 on:
   push:
     branches:
       - dev
       - dev-database
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  build-and-push-frontend:
-    name: Build e push do Frontend
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+  publish-backend:
+    name: Build & publish backend
+    uses: IFPBEsp/APAE-INFRA/.github/workflows/docker-build-publish-image.yml@dev
+    with:
+      context: ./api
+      dockerfile: ./api/Dockerfile
+      image-name: apae-gestao-escolar-backend
+      platforms: '["linux/amd64"]'
+      scan-severity: "HIGH,CRITICAL"
 
-    steps:
-      - name: Checkout do repositório
-        uses: actions/checkout@v4
-
-      - name: Login no GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Normalizar owner para lowercase
-        id: owner
-        env:
-          IMAGE_OWNER: ${{ github.repository_owner }}
-        run: echo "value=${IMAGE_OWNER,,}" >> "$GITHUB_OUTPUT"
-
-      - name: Build e push da imagem do Frontend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./app
-          push: true
-          tags: ghcr.io/${{ steps.owner.outputs.value }}/apae-gestao-escolar-frontend:latest
-          build-args: |
-            NEXT_PUBLIC_API_URL=/gestao-escolar/api
-            BACKEND_URL=${{ secrets.BACKEND_URL }}
-
-  build-and-push-backend:
-    name: Build e push do Backend
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Checkout do repositório
-        uses: actions/checkout@v4
-
-      - name: Login no GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Normalizar owner para lowercase
-        id: owner
-        env:
-          IMAGE_OWNER: ${{ github.repository_owner }}
-        run: echo "value=${IMAGE_OWNER,,}" >> "$GITHUB_OUTPUT"
-
-      - name: Build e push da imagem do Backend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./api
-          push: true
-          tags: ghcr.io/${{ steps.owner.outputs.value }}/apae-gestao-escolar-backend:latest
+  publish-frontend:
+    name: Build & publish frontend
+    uses: IFPBEsp/APAE-INFRA/.github/workflows/docker-build-publish-image.yml@dev
+    with:
+      context: ./app
+      dockerfile: ./app/Dockerfile
+      image-name: apae-gestao-escolar-frontend
+      build-args: |
+        NEXT_PUBLIC_API_URL=/gestao-escolar/api
+      platforms: '["linux/amd64"]'
+      scan-severity: "HIGH,CRITICAL"
