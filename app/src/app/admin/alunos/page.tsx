@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { listarAlunos } from "@/services/AlunoService";
 
 interface AlunoResponseDTO {
-  id: number;
+  id: string;
   nome: string;
   dataNascimento: string; 
   deficiencia: string;

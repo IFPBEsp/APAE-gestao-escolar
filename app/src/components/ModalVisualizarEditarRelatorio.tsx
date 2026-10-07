@@ -21,8 +21,8 @@ import { RelatorioIndividualConteudo } from "@/components/relatorios/RelatorioIn
 import { buscarAlunoPorId } from "@/services/AlunoService";
 
 interface Relatorio {
-  id: number | string;
-  alunoId?: number | string;
+  id: string;
+  alunoId?: string;
   data: string | Date;
   aluno?: string;
   professor?: string;
@@ -121,7 +121,7 @@ export default function ModalVisualizarEditarRelatorio({
 
   useEffect(() => {
     if (relatorio && isOpen) {
-      const isNew = !relatorio.id || relatorio.id === "novo" || relatorio.id === 0;
+      const isNew = !relatorio.id || relatorio.id === "novo";
       setIsEditando(isNew);
       setFormData({
         data: parseDate(relatorio.data),
@@ -147,7 +147,7 @@ export default function ModalVisualizarEditarRelatorio({
 
       const relatorioAtualizado: Relatorio = {
         ...relatorio!,
-        id: relatorio!.id || Date.now(),
+        id: relatorio!.id || "novo",
         data: format(formData.data, "yyyy-MM-dd"),
         atividades: formData.atividades,
         habilidades: formData.habilidades,
@@ -210,7 +210,7 @@ export default function ModalVisualizarEditarRelatorio({
     );
   }
 
-  const isNovoRelatorio = !relatorio?.id || relatorio.id === "novo" || relatorio.id === 0;
+  const isNovoRelatorio = !relatorio?.id || relatorio.id === "novo";
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { handleCancelar(); onClose(); } }}>

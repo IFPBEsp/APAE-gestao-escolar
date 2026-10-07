@@ -15,8 +15,16 @@ import { getHistoricoAluno } from "@/services/ChamadaService";
 export default function HistoricoAlunoPage() {
     const router = useRouter();
     const params = useParams();
-    const turmaId = params?.turmaId ? Number(params.turmaId) : 0;
-    const alunoId = params?.alunoId ? Number(params.alunoId) : 0;
+    const turmaId = params?.turmaId
+        ? Array.isArray(params.turmaId)
+            ? params.turmaId[0]
+            : params.turmaId
+        : "";
+    const alunoId = params?.alunoId
+        ? Array.isArray(params.alunoId)
+            ? params.alunoId[0]
+            : params.alunoId
+        : "";
 
     const [aluno, setAluno] = useState<any>(null);
     const [turma, setTurma] = useState<any>(null);
@@ -70,21 +78,21 @@ export default function HistoricoAlunoPage() {
     return (
         <div className="p-4 md:p-8">
             <div className="mx-auto max-w-5xl space-y-6">
-            {/* Botão Voltar */}
-            <Button
-                onClick={() => router.back()}
-                variant="outline"
-            >
-                <ArrowLeft className="mr-2 h-5 w-5" />
-                Voltar
-            </Button>
-
             {/* Header */}
-            <div className="mb-6">
-                <h1 className="text-[#0D4F97] text-2xl md:text-3xl font-bold mb-1">
-                Histórico Individual: {aluno?.nome}
-                </h1>
-                <p className="text-[#222222] font-medium opacity-80">{turma?.nome}</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-[#0D4F97] text-2xl md:text-3xl font-bold mb-1">
+                    Histórico Individual: {aluno?.nome}
+                    </h1>
+                    <p className="text-[#222222] font-medium opacity-80">{turma?.nome}</p>
+                </div>
+                <Button
+                    onClick={() => router.back()}
+                    variant="outline"
+                >
+                    <ArrowLeft className="mr-2 h-5 w-5" />
+                    Voltar
+                </Button>
             </div>
 
             {/* Card Principal do Aluno */}

@@ -2,6 +2,7 @@ package com.apae.gestao.dto.turma;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 import com.apae.gestao.dto.turmaAluno.TurmaAlunoResponseDTO;
 import com.apae.gestao.entity.Turma;
@@ -17,8 +18,8 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Representação completa das turmas retornadas pelos endpoints.")
 public class TurmaResponseDTO {
 
-    @Schema(description = "Identificador único da turma", example = "7")
-    private Long id;
+    @Schema(description = "Identificador único da turma")
+    private UUID id;
 
     @Schema(description = "Nome completo da turma", example = "Alfabetização 2025 - Manhã")
     private String nome;
@@ -33,13 +34,7 @@ public class TurmaResponseDTO {
     private String tipo;
 
     @Schema(description = "Indica se a turma está ativa", example = "true")
-    private Boolean isAtiva;
-
-    @Schema(description = "Nome do professor responsável", example = "Maria da Silva")
-    private String professorNome;
-
-    @Schema(description = "ID do professor responsável", example = "12")
-    private Long professorId;
+    private Boolean ativa;
 
     @ArraySchema(schema = @Schema(implementation = TurmaAlunoResponseDTO.class))
     private List<TurmaAlunoResponseDTO> alunos;
@@ -47,18 +42,16 @@ public class TurmaResponseDTO {
     @Schema(description = "Horário de aula baseado no turno", example = "Segunda a Sexta - 8h as 12h")
     private String horario;
 
+    @Schema(description = "Dados resumidos do professor responsável")
+    private com.apae.gestao.dto.professor.ProfessorResumoDTO professor;
+
     public TurmaResponseDTO(Turma turma) {
         this.id = turma.getId();
         this.nome = turma.getNome();
         this.anoCriacao = turma.getAnoCriacao();
         this.turno = turma.getTurno();
         this.tipo = turma.getTipo();
-        this.isAtiva = turma.getIsAtiva();
-
-        if (turma.getProfessor() != null) {
-            this.professorNome = turma.getProfessor().getNome();
-            this.professorId = turma.getProfessor().getId();
-        }
+        this.ativa = turma.getAtiva();
 
         if (turma.getTurmaAlunos() != null) {
             this.alunos = turma.getTurmaAlunos().stream()
@@ -78,5 +71,10 @@ public class TurmaResponseDTO {
             default:
                 return "Horário não definido";
         }
+    }
+
+    public TurmaResponseDTO(Turma turma, com.apae.gestao.dto.professor.ProfessorResumoDTO professor) {
+        this(turma);
+        this.professor = professor;
     }
 }

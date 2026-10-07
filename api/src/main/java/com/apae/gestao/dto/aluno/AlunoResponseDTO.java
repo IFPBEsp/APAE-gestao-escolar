@@ -1,6 +1,6 @@
 package com.apae.gestao.dto.aluno;
 
-import com.apae.gestao.entity.Aluno;
+import com.apae.gestao.entity.AlunoView;
 import com.apae.gestao.entity.Turma;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -8,7 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
-import java.util.Optional; 
+import java.time.Period;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -16,7 +17,7 @@ import java.util.Optional;
 @Schema(description = "Informações básicas apresentadas ao consultar alunos.")
 public class AlunoResponseDTO {
     @Schema(description = "Identificador do aluno", example = "5")
-    private Long id;
+    private UUID id;
 
     @Schema(description = "Nome completo", example = "Lucas Andrade")
     private String nome;
@@ -42,21 +43,18 @@ public class AlunoResponseDTO {
     @Schema(description = "Turno da turma atual (e.g., 'Manhã')", example = "Manhã")
     private String turnoTurmaAtual;
 
-    public AlunoResponseDTO(Aluno aluno) {
+    public AlunoResponseDTO(AlunoView aluno, Turma turmaAtual) {
         this.id = aluno.getId();
-        this.nome = aluno.getNome();
-        this.dataNascimento = aluno.getDataNascimento();
-        this.idade = aluno.getIdade();
-        this.deficiencia = aluno.getDeficiencia();
-        this.telefoneResponsavel = aluno.getTelefoneResponsavel();
-        this.nomeResponsavel = aluno.getNomeResponsavel();
-        
-        Optional<Turma> turmaAtual = aluno.getTurmaAtual(); 
+        this.nome = aluno.getNomeCompleto();
+        this.dataNascimento = aluno.getDataDeNascimento();
+        this.idade = aluno.getDataDeNascimento() != null
+                ? Period.between(aluno.getDataDeNascimento(), LocalDate.now()).getYears()
+                : null;
+        this.telefoneResponsavel = aluno.getContato();
 
-        if (turmaAtual.isPresent()) {
-            Turma turma = turmaAtual.get();
-            this.nomeTurmaAtual = turma.getNome();
-            this.turnoTurmaAtual = turma.getTurno();
+        if (turmaAtual != null) {
+            this.nomeTurmaAtual = turmaAtual.getNome();
+            this.turnoTurmaAtual = turmaAtual.getTurno();
         }
     }
 }

@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class AlunoTurmaHistoricoResponseDTO {
 
     @Schema(description = "Identificador da turma", example = "12")
-    private Long turmaId;
+    private UUID turmaId;
 
     @Schema(description = "Tipo pedagógico da turma", example = "Educação Especial")
     private String tipo;
@@ -36,7 +37,7 @@ public class AlunoTurmaHistoricoResponseDTO {
                 t.getTipo(),
                 t.getAnoCriacao(),
                 t.getTurno(),
-                Boolean.TRUE.equals(ta.getIsAlunoAtivo())
+                Boolean.TRUE.equals(ta.getAtivo())
         );
     }
 }

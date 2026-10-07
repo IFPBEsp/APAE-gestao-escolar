@@ -34,21 +34,21 @@
 
 ## Sumário
 
-- [Sobre o Projeto](#-sobre-o-projeto)
-- [Stack Tecnológica](#-stack-tecnológica)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Quick Start](#-quick-start)
-- [Infraestrutura e Deploy](#-infraestrutura-e-deploy)
-- [Deploy com Docker e GHCR](#-deploy-com-docker-e-ghcr)
-- [Diagrama de Classes](#-diagrama-de-classes)
-- [Modelo Entidade-Relacionamento](#-modelo-entidade-relacionamento-er)
-- [Referência da API](#-referência-da-api)
-- [Códigos de Status HTTP](#-códigos-de-status-http)
-- [Padrão de Documentação Swagger/OpenAPI](#-padrão-de-documentação-swaggeropenapi)
-- [Git Flow](#-git-flow)
-- [Style Guide](#-style-guide)
-- [Conventional Commits](#-conventional-commits)
-- [Como Contribuir](#-como-contribuir)
+- [Sobre o Projeto](#sobre-o-projeto)
+- [Stack Tecnológica](#stack-tecnológica)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Quick Start](#quick-start)
+- [Infraestrutura e Deploy](#infraestrutura-e-deploy)
+- [Deploy com Docker e GHCR](#deploy-com-docker-e-ghcr)
+- [Diagrama de Classes](#diagrama-de-classes)
+- [Modelo Entidade-Relacionamento](#modelo-entidade-relacionamento-er)
+- [Referência da API](#referência-da-api)
+- [Códigos de Status HTTP](#códigos-de-status-http)
+- [Padrão de Documentação Swagger/OpenAPI](#padrão-de-documentação-swaggeropenapi)
+- [Git Flow](#git-flow)
+- [Style Guide](#style-guide)
+- [Conventional Commits](#conventional-commits)
+- [Como Contribuir](#como-contribuir)
 
 ---
 
@@ -180,6 +180,52 @@ APAE-gestao-escolar/
 ---
 
 ## Quick Start
+
+### Desenvolvimento local autonomo
+
+O Gestao Escolar pode ser executado sem iniciar o APAE-Geral ou o Atendimento.
+O PostgreSQL local reproduz os tres schemas do Neon:
+
+- `gestao_escolar`: schema real do produto, versionado pelas migrations Flyway V1-V6;
+- `apae_geral`: contrato minimo mockado com usuarios, enderecos, pacientes e responsaveis;
+- `atendimento`: schema presente, mas vazio, pois o Gestao Escolar nao o consulta.
+
+Na raiz do repositorio:
+
+```bash
+cp .env.example .env
+npm --prefix app install
+npm run db:prepare
+npm run dev
+```
+
+Servicos locais:
+
+- Frontend: `http://localhost:3002`
+- Backend: `http://localhost:8081/gestao-escolar`
+- Swagger: `http://localhost:8081/gestao-escolar/docs`
+- Health check: `http://localhost:8081/gestao-escolar/actuator/health`
+- PostgreSQL: `localhost:5400`
+- MinIO: `http://localhost:9200` (console em `http://localhost:9201`)
+
+Credenciais ficticias:
+
+- Administrador: `admin@teste.local` / `12345678`
+- Professor: `professor@teste.local` / `12345678`
+
+Comandos uteis:
+
+```bash
+npm run db:prepare    # contratos, migrations, seed e MinIO
+npm run db:migrate    # reaplica apenas as migrations pendentes
+npm run db:seed       # reaplica o seed idempotente
+npm run docker:down   # para containers e preserva volumes
+npm run docker:drop   # apaga os volumes e todos os dados locais
+```
+
+Os objetos de `apae_geral` sao contratos locais de desenvolvimento, nao uma copia
+do schema pertencente ao APAE-Geral. Alteracoes reais desse contrato devem ser
+sincronizadas manualmente quando o produto de origem mudar.
 
 ### Pré-requisitos
 
@@ -994,11 +1040,11 @@ para impedir duplicação quando a chamada é registrada mais de uma vez."
 
 ## Como Contribuir
 
-O fluxo completo está detalhado na seção [Git Flow](#-git-flow). Em resumo:
+O fluxo completo está detalhado na seção [Git Flow](#git-flow). Em resumo:
 
 1. Escolha uma issue na coluna **Ready** do [board](https://github.com/orgs/IFPBEsp/projects/14).
 2. Assine a issue, preencha **Estimate** e **Start date**, crie a branch via GitHub e mova para **In Progress**.
-3. Implemente seguindo o [Style Guide](#-style-guide) e faça commits com [Conventional Commits](#-conventional-commits).
+3. Implemente seguindo o [Style Guide](#style-guide) e faça commits com [Conventional Commits](#conventional-commits).
 4. Abra um **Pull Request** para `dev` usando o [template de PR](.github/pull_request_template.md), adicione PO e Scrum Master como revisores, mova para **Code Review** e envie o link no Discord.
 5. Aguarde revisão — o autor não realiza o merge.
 

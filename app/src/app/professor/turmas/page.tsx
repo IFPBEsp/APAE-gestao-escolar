@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { BookOpen, Users, ClipboardCheck, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { listarTurmasDeProfessor } from "@/services/ProfessorService";
+import { listarTurmas } from "@/services/TurmaService";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Turma } from "@/types/turma";
 import { buscarProfessorPorId } from "@/services/ProfessorService";
 
 interface Professor {
-  id: number;
+  id: string;
   nome: string;
   email: string;
 }
@@ -35,9 +35,9 @@ export default function TurmasPage() {
       .catch(() => toast.error("Erro ao carregar professor"));
 
     setLoading(true);
-    listarTurmasDeProfessor(professorId)
+    listarTurmas()
       .then((data) => {
-          const ativas = data.filter(t => t.isAtiva);
+          const ativas = data.filter((t: Turma) => t.ativa);
           const ordenadas = ativas.sort((a, b) =>
             (b.anoCriacao || 0) - (a.anoCriacao || 0) || a.nome.localeCompare(b.nome)
           );

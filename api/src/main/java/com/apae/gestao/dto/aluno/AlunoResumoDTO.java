@@ -1,7 +1,6 @@
 package com.apae.gestao.dto.aluno;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -12,16 +11,8 @@ import lombok.Data;
 @Schema(description = "Informações básicas apresentadas ao consultar alunos.")
 public class AlunoResumoDTO {
 
-    private Long id;
+    private UUID id;
     private String nome;
     private String nomeResponsavel;
-    private String deficiencia;
-    private LocalDate dataNascimento;
-    private String telefoneResponsavel;
-
     private String nomeTurma;
-    private String turnoTurma;
-
-    private Double percentualPresenca;
-    private LocalDateTime dataUltimaAvaliacao;
 }

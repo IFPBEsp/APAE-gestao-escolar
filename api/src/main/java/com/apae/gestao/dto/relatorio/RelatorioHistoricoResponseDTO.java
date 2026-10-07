@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class RelatorioHistoricoResponseDTO {
 
-    private Long id;
+    private UUID id;
     private LocalDateTime dataRelatorio;
 
     private String atividades;
@@ -36,7 +37,7 @@ public class RelatorioHistoricoResponseDTO {
                 .habilidades(relatorio.getHabilidades())
                 .estrategias(relatorio.getEstrategias())
                 .recursos(relatorio.getRecursos())
-                .professorNome(relatorio.getProfessor().getNome())
+                .professorNome(null)
                 .turmaNomeCompleto(nomeTurmaCompleto)
                 .build();
     }

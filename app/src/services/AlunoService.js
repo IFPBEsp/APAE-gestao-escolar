@@ -3,7 +3,7 @@ import api from './api';
 export const listarAlunos = async (nome = '') => {
     try {
         const response = await api.get('/alunos', {
-            params: { nome: nome }
+            params: nome.trim() ? { nome: nome.trim() } : {}
         });
         return response.data;
     } catch (error) {
@@ -24,7 +24,7 @@ export const buscarAlunoPorId = async (id) => {
 
 export const atualizarTurmaAluno = async (alunoId, novaTurmaId) => {
     try {
-        const dto = { novaTurmaId: parseInt(novaTurmaId) }; 
+        const dto = { novaTurmaId };
         const response = await api.patch(`/alunos/${alunoId}/turma`, dto);
         return response.data;
     } catch (error) {

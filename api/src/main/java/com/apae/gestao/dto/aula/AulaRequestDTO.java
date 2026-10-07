@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -16,7 +17,7 @@ import java.time.LocalDate;
 public class AulaRequestDTO {
 
     @NotNull(message = "A turma é obrigatória")
-    private Long turmaId;
+    private UUID turmaId;
 
     @NotNull(message = "A data da aula é obrigatória")
     private LocalDate data;

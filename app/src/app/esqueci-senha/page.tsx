@@ -13,6 +13,24 @@ export default function EsqueciSenhaPage() {
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
 
+  const applyCPFMask = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 3) return numbers;
+    if (numbers.length <= 6)
+      return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
+    if (numbers.length <= 9)
+      return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
+    return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(
+      6,
+      9
+    )}-${numbers.slice(9, 11)}`;
+  };
+
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const masked = applyCPFMask(e.target.value);
+    setCpf(masked);
+  };
+
   const handleSubmit =  async (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
@@ -75,7 +93,8 @@ export default function EsqueciSenhaPage() {
                 type="text"
                 placeholder="000.000.000-00"
                 value={cpf}
-                onChange={(e) => setCpf(e.target.value)}
+                onChange={handleCpfChange}
+                maxLength={14}
                 className="w-full px-5 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0D4F97]"
                 disabled={carregando}
               />
