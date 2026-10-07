@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { format, startOfDay } from "date-fns";
+import { format, startOfDay, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { buscarTurmaPorId } from "@/services/TurmaService";
 import { 
@@ -20,7 +20,8 @@ import {
     getEstatisticasTurma, 
     contarAulasRealizadas, 
     getAlunosDaTurma, 
-    getChamadaPorTurmaEData 
+    getChamadaPorTurmaEData,
+    getDatasComChamada
 } from "@/services/ChamadaService";
 import { getAlunosComFrequencia } from "@/services/FrequenciaService";
 import ChamadaCalendar from "@/components/ChamadaCalendar";
@@ -28,7 +29,11 @@ import ChamadaCalendar from "@/components/ChamadaCalendar";
 export default function FrequenciaPage() {
     const router = useRouter();
     const params = useParams();
-    const turmaId = params?.turmaId ? Number(params.turmaId) : 0;
+    const turmaId = params?.turmaId
+        ? Array.isArray(params.turmaId)
+            ? params.turmaId[0]
+            : params.turmaId
+        : "";
 
     const [turma, setTurma] = useState<any>(null);
     const [alunos, setAlunos] = useState<any[]>([]);
@@ -116,27 +121,28 @@ export default function FrequenciaPage() {
     }
 
     return (
-        <>
+        <div className="p-4 md:p-8">
             <div className="mx-auto max-w-7xl space-y-6">
-                <Button
-                    onClick={() => router.back()}
-                    variant="outline"
-                >
-                    <ArrowLeft className="mr-2 h-5 w-5" />
-                    Voltar
-                </Button>
-
-                <div className="mb-6">
-                    <h1 className="text-[#0D4F97] text-2xl md:text-3xl font-bold mb-2">
-                        Gestão de Frequência - {turma?.nome}
-                    </h1>
-                    <p className="text-[#222222]">
-                        Registre chamadas e consulte o histórico de presença
-                    </p>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-[#0D4F97] text-2xl md:text-3xl font-bold mb-2">
+                            Gestão de Frequência - {turma?.nome}
+                        </h1>
+                        <p className="text-[#222222]">
+                            Registre chamadas e consulte o histórico de presença
+                        </p>
+                    </div>
+                    <Button
+                        onClick={() => router.back()}
+                        variant="outline"
+                    >
+                        <ArrowLeft className="mr-2 h-5 w-5" />
+                        Voltar
+                    </Button>
                 </div>
 
                 <div id="secao-chamada">
-                <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
+                <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white overflow-hidden">
                     <CardHeader className="bg-[#F8F9FA] border-b-2 border-[#B2D7EC]">
                         <CardTitle className="text-[#0D4F97]">
                             Registrar Chamada
@@ -146,7 +152,7 @@ export default function FrequenciaPage() {
                     </CardDescription>
                         </CardHeader>
 
-                        <CardContent className="p-6">
+                        <CardContent className="p-6 pt-6">
                     <ChamadaContent
                         turmaId={turmaId}
                         alunos={alunos}
@@ -169,7 +175,7 @@ export default function FrequenciaPage() {
                 />
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 
@@ -180,18 +186,19 @@ function ChamadaContent({
     data,
     descricao,
 }: {
-    turmaId: number;
+    turmaId: string;
     alunos: any[];
     onSalvarChamada?: () => void;
     data?: Date;
     descricao?: string;
 }) {
     const [selectedDate, setSelectedDate] = useState<Date>(data || new Date());
-    const [attendance, setAttendance] = useState<Record<number, boolean>>({});
+    const [attendance, setAttendance] = useState<Record<string, boolean>>({});
     const [descricaoAula, setDescricaoAula] = useState(descricao || "");
     const [isSaving, setIsSaving] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [loadingChamada, setLoadingChamada] = useState(false);
+    const [savedDates, setSavedDates] = useState<Date[]>([]);
 
     const todayStart = startOfDay(new Date());
     const selectedDateStart = startOfDay(selectedDate);
@@ -204,21 +211,26 @@ function ChamadaContent({
             
             try {
                 setLoadingChamada(true);
+
+                const datasStr = await getDatasComChamada(turmaId);
+                const datesParsed = datasStr.map((d: string) => parse(d, "yyyy-MM-dd", new Date()));
+                setSavedDates(datesParsed);
+
                 const dataFormatada = format(selectedDate, "yyyy-MM-dd");
                 const chamadaExistente = await getChamadaPorTurmaEData(turmaId, dataFormatada);
                 
                 if (chamadaExistente.listaPresencas && chamadaExistente.listaPresencas.length > 0) {
                     setDescricaoAula(chamadaExistente.descricao || "");
                     
-                    const novaAttendance: Record<number, boolean> = {};
+                    const novaAttendance: Record<string, boolean> = {};
                     
                     chamadaExistente.listaPresencas.forEach(presenca => {
-                        const alunoId = Number(presenca.alunoId);
+                        const alunoId = String(presenca.alunoId);
                         novaAttendance[alunoId] = presenca.status === 'PRESENTE';
                     });
                     
                     alunos.forEach(aluno => {
-                        const alunoId = Number(aluno.id);
+                        const alunoId = String(aluno.id);
                         if (novaAttendance[alunoId] === undefined) {
                             novaAttendance[alunoId] = true;
                         }
@@ -229,9 +241,9 @@ function ChamadaContent({
                     
                     toast.info("Chamada existente carregada.");
                 } else {
-                    const novaAttendance: Record<number, boolean> = {};
+                    const novaAttendance: Record<string, boolean> = {};
                     alunos.forEach(aluno => {
-                        const alunoId = Number(aluno.id);
+                        const alunoId = String(aluno.id);
                         novaAttendance[alunoId] = true;
                     });
                     setAttendance(novaAttendance);
@@ -239,9 +251,9 @@ function ChamadaContent({
                 }
             } catch (error) {
                 console.log("Nenhuma chamada encontrada para esta data.");
-                const novaAttendance: Record<number, boolean> = {};
+                const novaAttendance: Record<string, boolean> = {};
                 alunos.forEach(aluno => {
-                    const alunoId = Number(aluno.id);
+                    const alunoId = String(aluno.id);
                     novaAttendance[alunoId] = true;
                 });
                 setAttendance(novaAttendance);
@@ -254,7 +266,7 @@ function ChamadaContent({
         carregarChamadaExistente();
     }, [turmaId, selectedDate, JSON.stringify(alunos)]);
 
-    const toggleAttendance = (studentId: number) => {
+    const toggleAttendance = (studentId: string) => {
         setAttendance((prev) => ({
             ...prev,
             [studentId]: !(prev[studentId] ?? true),
@@ -282,7 +294,7 @@ function ChamadaContent({
             const chamadaRequest = {
                 descricao: descricaoAula,
                 presencas: alunos.map((aluno) => {
-                    const studentId = Number(aluno.id);
+                    const studentId = String(aluno.id);
                     const isPresent = attendance[studentId] ?? true;
                     
                     return {
@@ -311,11 +323,9 @@ function ChamadaContent({
 
     const totalCount = alunos.length;
     const presentCount = alunos.reduce((acc, aluno) => {
-        const studentId = Number(aluno.id);
+        const studentId = String(aluno.id);
         return acc + ((attendance[studentId] ?? true) ? 1 : 0);
     }, 0);
-
-    const savedDates = [];
 
     return (
         <div className="space-y-6">
@@ -395,7 +405,7 @@ function ChamadaContent({
                     </TableHeader>
                     <TableBody>
                         {alunos.map((student) => {
-                            const studentId = Number(student.id);
+                            const studentId = String(student.id);
                             const isPresent = attendance[studentId] ?? true;
 
                             return (
@@ -453,13 +463,17 @@ function HistoricoContent({
     turmaNome: string;
     alunos: any[];
     estatisticas?: any[];
-    onViewAlunoHistorico: (alunoId: number) => void;
+    onViewAlunoHistorico: (alunoId: string) => void;
     onNovaChamada?: () => void;
     totalAulasRealizadas?: number;
 }) {
     const params = useParams();
     const router = useRouter();
-    const turmaId = params?.turmaId ? Number(params.turmaId) : 0;
+    const turmaId = params?.turmaId
+        ? Array.isArray(params.turmaId)
+            ? params.turmaId[0]
+            : params.turmaId
+        : "";
 
     const [searchTerm, setSearchTerm] = useState("");
     const [showAlertsOnly, setShowAlertsOnly] = useState(false);
@@ -495,7 +509,7 @@ function HistoricoContent({
     });
 
     return (
-        <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
+        <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white overflow-hidden">
             <CardHeader className="bg-[#F8F9FA] border-b-2 border-[#B2D7EC]">
                 <div className="flex justify-between items-center">
                     <div>
@@ -506,8 +520,8 @@ function HistoricoContent({
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="p-6 space-y-6">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mt-6">
+            <CardContent className="p-6 pt-6 space-y-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
                         <CardContent className="p-6 pt-12 text-center flex flex-col items-center justify-start h-full">
                             <p className="text-[#0D4F97] text-2xl font-bold">{mediaFrequencia}%</p>

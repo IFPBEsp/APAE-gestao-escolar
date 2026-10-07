@@ -1,7 +1,6 @@
 package com.apae.gestao.config;
 
 
-import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -73,46 +72,5 @@ public class OpenApiConfig {
                         .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP)
                         .scheme("bearer")
                         .bearerFormat("JWT"));
-    }
-
-    @Bean
-    public GroupedOpenApi professorApi() {
-        return GroupedOpenApi.builder()
-                .group("Professores")
-                .pathsToMatch("/api/professores/**")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi turmaApi() {
-        return GroupedOpenApi.builder()
-                .group("Turmas")
-                .pathsToMatch("/api/turmas/**")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi alunoApi() {
-        return GroupedOpenApi.builder()
-                .group("Alunos")
-                .pathsToMatch("/api/alunos/**")
-                .build();
-    }
-    
-    
-    @Bean
-    public GroupedOpenApi relatorioApi() {
-        return GroupedOpenApi.builder()
-                .group("Relatórios")
-                .pathsToMatch("/api/relatorios/**")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi avaliacaoApi() {
-        return GroupedOpenApi.builder()
-                .group("Avaliações")
-                .pathsToMatch("/api/avaliacoes/**")
-                .build();
     }
 }

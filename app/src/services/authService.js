@@ -23,3 +23,15 @@ export const primeiroAcesso = async (email, novaSenha) => {
     throw error;
   }
 };
+
+export const redefinirSenha = async (email, cpf) => {
+  try {
+    const response = await api.post('/auth/redefinir-senha', {
+      email,
+      cpf,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.apae.gestao.dto.ApiErrorResponse;
+import com.apae.gestao.dto.api.ApiErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 

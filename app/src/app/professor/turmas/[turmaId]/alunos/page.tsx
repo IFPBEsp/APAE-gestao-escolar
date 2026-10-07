@@ -44,7 +44,11 @@ const ActionButton = ({ variant, onClick, label, extraClass = "" }: ActionButton
 
 export default function TurmaDetalhesPage() {
   const params = useParams();
-  const turmaId = params?.turmaId ? Number(params.turmaId) : null;
+  const turmaId = params?.turmaId
+    ? Array.isArray(params.turmaId)
+      ? params.turmaId[0]
+      : params.turmaId
+    : null;
   const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -54,7 +58,7 @@ export default function TurmaDetalhesPage() {
   const [alunos, setAlunos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  async function carregarUltimaAvaliacao(alunoId: number) {
+  async function carregarUltimaAvaliacao(alunoId: string) {
     if (!alunoId) {
       return { ultimaAvaliacao: "—" };
     }
@@ -121,11 +125,11 @@ export default function TurmaDetalhesPage() {
     aluno.nome?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAvaliacoes = (alunoId: number) => {
+  const handleAvaliacoes = (alunoId: string) => {
     router.push(`/professor/alunos/${alunoId}/avaliacoes?turmaId=${turmaId}`);
   };
 
-  const handleRelatorios = (alunoId: number) => {
+  const handleRelatorios = (alunoId: string) => {
     router.push(`/professor/alunos/${alunoId}/relatorios?turmaId=${turmaId}`);
   };
 
@@ -148,7 +152,13 @@ export default function TurmaDetalhesPage() {
     <div className="container mx-auto">
       <div className="p-4 md:p-8">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
+                Acompanhe seus Alunos - {turma?.nome}
+              </h1>
+              <p className="text-[#222222] text-lg">{turma?.descricao}</p>
+            </div>
             <Button
               onClick={() => router.push("/professor/turmas")}
               variant="outline"
@@ -156,13 +166,6 @@ export default function TurmaDetalhesPage() {
               <ArrowLeft className="mr-2 h-5 w-5" />
               Voltar
             </Button>
-          </div>
-
-          <div className="mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
-              Acompanhe seus Alunos - {turma?.nome}
-            </h1>
-            <p className="text-[#222222] text-lg">{turma?.descricao}</p>
           </div>
 
           <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md mb-6">
@@ -243,7 +246,7 @@ export default function TurmaDetalhesPage() {
           </Card>
 
           {viewMode === "grid" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
               {filteredAlunos.map((aluno: any) => (
                 <Card
                   key={aluno.id}
@@ -261,13 +264,15 @@ export default function TurmaDetalhesPage() {
                     </div>
 
                     <div className="space-y-3 mb-4">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap items-center justify-between gap-2 bg-green-50/50 p-2 rounded border border-green-100">
                         <div className="flex items-center gap-2">
-                          <BarChart3 className="h-4 w-4 text-green-600" />
-                          <span className="text-gray-700">Última Avaliação:</span>
+                          <BarChart3 className="h-4 w-4 text-green-600 shrink-0" />
+                          <span className="text-gray-700 text-sm font-medium">Última Avaliação:</span>
                         </div>
-                        <div className="text-right">
-                          <div className="font-bold text-green-600">{aluno.ultimaAvaliacao}</div>
+                        <div className="text-right flex-1 min-w-0">
+                          <div className="font-bold text-green-600 truncate" title={aluno.ultimaAvaliacao}>
+                            {aluno.ultimaAvaliacao}
+                          </div>
                         </div>
                       </div>
                     </div>

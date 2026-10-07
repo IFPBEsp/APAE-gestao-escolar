@@ -11,37 +11,45 @@ import com.apae.gestao.dto.aluno.AlunoFrequenciaResumoDTO;
 import com.apae.gestao.dto.aula.AulaPresencaAlunoResponseDTO;
 import com.apae.gestao.dto.turma.TurmaResumoFrequenciaDTO;
 import com.apae.gestao.service.FrequenciaService;
+import com.apae.gestao.openapi.Doc404NotFound;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/frequencia")
-@Tag(name = "Frequências")
+@Tag(name = "Frequências", description = "Consulta de frequência e histórico de presença.")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 public class FrequenciaController {
 
-    
     private final FrequenciaService frequenciaService;
 
     @GetMapping("/turma/{id}/resumo")
-    public TurmaResumoFrequenciaDTO getResumoTurma(@PathVariable Long id) {
+    @Operation(summary = "Resumo de frequência da turma", description = "Retorna o resumo de frequência de uma turma específica.")
+    @Doc404NotFound
+    public TurmaResumoFrequenciaDTO getResumoTurma(@PathVariable UUID id) {
         return frequenciaService.getResumoTurma(id);
     }
 
     @GetMapping("/turma/{id}/alunos")
+    @Operation(summary = "Listar alunos com frequência da turma", description = "Lista os alunos de uma turma com seus dados de frequência.")
+    @Doc404NotFound
     public Page<AlunoFrequenciaResumoDTO> listarAlunos(
-        @PathVariable Long id,
+        @PathVariable UUID id,
         Pageable pageable
     ) {
         return frequenciaService.listarAlunos(id, pageable);
     }
 
     @GetMapping("/aluno/{id}/historico")
+    @Operation(summary = "Histórico individual de presença do aluno", description = "Retorna o histórico detalhado de presença de um aluno específico.")
+    @Doc404NotFound
     public Page<AulaPresencaAlunoResponseDTO> getHistoricoIndividualAluno(
-        @PathVariable Long id,
+        @PathVariable UUID id,
         Pageable pageable
     ) {
         return frequenciaService.getHistoricoIndividualAluno(id, pageable);

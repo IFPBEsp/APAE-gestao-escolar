@@ -2,17 +2,18 @@
 
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { assetPath } from '@/utils/constants';
 
 export default function Header() {
   const pathname = usePathname();
 
-  if (pathname === '/' || pathname === '/login') return null;
+  if (pathname === '/' || pathname === '/login' || pathname === '/esqueci-senha' || pathname === '/primeiro-acesso') return null;
 
   return (
     <header className="flex h-16 md:h-20 items-center justify-center bg-[#0D4F97] px-4 md:px-6 fixed top-0 w-full z-30">
       <div className="flex items-center gap-2 md:gap-3">
         <Image
-          src="/apae-logo.png"
+          src={assetPath('/apae-logo.png')}
           alt="Logotipo da APAE - Flor e Mãos"
           width={40}
           height={40}

@@ -17,12 +17,12 @@ import { buscarAlunoPorId } from "@/services/AlunoService";
 import { EstudanteCard } from "@/components/alunos/EstudanteCard";
 
 interface Avaliacao {
-  id: number;
+  id: string;
   descricao: string;
   dataAvaliacao: string;
-  alunoId: number;
+  alunoId: string;
   alunoNome: string;
-  professorId: number;
+  professorId: string;
   professorNome: string;
 }
 
@@ -32,7 +32,11 @@ export default function AvaliacoesAlunoPage() {
   const router = useRouter();
   const { professorId } = useAuth();
 
-  const alunoId = params?.alunoId ? parseInt(Array.isArray(params.alunoId) ? params.alunoId[0] : params.alunoId) : 0;
+  const alunoId = params?.alunoId
+    ? Array.isArray(params.alunoId)
+      ? params.alunoId[0]
+      : params.alunoId
+    : "";
   const turmaId = searchParams?.get('turmaId') || '';
   
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
@@ -53,13 +57,13 @@ export default function AvaliacoesAlunoPage() {
 
   useEffect(() => {
     const carregarDadosIniciais = async () => {
-      if (!alunoId || isNaN(alunoId)) return;
+      if (!alunoId) return;
 
       try {
         setLoadingAluno(true);
         const [aluno, turma] = await Promise.all([
           buscarAlunoPorId(alunoId),
-          turmaId ? buscarTurmaPorId(Number(turmaId)) : Promise.resolve(null)
+          turmaId ? buscarTurmaPorId(turmaId) : Promise.resolve(null)
         ]);
         setAlunoData(aluno);
         setTurmaData(turma);
@@ -105,6 +109,7 @@ export default function AvaliacoesAlunoPage() {
 
   const handleAdicionarAvaliacao = async () => {
     if (!descricaoAvaliacao.trim()) return toast.error("Preencha a descrição!");
+    if (!professorId) return toast.error("Usuário não autenticado");
     try {
       setSaving(true);
       await AvaliacaoService.criarAvaliacao({
@@ -124,6 +129,7 @@ export default function AvaliacoesAlunoPage() {
 
   const handleEditarAvaliacao = async () => {
     if (!avaliacaoEditando || !descricaoAvaliacao.trim()) return;
+    if (!professorId) return toast.error("Usuário não autenticado");
     try {
       setSaving(true);
       await AvaliacaoService.atualizarAvaliacao(avaliacaoEditando.id, {
@@ -169,24 +175,24 @@ export default function AvaliacoesAlunoPage() {
       {/* Main Content */}
       <div className="p-4 md:p-8">
         <div className="mx-auto max-w-6xl">
-          {/* Botão Voltar */}
-          <Button
-            onClick={() => router.push(turmaId ? `/professor/turmas/${turmaId}/alunos` : "/professor/turmas")}
-            variant="outline"
-          >
-            <ArrowLeft className="mr-2 h-5 w-5" />
-            Voltar
-          </Button>
-
-          {/* Título Principal da Página */}
-          <div className="flex items-start gap-3 mb-6 mt-6">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D4F97]/10">
-              <FileText className="h-5 w-5 text-[#0D4F97]" />
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D4F97]/10">
+                <FileText className="h-5 w-5 text-[#0D4F97]" />
+              </div>
+              <div>
+                <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho do Aluno</h2>
+                <p className="text-[#222222]">Acompanhe o progresso e histórico de avaliações de {alunoData?.nome || "..."}</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho do Aluno</h2>
-              <p className="text-[#222222]">Acompanhe o progresso e histórico de avaliações de {alunoData?.nome || "..."}</p>
-            </div>
+            <Button
+              onClick={() => router.push(turmaId ? `/professor/turmas/${turmaId}/alunos` : "/professor/turmas")}
+              variant="outline"
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Voltar
+            </Button>
           </div>
 
             <EstudanteCard
@@ -211,13 +217,14 @@ export default function AvaliacoesAlunoPage() {
 
           {/* Lista de Avaliações */}
           <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
-            <CardContent className="p-0">
-              {/* Header da Tabela */}
-              <div className="hidden border-b-2 border-[#B2D7EC] bg-[#B2D7EC]/20 md:grid md:grid-cols-12 md:gap-4 md:p-4">
-                <div className="col-span-2 text-[#0D4F97] font-semibold">Data</div>
-                <div className="col-span-8 text-[#0D4F97] font-semibold">Descrição</div>
-                <div className="col-span-2 text-center text-[#0D4F97] font-semibold">Ações</div>
-              </div>
+            <CardContent className="p-0 overflow-x-auto">
+              <div className="w-full md:min-w-[800px]">
+                {/* Header da Tabela */}
+                <div className="hidden border-b-2 border-[#B2D7EC] bg-[#B2D7EC]/20 md:grid md:grid-cols-12 md:gap-4 md:p-4">
+                  <div className="col-span-2 text-[#0D4F97] font-semibold">Data</div>
+                  <div className="col-span-8 text-[#0D4F97] font-semibold">Descrição</div>
+                  <div className="col-span-2 text-center text-[#0D4F97] font-semibold">Ações</div>
+                </div>
 
                 {loading ? (
                   <div className="p-8 text-center flex justify-center items-center">
@@ -226,30 +233,43 @@ export default function AvaliacoesAlunoPage() {
                 ) : avaliacoes.length === 0 ? (
                   <div className="p-8 text-center text-gray-500">Nenhuma avaliação encontrada.</div>
                 ) : (
-                  avaliacoes.map((av) => (
-                    <div key={av.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border-b border-[#B2D7EC] items-center hover:bg-gray-50">
-                      <div className="md:col-span-2 font-medium">{formatarData(av.dataAvaliacao)}</div>
-                      <div className="md:col-span-8 text-sm text-gray-700">{av.descricao}</div>
-                      <div className="md:col-span-2 flex justify-center gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleOpenEditarDialog(av)} 
-                          >
-                          <Edit className="h-5 w-5" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleOpenExcluirDialog(av)} 
-                          >
-                          <Trash2 className="h-5 w-5" />
-                        </Button>
-                      </div>
+                  <div className="w-full">
+                    {avaliacoes.map((av) => (
+                        <div key={av.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border-b border-[#B2D7EC] items-center hover:bg-gray-50">
+                          <div className="col-span-1 md:col-span-2">
+                            <p className="text-[#0D4F97] md:hidden font-semibold">Data:</p>
+                            <p className="font-medium min-w-0 break-words">{formatarData(av.dataAvaliacao)}</p>
+                          </div>
+                          <div className="col-span-1 md:col-span-8">
+                            <p className="text-[#0D4F97] md:hidden font-semibold">Descrição:</p>
+                            <p className="text-sm text-gray-700 min-w-0 break-words">{av.descricao}</p>
+                          </div>
+                          <div className="col-span-1 md:col-span-2 flex justify-center gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              aria-label="Editar avaliação"
+                              title="Editar avaliação"
+                              onClick={() => handleOpenEditarDialog(av)} 
+                            >
+                              <Edit className="h-5 w-5" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              aria-label="Excluir avaliação"
+                              title="Excluir avaliação"
+                              onClick={() => handleOpenExcluirDialog(av)} 
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </Button>
+                          </div>
                     </div>
-                  ))
-                )}
-              </CardContent>
+                  ))}
+                </div>
+              )}
+              </div>
+            </CardContent>
             </Card>
 
             {/* Dialog Adicionar/Editar */}

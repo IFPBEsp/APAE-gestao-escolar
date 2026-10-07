@@ -1,10 +1,11 @@
+import { format } from "date-fns";
+
 interface DadosAlunoImpressaoProps {
   cidade: string;
   dataRelatorio: string;
   nome: string;
   nascimento: string;
   turma: string;
-  ano: string;
 }
 
 export default function DadosAlunoImpressao({
@@ -13,8 +14,22 @@ export default function DadosAlunoImpressao({
   nome,
   nascimento,
   turma,
-  ano,
 }: DadosAlunoImpressaoProps) {
+
+  const formatarNascimento = (data: string) => {
+    if (!data || data === "—") return "—";
+    if (data.includes("/")) return data;
+
+    try {
+      const date = new Date(data);
+      if (!isNaN(date.getTime())) {
+        return format(date, "dd/MM/yyyy");
+      }
+    } catch (e) {}
+
+    return data;
+  };
+
   return (
     <section className="impressao-dados">
       <p>
@@ -26,14 +41,11 @@ export default function DadosAlunoImpressao({
       </p>
 
       <p>
-        <strong>DATA DE NASCIMENTO:</strong> {nascimento}
+        <strong>DATA DE NASCIMENTO:</strong> {formatarNascimento(nascimento)}
       </p>
 
       <p>
         <strong>TURMA:</strong> {turma}
-        <span style={{ marginLeft: "80px" }}>
-          <strong>ANO:</strong> {ano}
-        </span>
       </p>
     </section>
   );

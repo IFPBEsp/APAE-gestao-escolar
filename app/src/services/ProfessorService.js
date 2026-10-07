@@ -5,7 +5,7 @@ import api from './api';
  * Cadastra um novo professor na API.
  *
  * A chamada POST será direcionada para: [baseURL do api.ts] + '/professores'
- * O que resulta na URL lógica: /api/professores
+ * O que resulta na URL lógica: /gestao-escolar/api/professores
  *
  * @param {object} professorData - Os dados do professor (nome, email, etc.)
  * @returns {Promise<object>} O objeto de resposta da API (ProfessorResponseDTO).
@@ -36,7 +36,7 @@ export async function registerProfessor(professorData) {
  * @param {boolean} ativo - Status do professor (opcional)
  * @returns {Promise<Array>} Lista de professores
  */
-export async function listarProfessores(nome, ativo) {
+export async function listarProfessores(nome = "", ativo = undefined) {
     try {
         const params = new URLSearchParams();
         if (nome) params.append('nome', nome);
@@ -53,7 +53,7 @@ export async function listarProfessores(nome, ativo) {
 /**
  * Busca um professor por ID.
  * 
- * @param {number} id - ID do professor
+ * @param {string} id - ID UUID do professor
  * @returns {Promise<object>} Dados do professor
  */
 export async function buscarProfessorPorId(id) {
@@ -69,7 +69,7 @@ export async function buscarProfessorPorId(id) {
 /**
  * Atualiza um professor existente.
  * 
- * @param {number} id - ID do professor
+ * @param {string} id - ID UUID do professor
  * @param {object} professorData - Dados atualizados
  * @returns {Promise<object>} Professor atualizado
  */
@@ -83,25 +83,10 @@ export async function atualizarProfessor(id, professorData) {
     }
 }
 
-export async function listarTurmasDeProfessor(id) {
-    try {
-        const response = await api.get(`/professores/${id}/turmas`);
-        return response.data;
-    } catch (error) {
-        const apiMessage = error.response?.data?.message;
-        const errorMessage = apiMessage
-            || error.message
-            || "Erro ao buscar turmas do professor.";
-        console.error("ProfessorService Error:", error.response || error);
-        throw new Error(errorMessage);
-    }
-    
-}
-
 /**
  * Reativa um professor inativo pelo ID.
  *
- * @param {number} id - ID do professor
+ * @param {string} id - ID UUID do professor
  * @returns {Promise<object>} Professor atualizado (ativo)
  */
 export async function ativarProfessorporId(id) {
@@ -122,7 +107,7 @@ export async function ativarProfessorporId(id) {
 /**
  * Inativa um professor pelo ID.
  *
- * @param {number} id - ID do professor
+ * @param {string} id - ID UUID do professor
  * @returns {Promise<object>} Professor atualizado (inativo)
  */
 export async function inativarProfessorporId(id) {

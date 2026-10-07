@@ -21,8 +21,8 @@ import { RelatorioIndividualConteudo } from "@/components/relatorios/RelatorioIn
 import { buscarAlunoPorId } from "@/services/AlunoService";
 
 interface Relatorio {
-  id: number | string;
-  alunoId?: number | string;
+  id: string;
+  alunoId?: string;
   data: string | Date;
   aluno?: string;
   professor?: string;
@@ -41,6 +41,7 @@ interface ModalVisualizarEditarRelatorioProps {
   relatorio: Relatorio | null;
   alunoNome?: string;
   alunoDataNascimento?: string;
+  alunoTurma?: string;
   onSalvar?: (relatorioAtualizado: Relatorio) => void;
 }
 
@@ -65,6 +66,7 @@ export default function ModalVisualizarEditarRelatorio({
   relatorio,
   alunoNome,
   alunoDataNascimento,
+  alunoTurma,
   onSalvar,
 }: ModalVisualizarEditarRelatorioProps) {
   const [isEditando, setIsEditando] = useState(false);
@@ -96,30 +98,30 @@ export default function ModalVisualizarEditarRelatorio({
             setDadosAlunoCompleto({
               nome: aluno.nome || alunoNome || relatorio.aluno || "Aluno",
               nascimento: aluno.dataNascimento || alunoDataNascimento || relatorio.aluno_nascimento || "—",
-              turma: aluno.turma?.nome || relatorio.turma || "Alfabetização 2025 - Manhã"
+              turma: aluno.turma?.nome || alunoTurma || relatorio.turma || "—"
             });
           } catch (error) {
             setDadosAlunoCompleto({
               nome: alunoNome || relatorio.aluno || "Aluno",
               nascimento: alunoDataNascimento || relatorio.aluno_nascimento || "—",
-              turma: relatorio.turma || "Alfabetização 2025 - Manhã"
+              turma: alunoTurma || relatorio.turma || "—"
             });
           }
         } else {
           setDadosAlunoCompleto({
             nome: alunoNome || relatorio.aluno || "Aluno",
             nascimento: alunoDataNascimento || relatorio.aluno_nascimento || "—",
-            turma: relatorio.turma || "Alfabetização 2025 - Manhã"
+            turma: alunoTurma || relatorio.turma || "—"
           });
         }
       }
     }
     carregarDadosAluno();
-  }, [isOpen, relatorio, alunoNome, alunoDataNascimento]);
+  }, [isOpen, relatorio, alunoNome, alunoDataNascimento, alunoTurma]);
 
   useEffect(() => {
     if (relatorio && isOpen) {
-      const isNew = !relatorio.id || relatorio.id === "novo" || relatorio.id === 0;
+      const isNew = !relatorio.id || relatorio.id === "novo";
       setIsEditando(isNew);
       setFormData({
         data: parseDate(relatorio.data),
@@ -145,7 +147,7 @@ export default function ModalVisualizarEditarRelatorio({
 
       const relatorioAtualizado: Relatorio = {
         ...relatorio!,
-        id: relatorio!.id || Date.now(),
+        id: relatorio!.id || "novo",
         data: format(formData.data, "yyyy-MM-dd"),
         atividades: formData.atividades,
         habilidades: formData.habilidades,
@@ -208,7 +210,7 @@ export default function ModalVisualizarEditarRelatorio({
     );
   }
 
-  const isNovoRelatorio = !relatorio?.id || relatorio.id === "novo" || relatorio.id === 0;
+  const isNovoRelatorio = !relatorio?.id || relatorio.id === "novo";
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { handleCancelar(); onClose(); } }}>
@@ -277,7 +279,6 @@ export default function ModalVisualizarEditarRelatorio({
               nome={dadosAlunoCompleto.nome}
               nascimento={dadosAlunoCompleto.nascimento}
               turma={dadosAlunoCompleto.turma}
-              ano={format(formData.data, "yyyy")}
             />
             <RelatorioIndividualConteudo
               atividades={formData.atividades}

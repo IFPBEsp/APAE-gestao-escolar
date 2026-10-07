@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { BookOpen, Users, ClipboardCheck, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { listarTurmasDeProfessor } from "@/services/ProfessorService";
+import { listarTurmas } from "@/services/TurmaService";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Turma } from "@/types/turma";
 import { buscarProfessorPorId } from "@/services/ProfessorService";
 
 interface Professor {
-  id: number;
+  id: string;
   nome: string;
   email: string;
 }
@@ -35,9 +35,9 @@ export default function TurmasPage() {
       .catch(() => toast.error("Erro ao carregar professor"));
 
     setLoading(true);
-    listarTurmasDeProfessor(professorId)
+    listarTurmas()
       .then((data) => {
-          const ativas = data.filter(t => t.isAtiva);
+          const ativas = data.filter((t: Turma) => t.ativa);
           const ordenadas = ativas.sort((a, b) =>
             (b.anoCriacao || 0) - (a.anoCriacao || 0) || a.nome.localeCompare(b.nome)
           );
@@ -74,11 +74,6 @@ export default function TurmasPage() {
         <h1 className="text-2xl md:text-3xl font-bold text-[#0D4F97] mb-2">
           Minhas Turmas
         </h1>
-
-        <p className="text-[#222222] mt-1 text-sm md:text-lg">
-          Bem-vindo, {professor?.nome || usuario.email}!
-        </p>
-
         <p className="text-[#222222] mt-1 text-sm md:text-base">
           Gerencie suas turmas e alunos
         </p>
@@ -107,7 +102,7 @@ export default function TurmasPage() {
           {turmas.length === 0 ? (
             <p className="text-center">Nenhuma turma ativa encontrada.</p>
           ) : (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
 
               {turmas.map((turma: Turma) => (
 
@@ -119,13 +114,13 @@ export default function TurmasPage() {
                   }
                 >
 
-                  <div className="mb-4 flex items-center justify-between">
+                  <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
 
-                    <h3 className="text-[#0D4F97] font-bold text-lg md:text-xl pr-2">
+                    <h3 className="text-[#0D4F97] font-bold text-lg md:text-xl pr-2 flex-1 min-w-0 break-normal">
                       {turma.nome}
                     </h3>
 
-                    <span className="flex-shrink-0 rounded-full bg-[#B2D7EC] px-3 py-1 text-[#0D4F97] font-bold text-xs uppercase">
+                    <span className="flex-shrink-0 rounded-full bg-[#B2D7EC] px-3 py-1 text-[#0D4F97] font-bold text-xs uppercase mt-1">
                       {turma.totalAlunosAtivos ?? 0} ALUNOS
                     </span>
 
@@ -133,10 +128,12 @@ export default function TurmasPage() {
 
                   <div className="mb-6 space-y-2 text-[#222222] text-sm md:text-base">
 
-                    <p className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-[#0D4F97]/70" />
-                      <strong>Horário:</strong> {turma.horario}
-                    </p>
+                    <div className="flex items-start gap-2">
+                      <Calendar className="h-4 w-4 text-[#0D4F97]/70 mt-1 flex-shrink-0" />
+                      <p className="break-words min-w-0 flex-1">
+                        <strong>Horário:</strong> {turma.horario}
+                      </p>
+                    </div>
 
                     <p>
                       <strong>Turno:</strong> {turma.turno}
@@ -148,7 +145,7 @@ export default function TurmasPage() {
 
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex flex-wrap gap-3">
 
                     <Button
                       onClick={(e) =>
@@ -158,10 +155,10 @@ export default function TurmasPage() {
                         )
                       }
                       variant="outline"
-                      className="h-10 flex-1 border-2 border-[#0D4F97] text-[#0D4F97] font-bold hover:bg-[#0D4F97] hover:text-white"
+                      className="h-10 flex-1 min-w-[130px] border-2 border-[#0D4F97] text-[#0D4F97] font-bold hover:bg-[#0D4F97] hover:text-white"
                     >
-                      <Users className="mr-2 h-4 w-4" />
-                      Ver Alunos
+                      <Users className="mr-2 h-4 w-4 flex-shrink-0" />
+                      <span>Ver Alunos</span>
                     </Button>
 
                     <Button
@@ -171,10 +168,10 @@ export default function TurmasPage() {
                           e
                         )
                       }
-                      className="h-10 flex-1 bg-[#0D4F97] text-white font-bold hover:bg-[#FFD000] hover:text-[#0D4F97]"
+                      className="h-10 flex-1 min-w-[130px] bg-[#0D4F97] text-white font-bold hover:bg-[#FFD000] hover:text-[#0D4F97]"
                     >
-                      <ClipboardCheck className="mr-2 h-4 w-4" />
-                      Frequência
+                      <ClipboardCheck className="mr-2 h-4 w-4 flex-shrink-0" />
+                      <span>Frequência</span>
                     </Button>
 
                   </div>

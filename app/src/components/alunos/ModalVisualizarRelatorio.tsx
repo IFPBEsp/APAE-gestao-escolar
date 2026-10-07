@@ -22,6 +22,7 @@ interface ModalVisualizarRelatorioProps {
   relatorio: any;
   alunoNome?: string;
   alunoDataNascimento?: string;
+  alunoTurma?: string;
 }
 
 export default function ModalVisualizarRelatorio({
@@ -30,6 +31,7 @@ export default function ModalVisualizarRelatorio({
   relatorio,
   alunoNome,
   alunoDataNascimento,
+  alunoTurma,
 }: ModalVisualizarRelatorioProps) {
   if (!relatorio) return null;
 
@@ -40,7 +42,7 @@ export default function ModalVisualizarRelatorio({
     : new Date();
 
   const nomeAluno = alunoNome || relatorio.aluno || "Aluno";
-  const turmaDisplay = relatorio.turma || "Alfabetização 2025 - Manhã";
+  const turmaDisplay = alunoTurma || relatorio.turmaNome || relatorio.turma || "—";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -125,7 +127,6 @@ export default function ModalVisualizarRelatorio({
               nome={nomeAluno}
               nascimento={alunoDataNascimento || "—"}
               turma={turmaDisplay}
-              ano={format(dataRelatorio, "yyyy")}
             />
 
             <RelatorioIndividualConteudo

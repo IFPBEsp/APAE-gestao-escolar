@@ -1,7 +1,8 @@
 'use client';
 
-import { ArrowLeft, Clock, Calendar, Users, Briefcase, Edit, Power, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, Users, Edit, Power, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ModalHistoricoFrequencia from "@/components/frequencia/ModalHistoricoFrequencia";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Dialog,
@@ -28,10 +29,10 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 interface DetalhesTurmaProps {
-    turmaId: number;
+    turmaId: string;
     turmaData?: any;
     onBack: () => void;
-    onNavigate: (screen: string, turmaId?: number) => void;
+    onNavigate: (screen: string, turmaId?: string) => void;
     onEdit: () => void;
     onInactivate?: (turmaAtualizada?: any) => void;
 }
@@ -55,7 +56,7 @@ export function DetalhesTurma({
     const [loading, setLoading] = useState(!turmaData);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSubmittingToggle, setIsSubmittingToggle] = useState(false);
-    const [isTogglingAluno, setIsTogglingAluno] = useState<number | null>(null);
+    const [isTogglingAluno, setIsTogglingAluno] = useState<string | null>(null);
     const [isHistoricoOpen, setIsHistoricoOpen] = useState(false);
     const [historicoAluno, setHistoricoAluno] = useState<any[]>([]);
     const [alunoSelecionado, setAlunoSelecionado] = useState<any | null>(null);
@@ -125,7 +126,7 @@ export function DetalhesTurma({
     async function handleToggleTurma() {
         try {
             setIsSubmittingToggle(true);
-            if (turma.isAtiva) {
+            if (turma.ativa) {
                 await desativarTurma(turmaId);
                 toast.success("Turma inativada com sucesso");
             } else {
@@ -184,10 +185,10 @@ export function DetalhesTurma({
         }
     }
 
-    async function handleToggleAlunoStatus(alunoId: number, isAtivo: boolean) {
+    async function handleToggleAlunoStatus(alunoId: string, ativo: boolean) {
         try {
             setIsTogglingAluno(alunoId);
-            if (isAtivo) {
+            if (ativo) {
                 await desativarAlunoDaTurma(turmaId, alunoId);
                 toast.success("Aluno inativado com sucesso");
             } else {
@@ -314,12 +315,12 @@ export function DetalhesTurma({
                                     </h2>
                                     <span
                                         className={`inline-block rounded-full px-3 py-1 font-medium text-xs lg:text-sm w-fit
-                                        ${turma.isAtiva
+                                        ${turma.ativa
                                                 ? "bg-green-100 text-green-700"
                                                 : "bg-red-100 text-red-700"
                                             }`}
                                     >
-                                        {turma.isAtiva ? "Ativa" : "Inativa"}
+                                        {turma.ativa ? "Ativa" : "Inativa"}
                                     </span>
                                 </div>
                             </div>
@@ -327,21 +328,6 @@ export function DetalhesTurma({
 
                         {/* Grid de Informações */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-6 gap-x-8 mt-6 md:mt-10">
-                            {/* Professor Responsável */}
-                            <div className="flex items-start gap-3">
-                                <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
-                                    <Briefcase className="h-5 w-5" />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-medium text-gray-500 mb-1 truncate">
-                                        Professor Responsável
-                                    </p>
-                                    <p className="text-[#0D4F97] font-medium break-words">
-                                        {turma.professorNome || "—"}
-                                    </p>
-                                </div>
-                            </div>
-
                             {/* Ano de Criação */}
                             <div className="flex items-start gap-3">
                                 <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
@@ -432,34 +418,34 @@ export function DetalhesTurma({
                                                     <TableCell className="text-center">
                                                         <span
                                                             className={`inline-flex rounded-full px-3 py-1 font-medium text-xs ${
-                                                                aluno.isAtivo
+                                                                aluno.ativo
                                                                     ? "bg-green-100 text-green-700"
                                                                     : "bg-red-100 text-red-700"
                                                             }`}
                                                         >
-                                                            {aluno.isAtivo ? "Ativo" : "Inativo"}
+                                                            {aluno.ativo ? "Ativo" : "Inativo"}
                                                         </span>
                                                     </TableCell>
 
                                                     <TableCell className="text-center">
                                                         <Button
-                                                            variant={aluno.isAtivo ? "danger" : "primary"}
+                                                            variant={aluno.ativo ? "danger" : "primary"}
                                                             size="sm"
                                                             className={`w-[120px] ${
-                                                                !aluno.isAtivo
+                                                                !aluno.ativo
                                                                     ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700"
                                                                     : ""
                                                             }`}
                                                             disabled={isTogglingAluno !== null}
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                handleToggleAlunoStatus(aluno.alunoId, aluno.isAtivo);
+                                                                handleToggleAlunoStatus(aluno.alunoId, aluno.ativo);
                                                             }}
                                                         >
                                                             <Power className="mr-2 h-4 w-4" />
                                                             {isTogglingAluno === aluno.alunoId
                                                                 ? "Processando..."
-                                                                : aluno.isAtivo
+                                                                : aluno.ativo
                                                                 ? "Inativar"
                                                                 : "Ativar"}
                                                         </Button>
@@ -619,12 +605,12 @@ export function DetalhesTurma({
                             </Button>
 
                             <Button
-                                variant={turma.isAtiva ? "danger" : "primary"}
-                                className={`w-full ${!turma.isAtiva ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700" : ""}`}
+                                variant={turma.ativa ? "danger" : "primary"}
+                                className={`w-full ${!turma.ativa ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700" : ""}`}
                                 onClick={() => setIsDialogOpen(true)}
                             >
                                 <Power className="mr-2 h-5 w-5" />
-                                {turma.isAtiva ? "Inativar Turma" : "Reativar Turma"}
+                                {turma.ativa ? "Inativar Turma" : "Reativar Turma"}
                             </Button>
                         </div>
 
@@ -632,10 +618,10 @@ export function DetalhesTurma({
                             <DialogContent className="max-w-[95vw] sm:max-w-[425px] w-full">
                                 <DialogHeader>
                                     <DialogTitle>
-                                        {turma.isAtiva ? "Inativar Turma?" : "Reativar Turma?"}
+                                        {turma.ativa ? "Inativar Turma?" : "Reativar Turma?"}
                                     </DialogTitle>
                                     <DialogDescription>
-                                        {turma.isAtiva
+                                        {turma.ativa
                                             ? "Ao inativar esta turma, ela não aparecerá mais nas listagens ativas."
                                             : "Ao reativar esta turma, ela voltará a aparecer nas listagens ativas."
                                         }
@@ -650,8 +636,8 @@ export function DetalhesTurma({
                                         Cancelar
                                     </Button>
                                     <Button
-                                        variant={turma.isAtiva ? "danger" : "primary"}
-                                        className={!turma.isAtiva ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700" : ""}
+                                        variant={turma.ativa ? "danger" : "primary"}
+                                        className={!turma.ativa ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700" : ""}
                                         disabled={isSubmittingToggle}
                                         onClick={handleToggleTurma}
                                     >
@@ -661,65 +647,15 @@ export function DetalhesTurma({
                             </DialogContent>
                         </Dialog>
 
-                        <Dialog open={isHistoricoOpen} onOpenChange={setIsHistoricoOpen}>
-                            <DialogContent className="max-w-[95vw] sm:max-w-xl w-full">
-                                <DialogHeader>
-                                    <DialogTitle>
-                                        Histórico de Frequência - {alunoSelecionado?.nome || ""}
-                                    </DialogTitle>
-                                    <DialogDescription>
-                                        Registros individuais de presença do aluno na turma.
-                                    </DialogDescription>
-                                </DialogHeader>
-
-                                {loadingHistorico ? (
-                                    <div className="py-6 text-center text-[#0D4F97]">
-                                        Carregando histórico...
-                                    </div>
-                                ) : historicoAluno.length === 0 ? (
-                                    <div className="py-6 text-center text-[#222222]">
-                                        Nenhum registro de frequência encontrado para este aluno.
-                                    </div>
-                                ) : (
-                                    <div className="max-h-80 overflow-y-auto mt-4 space-y-2">
-                                        {historicoAluno.map((item, index) => (
-                                            <div
-                                                key={index}
-                                                className="flex items-center justify-between border-b border-[#E2E8F0] py-2"
-                                            >
-                                                <div>
-                                                    <p className="font-medium text-[#0D4F97]">{item.data}</p>
-                                                    <p className="text-sm text-[#222222]">
-                                                        {item.descricao || "Sem descrição"}
-                                                    </p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <span
-                                                        className={`px-3 py-1 rounded-full text-xs font-semibold ${item.status === "Presente"
-                                                                ? "bg-green-100 text-green-700"
-                                                                : "bg-red-100 text-red-700"
-                                                            }`}
-                                                    >
-                                                        {item.status}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-
-                                <DialogFooter className="mt-4">
-                                    <Button variant="outline" 
-                                    onClick={() => setIsHistoricoOpen(false)}
-                                    >
-                                        Fechar
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-
                     </CardContent>
                 </Card>
+                <ModalHistoricoFrequencia
+                    isOpen={isHistoricoOpen}
+                    onClose={() => setIsHistoricoOpen(false)}
+                    alunoNome={alunoSelecionado?.nome || ""}
+                    historico={historicoAluno}
+                    loading={loadingHistorico}
+                />
             </div>
         </div>
     );

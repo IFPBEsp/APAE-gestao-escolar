@@ -1,0 +1,16 @@
+**
+
+!package.json
+!package-lock.json
+
+!next.config.js
+!postcss.config.js
+!tailwind.config.js
+!components.json
+!tsconfig.json
+
+!public/
+!public/**
+
+!src/
+!src/**
