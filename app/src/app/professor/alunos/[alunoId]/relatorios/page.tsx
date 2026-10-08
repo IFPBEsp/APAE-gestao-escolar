@@ -48,11 +48,11 @@ export default function RelatoriosAlunoListaPage() {
 
   useEffect(() => {
     const carregarAluno = async () => {
-      if (!alunoIdFromUrl || isNaN(Number(alunoIdFromUrl))) return;
+      if (!alunoIdFromUrl) return;
 
       try {
         setLoadingAluno(true);
-        const data = await buscarAlunoPorId(Number(alunoIdFromUrl));
+        const data = await buscarAlunoPorId(alunoIdFromUrl);
         setAlunoData(data);
       } catch (error) {
         console.error("Erro ao carregar aluno:", error);
@@ -69,7 +69,7 @@ export default function RelatoriosAlunoListaPage() {
     const carregarTurma = async () => {
       if (!turmaId) return;
       try {
-        const data = await buscarTurmaPorId(Number(turmaId));
+        const data = await buscarTurmaPorId(turmaId);
         setTurmaData(data);
       } catch (error) {
         console.error("Erro ao carregar turma:", error);
@@ -84,7 +84,7 @@ export default function RelatoriosAlunoListaPage() {
     try {
       const dados = await listarRelatorios();
       const filtrados = dados.filter((r: any) =>
-        Number(r.alunoId) === Number(alunoIdFromUrl)
+        String(r.alunoId) === String(alunoIdFromUrl)
       );
       setRelatorios(filtrados);
     } catch {
@@ -103,18 +103,15 @@ export default function RelatoriosAlunoListaPage() {
     }
 
     try {
-      const isNovo =
-        !dadosDoModal.id ||
-        dadosDoModal.id === 0 ||
-        Number(dadosDoModal.id) > 999999;
+      const isNovo = !dadosDoModal.id || dadosDoModal.id === "novo";
 
       const payload = {
         atividades: dadosDoModal.atividades,
         habilidades: dadosDoModal.habilidades,
         estrategias: dadosDoModal.estrategias,
         recursos: dadosDoModal.recursos,
-        alunoId: Number(alunoIdFromUrl),
-        turmaId: Number(turmaId) || 1,
+        alunoId: alunoIdFromUrl,
+        turmaId,
         professorId: professorId
       };
 
@@ -151,17 +148,8 @@ export default function RelatoriosAlunoListaPage() {
       <div className="p-4 md:p-8">
         <div className="mx-auto max-w-6xl space-y-6">
 
-          {/* BOTÃO VOLTAR */}
-          <Button
-            onClick={() => router.back()}
-            variant="outline"
-          >
-            <ArrowLeft className="mr-2 h-5 w-5" />
-            Voltar
-          </Button>
-
-          {/* SEÇÃO RELATÓRIOS */}
-          <div className="space-y-4">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D4F97]/10">
                 <FileText className="h-5 w-5 text-[#0D4F97]" />
@@ -175,7 +163,16 @@ export default function RelatoriosAlunoListaPage() {
                 </p>
               </div>
             </div>
+            <Button
+              onClick={() => router.back()}
+              variant="outline"
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Voltar
+            </Button>
+          </div>
 
+          <div className="space-y-4">
             <EstudanteCard
               nome={alunoData?.nome || "Nome não encontrado"}
               turma={turmaData?.nome || alunoData?.turma?.nome || "Turma não encontrada"}
@@ -186,7 +183,7 @@ export default function RelatoriosAlunoListaPage() {
               action={
                 <Button
                   onClick={() => {
-                    setRelatorioSelecionado({ id: 0, alunoId: Number(alunoIdFromUrl) });
+                    setRelatorioSelecionado({ id: "novo", alunoId: alunoIdFromUrl });
                     setIsModalRelatorioOpen(true);
                   }}
                   variant="primary"

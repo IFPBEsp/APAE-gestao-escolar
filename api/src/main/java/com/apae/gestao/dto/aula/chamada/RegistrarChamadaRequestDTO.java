@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -31,7 +32,7 @@ public class RegistrarChamadaRequestDTO {
     public static class PresencaItemDTO {
 
         @NotNull(message = "O ID do aluno é obrigatório")
-        private Long alunoId;
+        private UUID alunoId;
 
         @NotNull(message = "O status da presença é obrigatório")
         private PresencaAlunoDTO.StatusPresenca status;

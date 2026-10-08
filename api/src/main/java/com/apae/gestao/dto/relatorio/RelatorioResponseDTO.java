@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -13,10 +14,10 @@ import java.time.LocalDateTime;
 @Schema(description = "Dados de resposta de um relatório.")
 public class RelatorioResponseDTO {
     @Schema(description = "Identificador do relatório", example = "1")
-    private Long id;
+    private UUID id;
 
     @Schema(description = "ID do aluno vinculado", example = "1")
-    private Long alunoId;
+    private UUID alunoId;
 
     @Schema(description = "Atividades realizadas pelo aluno", example = "Participou de atividades lúdicas e educacionais.")
     private String atividades;

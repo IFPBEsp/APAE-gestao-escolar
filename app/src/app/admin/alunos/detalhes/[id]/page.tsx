@@ -17,7 +17,7 @@ import { buscarRelatorioPorAluno } from "@/services/RelatorioService";
 
 
 interface AlunoDetailDTO {
-    id: number;
+    id: string;
     nome: string;
     dataNascimento: string; 
     deficiencia: string;
@@ -46,7 +46,7 @@ interface RelatorioHistoricoDTO {
 }
 
 interface AlunoTurmaHistoricoDTO {
-  turmaId: number;
+  turmaId: string;
   tipo: string | null;
   ano: number;
   turno: string;
@@ -56,7 +56,7 @@ interface AlunoTurmaHistoricoDTO {
 export default function DetalhesDoAluno({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const resolvedParams = use(params); 
-  const alunoId = parseInt(resolvedParams.id);
+  const alunoId = resolvedParams.id;
   
   const [alunoData, setAlunoData] = useState<AlunoDetailDTO | null>(null);
   const [avaliacoes, setAvaliacoes] = useState<AvaliacaoHistoricoDTO[]>([]);

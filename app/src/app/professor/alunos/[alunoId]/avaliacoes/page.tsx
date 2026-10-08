@@ -17,12 +17,12 @@ import { buscarAlunoPorId } from "@/services/AlunoService";
 import { EstudanteCard } from "@/components/alunos/EstudanteCard";
 
 interface Avaliacao {
-  id: number;
+  id: string;
   descricao: string;
   dataAvaliacao: string;
-  alunoId: number;
+  alunoId: string;
   alunoNome: string;
-  professorId: number;
+  professorId: string;
   professorNome: string;
 }
 
@@ -32,7 +32,11 @@ export default function AvaliacoesAlunoPage() {
   const router = useRouter();
   const { professorId } = useAuth();
 
-  const alunoId = params?.alunoId ? parseInt(Array.isArray(params.alunoId) ? params.alunoId[0] : params.alunoId) : 0;
+  const alunoId = params?.alunoId
+    ? Array.isArray(params.alunoId)
+      ? params.alunoId[0]
+      : params.alunoId
+    : "";
   const turmaId = searchParams?.get('turmaId') || '';
   
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
@@ -53,13 +57,13 @@ export default function AvaliacoesAlunoPage() {
 
   useEffect(() => {
     const carregarDadosIniciais = async () => {
-      if (!alunoId || isNaN(alunoId)) return;
+      if (!alunoId) return;
 
       try {
         setLoadingAluno(true);
         const [aluno, turma] = await Promise.all([
           buscarAlunoPorId(alunoId),
-          turmaId ? buscarTurmaPorId(Number(turmaId)) : Promise.resolve(null)
+          turmaId ? buscarTurmaPorId(turmaId) : Promise.resolve(null)
         ]);
         setAlunoData(aluno);
         setTurmaData(turma);
@@ -105,6 +109,7 @@ export default function AvaliacoesAlunoPage() {
 
   const handleAdicionarAvaliacao = async () => {
     if (!descricaoAvaliacao.trim()) return toast.error("Preencha a descrição!");
+    if (!professorId) return toast.error("Usuário não autenticado");
     try {
       setSaving(true);
       await AvaliacaoService.criarAvaliacao({
@@ -124,6 +129,7 @@ export default function AvaliacoesAlunoPage() {
 
   const handleEditarAvaliacao = async () => {
     if (!avaliacaoEditando || !descricaoAvaliacao.trim()) return;
+    if (!professorId) return toast.error("Usuário não autenticado");
     try {
       setSaving(true);
       await AvaliacaoService.atualizarAvaliacao(avaliacaoEditando.id, {
@@ -169,24 +175,24 @@ export default function AvaliacoesAlunoPage() {
       {/* Main Content */}
       <div className="p-4 md:p-8">
         <div className="mx-auto max-w-6xl">
-          {/* Botão Voltar */}
-          <Button
-            onClick={() => router.push(turmaId ? `/professor/turmas/${turmaId}/alunos` : "/professor/turmas")}
-            variant="outline"
-          >
-            <ArrowLeft className="mr-2 h-5 w-5" />
-            Voltar
-          </Button>
-
-          {/* Título Principal da Página */}
-          <div className="flex items-start gap-3 mb-6 mt-6">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D4F97]/10">
-              <FileText className="h-5 w-5 text-[#0D4F97]" />
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D4F97]/10">
+                <FileText className="h-5 w-5 text-[#0D4F97]" />
+              </div>
+              <div>
+                <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho do Aluno</h2>
+                <p className="text-[#222222]">Acompanhe o progresso e histórico de avaliações de {alunoData?.nome || "..."}</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-[#0D4F97] text-2xl font-bold">Avaliações e Desempenho do Aluno</h2>
-              <p className="text-[#222222]">Acompanhe o progresso e histórico de avaliações de {alunoData?.nome || "..."}</p>
-            </div>
+            <Button
+              onClick={() => router.push(turmaId ? `/professor/turmas/${turmaId}/alunos` : "/professor/turmas")}
+              variant="outline"
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Voltar
+            </Button>
           </div>
 
             <EstudanteCard

@@ -26,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/alunos")
@@ -47,7 +48,7 @@ public class AlunoController {
             @Parameter(example = "João", in = ParameterIn.QUERY)
             @RequestParam(value = "nome", required = false) String nome,
             @RequestParam(defaultValue = "false", required = false) Boolean apenasAtivos,
-            @PageableDefault(size = 30, sort = "nome")
+            @PageableDefault(size = 30, sort = "nomeCompleto")
             Pageable pageable
     ) {
         Page<AlunoResumoDTO> alunos =
@@ -62,7 +63,7 @@ public class AlunoController {
             @ApiResponse(responseCode = "200", description = "Aluno encontrado")
     })
     @Doc404NotFound
-    public ResponseEntity<AlunoDetalhesDTO> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<AlunoDetalhesDTO> buscarPorId(@PathVariable UUID id) {
         AlunoDetalhesDTO aluno = alunoService.buscarPorId(id);
         return ResponseEntity.ok(aluno);
     }
@@ -78,7 +79,7 @@ public class AlunoController {
     })
     @DocStandardErrors
     public ResponseEntity<AlunoDetalhesDTO> atualizarTurma(
-        @PathVariable Long alunoId,
+        @PathVariable UUID alunoId,
         @Valid @RequestBody AlunoTurmaRequestDTO dto
     ) {
         AlunoDetalhesDTO alunoAtualizado =
@@ -91,7 +92,7 @@ public class AlunoController {
     @Operation(summary = "Buscar histórico de avaliações do aluno")
     @Doc404NotFound
     public ResponseEntity<List<AvaliacaoHistoricoResponseDTO>> buscarAvaliacoesPorAlunoId(
-            @PathVariable Long id
+            @PathVariable UUID id
     ) {
         List<AvaliacaoHistoricoResponseDTO> avaliacoes =
                 alunoService.buscarAvaliacoesPorAlunoId(id);
@@ -109,7 +110,7 @@ public class AlunoController {
     })
     @Doc404NotFound
     public ResponseEntity<List<AlunoTurmaHistoricoItemDTO>> listarHistoricoTurmasPorAlunoId(
-            @PathVariable Long id
+            @PathVariable UUID id
     ) {
         return ResponseEntity.ok(alunoService.listarHistoricoTurmasPorAlunoId(id));
     }
@@ -117,7 +118,7 @@ public class AlunoController {
     @GetMapping("/{id}/turmas/historico")
     @Operation(summary = "Buscar histórico de turmas do aluno (vínculos ativos e anteriores)")
     public ResponseEntity<List<AlunoTurmaHistoricoResponseDTO>> buscarHistoricoTurmasPorAlunoId(
-            @PathVariable Long id
+            @PathVariable UUID id
     ) {
         List<AlunoTurmaHistoricoResponseDTO> historico =
                 alunoService.buscarHistoricoTurmasPorAlunoId(id);

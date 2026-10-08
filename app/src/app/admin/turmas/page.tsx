@@ -4,17 +4,17 @@ import { useState, useEffect } from "react";
 import { Plus, Search, BookOpen} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { NovaTurmaModal } from "@/components/turmas/NovaTurmaModal";
 import { DetalhesTurma } from "@/components/turmas/DetalhesTurma";
 import { EditarTurmaModal } from "@/components/turmas/EditarTurmaModal";
-import { listarTurmas, listarAlunosAtivos, buscarTurmaPorId } from "@/services/TurmaService";
+import { listarTurmas, buscarTurmaPorId } from "@/services/TurmaService";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function GerenciarTurmasPage() {
+  const router = useRouter();
   const [turmas, setTurmas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isNovaTurmaOpen, setIsNovaTurmaOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<"listar-turmas" | "detalhes-turma">("listar-turmas");
   const [selectedTurma, setSelectedTurma] = useState<any>(null);
   const [isEditarTurmaOpen, setIsEditarTurmaOpen] = useState(false);
@@ -74,11 +74,6 @@ export default function GerenciarTurmasPage() {
     }
   };
 
-  const handleSaveNovaTurma = async () => {
-    const data = await listarTurmas();
-    setTurmas(data);
-  };
-
   const handleUpdateTurma = async (updatedTurma: any) => {
     try {
       // Recarrega todas as turmas para garantir contadores e dados agregados atualizados
@@ -131,16 +126,11 @@ export default function GerenciarTurmasPage() {
               <div className="flex gap-4 items-center">
                 <Button
                   variant="primary"
-                  onClick={() => setIsNovaTurmaOpen(true)}
+                  onClick={() => router.push("/admin/turmas/cadastrar")}
                 >
                   <Plus size={18} />
                   Nova Turma
                 </Button>
-                <NovaTurmaModal
-                  isOpen={isNovaTurmaOpen}
-                  onClose={() => setIsNovaTurmaOpen(false)}
-                  onSave={handleSaveNovaTurma}
-                />
               </div>
             </div>
 
@@ -179,12 +169,12 @@ export default function GerenciarTurmasPage() {
 
                         <span
                           className={`inline-block rounded-full px-2 md:px-3 py-1 text-xs md:text-sm font-medium ${
-                            turma.isAtiva
+                            turma.ativa
                               ? "bg-green-100 text-green-700"
                               : "bg-red-100 text-red-700"
                           }`}
                         >
-                          {turma.isAtiva ? "Ativa" : "Inativa"}
+                          {turma.ativa ? "Ativa" : "Inativa"}
                         </span>
 
                         <span className="inline-block bg-[#E8F3FF] text-[#0D4F97] px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium border border-[#B2D7EC]">
@@ -197,9 +187,6 @@ export default function GerenciarTurmasPage() {
                   </div>
 
                   <div className="text-gray-700 space-y-1 text-sm md:text-base">
-                    <p>
-                      <strong>Professor:</strong> {turma.professorNome}
-                    </p>
                     <p>
                       <strong>Turno:</strong> {turma.turno}
                     </p>

@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/frequencia")
@@ -30,7 +31,7 @@ public class FrequenciaController {
     @GetMapping("/turma/{id}/resumo")
     @Operation(summary = "Resumo de frequência da turma", description = "Retorna o resumo de frequência de uma turma específica.")
     @Doc404NotFound
-    public TurmaResumoFrequenciaDTO getResumoTurma(@PathVariable Long id) {
+    public TurmaResumoFrequenciaDTO getResumoTurma(@PathVariable UUID id) {
         return frequenciaService.getResumoTurma(id);
     }
 
@@ -38,7 +39,7 @@ public class FrequenciaController {
     @Operation(summary = "Listar alunos com frequência da turma", description = "Lista os alunos de uma turma com seus dados de frequência.")
     @Doc404NotFound
     public Page<AlunoFrequenciaResumoDTO> listarAlunos(
-        @PathVariable Long id,
+        @PathVariable UUID id,
         Pageable pageable
     ) {
         return frequenciaService.listarAlunos(id, pageable);
@@ -48,7 +49,7 @@ public class FrequenciaController {
     @Operation(summary = "Histórico individual de presença do aluno", description = "Retorna o histórico detalhado de presença de um aluno específico.")
     @Doc404NotFound
     public Page<AulaPresencaAlunoResponseDTO> getHistoricoIndividualAluno(
-        @PathVariable Long id,
+        @PathVariable UUID id,
         Pageable pageable
     ) {
         return frequenciaService.getHistoricoIndividualAluno(id, pageable);

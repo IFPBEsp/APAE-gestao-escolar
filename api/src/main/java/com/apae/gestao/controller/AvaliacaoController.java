@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/avaliacoes")
@@ -57,7 +58,7 @@ public class AvaliacaoController {
     })
     @Doc404NotFound
     public ResponseEntity<AvaliacaoResponseDTO> buscarPorId(
-            @Parameter(description = "Identificador da avaliação", example = "1", in = ParameterIn.PATH) @PathVariable Long id) {
+            @Parameter(description = "Identificador da avaliação", in = ParameterIn.PATH) @PathVariable UUID id) {
         AvaliacaoResponseDTO response = avaliacaoService.buscarPorId(id);
         return ResponseEntity.ok(response);
     }
@@ -67,7 +68,7 @@ public class AvaliacaoController {
     @Operation(summary = "Listar avaliações por aluno")
     @Doc404NotFound
     public ResponseEntity<List<AvaliacaoResponseDTO>> listarPorAluno(
-            @Parameter(description = "ID do aluno", example = "5", in = ParameterIn.PATH) @PathVariable Long alunoId) {
+            @Parameter(description = "ID do aluno", in = ParameterIn.PATH) @PathVariable UUID alunoId) {
         List<AvaliacaoResponseDTO> response = avaliacaoService.listarPorAluno(alunoId);
         return ResponseEntity.ok(response);
     }
@@ -76,7 +77,7 @@ public class AvaliacaoController {
     @Operation(summary = "Listar avaliações por professor")
     @Doc404NotFound
     public ResponseEntity<List<AvaliacaoResponseDTO>> listarPorProfessor(
-            @Parameter(description = "ID do professor", example = "2", in = ParameterIn.PATH) @PathVariable Long professorId) {
+            @Parameter(description = "ID do professor", in = ParameterIn.PATH) @PathVariable UUID professorId) {
         List<AvaliacaoResponseDTO> response = avaliacaoService.listarPorProfessor(professorId);
         return ResponseEntity.ok(response);
     }
@@ -88,7 +89,7 @@ public class AvaliacaoController {
     })
     @DocStandardErrors
     public ResponseEntity<AvaliacaoResponseDTO> atualizar(
-            @Parameter(description = "Identificador da avaliação", example = "1", in = ParameterIn.PATH) @PathVariable Long id,
+            @Parameter(description = "Identificador da avaliação", in = ParameterIn.PATH) @PathVariable UUID id,
             @Valid @RequestBody AvaliacaoRequestDTO dto) {
         AvaliacaoResponseDTO response = avaliacaoService.atualizar(id, dto);
         return ResponseEntity.ok(response);
@@ -101,7 +102,7 @@ public class AvaliacaoController {
     })
     @Doc404NotFound
     public ResponseEntity<Void> deletar(
-            @Parameter(description = "Identificador da avaliação", example = "1", in = ParameterIn.PATH) @PathVariable Long id) {
+            @Parameter(description = "Identificador da avaliação", in = ParameterIn.PATH) @PathVariable UUID id) {
         avaliacaoService.deletar(id);
         return ResponseEntity.noContent().build();
     }

@@ -13,8 +13,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                     "https://apae-gestao-escolar.vercel.app", 
                     "https://apae-gestao-escolar.onrender.com", 
+                    "https://143.95.170.25",
                     "http://localhost:3000",
-                    "http://localhost"
+                    "http://localhost:3002"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders("*")

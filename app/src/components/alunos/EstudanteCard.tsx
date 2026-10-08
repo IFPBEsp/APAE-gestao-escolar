@@ -6,8 +6,8 @@ interface EstudanteCardProps {
     nome: string;
     turma: string;
     turno?: string;
-    turmaId?: string | number | null;
-    alunoId?: string | number | null;
+    turmaId?: string | null;
+    alunoId?: string | null;
     loading?: boolean;
     action?: React.ReactNode;
 }

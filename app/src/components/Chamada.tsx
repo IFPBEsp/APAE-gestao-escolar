@@ -22,7 +22,7 @@ import {
 } from "@/services/ChamadaService"; 
 
 interface StudentAttendance {
-    id: number;
+    id: string;
     name: string; 
     isAbsent: boolean;
 }
@@ -35,7 +35,7 @@ interface ChamadaProps {
   data?: Date; 
   descricao?: string; 
   
-  turmaIdProp?: number | string;
+  turmaIdProp?: string;
   turmaNomeProp?: string;
   onSaveSuccess?: () => void;
 }
@@ -71,20 +71,16 @@ export default function Chamada({
 
   const { turmaId, turmaNome } = useMemo(() => {
       if (turmaIdProp && turmaNomeProp) {
-          const id = typeof turmaIdProp === 'string' ? parseInt(turmaIdProp, 10) : turmaIdProp;
           return { 
-              turmaId: isNaN(id as number) ? undefined : id as number, 
+              turmaId: String(turmaIdProp),
               turmaNome: turmaNomeProp 
           };
       }
       
       if (initialClass) {
-          const parts = initialClass.split('-');
-          const id = parseInt(parts[0], 10);
-          const name = parts.slice(1).join('-').trim();
           return { 
-              turmaId: isNaN(id) ? undefined : id, 
-              turmaNome: name || "Turma Selecionada" 
+              turmaId: initialClass,
+              turmaNome: "Turma Selecionada" 
           };
       }
 
@@ -157,7 +153,7 @@ export default function Chamada({
   }, [turmaId, dateFormatted]);
 
 
-  const handleAttendanceChange = (studentId: number, isPresent: boolean) => {
+  const handleAttendanceChange = (studentId: string, isPresent: boolean) => {
     const newIsAbsent = !isPresent; 
 
     setStudents(prevStudents => 
@@ -235,14 +231,15 @@ export default function Chamada({
 
   return (
     <div className="max-w-5xl mx-auto p-4">
-      <Button onClick={onBack} variant="outline" className="mb-6 border-[#B2D7EC] text-[#0D4F97] hover:bg-[#B2D7EC]/20 h-12">
-        <ArrowLeft className="mr-2 h-5 w-5" /> Voltar
-      </Button>
-
       <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md bg-white">
-        <CardHeader>
-          <CardTitle className="text-[#0D4F97] text-2xl">Registro de Presença</CardTitle>
-          <CardDescription className="text-[#222222] font-semibold text-lg">{turmaNome}</CardDescription>
+        <CardHeader className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <CardTitle className="text-[#0D4F97] text-2xl">Registro de Presença</CardTitle>
+            <CardDescription className="text-[#222222] font-semibold text-lg">{turmaNome}</CardDescription>
+          </div>
+          <Button onClick={onBack} variant="outline" className="border-[#B2D7EC] text-[#0D4F97] hover:bg-[#B2D7EC]/20 h-12">
+            <ArrowLeft className="mr-2 h-5 w-5" /> Voltar
+          </Button>
         </CardHeader>
         
         <CardContent className="space-y-6">

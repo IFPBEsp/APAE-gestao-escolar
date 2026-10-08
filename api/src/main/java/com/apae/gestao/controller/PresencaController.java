@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/presencas")
@@ -30,7 +31,7 @@ public class PresencaController {
     @Operation(summary = "Buscar chamada por turma e data", description = "Retorna a chamada de uma turma em uma data específica.")
     @Doc404NotFound
     public ResponseEntity<ChamadaResponseDTO> getChamadaPorTurmaEData(
-            @PathVariable Long turmaId,
+            @PathVariable UUID turmaId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
 
         ChamadaResponseDTO response = presencaService.getChamadaPorTurmaEData(turmaId, data);
@@ -41,7 +42,7 @@ public class PresencaController {
     @Operation(summary = "Registrar chamada", description = "Registra a chamada de presença para uma turma em uma data específica.")
     @DocStandardErrors
     public ResponseEntity<ChamadaResponseDTO> registrarChamada(
-            @PathVariable Long turmaId,
+            @PathVariable UUID turmaId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
             @Valid @RequestBody RegistrarChamadaRequestDTO request) {
 
@@ -52,7 +53,7 @@ public class PresencaController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Deletar presença", description = "Remove um registro de presença pelo ID.")
     @Doc404NotFound
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(@PathVariable UUID id) {
         presencaService.deletar(id);
         return ResponseEntity.noContent().build();
     }

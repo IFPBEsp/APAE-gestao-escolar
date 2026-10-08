@@ -1,29 +1,6 @@
-# Build do Maven
-target/
+**
 
-# Controle de versão
-.git/
-.gitignore
+!pom.xml
 
-# Variáveis de ambiente locais
-.env
-.env.local
-
-# Docker local
-docker-compose.yml
-
-# Logs
-*.log
-
-# Editor
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Sistema operacional
-.DS_Store
-Thumbs.db
-
-# Postman
-*.postman_collection.json
+!src/
+!src/**

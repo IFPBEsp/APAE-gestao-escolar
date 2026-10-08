@@ -1,29 +1,16 @@
-# Dependências
-node_modules/
+**
 
-# Build do Next.js
-.next/
-out/
+!package.json
+!package-lock.json
 
-# Controle de versão
-.git/
-.gitignore
+!next.config.js
+!postcss.config.js
+!tailwind.config.js
+!components.json
+!tsconfig.json
 
-# Variáveis de ambiente locais
-.env
-.env.local
-.env.*.local
+!public/
+!public/**
 
-# Logs
-*.log
-npm-debug.log*
-
-# Editor
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Sistema operacional
-.DS_Store
-Thumbs.db
+!src/
+!src/**

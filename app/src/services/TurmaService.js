@@ -1,5 +1,15 @@
 import api from './api';
 
+function normalizarAlunoTurma(aluno) {
+    const id = aluno.pacienteId || aluno.alunoId || aluno.id;
+    return {
+        ...aluno,
+        id,
+        alunoId: id,
+        pacienteId: id,
+    };
+}
+
 export async function listarTurmas() {
     try {
         const response = await api.get('/turmas');
@@ -95,19 +105,6 @@ export async function excluirTurma(id){
     }
 }
 
-export async function atribuirProfessor(professorId, turmaId){
-    try {
-        await api.post(`/turmas/${turmaId}/professor/${professorId}`);
-    } catch (error) {
-        const apiMessage = error.response?.data?.message;
-        const errorMessage = apiMessage
-                                || error.message
-                                || "Erro desconhecido ao tentar se conectar com a API.";
-        console.error("TurmaService Error:", error.response || error);
-        throw new Error(errorMessage);
-    }
-}
-
 export async function adicionarAlunosATurma(turmaId, alunosIds){
     try {
         await api.post(`/turmas/${turmaId}/alunos`,  alunosIds );
@@ -124,7 +121,7 @@ export async function adicionarAlunosATurma(turmaId, alunosIds){
 export async function listarAlunos(turmaId){
     try {
         const response = await api.get(`/turmas/${turmaId}/alunos`);
-        return response.data;
+        return response.data.map(normalizarAlunoTurma);
     } catch (error) {
         const apiMessage = error.response?.data?.message;
         const errorMessage = apiMessage
@@ -138,7 +135,7 @@ export async function listarAlunos(turmaId){
 export async function listarAlunosAtivos(turmaId){
     try {
         const response = await api.get(`/turmas/${turmaId}/alunos/ativos`);
-        return response.data;
+        return response.data.map(normalizarAlunoTurma);
     } catch (error) {
         const apiMessage = error.response?.data?.message;
         const errorMessage = apiMessage
@@ -152,7 +149,7 @@ export async function listarAlunosAtivos(turmaId){
 export async function listarAlunosInativos(turmaId){
     try {
         const response = await api.get(`/turmas/${turmaId}/alunos/inativos`);
-        return response.data;
+        return response.data.map(normalizarAlunoTurma);
     } catch (error) {
         const apiMessage = error.response?.data?.message;
         const errorMessage = apiMessage
@@ -188,3 +185,48 @@ export async function desativarAlunoDaTurma(turmaId, alunoId){
         throw new Error(errorMessage);
     }
 }
+
+/**
+ * Associa um professor responsável à turma.
+ *
+ * @param {string} turmaId - ID UUID da turma
+ * @param {string} professorId - ID UUID do professor
+ * @returns {Promise<object>} Dados da turma atualizada (TurmaResponseDTO)
+ */
+export async function adicionarProfessor(turmaId, professorId) {
+    try {
+        const response = await api.put(`/turmas/${turmaId}/professor/${professorId}`);
+        return response.data;
+    } catch (error) {
+        const apiMessage = error.response?.data?.message;
+        const errorMessage = apiMessage
+                                || error.message
+                                || "Erro desconhecido ao tentar vincular professor à turma.";
+        console.error("TurmaService Error:", error.response || error);
+        throw new Error(errorMessage);
+    }
+}
+
+/**
+ * Remove o professor responsável de uma turma.
+ *
+ * @param {string} turmaId - ID UUID da turma
+ * @returns {Promise<object>} Dados da turma atualizada (TurmaResponseDTO)
+ */
+export async function removerProfessor(turmaId) {
+    try {
+        const response = await api.delete(`/turmas/${turmaId}/professor`);
+        return response.data;
+    } catch (error) {
+        const apiMessage = error.response?.data?.message;
+        const errorMessage = apiMessage
+                                || error.message
+                                || "Erro desconhecido ao tentar remover professor da turma.";
+        console.error("TurmaService Error:", error.response || error);
+        throw new Error(errorMessage);
+    }
+}
+
+export const vincularProfessor = adicionarProfessor;
+export const desvincularProfessor = removerProfessor;
+

@@ -6,27 +6,29 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AvaliacaoHistoricoResponseDTO {
-    private Long id;
+    private UUID id;
     private LocalDateTime dataAvaliacao; 
     private String descricao;
     private String professorNome; 
     private String turmaNomeCompleto; 
     
     public static AvaliacaoHistoricoResponseDTO fromEntity(
-        Avaliacao avaliacao, 
-        String nomeTurmaCompleto 
+        Avaliacao avaliacao,
+        String professorNome,
+        String nomeTurmaCompleto
     ) {
         return AvaliacaoHistoricoResponseDTO.builder()
                 .id(avaliacao.getId())
                 .dataAvaliacao(avaliacao.getDataAvaliacao())
                 .descricao(avaliacao.getDescricao()) 
-                .professorNome(avaliacao.getProfessor().getNome()) 
+                .professorNome(professorNome)
                 .turmaNomeCompleto(nomeTurmaCompleto)
                 .build();
     }

@@ -1,44 +1,35 @@
-# =======================================================
-# APAE - Gestão Escolar — Backend (Spring Boot)
-# =======================================================
+# syntax=docker/dockerfile:1.7
 
-# -------------------------------------------------------
-# Stage 1: Build
-# -------------------------------------------------------
-FROM maven:3.9-eclipse-temurin-21-alpine AS builder
+FROM maven:3.9-eclipse-temurin-21-alpine@sha256:65353f527c86cb23187c8233475713e15067e8d36220d18863c379680698fe85 AS builder
 
 WORKDIR /app
 
-# Copia o pom.xml primeiro e baixa as dependências
-# (camada de cache separada — rebuild só se pom.xml mudar)
 COPY pom.xml .
-RUN mvn dependency:go-offline -B -q
-
 COPY src ./src
-RUN mvn clean package -DskipTests -B -q
 
-# -------------------------------------------------------
-# Stage 2: Produção
-# -------------------------------------------------------
-FROM eclipse-temurin:21-jre-alpine
+RUN --mount=type=cache,id=gestao-escolar-m2,target=/root/.m2 \
+    mvn package -DskipTests -B -q
+
+
+FROM gcr.io/distroless/java21-debian13:nonroot@sha256:bb0b3c7edc4417acdf76ea0f52bb5fae28881fe05aae6cc55af4cc4cb0200d2d AS runtime
+
+ARG APP_VERSION
+ARG VCS_REF
+
+LABEL org.opencontainers.image.title="APAE Gestão Escolar" \
+      org.opencontainers.image.description="Backend do APAE Gestão Escolar" \
+      org.opencontainers.image.source="https://github.com/IFPBEsp/APAE-gestao-escolar" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.version=$APP_VERSION \
+      org.opencontainers.image.revision=$VCS_REF
 
 WORKDIR /app
 
-# Metadados da imagem (vincula ao repositório no GHCR)
-LABEL org.opencontainers.image.source=https://github.com/IFPBEsp/APAE-gestao-escolar
-LABEL org.opencontainers.image.description="APAE Gestão Escolar - Backend (Spring Boot)"
-LABEL org.opencontainers.image.licenses=MIT
+COPY --from=builder --chown=65532:65532 /app/target/*.jar app.jar
 
-# Usuário não-root para segurança em produção
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-COPY --from=builder --chown=appuser:appgroup /app/target/*.jar app.jar
-
-USER appuser
+USER 65532:65532
 
 EXPOSE 8080
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD wget -qO- http://localhost:8080/gestao-escolar/actuator/health || exit 1
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["/usr/bin/java"]
+CMD ["-jar", "app.jar"]

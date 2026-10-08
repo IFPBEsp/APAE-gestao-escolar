@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -14,24 +15,29 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AvaliacaoResponseDTO {
 
-    private Long id;
+    private UUID id;
     private String descricao;
-    private Long alunoId;
+    private UUID alunoId;
     private String alunoNome;
-    private Long professorId;
+    private UUID professorId;
     private String professorNome;
     private LocalDateTime dataAvaliacao;
     private String turmaNomeCompleto;
 
 
-    public static AvaliacaoResponseDTO fromEntity(Avaliacao avaliacao, String turmaCompleto) {
+    public static AvaliacaoResponseDTO fromEntity(
+            Avaliacao avaliacao,
+            String alunoNome,
+            String professorNome,
+            String turmaCompleto
+    ) {
         return AvaliacaoResponseDTO.builder()
                 .id(avaliacao.getId())
                 .descricao(avaliacao.getDescricao())
-                .alunoId(avaliacao.getAluno().getId())
-                .alunoNome(avaliacao.getAluno().getNome())
+                .alunoId(avaliacao.getPacienteId())
+                .alunoNome(alunoNome)
                 .professorId(avaliacao.getProfessor().getId())
-                .professorNome(avaliacao.getProfessor().getNome())
+                .professorNome(professorNome)
                 .dataAvaliacao(avaliacao.getDataAvaliacao())
                 .turmaNomeCompleto(turmaCompleto)
                 .build();
