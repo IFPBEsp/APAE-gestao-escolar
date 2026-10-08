@@ -7,8 +7,9 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface AulaRepository extends JpaRepository<Aula,Long> {
-    Optional<Aula> findByTurmaAndDataDaAula(Turma turma, LocalDate dataDaAula);
+public interface AulaRepository extends JpaRepository<Aula, UUID> {
+    Optional<Aula> findByTurmaAndData(Turma turma, LocalDate data);
 }

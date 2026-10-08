@@ -1,6 +1,7 @@
 package com.apae.gestao.dto.turma;
 
 import java.util.Set;
+import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,17 +25,13 @@ public class TurmaRequestDTO {
     @Schema(description = "Turno principal da turma", example = "MANHA")
     private String turno;
 
-    @NotNull
-    @Schema(description = "Identificador do professor responsável", example = "12")
-    private Long professorId;
-
     @Schema(description = "Status da turma (ativa/inativa). Caso não informado, assume true", example = "true")
-    private Boolean isAtiva;
+    private Boolean ativa;
 
     @NotBlank(message = "Tipo é obrigatório")
     @Schema(description = "Tipo pedagógico ou classificação da turma", example = "Educação Especial")
     private String tipo;
 
-    @ArraySchema(schema = @Schema(implementation = Long.class, description = "IDs de alunos vinculados"), uniqueItems = true)
-    private Set<Long> alunosIds;
+    @ArraySchema(schema = @Schema(implementation = UUID.class, description = "IDs de pacientes vinculados"), uniqueItems = true)
+    private Set<UUID> alunosIds;
 }

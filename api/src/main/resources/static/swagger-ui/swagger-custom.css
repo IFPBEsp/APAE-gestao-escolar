@@ -33,3 +33,10 @@
   color: #fff;
 }
 
+/* Esconde o seletor de definição de grupos no topo ("Select a definition") */
+.swagger-ui .topbar .download-url-wrapper,
+.swagger-ui .topbar .select-label,
+.swagger-ui .topbar select {
+  display: none !important;
+}
+

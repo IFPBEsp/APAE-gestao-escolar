@@ -11,9 +11,11 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/**") 
                 .allowedOrigins(
-                    "https://apae-gestao-escolar-silk.vercel.app", 
-                    "https://apae-gestao-escolar-10n9.onrender.com", 
-                    "http://localhost:3000"
+                    "https://apae-gestao-escolar.vercel.app", 
+                    "https://apae-gestao-escolar.onrender.com", 
+                    "https://143.95.170.25",
+                    "http://localhost:3000",
+                    "http://localhost:3002"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders("*")

@@ -1,11 +1,14 @@
 package com.apae.gestao.controller;
 
 import java.util.List;
+import java.util.UUID;
 
-import com.apae.gestao.dto.ApiErrorResponse;
-import com.apae.gestao.dto.RelatorioRequestDTO;
-import com.apae.gestao.dto.RelatorioResponseDTO;
+import com.apae.gestao.dto.relatorio.RelatorioRequestDTO;
+import com.apae.gestao.dto.relatorio.RelatorioResponseDTO;
 import com.apae.gestao.service.RelatorioService;
+import com.apae.gestao.openapi.Doc400ValidationError;
+import com.apae.gestao.openapi.Doc404NotFound;
+import com.apae.gestao.openapi.DocStandardErrors;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,9 +36,9 @@ public class RelatorioController {
     @PostMapping
     @Operation(summary = "Criar um novo relatório")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Relatório criado", content = @Content(schema = @Schema(implementation = RelatorioResponseDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Relatório criado", content = @Content(schema = @Schema(implementation = RelatorioResponseDTO.class)))
     })
+    @Doc400ValidationError
     public ResponseEntity<RelatorioResponseDTO> criar(@RequestBody RelatorioRequestDTO request) {
         RelatorioResponseDTO relatorio = relatorioService.criar(request);
         return ResponseEntity.ok(relatorio);
@@ -51,18 +54,19 @@ public class RelatorioController {
     @GetMapping("/{id}")
     @Operation(summary = "Buscar relatório por ID")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Relatório encontrado", content = @Content(schema = @Schema(implementation = RelatorioResponseDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Relatório não encontrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Relatório encontrado", content = @Content(schema = @Schema(implementation = RelatorioResponseDTO.class)))
     })
+    @Doc404NotFound
     public ResponseEntity<RelatorioResponseDTO> buscarPorId(
-            @Parameter(description = "Identificador do relatório", example = "1", in = ParameterIn.PATH) @PathVariable Long id) {
+            @Parameter(description = "Identificador do relatório", in = ParameterIn.PATH) @PathVariable UUID id) {
         RelatorioResponseDTO relatorio = relatorioService.buscarPorId(id);
         return ResponseEntity.ok(relatorio);
     }
 
     @GetMapping("/alunos/{alunoId}")
     @Operation(summary = "Listar relatórios de um aluno específico")
-    public ResponseEntity<List<RelatorioResponseDTO>> listarPorAluno(@PathVariable Long alunoId) {
+    @Doc404NotFound
+    public ResponseEntity<List<RelatorioResponseDTO>> listarPorAluno(@PathVariable UUID alunoId) {
         List<RelatorioResponseDTO> relatorios = relatorioService.buscarPorAluno(alunoId);
         return ResponseEntity.ok(relatorios);
     }
@@ -70,11 +74,11 @@ public class RelatorioController {
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar um relatório")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Relatório atualizado", content = @Content(schema = @Schema(implementation = RelatorioResponseDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Relatório não encontrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Relatório atualizado", content = @Content(schema = @Schema(implementation = RelatorioResponseDTO.class)))
     })
+    @DocStandardErrors
     public ResponseEntity<RelatorioResponseDTO> atualizar(
-            @Parameter(description = "Identificador do relatório", example = "1", in = ParameterIn.PATH) @PathVariable Long id,
+            @Parameter(description = "Identificador do relatório", in = ParameterIn.PATH) @PathVariable UUID id,
             @RequestBody RelatorioRequestDTO request) {
         RelatorioResponseDTO relatorio = relatorioService.atualizar(id, request);
         return ResponseEntity.ok(relatorio);
@@ -83,11 +87,11 @@ public class RelatorioController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Deletar um relatório")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Relatório deletado"),
-            @ApiResponse(responseCode = "404", description = "Relatório não encontrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+            @ApiResponse(responseCode = "204", description = "Relatório deletado")
     })
+    @Doc404NotFound
     public ResponseEntity<Void> deletar(
-            @Parameter(description = "Identificador do relatório", example = "1", in = ParameterIn.PATH) @PathVariable Long id) {
+            @Parameter(description = "Identificador do relatório", in = ParameterIn.PATH) @PathVariable UUID id) {
         relatorioService.deletar(id);
         return ResponseEntity.noContent().build();
     }

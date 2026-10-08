@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import styles from "./ProfessionalForm.module.css";
 import { useRouter } from "next/navigation";
+import { assetPath } from "@/utils/constants";
 
 const defaultProfessional = {
 	photo: null,
@@ -198,7 +199,7 @@ export default function ProfessionalForm() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-4 mb-4">
             <img 
-              src="/logo.APAE.jpg" 
+              src={assetPath("/logo.APAE.jpg")} 
               alt="APAE" 
               className="w-20 h-20" 
             />
@@ -478,5 +479,4 @@ export default function ProfessionalForm() {
 	</div>
 	);
 }
-
 

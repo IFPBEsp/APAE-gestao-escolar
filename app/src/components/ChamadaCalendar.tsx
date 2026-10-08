@@ -62,6 +62,7 @@ export default function ChamadaCalendar({ selected, onSelect, savedDates = [] }:
         onSelect={onSelect}
         locale={ptBR}
         disabled={isDisabled}
+        modifiers={modifiers}
         modifiersClassNames={modifiersClassNames}
         month={currentMonth}
         onMonthChange={setCurrentMonth}
@@ -74,10 +75,10 @@ export default function ChamadaCalendar({ selected, onSelect, savedDates = [] }:
           row: "flex w-full justify-between mt-1",
           cell: "relative p-0 text-center flex items-center justify-center",
           day: "h-9 w-9 p-0 font-normal hover:bg-[#B2D7EC]/20 rounded-md transition-all flex items-center justify-center",
-          day_selected: "bg-[#0D4F97] text-white hover:bg-[#0D4F97] !opacity-100 z-10",
-          day_today: "border-2 border-[#0D4F97] text-[#0D4F97] font-black",
-          day_outside: "text-gray-300 opacity-20",
-          day_disabled: "text-gray-200 opacity-20 cursor-not-allowed",
+          selected: "bg-[#0D4F97] text-white hover:bg-[#0D4F97] !opacity-100 z-10",
+          today: "border-2 border-[#0D4F97] text-[#0D4F97] font-black",
+          outside: "text-gray-300 opacity-20",
+          disabled: "text-gray-200 opacity-20 cursor-not-allowed",
           
           caption: "flex justify-between items-center pt-1 mb-4",
           caption_label: "text-[#0D4F97] font-bold capitalize",

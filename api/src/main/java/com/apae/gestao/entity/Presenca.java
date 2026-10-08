@@ -4,28 +4,29 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
-@Table(name = "presencas", uniqueConstraints = @UniqueConstraint(columnNames = {"alunos_id", "aulas_id"}))
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter@Setter
 @Builder
+@Table(name = "presencas", schema = "gestao_escolar", uniqueConstraints = @UniqueConstraint(columnNames = {"paciente_id", "aula_id"}))
 public class Presenca {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column
     private Boolean faltou;
 
-    @ManyToOne
-    @JoinColumn(name = "alunos_id")
-    private Aluno aluno;
+    @Column(name = "paciente_id")
+    private UUID pacienteId;
 
     @ManyToOne
-    @JoinColumn(name = "aulas_id")
+    @JoinColumn(name = "aula_id")
     private Aula aula;
 
     @PrePersist
@@ -51,7 +52,7 @@ public class Presenca {
         return "Presenca{" +
                 "id=" + id +
                 ", faltou=" + faltou +
-                ", alunoId=" + (aluno != null ? aluno.getId() : null) +
+                ", pacienteId=" + (pacienteId!= null ? pacienteId : null) +
                 ", aulaId=" + (aula != null ? aula.getId() : null) +
                 '}';
     }

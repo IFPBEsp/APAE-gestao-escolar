@@ -48,11 +48,11 @@ export default function RelatoriosAlunoListaPage() {
 
   useEffect(() => {
     const carregarAluno = async () => {
-      if (!alunoIdFromUrl || isNaN(Number(alunoIdFromUrl))) return;
+      if (!alunoIdFromUrl) return;
 
       try {
         setLoadingAluno(true);
-        const data = await buscarAlunoPorId(Number(alunoIdFromUrl));
+        const data = await buscarAlunoPorId(alunoIdFromUrl);
         setAlunoData(data);
       } catch (error) {
         console.error("Erro ao carregar aluno:", error);
@@ -69,7 +69,7 @@ export default function RelatoriosAlunoListaPage() {
     const carregarTurma = async () => {
       if (!turmaId) return;
       try {
-        const data = await buscarTurmaPorId(Number(turmaId));
+        const data = await buscarTurmaPorId(turmaId);
         setTurmaData(data);
       } catch (error) {
         console.error("Erro ao carregar turma:", error);
@@ -84,7 +84,7 @@ export default function RelatoriosAlunoListaPage() {
     try {
       const dados = await listarRelatorios();
       const filtrados = dados.filter((r: any) =>
-        Number(r.alunoId) === Number(alunoIdFromUrl)
+        String(r.alunoId) === String(alunoIdFromUrl)
       );
       setRelatorios(filtrados);
     } catch {
@@ -103,18 +103,15 @@ export default function RelatoriosAlunoListaPage() {
     }
 
     try {
-      const isNovo =
-        !dadosDoModal.id ||
-        dadosDoModal.id === 0 ||
-        Number(dadosDoModal.id) > 999999;
+      const isNovo = !dadosDoModal.id || dadosDoModal.id === "novo";
 
       const payload = {
         atividades: dadosDoModal.atividades,
         habilidades: dadosDoModal.habilidades,
         estrategias: dadosDoModal.estrategias,
         recursos: dadosDoModal.recursos,
-        alunoId: Number(alunoIdFromUrl),
-        turmaId: Number(turmaId) || 1,
+        alunoId: alunoIdFromUrl,
+        turmaId,
         professorId: professorId
       };
 
@@ -151,17 +148,8 @@ export default function RelatoriosAlunoListaPage() {
       <div className="p-4 md:p-8">
         <div className="mx-auto max-w-6xl space-y-6">
 
-          {/* BOTÃO VOLTAR */}
-          <Button
-            onClick={() => router.back()}
-            variant="outline"
-          >
-            <ArrowLeft className="mr-2 h-5 w-5" />
-            Voltar
-          </Button>
-
-          {/* SEÇÃO RELATÓRIOS */}
-          <div className="space-y-4">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D4F97]/10">
                 <FileText className="h-5 w-5 text-[#0D4F97]" />
@@ -175,7 +163,16 @@ export default function RelatoriosAlunoListaPage() {
                 </p>
               </div>
             </div>
+            <Button
+              onClick={() => router.back()}
+              variant="outline"
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Voltar
+            </Button>
+          </div>
 
+          <div className="space-y-4">
             <EstudanteCard
               nome={alunoData?.nome || "Nome não encontrado"}
               turma={turmaData?.nome || alunoData?.turma?.nome || "Turma não encontrada"}
@@ -186,7 +183,7 @@ export default function RelatoriosAlunoListaPage() {
               action={
                 <Button
                   onClick={() => {
-                    setRelatorioSelecionado({ id: 0, alunoId: Number(alunoIdFromUrl) });
+                    setRelatorioSelecionado({ id: "novo", alunoId: alunoIdFromUrl });
                     setIsModalRelatorioOpen(true);
                   }}
                   variant="primary"
@@ -199,83 +196,89 @@ export default function RelatoriosAlunoListaPage() {
 
             {/* TABELA / GRID */}
             <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
-              <CardContent className="p-0">
-                {/* Cabeçalho Desktop */}
-                <div className="hidden border-b-2 border-[#B2D7EC] bg-[#B2D7EC]/20 md:grid md:grid-cols-12 md:gap-4 md:p-4">
-                  <div className="col-span-2 text-[#0D4F97] font-semibold">Data</div>
-                  <div className="col-span-2 text-[#0D4F97] font-semibold">Atividades</div>
-                  <div className="col-span-2 text-[#0D4F97] font-semibold">Habilidades</div>
-                  <div className="col-span-2 text-[#0D4F97] font-semibold">Estratégias</div>
-                  <div className="col-span-2 text-[#0D4F97] font-semibold">Recursos</div>
-                  <div className="col-span-2 text-center text-[#0D4F97] font-semibold">Ações</div>
-                </div>
+              <CardContent className="p-0 overflow-x-auto">
+                <div className="min-w-[1000px] w-full">
+                  {/* Cabeçalho Desktop */}
+                  <div className="hidden border-b-2 border-[#B2D7EC] bg-[#B2D7EC]/20 md:grid md:grid-cols-12 md:gap-4 md:p-4">
+                    <div className="col-span-2 text-[#0D4F97] font-semibold">Data</div>
+                    <div className="col-span-2 text-[#0D4F97] font-semibold">Atividades</div>
+                    <div className="col-span-2 text-[#0D4F97] font-semibold">Habilidades</div>
+                    <div className="col-span-2 text-[#0D4F97] font-semibold">Estratégias</div>
+                    <div className="col-span-2 text-[#0D4F97] font-semibold">Recursos</div>
+                    <div className="col-span-2 text-center text-[#0D4F97] font-semibold">Ações</div>
+                  </div>
 
-                {/* Lista de Relatórios */}
-                <div className="w-full">
-                  {relatorios.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">
-                      Nenhum relatório encontrado.
-                    </div>
-                  ) : (
-                    relatorios.map((rel) => (
-                      <div
-                        key={rel.id}
-                        className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border-b border-[#B2D7EC] items-center hover:bg-gray-50"
-                      >
-                        <div className="col-span-1 md:col-span-2">
-                          <p className="text-[#0D4F97] md:hidden font-semibold">Data:</p>
-                          <p className="font-medium">
-                            {rel.createdAt
-                              ? format(new Date(rel.createdAt), "dd/MM/yyyy")
-                              : "---"}
-                          </p>
-                        </div>
-
-                        <div className="col-span-1 md:col-span-2">
-                          <p className="text-[#0D4F97] md:hidden font-semibold">Atividades:</p>
-                          <p className="text-sm text-gray-700 line-clamp-3">{rel.atividades}</p>
-                        </div>
-
-                        <div className="col-span-1 md:col-span-2">
-                          <p className="text-[#0D4F97] md:hidden font-semibold">Habilidades:</p>
-                          <p className="text-sm text-gray-700 line-clamp-3">{rel.habilidades}</p>
-                        </div>
-
-                        <div className="col-span-1 md:col-span-2">
-                          <p className="text-[#0D4F97] md:hidden font-semibold">Estratégias:</p>
-                          <p className="text-sm text-gray-700 line-clamp-3">{rel.estrategias}</p>
-                        </div>
-
-                        <div className="col-span-1 md:col-span-2">
-                          <p className="text-[#0D4F97] md:hidden font-semibold">Recursos:</p>
-                          <p className="text-sm text-gray-700 line-clamp-3">{rel.recursos}</p>
-                        </div>
-
-                        <div className="col-span-1 md:col-span-2 flex justify-center gap-2">
-                          <Button
-                            onClick={() => {
-                              setRelatorioSelecionado(rel);
-                              setIsModalRelatorioOpen(true);
-                            }}
-                            variant="ghost"
-                            size="icon"
-                          >
-                            <Eye className="h-5 w-5" />
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              setRelatorioExcluindo(rel);
-                              setIsExcluirDialogOpen(true);
-                            }}
-                            variant="ghost"
-                            size="icon"
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </Button>
-                        </div>
+                  {/* Lista de Relatórios */}
+                  <div className="w-full">
+                    {relatorios.length === 0 ? (
+                      <div className="p-8 text-center text-gray-500">
+                        Nenhum relatório encontrado.
                       </div>
-                    ))
-                  )}
+                    ) : (
+                      relatorios.map((rel) => (
+                        <div
+                          key={rel.id}
+                          className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border-b border-[#B2D7EC] items-center hover:bg-gray-50"
+                        >
+                          <div className="col-span-1 md:col-span-2">
+                            <p className="text-[#0D4F97] md:hidden font-semibold">Data:</p>
+                            <p className="font-medium min-w-0 break-words">
+                              {rel.createdAt
+                                ? format(new Date(rel.createdAt), "dd/MM/yyyy")
+                                : "---"}
+                            </p>
+                          </div>
+
+                          <div className="col-span-1 md:col-span-2">
+                            <p className="text-[#0D4F97] md:hidden font-semibold">Atividades:</p>
+                            <p className="text-sm text-gray-700 line-clamp-3 min-w-0 break-words">{rel.atividades}</p>
+                          </div>
+
+                          <div className="col-span-1 md:col-span-2">
+                            <p className="text-[#0D4F97] md:hidden font-semibold">Habilidades:</p>
+                            <p className="text-sm text-gray-700 line-clamp-3 min-w-0 break-words">{rel.habilidades}</p>
+                          </div>
+
+                          <div className="col-span-1 md:col-span-2">
+                            <p className="text-[#0D4F97] md:hidden font-semibold">Estratégias:</p>
+                            <p className="text-sm text-gray-700 line-clamp-3 min-w-0 break-words">{rel.estrategias}</p>
+                          </div>
+
+                          <div className="col-span-1 md:col-span-2">
+                            <p className="text-[#0D4F97] md:hidden font-semibold">Recursos:</p>
+                            <p className="text-sm text-gray-700 line-clamp-3 min-w-0 break-words">{rel.recursos}</p>
+                          </div>
+
+                          <div className="col-span-1 md:col-span-2 flex md:justify-center gap-2">
+                            <Button
+                              onClick={() => {
+                                setRelatorioSelecionado(rel);
+                                setIsModalRelatorioOpen(true);
+                              }}
+                              variant="ghost"
+                              size="icon"
+                              aria-label="Visualizar relatório"
+                              title="Visualizar relatório"
+                            >
+                              <Eye className="h-5 w-5" />
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                setRelatorioExcluindo(rel);
+                                setIsExcluirDialogOpen(true);
+                              }}
+                              variant="ghost"
+                              size="icon"
+                              aria-label="Excluir relatório"
+                              title="Excluir relatório"
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </Button>
+                          </div>
+                      </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -293,6 +296,7 @@ export default function RelatoriosAlunoListaPage() {
           relatorio={relatorioSelecionado}
           alunoNome={alunoData?.nome}
           alunoDataNascimento={alunoData?.dataNascimento}
+          alunoTurma={turmaData?.nome || alunoData?.turma?.nome}
           onSalvar={handleSalvarRelatorio}
         />
       )}

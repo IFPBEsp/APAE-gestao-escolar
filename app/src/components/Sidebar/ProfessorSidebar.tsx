@@ -5,6 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { assetPath } from "@/utils/constants";
 
 interface ProfessorSidebarProps {
   activeTab?: string;
@@ -113,7 +114,7 @@ export default function ProfessorSidebar({
             <div className="flex flex-col items-center gap-3 mb-2">
               <div className="flex items-center justify-center">
                 <Image
-                  src="/apae-logo.png"
+                  src={assetPath('/apae-logo.png')}
                   alt="Logo APAE"
                   width={60}
                   height={60}
@@ -128,7 +129,7 @@ export default function ProfessorSidebar({
           ) : (
             <div className="flex justify-center">
               <Image
-                src="/apae-logo.png"
+                src={assetPath('/apae-logo.png')}
                 alt="Logo APAE"
                 width={40}
                 height={40}
@@ -204,7 +205,7 @@ export default function ProfessorSidebar({
                 {/* Logo e título centralizados */}
                 <div className="flex flex-col items-center gap-3 pt-4">
                   <Image
-                    src="/apae-logo.png"
+                    src={assetPath('/apae-logo.png')}
                     alt="Logo APAE"
                     width={60}
                     height={60}

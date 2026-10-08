@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Menu, X, LogOut, ChevronLeft, ChevronRight, type LucideIcon } from 'lucide-react';
+import { assetPath } from '@/utils/constants';
 
 export interface MenuItem {
     label: string;
@@ -74,7 +75,7 @@ export default function DashboardLayout({
 
                 <div className={`flex flex-col items-center gap-3 ${!collapsed ? "pt-4" : ""}`}>
                     <Image
-                        src="/apae-logo.png"
+                        src={assetPath('/apae-logo.png')}
                         alt="Logo APAE"
                         width={collapsed ? 40 : 60}
                         height={collapsed ? 40 : 60}

@@ -48,7 +48,7 @@ interface VerInformacoesTurmaPageProps {
 
 export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaPageProps) {
   const router = useRouter();
-  const turmaId = Number(params.id);
+  const turmaId = params.id;
 
   const [turma, setTurma] = useState<any>(null);
   const [alunos, setAlunos] = useState<any[]>([]);
@@ -174,12 +174,12 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
               </Button>
 
               <Button
-                variant={turma?.isAtiva ? "danger" : "primary"}
+                variant={turma?.ativa ? "danger" : "primary"}
                 onClick={handleDesativarTurma}
                 className="w-full flex-1"
               >
                 <Power className="mr-2 h-5 w-5" />
-                {turma?.isAtiva ? "Inativar Turma" : "Ativar Turma"}
+                {turma?.ativa ? "Inativar Turma" : "Ativar Turma"}
               </Button>
             </div>
           </CardContent>
@@ -245,7 +245,7 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
                     <td className="p-3">{aluno.nome}</td>
 
                     <td className="p-3 text-center">
-                      {aluno.isAtivo ? (
+                      {aluno.ativo ? (
                         <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full">
                           Ativo
                         </span>
