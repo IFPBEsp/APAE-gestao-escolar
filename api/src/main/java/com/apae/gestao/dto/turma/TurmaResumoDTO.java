@@ -40,5 +40,5 @@ public class TurmaResumoDTO {
     private String horario;
 
     @Schema(description = "Dados resumidos do professor responsável")
-    private com.apae.gestao.dto.professor.ProfessorResumoDTO professor;
+    private com.apae.gestao.dto.professor.ProfessorSimplesDTO professor;
 }

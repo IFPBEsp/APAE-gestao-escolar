@@ -755,4 +755,51 @@ public class TurmaServiceTest {
         assertEquals(1, resumos.size());
         assertTrue(resumos.get(0).getAtiva());
     }
+
+    @Test
+    @DisplayName("Deve retornar no resumo apenas id e nome do professor quando a turma possui professor vinculado")
+    void listarTurmas_SucessoComProfessor() {
+        UUID professorId = UUID.randomUUID();
+        UUID usuarioId = UUID.randomUUID();
+
+        Professor professor = new Professor();
+        professor.setId(professorId);
+        professor.setUsuarioId(usuarioId);
+        turma.setProfessor(professor);
+
+        Usuario usuario = new Usuario();
+        usuario.setId(usuarioId);
+        usuario.setNomeCompleto("Maria da Silva");
+        usuario.setCpf("12345678901");
+
+        when(turmaRepository.findAll()).thenReturn(List.of(turma));
+        when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuario));
+
+        List<TurmaResumoDTO> resumos = turmaService.listarTurmas(null, null, null, null, null, null);
+
+        assertEquals(1, resumos.size());
+        assertNotNull(resumos.get(0).getProfessor());
+        assertEquals(professorId, resumos.get(0).getProfessor().getId());
+        assertEquals("Maria da Silva", resumos.get(0).getProfessor().getNome());
+        verify(usuarioRepository, times(1)).findById(usuarioId);
+    }
+
+    @Test
+    @DisplayName("Deve retornar professor nulo no resumo quando o usuário do professor vinculado não é encontrado")
+    void listarTurmas_SucessoProfessorSemUsuario() {
+        UUID usuarioId = UUID.randomUUID();
+
+        Professor professor = new Professor();
+        professor.setId(UUID.randomUUID());
+        professor.setUsuarioId(usuarioId);
+        turma.setProfessor(professor);
+
+        when(turmaRepository.findAll()).thenReturn(List.of(turma));
+        when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.empty());
+
+        List<TurmaResumoDTO> resumos = turmaService.listarTurmas(null, null, null, null, null, null);
+
+        assertEquals(1, resumos.size());
+        assertNull(resumos.get(0).getProfessor());
+    }
 }
