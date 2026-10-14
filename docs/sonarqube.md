@@ -65,14 +65,9 @@ export SONAR_TOKEN="squ_seu_token_aqui"
 
 ```
 cd api
-./mvnw clean verify sonar:sonar -Dmaven.test.skip=true
+./mvnw clean verify sonar:sonar 
 cd ..
 ```
-
-* Justificativa técnica:
-  * A fase `verify` do Maven compila o projeto e gera os artefatos em `target/classes` — estes `.class` são necessários para a análise estática Java que o SonarQube realiza.
-  * A flag `-Dmaven.test.skip=true` é utilizada temporariamente porque testes conhecidos (por exemplo `MinioConnectionTest`) tentam conexões externas e provocam falhas na fase de testes, e há erros de compilação em classes de teste da suíte (ex.: `AuthControllerTest`), impedindo que a execução de testes e a geração de relatórios JaCoCo ocorram corretamente. Pular os testes garante a geração dos binários da aplicação principal para que o scanner Java possa analisar o código. Essa prática é temporária até a resolução da issue de integração do JaCoCo e a estabilização da suíte de testes.
-  * Não inclua parâmetros de host ou URL do Sonar na linha de comando; a análise deve usar as configurações locais conforme o ambiente.
 
 ## 5. Analisar o frontend
 
@@ -99,9 +94,6 @@ cd ..
   * Duplications
 
 ## 7. Cobertura
-
-* Backend: a cobertura aparece zerada enquanto a análise do backend for executada com `-Dmaven.test.skip=true`, pois essa opção impede a execução/geração dos relatórios JaCoCo (por exemplo `target/site/jacoco/jacoco.xml`); sem esse relatório o SonarQube não recebe dados de cobertura.
-* Frontend: a cobertura aparece zerada enquanto o arquivo `coverage/lcov.info` não existir; o scanner do frontend depende desse arquivo para enviar métricas de cobertura.
 * Observação técnica: a ausência de relatório de cobertura pode fazer com que certas condições do Quality Gate fiquem sem dados e não causem falha imediata; isso não substitui a necessidade de restaurar a geração de relatórios para avaliação completa.
 
 ## 8. Encerrar e limpar
