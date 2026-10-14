@@ -6,7 +6,7 @@ import com.apae.gestao.dto.auth.LoginResponseDTO;
 import com.apae.gestao.dto.auth.PrimeiroAcessoRequestDTO;
 import com.apae.gestao.dto.auth.RedefinirSenhaRequestDTO;
 import com.apae.gestao.security.JwtService;
-import com.apae.gestao.service.AuthService;
+import com.apae.gestao.auth.service.AuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

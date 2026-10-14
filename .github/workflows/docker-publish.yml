@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev
+      - dev-database
 
 jobs:
   build-and-push-frontend:
