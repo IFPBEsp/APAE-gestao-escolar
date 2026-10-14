@@ -10,11 +10,11 @@
 
 Após subir o container Docker, você pode acessar o PostgreSQL com:
 
-```bash
+```
 docker exec -it apae-gestao-escolar-db-1 psql -U apae_user -d apae_db
 ```
 
-> 💡 **Dica:** O nome do container pode variar. Use `docker ps` para listar os containers em execução e identificar o nome correto.
+💡 **Dica:** O nome do container pode variar. Use `docker ps` para listar os containers em execução e identificar o nome correto.
 
 ---
 
@@ -28,11 +28,11 @@ docker exec -it apae-gestao-escolar-db-1 psql -U apae_user -d apae_db
   - `listar_professores_com_turmas`
   - `public.listar_turmas_otimizado`
 
-> ✅ Isso garante que, em qualquer ambiente novo, basta subir o backend que as funções serão criadas/atualizadas automaticamente.
+✅ Isso garante que, em qualquer ambiente novo, basta subir o backend que as funções serão criadas/atualizadas automaticamente.
 
 Se você quiser apenas **verificar** se as funções existem no banco, dentro do `psql` execute, por exemplo:
 
-```sql
+```
 \df+ get_chamada_por_turma_e_data
 \df+ listar_professores_com_turmas
 \df+ listar_turmas_otimizado
@@ -86,7 +86,7 @@ JSON contendo:
 
 ## 💻 Código da Função
 
-```sql
+```
 CREATE OR REPLACE FUNCTION get_chamada_por_turma_e_data(
     p_turma_id BIGINT,
     p_data DATE
@@ -213,7 +213,7 @@ Lista JSON contendo:
 
 ## 💻 Código da Função
 
-```sql
+```
 CREATE OR REPLACE FUNCTION listar_professores_com_turmas(
     p_id BIGINT DEFAULT NULL,
     p_nome VARCHAR DEFAULT NULL,
@@ -343,7 +343,7 @@ Lista JSON contendo:
 
 ## 💻 Código da Função
 
-```sql
+```
 CREATE OR REPLACE FUNCTION public.listar_turmas_otimizado(p_id bigint DEFAULT NULL::bigint, p_nome character varying DEFAULT NULL::character varying, p_ano_criacao integer DEFAULT NULL::integer, p_turno character varying DEFAULT NULL::character varying, p_tipo character varying DEFAULT NULL::character varying, p_is_ativa boolean DEFAULT NULL::boolean, p_professor_id bigint DEFAULT NULL::bigint)
  RETURNS json
  LANGUAGE plpgsql
@@ -426,7 +426,7 @@ O uso de funções no PostgreSQL permite:
 
 Após executar as funções, teste com:
 
-```sql
+```
 -- Testar listagem de turmas
 SELECT listar_turmas_otimizado();
 
