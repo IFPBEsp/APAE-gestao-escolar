@@ -1,6 +1,7 @@
 package com.apae.gestao.security;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -10,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("Testes unitários do serviço JWT")
 class JwtServiceTest {
 
     private JwtService jwtService;
@@ -35,6 +37,7 @@ class JwtServiceTest {
     }
 
     @Test
+    @DisplayName("Deve gerar um token com o subject e a role informados")
     void deveGerarTokenComSubjectERole() {
         String token = jwtService.generateToken(
                 "professor@teste.com",
@@ -53,6 +56,7 @@ class JwtServiceTest {
     }
 
     @Test
+    @DisplayName("Deve extrair o subject corretamente do token")
     void deveExtrairSubjectDoToken() {
         String token = jwtService.generateToken(
                 "professor@teste.com",
@@ -65,6 +69,7 @@ class JwtServiceTest {
     }
 
     @Test
+    @DisplayName("Deve extrair a role corretamente do token")
     void deveExtrairRoleDoToken() {
         String token = jwtService.generateToken(
                 "professor@teste.com",
@@ -77,6 +82,7 @@ class JwtServiceTest {
     }
 
     @Test
+    @DisplayName("Deve considerar válido um token não expirado")
     void deveValidarTokenNaoExpirado() {
         String token = jwtService.generateToken(
                 "professor@teste.com",
@@ -87,6 +93,7 @@ class JwtServiceTest {
     }
 
     @Test
+    @DisplayName("Deve considerar inválido um token expirado")
     void deveRecusarTokenExpirado() {
         ReflectionTestUtils.setField(
                 jwtService,
@@ -103,6 +110,7 @@ class JwtServiceTest {
     }
 
     @Test
+    @DisplayName("Deve recusar um token com formato inválido")
     void deveRecusarTokenInvalido() {
         assertFalse(
                 jwtService.isTokenValid("token-invalido")
