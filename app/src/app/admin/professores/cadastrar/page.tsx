@@ -57,6 +57,16 @@ export default function CadastrarProfessorPage() {
     )}-${numbers.slice(9, 11)}`;
   };
 
+  const applyTelefoneMask = (value: string) => {
+    const numbers = value.replace(/\D/g, "").slice(0, 11);
+    if (numbers.length === 0) return "";
+    if (numbers.length <= 2) return `(${numbers}`;
+    if (numbers.length <= 6) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+    if (numbers.length <= 10)
+      return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`;
+  };
+
   const validateCPF = (cpf: string) => {
     const numbers = cpf.replace(/\D/g, "");
     if (numbers.length !== 11 || /^(\d)\1+$/.test(numbers)) return false;
@@ -81,6 +91,9 @@ export default function CadastrarProfessorPage() {
       const masked = applyCPFMask(value);
       setFormData((prev) => ({ ...prev, cpf: masked }));
       if (errors.cpf) setErrors((prev) => ({ ...prev, cpf: "" }));
+    } else if (name === "telefone") {
+      const masked = applyTelefoneMask(value);
+      setFormData((prev) => ({ ...prev, telefone: masked }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -120,7 +133,11 @@ export default function CadastrarProfessorPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await registerProfessor(formData);
+      const payload = {
+        ...formData,
+        telefone: formData.telefone.replace(/\D/g, ""),
+      };
+      const response = await registerProfessor(payload);
       console.log("Professor cadastrado (API):", response);
 
       toast.success("Professor cadastrado com sucesso!");
@@ -224,6 +241,7 @@ export default function CadastrarProfessorPage() {
                   value={formData.telefone}
                   onChange={handleChange}
                   required
+                  maxLength={15}
                   placeholder="(00) 00000-0000"
                   className="border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
                 />
