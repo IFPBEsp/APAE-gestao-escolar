@@ -16,6 +16,12 @@ import { ArrowLeft, Loader2, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { registerProfessor } from "@/services/ProfessorService";
 
+const DDDS_VALIDOS = [
+  11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 24, 27, 28, 31, 32, 33, 34, 35, 37, 38,
+  41, 42, 43, 44, 45, 46, 47, 48, 49, 51, 53, 54, 55, 61, 62, 63, 64, 65, 66, 67, 68, 69,
+  71, 73, 74, 75, 77, 79, 81, 82, 83, 84, 85, 86, 87, 88, 89, 91, 92, 93, 94, 95, 96, 97, 98, 99,
+];
+
 export default function CadastrarProfessorPage() {
   const enderecoInicial = {
     cidade: "",
@@ -40,6 +46,7 @@ export default function CadastrarProfessorPage() {
   });
   const [errors, setErrors] = useState({
     cpf: "",
+    telefone: "",
     endereco: "",
   });
 
@@ -57,7 +64,7 @@ export default function CadastrarProfessorPage() {
     )}-${numbers.slice(9, 11)}`;
   };
 
-  const applyTelefoneMask = (value: string) => {
+  const applyPhoneMask = (value: string) => {
     const numbers = value.replace(/\D/g, "").slice(0, 11);
     if (numbers.length === 0) return "";
     if (numbers.length <= 2) return `(${numbers}`;
@@ -84,6 +91,12 @@ export default function CadastrarProfessorPage() {
     return remainder === parseInt(numbers[10]);
   };
 
+  const validatePhone = (telefone: string) => {
+    const numbers = telefone.replace(/\D/g, "");
+    if (numbers.length !== 10 && numbers.length !== 11) return false;
+    return DDDS_VALIDOS.includes(parseInt(numbers.slice(0, 2), 10));
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
@@ -92,8 +105,9 @@ export default function CadastrarProfessorPage() {
       setFormData((prev) => ({ ...prev, cpf: masked }));
       if (errors.cpf) setErrors((prev) => ({ ...prev, cpf: "" }));
     } else if (name === "telefone") {
-      const masked = applyTelefoneMask(value);
+      const masked = applyPhoneMask(value);
       setFormData((prev) => ({ ...prev, telefone: masked }));
+      if (errors.telefone) setErrors((prev) => ({ ...prev, telefone: "" }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -124,6 +138,11 @@ export default function CadastrarProfessorPage() {
       toast.error("Por favor, corrija o CPF antes de enviar.");
       return;
     }
+    if (!validatePhone(formData.telefone)) {
+      setErrors((prev) => ({ ...prev, telefone: "Telefone inválido" }));
+      toast.error("Por favor, corrija o telefone antes de enviar.");
+      return;
+    }
     if (!enderecoCompleto()) {
       setErrors((prev) => ({ ...prev, endereco: "Preencha os campos obrigatórios do endereço" }));
       toast.error("Por favor, preencha o endereço completo.");
@@ -151,7 +170,7 @@ export default function CadastrarProfessorPage() {
         formacao: "",
         dataContratacao: "",
       });
-      setErrors({ cpf: "", endereco: "" });
+      setErrors({ cpf: "", telefone: "", endereco: "" });
       router.push("/admin/professores");
     } catch (error: any) {
       console.error("Erro no cadastro:", error);
@@ -243,8 +262,12 @@ export default function CadastrarProfessorPage() {
                   required
                   maxLength={15}
                   placeholder="(00) 00000-0000"
-                  className="border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                  className={`border-2 ${errors.telefone
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                    : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                    }`}
                 />
+                {errors.telefone && <p className="text-red-500">{errors.telefone}</p>}
               </div>
 
               {/* Endereço */}
