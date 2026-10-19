@@ -3,8 +3,10 @@ name: Docker Build & Publish
 on:
   push:
     branches:
-      - dev
-      - dev-database
+      - '*'
+  pull_request:
+    branches:
+      - '*'
   workflow_dispatch:
 
 permissions:
