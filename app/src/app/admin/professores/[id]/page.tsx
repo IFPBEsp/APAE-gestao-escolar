@@ -17,17 +17,19 @@ import {
   MapPin,
   CalendarDays,
 } from "lucide-react";
-import { toast } from "sonner";
+import StatusToggleAction from "@/components/StatusToggleAction";
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+
 import api from "@/services/api";
 import ModalEditarProfessor from "@/components/ModalEditarProfessor";
 import { format, isValid, parseISO } from "date-fns";
@@ -321,53 +323,38 @@ export default function DetalhesProfessor() {
                   <Edit className="mr-2 h-5 w-5" />
                   Editar Professor
                 </Button>
-                
-                <Button
-                  variant={professor.ativo ? "danger" : "primary"}
-                  onClick={() => setIsAlertOpen(true)}
-                  className={`w-full ${!professor.ativo ? activateButtonStyles : ""}`}
-                  disabled={isSubmittingToggle}
-                >
-                  <Power className="mr-2 h-5 w-5" />
-                  {professor.ativo ? "Inativar Professor" : "Ativar Professor"}
-                </Button>
+
+              <StatusToggleAction
+                isOpen={isAlertOpen}
+                onOpenChange={setIsAlertOpen}
+                onConfirm={handleToggleStatus}
+                isSubmitting={isSubmittingToggle}
+                active={professor.ativo}
+                labelA="Inativar Professor"
+                labelB="Ativar Professor"
+                titleA="Inativar Professor?"
+                titleB="Ativar Professor?"
+                descriptionA="Ao inativar este professor, ele não poderá mais acessar o sistema. Você poderá reativá-lo posteriormente."
+                descriptionB="Ao ativar este professor, ele voltará a ter acesso ao sistema."
+                variantA="danger"
+                variantB="primary"
+                activeClass={activateButtonStyles}
+                cancelLabel="Cancelar"
+                confirmationLabel="Confirmar"
+                dialog={{
+                  Dialog: AlertDialog,
+                  Content: AlertDialogContent,
+                  Header: AlertDialogHeader,
+                  Title: AlertDialogTitle,
+                  Description: AlertDialogDescription,
+                  Footer: AlertDialogFooter,
+                  Cancel: AlertDialogCancel,
+                  Action: AlertDialogAction,
+                }}
+              />
               </div>
             </CardContent>
           </Card>
-
-          {/* Alert Dialog de Confirmação */}
-          <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  {professor.ativo ? "Inativar" : "Ativar"} Professor?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  {professor.ativo
-                    ? "Ao inativar este professor, ele não poderá mais acessar o sistema. Você poderá reativá-lo posteriormente."
-                    : "Ao ativar este professor, ele voltará a ter acesso ao sistema."}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel asChild>
-                  <Button variant="outline" disabled={isSubmittingToggle}>
-                    Cancelar
-                  </Button>
-                </AlertDialogCancel>
-
-                <AlertDialogAction asChild>
-                  <Button
-                    variant={professor.ativo ? "danger" : "primary"}
-                    className={!professor.ativo ? activateButtonStyles : ""}
-                    onClick={handleToggleStatus}
-                    disabled={isSubmittingToggle}
-                  >
-                    {isSubmittingToggle ? "Processando..." : "Confirmar"}
-                  </Button>
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
 
           {/* Modal de Edição de Professor */}
           <ModalEditarProfessor

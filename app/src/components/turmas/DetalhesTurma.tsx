@@ -12,6 +12,7 @@ import {
     DialogDescription,
     DialogFooter
 } from "@/components/ui/dialog";
+import StatusToggleAction from "@/components/StatusToggleAction";
 import { useEffect, useRef, useState } from "react";
 import {
     buscarTurmaPorId,
@@ -604,49 +605,35 @@ export function DetalhesTurma({
                                 Editar Turma
                             </Button>
 
-                            <Button
-                                variant={turma.ativa ? "danger" : "primary"}
-                                className={`w-full ${!turma.ativa ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700" : ""}`}
-                                onClick={() => setIsDialogOpen(true)}
-                            >
-                                <Power className="mr-2 h-5 w-5" />
-                                {turma.ativa ? "Inativar Turma" : "Reativar Turma"}
-                            </Button>
+                            <StatusToggleAction
+                                isOpen={isDialogOpen}
+                                onOpenChange={setIsDialogOpen}
+                                onConfirm={handleToggleTurma}
+                                isSubmitting={isSubmittingToggle}
+                                active={turma.ativa}
+                                labelA="Inativar Turma"
+                                labelB="Reativar Turma"
+                                titleA="Inativar Turma?"
+                                titleB="Reativar Turma?"
+                                descriptionA="Ao inativar esta turma, ela não aparecerá mais nas listagens ativas."
+                                descriptionB="Ao reativar esta turma, ela voltará a aparecer nas listagens ativas."
+                                variantA="danger"
+                                variantB="primary"
+                                activeClass="bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700"
+                                cancelLabel="Cancelar"
+                                confirmationLabel="Confirmar"
+                                dialog={{
+                                    Dialog,
+                                    Content: DialogContent,
+                                    Header: DialogHeader,
+                                    Title: DialogTitle,
+                                    Description: DialogDescription,
+                                    Footer: DialogFooter,
+                                    Cancel: null,
+                                    Action: Button,
+                                }}
+                            />
                         </div>
-
-                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                            <DialogContent className="max-w-[95vw] sm:max-w-[425px] w-full">
-                                <DialogHeader>
-                                    <DialogTitle>
-                                        {turma.ativa ? "Inativar Turma?" : "Reativar Turma?"}
-                                    </DialogTitle>
-                                    <DialogDescription>
-                                        {turma.ativa
-                                            ? "Ao inativar esta turma, ela não aparecerá mais nas listagens ativas."
-                                            : "Ao reativar esta turma, ela voltará a aparecer nas listagens ativas."
-                                        }
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <DialogFooter>
-                                    <Button
-                                        variant="outline"
-                                        disabled={isSubmittingToggle}
-                                        onClick={() => setIsDialogOpen(false)}
-                                    >
-                                        Cancelar
-                                    </Button>
-                                    <Button
-                                        variant={turma.ativa ? "danger" : "primary"}
-                                        className={!turma.ativa ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700" : ""}
-                                        disabled={isSubmittingToggle}
-                                        onClick={handleToggleTurma}
-                                    >
-                                        {isSubmittingToggle ? "Processando..." : "Confirmar"}
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-
                     </CardContent>
                 </Card>
                 <ModalHistoricoFrequencia
