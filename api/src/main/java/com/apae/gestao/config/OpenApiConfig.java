@@ -1,5 +1,5 @@
-package com.apae.gestao.config;
 
+package com.apae.gestao.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +32,7 @@ import io.swagger.v3.oas.annotations.ExternalDocumentation;
         @Tag(name = "Turmas", description = "Fluxos de criação, vinculação e acompanhamento de turmas"),
         @Tag(name = "Alunos", description = "Consultas públicas sobre alunos ativos"),
         @Tag(name = "Relatórios", description = "Gerenciamento de relatórios individuais dos alunos."),
-        @Tag(name = "Avaliações", description = "Criação e gerenciamento de avaliações dos alunos.") 
+        @Tag(name = "Avaliações", description = "Criação e gerenciamento de avaliações dos alunos.")
     },
     externalDocs = @ExternalDocumentation(
         description = "Guia funcional do Sistema APAE",
@@ -40,7 +40,7 @@ import io.swagger.v3.oas.annotations.ExternalDocumentation;
     )
 )
 @SecurityScheme(
-    name = "bearerAuth",
+    name = OpenApiConfig.BEARER_AUTH,
     description = "Utilize o header Authorization com o formato: Bearer {token}",
     scheme = "bearer",
     bearerFormat = "JWT",
@@ -48,6 +48,8 @@ import io.swagger.v3.oas.annotations.ExternalDocumentation;
     in = SecuritySchemeIn.HEADER
 )
 public class OpenApiConfig {
+
+    public static final String BEARER_AUTH = "bearerAuth";
 
     @Bean
     public io.swagger.v3.oas.models.OpenAPI apaOpenAPI() {
@@ -66,9 +68,9 @@ public class OpenApiConfig {
                 .externalDocs(new io.swagger.v3.oas.models.ExternalDocumentation()
                         .description("Documentação funcional do projeto")
                         .url("https://github.com/IFPBEsp/APAE-gestao-escolar"))
-                .addSecurityItem(new io.swagger.v3.oas.models.security.SecurityRequirement().addList("bearerAuth"))
-                .schemaRequirement("bearerAuth", new io.swagger.v3.oas.models.security.SecurityScheme()
-                        .name("bearerAuth")
+                .addSecurityItem(new io.swagger.v3.oas.models.security.SecurityRequirement().addList(BEARER_AUTH))
+                .schemaRequirement(BEARER_AUTH, new io.swagger.v3.oas.models.security.SecurityScheme()
+                        .name(BEARER_AUTH)
                         .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP)
                         .scheme("bearer")
                         .bearerFormat("JWT"));
