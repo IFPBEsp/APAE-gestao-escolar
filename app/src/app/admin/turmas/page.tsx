@@ -190,6 +190,13 @@ export default function GerenciarTurmasPage() {
                     <p>
                       <strong>Turno:</strong> {turma.turno}
                     </p>
+                    {turma.professor?.nome ? (
+                      <p>
+                        <strong>Professor:</strong> {turma.professor.nome}
+                      </p>
+                    ) : (
+                      <p className="text-gray-500">Sem professor vinculado</p>
+                    )}
                   </div>
                 </div>
               ))}

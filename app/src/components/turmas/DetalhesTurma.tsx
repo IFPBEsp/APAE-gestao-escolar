@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Clock, Calendar, Users, Edit, Power, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, Users, Edit, Power, AlertTriangle, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ModalHistoricoFrequencia from "@/components/frequencia/ModalHistoricoFrequencia";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -370,6 +370,26 @@ export function DetalhesTurma({
                                     <p className="text-[#0D4F97] font-medium break-words">
                                         {turma.totalAlunosAtivos || 0} ativos de {turma.totalAlunos || 0}
                                     </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 bg-[#E8F3FF] rounded-md text-[#0D4F97]">
+                                    <GraduationCap className="h-5 w-5" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium text-gray-500 mb-1 truncate">
+                                        Professor Responsável
+                                    </p>
+                                    {turma?.professor?.nome ? (
+                                        <p className="text-[#0D4F97] font-medium break-words">
+                                            {turma.professor.nome}
+                                        </p>
+                                    ) : (
+                                        <p className="text-gray-500 font-medium break-words">
+                                            Sem professor vinculado
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </div>

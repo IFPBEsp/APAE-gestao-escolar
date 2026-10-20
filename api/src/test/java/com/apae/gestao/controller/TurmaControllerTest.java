@@ -36,6 +36,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.apae.gestao.dto.professor.EnderecoDTO;
 import com.apae.gestao.dto.professor.ProfessorResumoDTO;
+import com.apae.gestao.dto.professor.ProfessorSimplesDTO;
 import com.apae.gestao.dto.turma.TurmaRequestDTO;
 import com.apae.gestao.dto.turma.TurmaResponseDTO;
 import com.apae.gestao.dto.turma.TurmaResumoDTO;
@@ -81,6 +82,10 @@ class TurmaControllerTest {
                 LocalDate.of(2024, 2, 1), LocalDate.of(1990, 5, 12),
                 new EnderecoDTO("Alagoa Grande", "58388-000", "PB", "Centro", "Rua A", "10", null),
                 false);
+    }
+
+    private ProfessorSimplesDTO professorSimples(UUID id) {
+        return new ProfessorSimplesDTO(id, "Maria da Silva");
     }
 
     private TurmaResponseDTO turmaResponse(UUID id, boolean ativa) {
@@ -250,7 +255,7 @@ class TurmaControllerTest {
             UUID professorId = UUID.randomUUID();
             TurmaResumoDTO resumo = new TurmaResumoDTO(id, "Alfabetização 2025 - Manhã", 2025, "MANHA",
                     "Educação Especial", true, 25L, 23L, "Segunda a Sexta - 8h as 12h",
-                    professorResumo(professorId));
+                    professorSimples(professorId));
             when(turmaService.buscarTurmaResumidaPorId(id)).thenReturn(resumo);
 
             mockMvc.perform(get(BASE_URL + "/{id}", id))
@@ -264,7 +269,11 @@ class TurmaControllerTest {
                     .andExpect(jsonPath("$.totalAlunosAtivos").value(23))
                     .andExpect(jsonPath("$.horario").value("Segunda a Sexta - 8h as 12h"))
                     .andExpect(jsonPath("$.professor.id").value(professorId.toString()))
-                    .andExpect(jsonPath("$.professor.nome").value("Maria da Silva"));
+                    .andExpect(jsonPath("$.professor.nome").value("Maria da Silva"))
+                    .andExpect(jsonPath("$.professor.cpf").doesNotExist())
+                    .andExpect(jsonPath("$.professor.email").doesNotExist())
+                    .andExpect(jsonPath("$.professor.telefone").doesNotExist())
+                    .andExpect(jsonPath("$.professor.endereco").doesNotExist());
 
             verify(turmaService).buscarTurmaResumidaPorId(id);
         }
