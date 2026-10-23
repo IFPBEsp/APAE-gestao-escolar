@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -12,9 +12,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, User } from "lucide-react";
+import { Loader2, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { registerProfessor } from "@/services/ProfessorService";
+import { consultarCep } from "@/services/viaCepService";
 
 const DDDS_VALIDOS = [
   11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 24, 27, 28, 31, 32, 33, 34, 35, 37, 38,
@@ -34,6 +35,8 @@ export default function CadastrarProfessorPage() {
   };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCepLoading, setIsCepLoading] = useState(false);
+  
   const [formData, setFormData] = useState({
     nome: "",
     cpf: "",
@@ -44,6 +47,7 @@ export default function CadastrarProfessorPage() {
     formacao: "",
     dataContratacao: "",
   });
+  
   const [errors, setErrors] = useState({
     cpf: "",
     telefone: "",
@@ -51,6 +55,7 @@ export default function CadastrarProfessorPage() {
     endereco: "",
   });
 
+  const abortControllerRef = useRef<AbortController | null>(null);
   const router = useRouter();
 
   const applyCPFMask = (value: string) => {
@@ -59,10 +64,7 @@ export default function CadastrarProfessorPage() {
     if (numbers.length <= 6) return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
     if (numbers.length <= 9)
       return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
-    return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(
-      6,
-      9
-    )}-${numbers.slice(9, 11)}`;
+    return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6, 9)}-${numbers.slice(9, 11)}`;
   };
 
   const applyPhoneMask = (value: string) => {
@@ -84,13 +86,11 @@ export default function CadastrarProfessorPage() {
   const validateCPF = (cpf: string) => {
     const numbers = cpf.replace(/\D/g, "");
     if (numbers.length !== 11 || /^(\d)\1+$/.test(numbers)) return false;
-
     let sum = 0;
     for (let i = 0; i < 9; i++) sum += parseInt(numbers[i]) * (10 - i);
     let remainder = (sum * 10) % 11;
     if (remainder === 10) remainder = 0;
     if (remainder !== parseInt(numbers[9])) return false;
-
     sum = 0;
     for (let i = 0; i < 10; i++) sum += parseInt(numbers[i]) * (11 - i);
     remainder = (sum * 10) % 11;
@@ -111,7 +111,6 @@ export default function CadastrarProfessorPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
     if (name === "cpf") {
       const masked = applyCPFMask(value);
       setFormData((prev) => ({ ...prev, cpf: masked }));
@@ -128,18 +127,60 @@ export default function CadastrarProfessorPage() {
   const handleEnderecoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const newValue = name === "cep" ? applyCEPMask(value) : value;
-
+    
     setFormData((prev) => ({
       ...prev,
-      endereco: {
-        ...prev.endereco,
-        [name]: newValue,
-      },
+      endereco: { ...prev.endereco, [name]: newValue },
     }));
 
     if (name === "cep" && errors.cep) setErrors((prev) => ({ ...prev, cep: "" }));
     if (errors.endereco) setErrors((prev) => ({ ...prev, endereco: "" }));
   };
+
+  useEffect(() => {
+    const buscarDadosCep = async (cepLimpo: string) => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+
+      setIsCepLoading(true);
+
+      try {
+        const data = await consultarCep(cepLimpo, abortControllerRef.current.signal);
+        
+        setFormData((prev) => ({
+          ...prev,
+          endereco: {
+            ...prev.endereco,
+            rua: data.logradouro || prev.endereco.rua,
+            bairro: data.bairro || prev.endereco.bairro,
+            cidade: data.localidade || prev.endereco.cidade,
+            estado: data.uf || prev.endereco.estado,
+          },
+        }));
+        
+        if (errors.cep) setErrors((prev) => ({ ...prev, cep: "" }));
+      } catch (error: any) {
+        if (error.name === "CanceledError" || error.code === "ERR_CANCELED") return;
+
+        if (error.message === "CEP não encontrado.") {
+          toast.error("CEP inexistente. Preencha o endereço manualmente.");
+        } else {
+          toast.error("Serviço de CEP indisponível. Preencha manualmente.");
+        }
+      } finally {
+        setIsCepLoading(false);
+      }
+    };
+
+    const cepLimpo = formData.endereco.cep.replace(/\D/g, "");
+    if (cepLimpo.length === 8) {
+      buscarDadosCep(cepLimpo);
+    } else if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  }, [formData.endereco.cep, errors.cep]);
 
   const enderecoCompleto = () => {
     const { cidade, cep, estado, bairro, rua, numero } = formData.endereco;
@@ -181,24 +222,11 @@ export default function CadastrarProfessorPage() {
           cep: formData.endereco.cep.replace(/\D/g, ""),
         },
       };
-      const response = await registerProfessor(payload);
-      console.log("Professor cadastrado (API):", response);
-
+      await registerProfessor(payload);
+      
       toast.success("Professor cadastrado com sucesso!");
-      setFormData({
-        nome: "",
-        cpf: "",
-        email: "",
-        telefone: "",
-        endereco: enderecoInicial,
-        dataNascimento: "",
-        formacao: "",
-        dataContratacao: "",
-      });
-      setErrors({ cpf: "", telefone: "", cep: "", endereco: "" });
       router.push("/admin/professores");
     } catch (error: any) {
-      console.error("Erro no cadastro:", error);
       toast.error(error.message || "Erro ao cadastrar o professor.");
     } finally {
       setIsSubmitting(false);
@@ -208,7 +236,6 @@ export default function CadastrarProfessorPage() {
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-[#F4F6FB] p-4 md:p-8">
       <div className="mx-auto max-w-2xl">
-
         <Card className="rounded-xl border-2 border-[#B2D7EC] shadow-md">
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -226,76 +253,45 @@ export default function CadastrarProfessorPage() {
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-
-              {/* Nome */}
+              
               <div className="space-y-2">
                 <Label htmlFor="nome" className="text-[#0D4F97]">Nome Completo *</Label>
                 <Input
-                  id="nome"
-                  name="nome"
-                  value={formData.nome}
-                  onChange={handleChange}
-                  required
+                  id="nome" name="nome" value={formData.nome} onChange={handleChange} required
                   placeholder="Digite o nome do professor"
                   className="border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
                 />
               </div>
 
-              {/* CPF */}
               <div className="space-y-2">
                 <Label htmlFor="cpf" className="text-[#0D4F97]">CPF *</Label>
                 <Input
-                  id="cpf"
-                  name="cpf"
-                  value={formData.cpf}
-                  onChange={handleChange}
-                  required
-                  maxLength={14}
-                  placeholder="000.000.000-00"
-                  className={`border-2 ${errors.cpf
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                    : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
-                    }`}
+                  id="cpf" name="cpf" value={formData.cpf} onChange={handleChange} required
+                  maxLength={14} placeholder="000.000.000-00"
+                  className={`border-2 ${errors.cpf ? "border-red-500 focus:border-red-500" : "border-[#B2D7EC] focus:border-[#0D4F97]"}`}
                 />
                 {errors.cpf && <p className="text-red-500">{errors.cpf}</p>}
               </div>
 
-              {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-[#0D4F97]">E-mail *</Label>
                 <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
+                  id="email" name="email" type="email" value={formData.email} onChange={handleChange} required
                   placeholder="exemplo@email.com"
-                  className="border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                  className="border-2 border-[#B2D7EC] focus:border-[#0D4F97]"
                 />
               </div>
 
-              {/* Telefone */}
               <div className="space-y-2">
                 <Label htmlFor="telefone" className="text-[#0D4F97]">Telefone *</Label>
                 <Input
-                  id="telefone"
-                  name="telefone"
-                  type="tel"
-                  value={formData.telefone}
-                  onChange={handleChange}
-                  required
-                  maxLength={15}
-                  placeholder="(00) 00000-0000"
-                  className={`border-2 ${errors.telefone
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                    : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
-                    }`}
+                  id="telefone" name="telefone" type="tel" value={formData.telefone} onChange={handleChange} required
+                  maxLength={15} placeholder="(00) 00000-0000"
+                  className={`border-2 ${errors.telefone ? "border-red-500 focus:border-red-500" : "border-[#B2D7EC] focus:border-[#0D4F97]"}`}
                 />
                 {errors.telefone && <p className="text-red-500">{errors.telefone}</p>}
               </div>
 
-              {/* Endereço */}
               <div className="space-y-4">
                 <div>
                   <Label className="text-[#0D4F97]">Endereço *</Label>
@@ -303,182 +299,123 @@ export default function CadastrarProfessorPage() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
+                  <div className="space-y-2 relative">
                     <Label htmlFor="cep" className="text-[#0D4F97]">CEP *</Label>
-                    <Input
-                      id="cep"
-                      name="cep"
-                      value={formData.endereco.cep}
-                      onChange={handleEnderecoChange}
-                      required
-                      maxLength={9}
-                      placeholder="00000-000"
-                      className={`border-2 ${errors.cep || errors.endereco
-                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                        : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
-                        }`}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="cep"
+                        name="cep"
+                        value={formData.endereco.cep}
+                        onChange={handleEnderecoChange}
+                        required
+                        maxLength={9}
+                        placeholder="00000-000"
+                        className={`border-2 pr-10 ${errors.cep || errors.endereco
+                          ? "border-red-500 focus:border-red-500"
+                          : "border-[#B2D7EC] focus:border-[#0D4F97]"
+                          }`}
+                      />
+                      {isCepLoading && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[#0D4F97]">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        </div>
+                      )}
+                    </div>
                     {errors.cep && <p className="text-red-500">{errors.cep}</p>}
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="estado" className="text-[#0D4F97]">Estado *</Label>
                     <Input
-                      id="estado"
-                      name="estado"
-                      value={formData.endereco.estado}
-                      onChange={handleEnderecoChange}
-                      required
+                      id="estado" name="estado" value={formData.endereco.estado} onChange={handleEnderecoChange} required
                       placeholder="PE"
-                      className={`border-2 ${errors.endereco
-                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                        : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
-                        }`}
+                      className="border-2 border-[#B2D7EC] focus:border-[#0D4F97]"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="cidade" className="text-[#0D4F97]">Cidade *</Label>
                     <Input
-                      id="cidade"
-                      name="cidade"
-                      value={formData.endereco.cidade}
-                      onChange={handleEnderecoChange}
-                      required
+                      id="cidade" name="cidade" value={formData.endereco.cidade} onChange={handleEnderecoChange} required
                       placeholder="Recife"
-                      className={`border-2 ${errors.endereco
-                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                        : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
-                        }`}
+                      className="border-2 border-[#B2D7EC] focus:border-[#0D4F97]"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="bairro" className="text-[#0D4F97]">Bairro *</Label>
                     <Input
-                      id="bairro"
-                      name="bairro"
-                      value={formData.endereco.bairro}
-                      onChange={handleEnderecoChange}
-                      required
+                      id="bairro" name="bairro" value={formData.endereco.bairro} onChange={handleEnderecoChange} required
                       placeholder="Centro"
-                      className={`border-2 ${errors.endereco
-                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                        : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
-                        }`}
+                      className="border-2 border-[#B2D7EC] focus:border-[#0D4F97]"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="rua" className="text-[#0D4F97]">Rua *</Label>
                     <Input
-                      id="rua"
-                      name="rua"
-                      value={formData.endereco.rua}
-                      onChange={handleEnderecoChange}
-                      required
+                      id="rua" name="rua" value={formData.endereco.rua} onChange={handleEnderecoChange} required
                       placeholder="Av. Brasil"
-                      className={`border-2 ${errors.endereco
-                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                        : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
-                        }`}
+                      className="border-2 border-[#B2D7EC] focus:border-[#0D4F97]"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="numero" className="text-[#0D4F97]">Número *</Label>
                     <Input
-                      id="numero"
-                      name="numero"
-                      value={formData.endereco.numero}
-                      onChange={handleEnderecoChange}
-                      required
+                      id="numero" name="numero" value={formData.endereco.numero} onChange={handleEnderecoChange} required
                       placeholder="1000"
-                      className={`border-2 ${errors.endereco
-                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                        : "border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
-                        }`}
+                      className="border-2 border-[#B2D7EC] focus:border-[#0D4F97]"
                     />
                   </div>
 
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="complemento" className="text-[#0D4F97]">Complemento</Label>
                     <Input
-                      id="complemento"
-                      name="complemento"
-                      value={formData.endereco.complemento}
-                      onChange={handleEnderecoChange}
+                      id="complemento" name="complemento" value={formData.endereco.complemento} onChange={handleEnderecoChange}
                       placeholder="Sala, bloco ou referência"
-                      className="border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                      className="border-2 border-[#B2D7EC] focus:border-[#0D4F97]"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Data de Nascimento */}
               <div className="space-y-2">
                 <Label htmlFor="dataNascimento" className="text-[#0D4F97]">Data de Nascimento *</Label>
                 <Input
-                  id="dataNascimento"
-                  name="dataNascimento"
-                  type="date"
-                  value={formData.dataNascimento}
-                  onChange={handleChange}
-                  required
-                  className="border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                  id="dataNascimento" name="dataNascimento" type="date" value={formData.dataNascimento} onChange={handleChange} required
+                  className="border-2 border-[#B2D7EC] focus:border-[#0D4F97]"
                 />
               </div>
 
-              {/* Formação */}
               <div className="space-y-2">
                 <Label htmlFor="formacao" className="text-[#0D4F97]">Formação *</Label>
                 <Input
-                  id="formacao"
-                  name="formacao"
-                  value={formData.formacao}
-                  onChange={handleChange}
-                  required
+                  id="formacao" name="formacao" value={formData.formacao} onChange={handleChange} required
                   placeholder="Ex: Licenciatura em Educação Especial"
-                  className="border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                  className="border-2 border-[#B2D7EC] focus:border-[#0D4F97]"
                 />
               </div>
 
-              {/* Data de Contratação */}
               <div className="space-y-2">
                 <Label htmlFor="dataContratacao" className="text-[#0D4F97]">Data de Contratação *</Label>
                 <Input
-                  id="dataContratacao"
-                  name="dataContratacao"
-                  type="date"
-                  value={formData.dataContratacao}
-                  onChange={handleChange}
-                  required
-                  className="border-2 border-[#B2D7EC] focus:border-[#0D4F97] focus:ring-[#0D4F97]"
+                  id="dataContratacao" name="dataContratacao" type="date" value={formData.dataContratacao} onChange={handleChange} required
+                  className="border-2 border-[#B2D7EC] focus:border-[#0D4F97]"
                 />
               </div>
 
-              {/* Botões */}
               <div className="flex justify-end gap-4 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.back()}
-                >
+                <Button type="button" variant="outline" onClick={() => router.back()}>
                   Cancelar
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  variant="primary"
-                >
+                <Button type="submit" disabled={isSubmitting} variant="primary">
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       Cadastrando...
                     </>
-                  ) : (
-                    "Cadastrar"
-                  )}
+                  ) : "Cadastrar"}
                 </Button>
               </div>
             </form>
