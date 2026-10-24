@@ -17,6 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -228,7 +229,17 @@ class RelatorioServiceTest {
             assertThat(resultado.getTurmaNome()).isEqualTo("Turma A");
             assertThat(resultado.getProfessorNome()).isEqualTo("Maria Silva");
 
-            verify(relatorioRepository).save(any(Relatorio.class));
+            ArgumentCaptor<Relatorio> relatorioCaptor = ArgumentCaptor.forClass(Relatorio.class);
+            verify(relatorioRepository).save(relatorioCaptor.capture());
+            Relatorio enviado = relatorioCaptor.getValue();
+
+            assertThat(enviado.getPacienteId()).isEqualTo(alunoId);
+            assertThat(enviado.getProfessor()).isSameAs(professor);
+            assertThat(enviado.getTurma()).isSameAs(turma);
+            assertThat(enviado.getAtividades()).isEqualTo("Novas atividades");
+            assertThat(enviado.getHabilidades()).isEqualTo("Melhoria na comunicação");
+            assertThat(enviado.getEstrategias()).isEqualTo("Reforço positivo");
+            assertThat(enviado.getRecursos()).isEqualTo("Materiais adaptados");
         }
 
         @Test
@@ -278,28 +289,85 @@ class RelatorioServiceTest {
     class Atualizar {
 
         @Test
-        @DisplayName("Deve atualizar os dados de um relatório existente")
+        @DisplayName("Deve atualizar a entidade existente com novos dados, aluno, professor e turma")
         void deveAtualizarRelatorioExistente() {
+            // O relatório do setUp tem aluno, professor, turma e textos diferentes destes novos valores
+            UUID novoAlunoId = UUID.randomUUID();
+            UUID novoProfessorId = UUID.randomUUID();
+            UUID novoProfessorUsuarioId = UUID.randomUUID();
+            UUID novaTurmaId = UUID.randomUUID();
+
+            AlunoView novoAluno = new AlunoView(
+                    novoAlunoId,
+                    "Pedro Souza",
+                    "555.666.777-88",
+                    LocalDate.of(2014, 3, 10),
+                    "(83) 98888-0000",
+                    null,
+                    true,
+                    false
+            );
+
+            Professor novoProfessor = new Professor();
+            novoProfessor.setId(novoProfessorId);
+            novoProfessor.setUsuarioId(novoProfessorUsuarioId);
+
+            Turma novaTurma = new Turma();
+            novaTurma.setId(novaTurmaId);
+            novaTurma.setNome("Turma B");
+
+            Usuario novoUsuarioProfessor = new Usuario();
+            novoUsuarioProfessor.setId(novoProfessorUsuarioId);
+            novoUsuarioProfessor.setNomeCompleto("Joana Lima");
+
+            RelatorioRequestDTO novoRequest = new RelatorioRequestDTO(
+                    "Atividades atualizadas",
+                    "Habilidades atualizadas",
+                    "Estratégias atualizadas",
+                    "Recursos atualizados",
+                    novoAlunoId,
+                    novaTurmaId,
+                    novoProfessorId
+            );
+
             when(relatorioRepository.findById(relatorioId))
                     .thenReturn(Optional.of(relatorio));
-            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
-            when(professorRepository.findById(professorId))
-                    .thenReturn(Optional.of(professor));
-            when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
-            when(usuarioRepository.findById(professorUsuarioId))
-                    .thenReturn(Optional.of(usuarioProfessor));
+            when(alunoRepository.findById(novoAlunoId)).thenReturn(Optional.of(novoAluno));
+            when(professorRepository.findById(novoProfessorId))
+                    .thenReturn(Optional.of(novoProfessor));
+            when(turmaRepository.findById(novaTurmaId)).thenReturn(Optional.of(novaTurma));
+            when(usuarioRepository.findById(novoProfessorUsuarioId))
+                    .thenReturn(Optional.of(novoUsuarioProfessor));
             when(relatorioRepository.save(any(Relatorio.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
-            RelatorioResponseDTO resultado = relatorioService.atualizar(relatorioId, request);
+            RelatorioResponseDTO resultado = relatorioService.atualizar(relatorioId, novoRequest);
+
+            ArgumentCaptor<Relatorio> relatorioCaptor = ArgumentCaptor.forClass(Relatorio.class);
+            verify(relatorioRepository, times(1)).save(relatorioCaptor.capture());
+            Relatorio enviado = relatorioCaptor.getValue();
+
+            assertThat(enviado).isSameAs(relatorio);
+            assertThat(enviado.getId()).isEqualTo(relatorioId);
+            assertThat(enviado.getCreatedAt()).isEqualTo(LocalDateTime.of(2026, 10, 17, 10, 0));
+            assertThat(enviado.getPacienteId()).isEqualTo(novoAlunoId);
+            assertThat(enviado.getProfessor()).isSameAs(novoProfessor);
+            assertThat(enviado.getTurma()).isSameAs(novaTurma);
+            assertThat(enviado.getAtividades()).isEqualTo("Atividades atualizadas");
+            assertThat(enviado.getHabilidades()).isEqualTo("Habilidades atualizadas");
+            assertThat(enviado.getEstrategias()).isEqualTo("Estratégias atualizadas");
+            assertThat(enviado.getRecursos()).isEqualTo("Recursos atualizados");
 
             assertThat(resultado.getId()).isEqualTo(relatorioId);
-            assertThat(resultado.getAtividades()).isEqualTo("Novas atividades");
-            assertThat(resultado.getHabilidades()).isEqualTo("Melhoria na comunicação");
-            assertThat(resultado.getEstrategias()).isEqualTo("Reforço positivo");
-            assertThat(resultado.getRecursos()).isEqualTo("Materiais adaptados");
-
-            verify(relatorioRepository).save(relatorio);
+            assertThat(resultado.getAlunoId()).isEqualTo(novoAlunoId);
+            assertThat(resultado.getAlunoNome()).isEqualTo("Pedro Souza");
+            assertThat(resultado.getAlunoDataNascimento()).isEqualTo(LocalDate.of(2014, 3, 10));
+            assertThat(resultado.getTurmaNome()).isEqualTo("Turma B");
+            assertThat(resultado.getProfessorNome()).isEqualTo("Joana Lima");
+            assertThat(resultado.getAtividades()).isEqualTo("Atividades atualizadas");
+            assertThat(resultado.getHabilidades()).isEqualTo("Habilidades atualizadas");
+            assertThat(resultado.getEstrategias()).isEqualTo("Estratégias atualizadas");
+            assertThat(resultado.getRecursos()).isEqualTo("Recursos atualizados");
         }
 
         @Test
@@ -312,6 +380,53 @@ class RelatorioServiceTest {
             assertThatThrownBy(() -> relatorioService.atualizar(idInexistente, request))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Relatório não encontrado");
+
+            verify(relatorioRepository, never()).save(any(Relatorio.class));
+        }
+
+        @Test
+        @DisplayName("Deve lançar exceção ao atualizar quando o aluno não existir")
+        void deveLancarExcecaoAoAtualizarQuandoAlunoNaoExistir() {
+            when(relatorioRepository.findById(relatorioId))
+                    .thenReturn(Optional.of(relatorio));
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> relatorioService.atualizar(relatorioId, request))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Aluno não encontrado");
+
+            verify(relatorioRepository, never()).save(any(Relatorio.class));
+        }
+
+        @Test
+        @DisplayName("Deve lançar exceção ao atualizar quando o professor não existir")
+        void deveLancarExcecaoAoAtualizarQuandoProfessorNaoExistir() {
+            when(relatorioRepository.findById(relatorioId))
+                    .thenReturn(Optional.of(relatorio));
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
+            when(professorRepository.findById(professorId))
+                    .thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> relatorioService.atualizar(relatorioId, request))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Professor não encontrado");
+
+            verify(relatorioRepository, never()).save(any(Relatorio.class));
+        }
+
+        @Test
+        @DisplayName("Deve lançar exceção ao atualizar quando a turma não existir")
+        void deveLancarExcecaoAoAtualizarQuandoTurmaNaoExistir() {
+            when(relatorioRepository.findById(relatorioId))
+                    .thenReturn(Optional.of(relatorio));
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
+            when(professorRepository.findById(professorId))
+                    .thenReturn(Optional.of(professor));
+            when(turmaRepository.findById(turmaId)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> relatorioService.atualizar(relatorioId, request))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("Turma não encontrada");
 
             verify(relatorioRepository, never()).save(any(Relatorio.class));
         }
