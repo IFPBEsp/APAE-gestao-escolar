@@ -3,11 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  ArrowLeft,
+import { Button } from "@/components/ui/button";import { ArrowLeft,
   Edit,
-  Power,
   UserCircle,
   Mail,
   Phone,
@@ -17,17 +14,7 @@ import {
   MapPin,
   CalendarDays,
 } from "lucide-react";
-import StatusToggleAction from "@/components/StatusToggleAction";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from "@/components/ui/alert-dialog";
+import StatusToggleAction, { type StatusToggleCopy } from "@/components/StatusToggleAction";
 import { toast } from "sonner";
 
 import api from "@/services/api";
@@ -121,7 +108,18 @@ export default function DetalhesProfessor() {
     return endereco.complemento ? `${linha} - ${endereco.complemento}` : linha || "—";
   };
 
-  const activateButtonStyles = "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700";
+  const PROFESSOR_STATUS_COPY: StatusToggleCopy = {
+  deactivate: {
+    button: "Inativar Professor",
+    title: "Inativar Professor?",
+    description: "Ao inativar este professor, ele não poderá mais acessar o sistema. Você poderá reativá-lo posteriormente.",
+  },
+  activate: {
+    button: "Ativar Professor",
+    title: "Ativar Professor?",
+    description: "Ao ativar este professor, ele voltará a ter acesso ao sistema.",
+  },
+};
 
   if (loading) {
     return (
@@ -325,32 +323,12 @@ export default function DetalhesProfessor() {
                 </Button>
 
               <StatusToggleAction
+                active={professor.ativo}
+                copy={PROFESSOR_STATUS_COPY}
                 isOpen={isAlertOpen}
                 onOpenChange={setIsAlertOpen}
                 onConfirm={handleToggleStatus}
                 isSubmitting={isSubmittingToggle}
-                active={professor.ativo}
-                labelA="Inativar Professor"
-                labelB="Ativar Professor"
-                titleA="Inativar Professor?"
-                titleB="Ativar Professor?"
-                descriptionA="Ao inativar este professor, ele não poderá mais acessar o sistema. Você poderá reativá-lo posteriormente."
-                descriptionB="Ao ativar este professor, ele voltará a ter acesso ao sistema."
-                variantA="danger"
-                variantB="primary"
-                activeClass={activateButtonStyles}
-                cancelLabel="Cancelar"
-                confirmationLabel="Confirmar"
-                dialog={{
-                  Dialog: AlertDialog,
-                  Content: AlertDialogContent,
-                  Header: AlertDialogHeader,
-                  Title: AlertDialogTitle,
-                  Description: AlertDialogDescription,
-                  Footer: AlertDialogFooter,
-                  Cancel: AlertDialogCancel,
-                  Action: AlertDialogAction,
-                }}
               />
               </div>
             </CardContent>

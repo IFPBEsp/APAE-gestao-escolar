@@ -4,15 +4,7 @@ import { ArrowLeft, Clock, Calendar, Users, Edit, Power, AlertTriangle } from "l
 import { Button } from "@/components/ui/button";
 import ModalHistoricoFrequencia from "@/components/frequencia/ModalHistoricoFrequencia";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter
-} from "@/components/ui/dialog";
-import StatusToggleAction from "@/components/StatusToggleAction";
+import StatusToggleAction, { type StatusToggleCopy } from "@/components/StatusToggleAction";
 import { useEffect, useRef, useState } from "react";
 import {
     buscarTurmaPorId,
@@ -65,6 +57,19 @@ export function DetalhesTurma({
     const [searchTerm, setSearchTerm] = useState("");
     const [showAlertsOnly, setShowAlertsOnly] = useState(false);
     const historicoRequestIdRef = useRef(0);
+
+    const TURMA_STATUS_COPY: StatusToggleCopy = {
+      deactivate: {
+        button: "Inativar Turma",
+        title: "Inativar Turma?",
+        description: "Ao inativar esta turma, ela não aparecerá mais nas listagens ativas.",
+      },
+      activate: {
+        button: "Reativar Turma",
+        title: "Reativar Turma?",
+        description: "Ao reativar esta turma, ela voltará a aparecer nas listagens ativas.",
+      },
+    };
 
     useEffect(() => {
         async function carregarTurma() {
@@ -606,32 +611,12 @@ export function DetalhesTurma({
                             </Button>
 
                             <StatusToggleAction
-                                isOpen={isDialogOpen}
-                                onOpenChange={setIsDialogOpen}
-                                onConfirm={handleToggleTurma}
-                                isSubmitting={isSubmittingToggle}
-                                active={turma.ativa}
-                                labelA="Inativar Turma"
-                                labelB="Reativar Turma"
-                                titleA="Inativar Turma?"
-                                titleB="Reativar Turma?"
-                                descriptionA="Ao inativar esta turma, ela não aparecerá mais nas listagens ativas."
-                                descriptionB="Ao reativar esta turma, ela voltará a aparecer nas listagens ativas."
-                                variantA="danger"
-                                variantB="primary"
-                                activeClass="bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700"
-                                cancelLabel="Cancelar"
-                                confirmationLabel="Confirmar"
-                                dialog={{
-                                    Dialog,
-                                    Content: DialogContent,
-                                    Header: DialogHeader,
-                                    Title: DialogTitle,
-                                    Description: DialogDescription,
-                                    Footer: DialogFooter,
-                                    Cancel: null,
-                                    Action: Button,
-                                }}
+                              active={turma.ativa}
+                              copy={TURMA_STATUS_COPY}
+                              isOpen={isDialogOpen}
+                              onOpenChange={setIsDialogOpen}
+                              onConfirm={handleToggleTurma}
+                              isSubmitting={isSubmittingToggle}
                             />
                         </div>
                     </CardContent>
