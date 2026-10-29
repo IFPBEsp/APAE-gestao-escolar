@@ -160,11 +160,11 @@ export default function Professores() {
                   </div>
 
                   <div className="mt-3 md:mt-4 text-xs md:text-sm text-[#222222] space-y-1">
-                    <p className="truncate" title={professor.email || undefined}>
-                      <span className="font-medium">Email: </span>
-                      <span className="font-semibold text-[#0D4F97]">
-                        {professor.email || 'Não informado'}
-                      </span>
+                    <p
+                      className="truncate text-[#0D4F97] font-medium"
+                      title={professor.email || undefined}
+                    >
+                      Email: {professor.email || 'Não informado'}
                     </p>
                     {professor.turmas && (
                       <p className="truncate text-[#0D4F97] font-medium mt-1">
