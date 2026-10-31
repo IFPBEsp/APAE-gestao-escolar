@@ -12,7 +12,6 @@ import { listarProfessores } from "@/services/ProfessorService";
 import { contarAulasRealizadas, getEstatisticasTurma } from "@/services/ChamadaService";
 import type { TurmaResumo } from "@/types/turma";
 
-
 export interface TurmasData {
   ativas: number;
   total: number;
