@@ -123,6 +123,7 @@ O objetivo é **substituir processos manuais e fragmentados** por uma ferramenta
 | Tecnologia | Descrição |
 |------------|-----------|
 | [Git](https://git-scm.com/) | Controle de versão |
+| [Gitleaks](https://github.com/gitleaks/gitleaks#installing) | v8+ — detecção de segredos e credenciais no hook de pre-commit |
 | [VS Code](https://code.visualstudio.com/) / [IntelliJ IDEA](https://www.jetbrains.com/idea/) | Editores recomendados |
 
 ---
@@ -236,6 +237,7 @@ sincronizadas manualmente quando o produto de origem mudar.
 | **Docker** | 20+ | Subir PostgreSQL e MinIO locais |
 | **Java** | 21+ | Compilar e executar o backend Spring Boot |
 | **Git** | — | Clonar o repositório |
+| **Gitleaks** | 8+ | Detectar segredos no hook de pre-commit ([instalação](https://github.com/gitleaks/gitleaks#installing)) |
 
 ### 1. Clone o repositório
 
