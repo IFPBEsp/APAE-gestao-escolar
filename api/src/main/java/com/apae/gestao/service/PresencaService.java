@@ -70,12 +70,14 @@ public class PresencaService {
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada com id: " + turmaId));
 
         Aula aula = aulaRepository.findByTurmaAndData(turma, data)
+                .map(aulaExistente -> {
+                    if (request.getDescricao() != null && !request.getDescricao().isBlank()) {
+                        aulaExistente.setDescricao(request.getDescricao());
+                        aulaRepository.save(aulaExistente);
+                    }
+                    return aulaExistente;
+                })
                 .orElseGet(() -> criarNovaAula(turma, data, request.getDescricao()));
-
-        if (request.getDescricao() != null && !request.getDescricao().isBlank()) {
-            aula.setDescricao(request.getDescricao());
-            aulaRepository.save(aula);
-        }
 
         for (RegistrarChamadaRequestDTO.PresencaItemDTO item : request.getPresencas()) {
             registrarOuAtualizarPresencaIndividual(aula, item);

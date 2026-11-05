@@ -15,6 +15,7 @@ import com.apae.gestao.repository.UsuarioRepository;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Usuario;
 import com.apae.gestao.dto.professor.ProfessorResumoDTO;
+import com.apae.gestao.dto.professor.ProfessorSimplesDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -329,12 +330,23 @@ public class TurmaService {
                 totalAlunos,
                 totalAtivos,
                 horarioPorTurno(turma.getTurno()),
-                mapProfessorResumo(turma.getProfessor())
+                mapProfessorSimples(turma.getProfessor())
         );
     }
 
     private TurmaResponseDTO toResponse(Turma turma) {
         return new TurmaResponseDTO(turma, mapProfessorResumo(turma.getProfessor()));
+    }
+
+    private ProfessorSimplesDTO mapProfessorSimples(Professor professor) {
+        if (professor == null) {
+            return null;
+        }
+        Usuario usuario = usuarioRepository.findById(professor.getUsuarioId()).orElse(null);
+        if (usuario == null) {
+            return null;
+        }
+        return new ProfessorSimplesDTO(professor.getId(), usuario.getNomeCompleto());
     }
 
     private ProfessorResumoDTO mapProfessorResumo(Professor professor) {
