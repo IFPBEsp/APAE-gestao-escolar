@@ -1,3 +1,4 @@
+
 package com.apae.gestao.service;
 
 import com.apae.gestao.dto.avaliacao.AvaliacaoRequestDTO;
@@ -25,6 +26,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AvaliacaoService {
 
+    private static final String ALUNO_NAO_ENCONTRADO = "Aluno não encontrado";
+    private static final String PROFESSOR_NAO_ENCONTRADO = "Professor não encontrado";
+
     private final AvaliacaoRepository avaliacaoRepository;
     private final AlunoViewRepository alunoRepository;
     private final ProfessorRepository professorRepository;
@@ -34,9 +38,9 @@ public class AvaliacaoService {
     @Transactional
     public AvaliacaoResponseDTO criar(AvaliacaoRequestDTO dto) {
         alunoRepository.findById(dto.getAlunoId())
-                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException(ALUNO_NAO_ENCONTRADO));
         Professor professor = professorRepository.findById(dto.getProfessorId())
-                .orElseThrow(() -> new EntityNotFoundException("Professor não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException(PROFESSOR_NAO_ENCONTRADO));
 
         Avaliacao avaliacao = Avaliacao.builder()
                 .descricao(dto.getDescricao())
@@ -64,7 +68,7 @@ public class AvaliacaoService {
     @Transactional(readOnly = true)
     public List<AvaliacaoResponseDTO> listarPorAluno(UUID alunoId) {
         alunoRepository.findById(alunoId)
-                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException(ALUNO_NAO_ENCONTRADO));
         return avaliacaoRepository.findByPacienteIdOrderByDataAvaliacaoDesc(alunoId)
                 .stream()
                 .map(this::toResponse)
@@ -74,7 +78,7 @@ public class AvaliacaoService {
     @Transactional(readOnly = true)
     public List<AvaliacaoResponseDTO> listarPorProfessor(UUID professorId) {
         Professor professor = professorRepository.findById(professorId)
-                .orElseThrow(() -> new EntityNotFoundException("Professor não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException(PROFESSOR_NAO_ENCONTRADO));
         return avaliacaoRepository.findByProfessorOrderByDataAvaliacaoDesc(professor)
                 .stream()
                 .map(this::toResponse)
@@ -87,9 +91,9 @@ public class AvaliacaoService {
                 .orElseThrow(() -> new EntityNotFoundException("Avaliação não encontrada"));
 
         alunoRepository.findById(dto.getAlunoId())
-                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException(ALUNO_NAO_ENCONTRADO));
         Professor professor = professorRepository.findById(dto.getProfessorId())
-                .orElseThrow(() -> new EntityNotFoundException("Professor não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException(PROFESSOR_NAO_ENCONTRADO));
 
         avaliacao.setDescricao(dto.getDescricao());
         avaliacao.setPacienteId(dto.getAlunoId());
