@@ -188,7 +188,8 @@ export default function GerenciarTurmasPage() {
 
                   <div className="text-gray-700 space-y-1 text-sm md:text-base">
                     <p>
-                      <strong>Turno:</strong> {turma.turno}
+                      <span className="font-bold text-[#222222]">Turno: </span>
+                      <span className="text-[#0D4F97]">{turma.turno}</span>
                     </p>
                     {turma.professor?.nome ? (
                       <p>
