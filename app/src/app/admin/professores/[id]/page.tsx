@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";import { ArrowLeft,
+import { Button } from "@/components/ui/button";
+import {
+  ArrowLeft,
   Edit,
   UserCircle,
   Mail,
