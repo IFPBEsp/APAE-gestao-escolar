@@ -3,11 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  ArrowLeft,
+import { Button } from "@/components/ui/button";import { ArrowLeft,
   Edit,
-  Power,
   UserCircle,
   Mail,
   Phone,
@@ -17,17 +14,9 @@ import {
   MapPin,
   CalendarDays,
 } from "lucide-react";
+import StatusToggleAction, { type StatusToggleCopy } from "@/components/StatusToggleAction";
 import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+
 import api from "@/services/api";
 import ModalEditarProfessor from "@/components/ModalEditarProfessor";
 import { format, isValid, parseISO } from "date-fns";
@@ -119,7 +108,18 @@ export default function DetalhesProfessor() {
     return endereco.complemento ? `${linha} - ${endereco.complemento}` : linha || "—";
   };
 
-  const activateButtonStyles = "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700";
+  const PROFESSOR_STATUS_COPY: StatusToggleCopy = {
+  deactivate: {
+    button: "Inativar Professor",
+    title: "Inativar Professor?",
+    description: "Ao inativar este professor, ele não poderá mais acessar o sistema. Você poderá reativá-lo posteriormente.",
+  },
+  activate: {
+    button: "Ativar Professor",
+    title: "Ativar Professor?",
+    description: "Ao ativar este professor, ele voltará a ter acesso ao sistema.",
+  },
+};
 
   if (loading) {
     return (
@@ -321,53 +321,18 @@ export default function DetalhesProfessor() {
                   <Edit className="mr-2 h-5 w-5" />
                   Editar Professor
                 </Button>
-                
-                <Button
-                  variant={professor.ativo ? "danger" : "primary"}
-                  onClick={() => setIsAlertOpen(true)}
-                  className={`w-full ${!professor.ativo ? activateButtonStyles : ""}`}
-                  disabled={isSubmittingToggle}
-                >
-                  <Power className="mr-2 h-5 w-5" />
-                  {professor.ativo ? "Inativar Professor" : "Ativar Professor"}
-                </Button>
+
+              <StatusToggleAction
+                active={professor.ativo}
+                copy={PROFESSOR_STATUS_COPY}
+                isOpen={isAlertOpen}
+                onOpenChange={setIsAlertOpen}
+                onConfirm={handleToggleStatus}
+                isSubmitting={isSubmittingToggle}
+              />
               </div>
             </CardContent>
           </Card>
-
-          {/* Alert Dialog de Confirmação */}
-          <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  {professor.ativo ? "Inativar" : "Ativar"} Professor?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  {professor.ativo
-                    ? "Ao inativar este professor, ele não poderá mais acessar o sistema. Você poderá reativá-lo posteriormente."
-                    : "Ao ativar este professor, ele voltará a ter acesso ao sistema."}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel asChild>
-                  <Button variant="outline" disabled={isSubmittingToggle}>
-                    Cancelar
-                  </Button>
-                </AlertDialogCancel>
-
-                <AlertDialogAction asChild>
-                  <Button
-                    variant={professor.ativo ? "danger" : "primary"}
-                    className={!professor.ativo ? activateButtonStyles : ""}
-                    onClick={handleToggleStatus}
-                    disabled={isSubmittingToggle}
-                  >
-                    {isSubmittingToggle ? "Processando..." : "Confirmar"}
-                  </Button>
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
 
           {/* Modal de Edição de Professor */}
           <ModalEditarProfessor
