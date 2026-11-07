@@ -168,8 +168,9 @@ export default function Professores() {
                       <span className="text-[#0D4F97]">{professor.email || 'Não informado'}</span>
                     </p>
                     {professor.turmas && (
-                      <p className="truncate text-[#0D4F97] font-medium mt-1">
-                        Turmas: {professor.turmas}
+                      <p className="truncate font-medium mt-1">
+                        <span className="font-bold text-[#222222]">Turmas: </span>
+                        <span className="text-[#0D4F97]">{professor.turmas}</span>
                       </p>
                     )}
                   </div>
