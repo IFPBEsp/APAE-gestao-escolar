@@ -1,0 +1,3 @@
+# A aplicacao nao utiliza XsltView nem SSE com view, reduzindo a exposicao. Sem correcao na linha 6.2.x
+CVE-2026-47884
+CVE-2026-47890
