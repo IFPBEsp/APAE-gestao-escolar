@@ -216,24 +216,13 @@ export default function CadastrarProfessorPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateCPF(formData.cpf)) {
-      setErrors((prev) => ({ ...prev, cpf: "CPF inválido" }));
-      toast.error("Por favor, corrija o CPF antes de enviar.");
-      return;
-    }
-    if (!validatePhone(formData.telefone)) {
-      setErrors((prev) => ({ ...prev, telefone: "Telefone inválido" }));
-      toast.error("Por favor, corrija o telefone antes de enviar.");
-      return;
-    }
-    if (!validateCEP(formData.endereco.cep)) {
-      setErrors((prev) => ({ ...prev, cep: "CEP inválido" }));
-      toast.error("Por favor, corrija o CEP antes de enviar.");
-      return;
-    }
-    if (!enderecoCompleto()) {
-      setErrors((prev) => ({ ...prev, endereco: "Preencha os campos obrigatórios do endereço" }));
-      toast.error("Por favor, preencha o endereço completo.");
+    const newErrors = validateForm();
+    const hasErrors = Object.keys(newErrors).length > 0;
+
+    setErrors({ cpf: "", telefone: "", cep: "", endereco: "", ...newErrors });
+
+    if (hasErrors) {
+      toast.error("Por favor, corrija os campos destacados em vermelho antes de enviar.");
       return;
     }
 
