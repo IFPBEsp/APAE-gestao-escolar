@@ -23,6 +23,13 @@ const DDDS_VALIDOS = [
   71, 73, 74, 75, 77, 79, 81, 82, 83, 84, 85, 86, 87, 88, 89, 91, 92, 93, 94, 95, 96, 97, 98, 99,
 ];
 
+type FormErrors = {
+  cpf: string;
+  telefone: string;
+  cep: string;
+  endereco: string;
+};
+
 export default function CadastrarProfessorPage() {
   const enderecoInicial = {
     cidade: "",
@@ -48,7 +55,7 @@ export default function CadastrarProfessorPage() {
     dataContratacao: "",
   });
   
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<FormErrors>({
     cpf: "",
     telefone: "",
     cep: "",
