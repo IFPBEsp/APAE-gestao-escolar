@@ -194,6 +194,25 @@ export default function CadastrarProfessorPage() {
     return [cidade, cep, estado, bairro, rua, numero].every((valor) => valor.trim());
   };
 
+  const validateForm = (): Partial<FormErrors> => {
+    const newErrors: Partial<FormErrors> = {};
+
+    if (!validateCPF(formData.cpf)) {
+      newErrors.cpf = "CPF inválido";
+    }
+    if (!validatePhone(formData.telefone)) {
+      newErrors.telefone = "Telefone inválido";
+    }
+    if (!validateCEP(formData.endereco.cep)) {
+      newErrors.cep = "CEP inválido";
+    }
+    if (!enderecoCompleto()) {
+      newErrors.endereco = "Preencha os campos obrigatórios do endereço";
+    }
+
+    return newErrors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
