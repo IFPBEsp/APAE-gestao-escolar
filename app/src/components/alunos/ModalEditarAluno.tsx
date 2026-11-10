@@ -1,4 +1,5 @@
 "use client";
+import type { AlunoResumo } from "@/types/api";
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,7 @@ interface AlunoModalProps {
 interface ModalEditarAlunoProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (alunoAtualizado: any) => void;
+    onSave: (alunoAtualizado: AlunoResumo) => void;
     aluno: AlunoModalProps | null;
 }
 

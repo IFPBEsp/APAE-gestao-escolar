@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useMemo, useSyncExternalStore, ReactNode } from 'react';
 
 interface Usuario {
   id: string;
@@ -19,36 +19,45 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [usuario, setUsuario] = useState<Usuario | null>(null);
-  const [loading, setLoading] = useState(true);
+function subscribeAuth(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  window.addEventListener("apae-auth-change", onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener("apae-auth-change", onChange);
+  };
+}
 
-  useEffect(() => {
-    // Recupera usuário do localStorage ao carregar a página
-    const usuarioSalvo = localStorage.getItem('usuarioLogado');
-    if (usuarioSalvo) {
-      try {
-        setUsuario(JSON.parse(usuarioSalvo));
-      } catch (error) {
-        console.error('Erro ao carregar usuário:', error);
-        localStorage.removeItem('usuarioLogado');
-      }
+const getUsuarioSnapshot = () => localStorage.getItem("usuarioLogado");
+const getServerUsuarioSnapshot = () => null;
+const getClientReady = () => true;
+const getServerReady = () => false;
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const usuarioSalvo = useSyncExternalStore(subscribeAuth, getUsuarioSnapshot, getServerUsuarioSnapshot);
+  const hydrated = useSyncExternalStore(subscribeAuth, getClientReady, getServerReady);
+  const loading = !hydrated;
+  const usuario = useMemo<Usuario | null>(() => {
+    if (!usuarioSalvo) return null;
+    try {
+      return JSON.parse(usuarioSalvo) as Usuario;
+    } catch {
+      return null;
     }
-    setLoading(false);
-  }, []);
+  }, [usuarioSalvo]);
 
   const login = (novoUsuario: Usuario) => {
-    setUsuario(novoUsuario);
     localStorage.setItem('usuarioLogado', JSON.stringify(novoUsuario));
+    window.dispatchEvent(new Event('apae-auth-change'));
   };
 
   const logout = () => {
-    setUsuario(null);
     localStorage.removeItem('usuarioLogado');
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     document.cookie = 'token=; path=/; max-age=0';
     document.cookie = 'role=; path=/; max-age=0';
+    window.dispatchEvent(new Event('apae-auth-change'));
   };
 
   return (

@@ -1,4 +1,5 @@
 'use client'
+import { apiError } from "@/utils/apiError";
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
@@ -50,12 +51,6 @@ export default function DetalhesProfessor() {
   const [isModalEditarOpen, setIsModalEditarOpen] = useState(false);
   const [isSubmittingToggle, setIsSubmittingToggle] = useState(false);
 
-  useEffect(() => {
-    if (professorId) {
-      loadProfessor();
-    }
-  }, [professorId]);
-
   const loadProfessor = async () => {
     try {
       setLoading(true);
@@ -69,6 +64,23 @@ export default function DetalhesProfessor() {
       setLoading(false);
     }
   };
+
+
+  useEffect(() => {
+    if (!professorId) return;
+    let active = true;
+    api.get(`/professores/${professorId}`)
+      .then(response => { if (active) setProfessor(response.data); })
+      .catch(error => {
+        if (active) {
+          console.error("Erro ao carregar professor:", error);
+          toast.error("Erro ao carregar dados do professor");
+          router.push("/admin/professores");
+        }
+      })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [professorId, router]);
 
   const handleToggleStatus = async () => {
     if (!professor) return;
@@ -89,9 +101,9 @@ export default function DetalhesProfessor() {
       toast.success(
         `Professor ${professor.ativo ? "inativado" : "ativado"} com sucesso!`
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro ao alterar status:", error);
-      toast.error(error.message || "Erro ao alterar status do professor");
+      toast.error(apiError(error).message || "Erro ao alterar status do professor");
     } finally {
       setIsSubmittingToggle(false);
     }

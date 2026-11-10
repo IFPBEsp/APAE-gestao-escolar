@@ -1,3 +1,4 @@
+import type { RelatorioData } from "@/types/api";
 import { useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { useImpressaoDocumento } from "@/components/impressao/useImpressaoDocume
 
 
 interface VisualizarRelatorioAdminProps {
-  relatorio: any;
+  relatorio: RelatorioData | null;
   onBack: () => void;
   alunoNome?: string;
   alunoDataNascimento?: string;
@@ -31,7 +32,7 @@ export default function VisualizarRelatorioAdmin({
   const { refImpressao, imprimir } = useImpressaoDocumento();
 
   const dataRelatorio = relatorio?.data
-    ? new Date(relatorio.data.split("/").reverse().join("-"))
+    ? (relatorio.data instanceof Date ? relatorio.data : new Date(relatorio.data.split("/").reverse().join("-")))
     : new Date();
 
   const atividades = relatorio?.atividades || "";

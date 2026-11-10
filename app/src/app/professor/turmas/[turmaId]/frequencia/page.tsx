@@ -1,4 +1,6 @@
 'use client'
+import type { AlunoResumo, TurmaDetalhe, EstatisticaFrequencia } from "@/types/api";
+import { apiError } from "@/utils/apiError";
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -35,9 +37,9 @@ export default function FrequenciaPage() {
             : params.turmaId
         : "";
 
-    const [turma, setTurma] = useState<any>(null);
-    const [alunos, setAlunos] = useState<any[]>([]);
-    const [estatisticas, setEstatisticas] = useState<any[]>([]);
+    const [turma, setTurma] = useState<TurmaDetalhe | null>(null);
+    const [alunos, setAlunos] = useState<AlunoResumo[]>([]);
+    const [estatisticas, setEstatisticas] = useState<EstatisticaFrequencia[]>([]);
     const [totalAulas, setTotalAulas] = useState(0);
     const [loading, setLoading] = useState(true);
 
@@ -187,7 +189,7 @@ function ChamadaContent({
     descricao,
 }: {
     turmaId: string;
-    alunos: any[];
+    alunos: AlunoResumo[];
     onSalvarChamada?: () => void;
     data?: Date;
     descricao?: string;
@@ -313,9 +315,9 @@ function ChamadaContent({
                 onSalvarChamada();
             }
             
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Erro ao salvar chamada:", err);
-            toast.error("Erro ao salvar chamada: " + (err.message || "Tente novamente."));
+            toast.error("Erro ao salvar chamada: " + (apiError(err).message || "Tente novamente."));
         } finally {
             setIsSaving(false);
         }
@@ -461,8 +463,8 @@ function HistoricoContent({
     totalAulasRealizadas = 0
 }: {
     turmaNome: string;
-    alunos: any[];
-    estatisticas?: any[];
+    alunos: AlunoResumo[];
+    estatisticas?: EstatisticaFrequencia[];
     onViewAlunoHistorico: (alunoId: string) => void;
     onNovaChamada?: () => void;
     totalAulasRealizadas?: number;

@@ -20,20 +20,9 @@ import DadosAlunoImpressao from "@/components/impressao/DadosAlunoImpressao";
 import { RelatorioIndividualConteudo } from "@/components/relatorios/RelatorioIndividualConteudo";
 import { buscarAlunoPorId } from "@/services/AlunoService";
 
-interface Relatorio {
-  id: string;
-  alunoId?: string;
-  data: string | Date;
-  aluno?: string;
-  professor?: string;
-  turma?: string;
-  atividades?: string;
-  habilidades?: string;
-  estrategias?: string;
-  recursos?: string;
-  atividade?: string;
-  aluno_nascimento?: string;
-}
+import type { RelatorioData } from "@/types/api";
+
+type Relatorio = RelatorioData;
 
 interface ModalVisualizarEditarRelatorioProps {
   isOpen: boolean;
@@ -45,7 +34,7 @@ interface ModalVisualizarEditarRelatorioProps {
   onSalvar?: (relatorioAtualizado: Relatorio) => void;
 }
 
-const parseDate = (dateString: any): Date => {
+const parseDate = (dateString: string | Date | null | undefined): Date => {
   if (!dateString) return new Date();
   if (dateString instanceof Date) return dateString;
   if (typeof dateString === "string") {
@@ -60,7 +49,7 @@ const parseDate = (dateString: any): Date => {
   return new Date();
 };
 
-export default function ModalVisualizarEditarRelatorio({
+function RelatorioEditor({
   isOpen,
   onClose,
   relatorio,
@@ -68,8 +57,8 @@ export default function ModalVisualizarEditarRelatorio({
   alunoDataNascimento,
   alunoTurma,
   onSalvar,
-}: ModalVisualizarEditarRelatorioProps) {
-  const [isEditando, setIsEditando] = useState(false);
+}: Omit<ModalVisualizarEditarRelatorioProps, "relatorio"> & { relatorio: Relatorio }) {
+  const [isEditando, setIsEditando] = useState(!relatorio.id || relatorio.id === "novo");
   const [isLoading, setIsLoading] = useState(false);
   const [dadosAlunoCompleto, setDadosAlunoCompleto] = useState({
     nome: "",
@@ -78,13 +67,13 @@ export default function ModalVisualizarEditarRelatorio({
   });
 
   const [formData, setFormData] = useState({
-    data: new Date(),
-    atividades: "",
-    habilidades: "",
-    estrategias: "",
-    recursos: "",
-    professor: "",
-  });
+        data: parseDate(relatorio.data),
+        atividades: relatorio.atividades || relatorio.atividade || "",
+        habilidades: relatorio.habilidades || "",
+        estrategias: relatorio.estrategias || "",
+        recursos: relatorio.recursos || "",
+        professor: relatorio.professor || "Professor(a)",
+      });
 
   const { refImpressao, imprimir } = useImpressaoDocumento();
 
@@ -118,21 +107,6 @@ export default function ModalVisualizarEditarRelatorio({
     }
     carregarDadosAluno();
   }, [isOpen, relatorio, alunoNome, alunoDataNascimento, alunoTurma]);
-
-  useEffect(() => {
-    if (relatorio && isOpen) {
-      const isNew = !relatorio.id || relatorio.id === "novo";
-      setIsEditando(isNew);
-      setFormData({
-        data: parseDate(relatorio.data),
-        atividades: relatorio.atividades || relatorio.atividade || "",
-        habilidades: relatorio.habilidades || "",
-        estrategias: relatorio.estrategias || "",
-        recursos: relatorio.recursos || "",
-        professor: relatorio.professor || "Professor(a)",
-      });
-    }
-  }, [relatorio, isOpen]);
 
   const handleSalvar = async () => {
     if (!formData.atividades.trim() || !formData.habilidades.trim() ||
@@ -291,4 +265,9 @@ export default function ModalVisualizarEditarRelatorio({
       </DialogContent>
     </Dialog>
   );
+}
+
+export default function ModalVisualizarEditarRelatorio(props: ModalVisualizarEditarRelatorioProps) {
+  if (!props.isOpen || !props.relatorio) return null;
+  return <RelatorioEditor {...props} relatorio={props.relatorio} key={props.relatorio.id ?? "novo"} />;
 }
