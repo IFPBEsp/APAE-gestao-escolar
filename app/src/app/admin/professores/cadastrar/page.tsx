@@ -23,6 +23,13 @@ const DDDS_VALIDOS = [
   71, 73, 74, 75, 77, 79, 81, 82, 83, 84, 85, 86, 87, 88, 89, 91, 92, 93, 94, 95, 96, 97, 98, 99,
 ];
 
+type FormErrors = {
+  cpf: string;
+  telefone: string;
+  cep: string;
+  endereco: string;
+};
+
 export default function CadastrarProfessorPage() {
   const enderecoInicial = {
     cidade: "",
@@ -48,7 +55,7 @@ export default function CadastrarProfessorPage() {
     dataContratacao: "",
   });
   
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<FormErrors>({
     cpf: "",
     telefone: "",
     cep: "",
@@ -187,27 +194,35 @@ export default function CadastrarProfessorPage() {
     return [cidade, cep, estado, bairro, rua, numero].every((valor) => valor.trim());
   };
 
+  const validateForm = (): Partial<FormErrors> => {
+    const newErrors: Partial<FormErrors> = {};
+
+    if (!validateCPF(formData.cpf)) {
+      newErrors.cpf = "CPF inválido";
+    }
+    if (!validatePhone(formData.telefone)) {
+      newErrors.telefone = "Telefone inválido";
+    }
+    if (!validateCEP(formData.endereco.cep)) {
+      newErrors.cep = "CEP inválido";
+    }
+    if (!enderecoCompleto()) {
+      newErrors.endereco = "Preencha os campos obrigatórios do endereço";
+    }
+
+    return newErrors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateCPF(formData.cpf)) {
-      setErrors((prev) => ({ ...prev, cpf: "CPF inválido" }));
-      toast.error("Por favor, corrija o CPF antes de enviar.");
-      return;
-    }
-    if (!validatePhone(formData.telefone)) {
-      setErrors((prev) => ({ ...prev, telefone: "Telefone inválido" }));
-      toast.error("Por favor, corrija o telefone antes de enviar.");
-      return;
-    }
-    if (!validateCEP(formData.endereco.cep)) {
-      setErrors((prev) => ({ ...prev, cep: "CEP inválido" }));
-      toast.error("Por favor, corrija o CEP antes de enviar.");
-      return;
-    }
-    if (!enderecoCompleto()) {
-      setErrors((prev) => ({ ...prev, endereco: "Preencha os campos obrigatórios do endereço" }));
-      toast.error("Por favor, preencha o endereço completo.");
+    const newErrors = validateForm();
+    const hasErrors = Object.keys(newErrors).length > 0;
+
+    setErrors({ cpf: "", telefone: "", cep: "", endereco: "", ...newErrors });
+
+    if (hasErrors) {
+      toast.error("Por favor, corrija os campos destacados em vermelho antes de enviar.");
       return;
     }
 
