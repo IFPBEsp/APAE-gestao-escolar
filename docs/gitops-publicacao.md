@@ -43,3 +43,29 @@ git diff --check
 Checks de PR nao comprovam publicacao no GHCR. O aceite da #106 exige uma
 execucao real na `main` e evidencias de notificacao, homologacao, promocao
 sem rebuild e rollback.
+
+## Lint e contratos do frontend
+
+O frontend usa o pacote oficial `eslint-config-next` fixado em `16.1.5`,
+compativel com a versao de Next.js do lockfile, no formato flat config.
+O pacote incorreto `eslint-plugin-next` foi removido e `npm run lint` chama
+diretamente o ESLint CLI. O aumento do lockfile inclui as dependencias reais
+das regras de Next.js, React e TypeScript; nao e uma revisao de vulnerabilidades.
+
+Os contratos compartilhados ficam em `app/src/types/api.ts`. Erros capturados
+sao tratados como `unknown` e estreitados pelos helpers de `apiError.ts`.
+As regras de hooks permanecem habilitadas: formularios inicializam seus dados
+quando o editor e montado, respostas obsoletas sao ignoradas nos carregamentos
+ajustados e o contexto de autenticacao acompanha o armazenamento externo.
+
+```bash
+cd app
+npm ci
+npm run lint
+npm run build
+npx --no-install tsc --noEmit
+```
+
+A correcao da configuracao revelou e corrigiu os erros bloqueantes existentes
+no codigo. Os avisos de lint continuam visiveis. As correcoes de CVEs seguem
+separadas no PR da issue #137.

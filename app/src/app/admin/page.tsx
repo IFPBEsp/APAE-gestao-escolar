@@ -1,4 +1,5 @@
 "use client";
+import type { AlunoResumo, TurmaDetalhe, EstatisticaFrequencia, HistoricoPresenca } from "@/types/api";
 
 import { useState, useEffect } from "react";
 import { GraduationCap, ArrowRight, UserPlus, Search, Shield, ChevronRight, Activity, BookOpen, BarChart2, Users2, Users, School } from "lucide-react";
@@ -21,13 +22,13 @@ export default function AdminHomePage() {
   const [totalProfessores, setTotalProfessores] = useState<number | string>("--");
   
   const [turmasData, setTurmasData] = useState<{ ativas: number, total: number, ocupacao: number, capacidadeTotal: number }>({ ativas: 0, total: 0, ocupacao: 0, capacidadeTotal: 0 });
-  const [ultimosAlunos, setUltimosAlunos] = useState<any[]>([]);
-  const [topTurmas, setTopTurmas] = useState<any[]>([]);
+  const [ultimosAlunos, setUltimosAlunos] = useState<AlunoResumo[]>([]);
+  const [topTurmas, setTopTurmas] = useState<TurmaDetalhe[]>([]);
 
   const [localSearchActive, setLocalSearchActive] = useState(false);
-  const [localSearchResults, setLocalSearchResults] = useState<any[]>([]);
+  const [localSearchResults, setLocalSearchResults] = useState<AlunoResumo[]>([]);
   const [localSearchLoading, setLocalSearchLoading] = useState(false);
-  const [selectedLocalAluno, setSelectedLocalAluno] = useState<any | null>(null);
+  const [selectedLocalAluno, setSelectedLocalAluno] = useState<AlunoResumo | null>(null);
 
   const [frequenciaMediaGlobal, setFrequenciaMediaGlobal] = useState<number>(0);
   const [graficoMetas, setGraficoMetas] = useState<{ dadas: number, restantes: number }>({ dadas: 0, restantes: 200 });
@@ -40,7 +41,7 @@ export default function AdminHomePage() {
         const resAlunos = await listarAlunos("");
         const alunosList = Array.isArray(resAlunos) ? resAlunos : (resAlunos?.content || []);
         
-        const recentActivities = [...alunosList].sort((a: any, b: any) => {
+        const recentActivities = [...alunosList].sort((a, b) => {
            const timeA = a.dataUltimaAvaliacao ? new Date(a.dataUltimaAvaliacao).getTime() : 0;
            const timeB = b.dataUltimaAvaliacao ? new Date(b.dataUltimaAvaliacao).getTime() : 0;
            return timeB - timeA;
@@ -65,9 +66,9 @@ export default function AdminHomePage() {
         let countFreqValid = 0;
         let turmasAulasSum = 0; 
 
-        const turmasFormatadas: any[] = [];
+        const turmasFormatadas: TurmaDetalhe[] = [];
 
-        const perTurmaStats = await Promise.all(turmasList.map(async (t: any) => {
+        const perTurmaStats = await Promise.all(turmasList.map(async (t: TurmaDetalhe) => {
            try {
               const [estatisticas, aulasRealizadasData] = await Promise.all([
                  getEstatisticasTurma(t.id),
@@ -91,7 +92,7 @@ export default function AdminHomePage() {
            }
            
            if (estatisticas && estatisticas.length > 0) {
-              const avgFreqTurma = estatisticas.reduce((acc: any, curr: any) => acc + curr.frequencia, 0) / estatisticas.length;
+              const avgFreqTurma = estatisticas.reduce((acc: number, curr: EstatisticaFrequencia) => acc + curr.frequencia, 0) / estatisticas.length;
               sumPorcentagemFreq += avgFreqTurma;
               countFreqValid++;
            }
@@ -110,7 +111,7 @@ export default function AdminHomePage() {
            capacidadeTotal: cTotal
         });
 
-        const sortedTurmas = turmasFormatadas.sort((a: any, b: any) => b.ocupacao - a.ocupacao);
+        const sortedTurmas = turmasFormatadas.sort((a, b) => (b.ocupacao ?? 0) - (a.ocupacao ?? 0));
         setTopTurmas(sortedTurmas.slice(0, 4));
 
         setFrequenciaMediaGlobal(
@@ -126,8 +127,8 @@ export default function AdminHomePage() {
       }
 
       try {
-        const resProfessores: any = await listarProfessores(); 
-        const countProf = Array.isArray(resProfessores) ? resProfessores.length : (resProfessores?.totalElements || resProfessores?.content?.length || 0);
+        const resProfessores = await listarProfessores();
+        const countProf = resProfessores.length;
         setTotalProfessores(countProf);
       } catch (e) {
         console.error("Erro ao puxar professores", e);
@@ -171,7 +172,7 @@ export default function AdminHomePage() {
      setSelectedLocalAluno(null);
   }
 
-  const abrirPerfilLocal = async (aluno: any) => {
+  const abrirPerfilLocal = async (aluno: AlunoResumo) => {
      setSelectedLocalAluno({...aluno, isMetricsLoading: true});
      try {
        // Lazy require service para não dar ciclico na page
@@ -180,15 +181,15 @@ export default function AdminHomePage() {
        
        let frequenciaCalc = 0;
        if (historico && historico.length > 0) {
-          const presentes = historico.filter((h:any) => h.status === 'Presente').length;
+          const presentes = historico.filter((h: HistoricoPresenca) => h.status === 'Presente').length;
           frequenciaCalc = Math.round((presentes / historico.length) * 100);
        }
-       setSelectedLocalAluno((prev: any) => {
+       setSelectedLocalAluno((prev) => {
           if (!prev || prev.id !== aluno.id) return prev;
           return {...prev, isMetricsLoading: false, freqHistorico: historico, frequenciaVal: historico.length > 0 ? frequenciaCalc : null};
        });
      } catch(err) {
-       setSelectedLocalAluno((prev: any) => {
+       setSelectedLocalAluno((prev) => {
           if (!prev || prev.id !== aluno.id) return prev;
           return {...prev, isMetricsLoading: false, freqHistorico: [], frequenciaVal: null};
        });
@@ -560,7 +561,7 @@ export default function AdminHomePage() {
               <div className="flex items-center justify-between border-b border-gray-200 pb-2">
                  <div>
                    <h2 className="text-xl font-extrabold text-[#0D4F97]">Raio-X Módulo do Aluno</h2>
-                   <p className="text-sm font-semibold text-gray-500">Resultado da busca focada para "{searchTerm}"</p>
+                   <p className="text-sm font-semibold text-gray-500">Resultado da busca focada para &quot;{searchTerm}&quot;</p>
                  </div>
                  <button onClick={limparPesquisaLocal} className="text-xs font-bold text-gray-400 border border-gray-200 bg-white hover:bg-gray-50 hover:text-rose-500 rounded-md px-3 py-1.5 transition-colors">Encerrar Pesquisa [X]</button>
               </div>
@@ -612,7 +613,7 @@ export default function AdminHomePage() {
                            <p className="text-xs font-extrabold text-[#0D4F97]/50 uppercase tracking-widest text-center">Frequência Pessoal</p>
                            {selectedLocalAluno.isMetricsLoading ? (
                               <div className="w-16 h-16 border-4 border-gray-100 border-t-[#0D4F97] rounded-full animate-spin my-4"></div>
-                           ) : selectedLocalAluno.frequenciaVal !== null ? (
+                           ) : selectedLocalAluno.frequenciaVal != null ? (
                               <>
                                 <div className="w-40 h-40 relative">
                                    <ResponsiveContainer width="100%" height="100%">
@@ -646,7 +647,7 @@ export default function AdminHomePage() {
                      {localSearchResults.length === 0 ? (
                         <div className="col-span-full py-12 text-center border-2 border-dashed border-gray-200 rounded-2xl">
                            <p className="text-gray-400 font-bold text-lg">Infelizmente, zero resultados encontrados!</p>
-                           <p className="text-gray-400 text-sm mt-1">Nenhum aluno ativo possui ou contém "{searchTerm}".</p>
+                           <p className="text-gray-400 text-sm mt-1">Nenhum aluno ativo possui ou contém &quot;{searchTerm}&quot;.</p>
                         </div>
                      ) : (
                         localSearchResults.map(al => (

@@ -1,4 +1,6 @@
 'use client';
+import type { AlunoResumo, TurmaDetalhe, EstatisticaFrequencia, HistoricoPresenca } from "@/types/api";
+import { apiError } from "@/utils/apiError";
 
 import { ArrowLeft, Clock, Calendar, Users, Edit, Power, AlertTriangle, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,11 +32,11 @@ import { useRouter } from "next/navigation";
 
 interface DetalhesTurmaProps {
     turmaId: string;
-    turmaData?: any;
+    turmaData?: TurmaDetalhe;
     onBack: () => void;
     onNavigate: (screen: string, turmaId?: string) => void;
     onEdit: () => void;
-    onInactivate?: (turmaAtualizada?: any) => void;
+    onInactivate?: (turmaAtualizada?: TurmaDetalhe) => void;
 }
 
 export function DetalhesTurma({
@@ -48,18 +50,18 @@ export function DetalhesTurma({
 
     const router = useRouter();
 
-    const [turma, setTurma] = useState<any>(turmaData || null);
-    const [alunosDaTurma, setAlunosDaTurma] = useState<any[]>([]);
-    const [alunosFrequencia, setAlunosFrequencia] = useState<any[]>([]);
-    const [estatisticas, setEstatisticas] = useState<any[]>([]);
+    const [turma, setTurma] = useState<TurmaDetalhe | null>(turmaData || null);
+    const [alunosDaTurma, setAlunosDaTurma] = useState<AlunoResumo[]>([]);
+    const [alunosFrequencia, setAlunosFrequencia] = useState<AlunoResumo[]>([]);
+    const [estatisticas, setEstatisticas] = useState<EstatisticaFrequencia[]>([]);
     const [totalAulasRealizadas, setTotalAulasRealizadas] = useState(0);
     const [loading, setLoading] = useState(!turmaData);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSubmittingToggle, setIsSubmittingToggle] = useState(false);
     const [isTogglingAluno, setIsTogglingAluno] = useState<string | null>(null);
     const [isHistoricoOpen, setIsHistoricoOpen] = useState(false);
-    const [historicoAluno, setHistoricoAluno] = useState<any[]>([]);
-    const [alunoSelecionado, setAlunoSelecionado] = useState<any | null>(null);
+    const [historicoAluno, setHistoricoAluno] = useState<HistoricoPresenca[]>([]);
+    const [alunoSelecionado, setAlunoSelecionado] = useState<AlunoResumo | null>(null);
     const [loadingHistorico, setLoadingHistorico] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [showAlertsOnly, setShowAlertsOnly] = useState(false);
@@ -113,8 +115,8 @@ export function DetalhesTurma({
                 toast.error("Não foi possível carregar o total de aulas realizadas.");
               }
 
-            } catch (error: any) {
-              toast.error(error.message || "Erro ao carregar turma");
+            } catch (error: unknown) {
+              toast.error(apiError(error).message || "Erro ao carregar turma");
             } finally {
               setLoading(false);
             }
@@ -126,15 +128,15 @@ export function DetalhesTurma({
     async function handleToggleTurma() {
         try {
             setIsSubmittingToggle(true);
-            if (turma.ativa) {
+            if (turma?.ativa) {
                 await desativarTurma(turmaId);
                 toast.success("Turma inativada com sucesso");
             } else {
                 await ativarTurma(turmaId);
                 toast.success("Turma reativada com sucesso");
             }
-        } catch (error: any) {
-            toast.error(error.message || "Erro ao alterar status da turma");
+        } catch (error: unknown) {
+            toast.error(apiError(error).message || "Erro ao alterar status da turma");
             setIsSubmittingToggle(false);
             return;
         }
@@ -148,7 +150,7 @@ export function DetalhesTurma({
             }
             
             setIsDialogOpen(false);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Erro ao atualizar dados da turma:", error);
             toast.error("Erro ao atualizar dados da tela. Recarregue a página.");
         } finally {
@@ -156,7 +158,7 @@ export function DetalhesTurma({
         }
     }
 
-    async function handleAbrirHistoricoAluno(aluno: any) {
+    async function handleAbrirHistoricoAluno(aluno: AlunoResumo) {
         if (!aluno?.id) {
             toast.error("Erro: Identificador do aluno não encontrado.");
             return;
@@ -175,9 +177,9 @@ export function DetalhesTurma({
             if (historicoRequestIdRef.current === currentRequestId) {
                 setHistoricoAluno(historico);
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Erro ao carregar histórico do aluno:", error);
-            toast.error(error.message || "Erro ao carregar histórico do aluno.");
+            toast.error(apiError(error).message || "Erro ao carregar histórico do aluno.");
         } finally {
             if (historicoRequestIdRef.current === currentRequestId) {
                 setLoadingHistorico(false);
@@ -195,8 +197,8 @@ export function DetalhesTurma({
                 await ativarAlunoDaTurma(turmaId, alunoId);
                 toast.success("Aluno ativado com sucesso");
             }
-        } catch (error: any) {
-            toast.error(error.message || "Erro ao alterar status do aluno");
+        } catch (error: unknown) {
+            toast.error(apiError(error).message || "Erro ao alterar status do aluno");
             setIsTogglingAluno(null);
             return;
         }
@@ -222,7 +224,7 @@ export function DetalhesTurma({
             } else if (alunosFrequenciaResult.status === "rejected") {
                 toast.error("Não foi possível recarregar a frequência dos alunos.");
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Erro ao atualizar dados após toggle do aluno:", error);
             toast.error("Erro ao atualizar dados da tela. Recarregue a página.");
         } finally {
@@ -240,7 +242,7 @@ export function DetalhesTurma({
 
     const alunosComFrequencia = alunosFrequencia.map((aluno) => {
         const stat = estatisticas.find(
-            (s: any) => String(s.alunoId) === String(aluno.id)
+            (s: EstatisticaFrequencia) => String(s.alunoId) === String(aluno.id)
         );
 
         return {
@@ -311,7 +313,7 @@ export function DetalhesTurma({
                                 </div>
                                 <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3 flex-1 min-w-0">
                                     <h2 className="text-2xl font-bold text-[#0D4F97] truncate">
-                                        {turma.nome || turma.name}
+                                        {turma.nome || turma.nome}
                                     </h2>
                                     <span
                                         className={`inline-block rounded-full px-3 py-1 font-medium text-xs lg:text-sm w-fit
@@ -459,7 +461,7 @@ export function DetalhesTurma({
                                                             disabled={isTogglingAluno !== null}
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                handleToggleAlunoStatus(aluno.alunoId, aluno.ativo);
+                                                                handleToggleAlunoStatus(aluno.alunoId ?? aluno.id, aluno.ativo ?? true);
                                                             }}
                                                         >
                                                             <Power className="mr-2 h-4 w-4" />

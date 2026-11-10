@@ -1,4 +1,5 @@
 'use client'
+import { apiError } from "@/utils/apiError";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -26,8 +27,8 @@ export default function ChamadaPage() {
       try {
         const data = await buscarTurmaPorId(turmaId);
         setTurma(data);
-      } catch (error: any) {
-        toast.error(error.message || 'Erro ao carregar a turma');
+      } catch (error: unknown) {
+        toast.error(apiError(error).message || 'Erro ao carregar a turma');
       } finally {
         setLoading(false);
       }

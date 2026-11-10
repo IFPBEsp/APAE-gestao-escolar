@@ -166,12 +166,7 @@ export default function ProfessorDashboardPage() {
   useEffect(() => {
     if (authLoading) return;
 
-    if (!usuario) {
-      setDashboard(null);
-      setError(null);
-      setLoading(false);
-      return;
-    }
+    if (!usuario) return;
 
     let ativo = true;
 
@@ -208,7 +203,7 @@ export default function ProfessorDashboardPage() {
     };
   }, [authLoading, usuario]);
 
-  if (authLoading || loading) {
+  if (authLoading || (usuario && loading)) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">

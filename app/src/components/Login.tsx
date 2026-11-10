@@ -1,4 +1,5 @@
 'use client'
+import { errorResponse } from "@/utils/apiError";
 
 import { useState } from "react";
 import { Eye, EyeOff, LogIn } from "lucide-react";
@@ -47,10 +48,10 @@ export default function LoginComponent({ tipoPredefinido }: LoginProps) {
         router.replace("/professor");
       }
 
-    } catch (err: any) {
-      console.log(err.response);
+    } catch (err: unknown) {
+      console.log(errorResponse(err));
 
-      const message = err.response?.data?.message;
+      const message = errorResponse(err)?.data?.message;
 
       if (message && message.includes("PRIMEIRO_ACESSO")) {
         router.push(`/primeiro-acesso?email=${email}`);

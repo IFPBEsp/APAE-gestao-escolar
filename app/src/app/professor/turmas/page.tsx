@@ -1,4 +1,5 @@
 'use client'
+import { apiError } from "@/utils/apiError";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -34,7 +35,6 @@ export default function TurmasPage() {
       .then(setProfessor)
       .catch(() => toast.error("Erro ao carregar professor"));
 
-    setLoading(true);
     listarTurmas()
       .then((data) => {
           const ativas = data.filter((t: Turma) => t.ativa);
@@ -43,7 +43,7 @@ export default function TurmasPage() {
           );
           setTurmas(ordenadas);
       })
-      .catch((err: any) => toast.error(err.message || "Erro ao carregar dados"))
+      .catch((err: unknown) => toast.error(apiError(err).message || "Erro ao carregar dados"))
       .finally(() => setLoading(false));
   }, [professorId, router]);
 

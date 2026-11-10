@@ -1,4 +1,5 @@
 'use client'
+import type { HistoricoPresenca, AvaliacaoData, RelatorioData } from "@/types/api";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,12 +67,12 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
   const [loadingAvaliacoes, setLoadingAvaliacoes] = useState(true);
   const [loadingRelatorios, setLoadingRelatorios] = useState(true);
   const [loadingHistoricoTurmas, setLoadingHistoricoTurmas] = useState(true);
-  const [selectedAvaliacao, setSelectedAvaliacao] = useState<any>(null); 
-  const [selectedRelatorio, setSelectedRelatorio] = useState<any>(null); 
+  const [selectedAvaliacao, setSelectedAvaliacao] = useState<AvaliacaoData | null>(null);
+  const [selectedRelatorio, setSelectedRelatorio] = useState<RelatorioData | null>(null);
   const [isHistoricoOpen, setIsHistoricoOpen] = useState(false);
-  const [historicoAluno, setHistoricoAluno] = useState<any[]>([]);
+  const [historicoAluno, setHistoricoAluno] = useState<HistoricoPresenca[]>([]);
   const [loadingHistorico, setLoadingHistorico] = useState(false);
-  const [turmaSelecionada, setTurmaSelecionada] = useState<any | null>(null);
+  const [turmaSelecionada, setTurmaSelecionada] = useState<AlunoTurmaHistoricoDTO | null>(null);
 
   useEffect(() => {
     async function loadAlunoData() {
@@ -367,7 +368,7 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
                     </TableHeader>
 
                     <TableBody className="text-gray-600">
-                      {avaliacoes.map((avaliacao: any, index: number) => (
+                      {avaliacoes.map((avaliacao, index: number) => (
                         <TableRow key={index}>
 
                           <TableCell className="font-medium text-gray-900 truncate px-4 sm:px-6">
@@ -486,7 +487,7 @@ export default function DetalhesDoAluno({ params }: { params: Promise<{ id: stri
                   </TableHeader>
 
                   <TableBody className="text-gray-600">
-                    {relatorios.map((relatorio: any, index: number) => (
+                    {relatorios.map((relatorio, index: number) => (
                       <TableRow key={index}>
 
                         <TableCell

@@ -1,4 +1,5 @@
 'use client'
+import type { AlunoResumo, TurmaDetalhe, RelatorioData } from "@/types/api";
 
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -36,15 +37,15 @@ export default function RelatoriosAlunoListaPage() {
   const alunoIdFromUrl = params?.alunoId ? String(params.alunoId) : null;
   const turmaId = searchParams?.get('turmaId');
 
-  const [relatorios, setRelatorios] = useState<any[]>([]);
+  const [relatorios, setRelatorios] = useState<RelatorioData[]>([]);
   const [isExcluirDialogOpen, setIsExcluirDialogOpen] = useState(false);
-  const [relatorioExcluindo, setRelatorioExcluindo] = useState<any | null>(null);
+  const [relatorioExcluindo, setRelatorioExcluindo] = useState<RelatorioData | null>(null);
   const [isModalRelatorioOpen, setIsModalRelatorioOpen] = useState(false);
-  const [relatorioSelecionado, setRelatorioSelecionado] = useState<any | null>(null);
+  const [relatorioSelecionado, setRelatorioSelecionado] = useState<RelatorioData | null>(null);
 
-  const [alunoData, setAlunoData] = useState<any>(null);
+  const [alunoData, setAlunoData] = useState<AlunoResumo | null>(null);
   const [loadingAluno, setLoadingAluno] = useState(true);
-  const [turmaData, setTurmaData] = useState<any>(null);
+  const [turmaData, setTurmaData] = useState<TurmaDetalhe | null>(null);
 
   useEffect(() => {
     const carregarAluno = async () => {
@@ -79,24 +80,31 @@ export default function RelatoriosAlunoListaPage() {
     carregarTurma();
   }, [turmaId]);
 
-  const carregarRelatorios = useCallback(async () => {
-    if (!alunoIdFromUrl) return;
+  const buscarRelatoriosDoAluno = useCallback(async (): Promise<RelatorioData[]> => {
+    if (!alunoIdFromUrl) return [];
     try {
       const dados = await listarRelatorios();
-      const filtrados = dados.filter((r: any) =>
+      const filtrados = dados.filter((r: RelatorioData) =>
         String(r.alunoId) === String(alunoIdFromUrl)
       );
-      setRelatorios(filtrados);
+      return filtrados;
     } catch {
       toast.error("Erro ao carregar relatórios.");
+      return [];
     }
   }, [alunoIdFromUrl]);
 
-  useEffect(() => {
-    carregarRelatorios();
-  }, [carregarRelatorios]);
+  const carregarRelatorios = useCallback(async () => {
+    setRelatorios(await buscarRelatoriosDoAluno());
+  }, [buscarRelatoriosDoAluno]);
 
-  const handleSalvarRelatorio = async (dadosDoModal: any) => {
+  useEffect(() => {
+    let active = true;
+    buscarRelatoriosDoAluno().then(data => { if (active) setRelatorios(data); });
+    return () => { active = false; };
+  }, [buscarRelatoriosDoAluno]);
+
+  const handleSalvarRelatorio = async (dadosDoModal: RelatorioData) => {
     if (!professorId) {
       toast.error("Usuário não autenticado");
       return;
@@ -126,7 +134,7 @@ export default function RelatoriosAlunoListaPage() {
       setIsModalRelatorioOpen(false);
       setRelatorioSelecionado(null);
       setTimeout(() => carregarRelatorios(), 400);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error("Erro ao processar relatório.");
     }
   };
@@ -178,12 +186,12 @@ export default function RelatoriosAlunoListaPage() {
               turma={turmaData?.nome || alunoData?.turma?.nome || "Turma não encontrada"}
               turno={turmaData?.turno || alunoData?.turma?.turno}
               turmaId={turmaId}
-              alunoId={alunoIdFromUrl}
+              alunoId={alunoIdFromUrl ?? undefined}
               loading={loadingAluno}
               action={
                 <Button
                   onClick={() => {
-                    setRelatorioSelecionado({ id: "novo", alunoId: alunoIdFromUrl });
+                    setRelatorioSelecionado({ id: "novo", alunoId: alunoIdFromUrl ?? undefined });
                     setIsModalRelatorioOpen(true);
                   }}
                   variant="primary"

@@ -1,4 +1,5 @@
 'use client'
+import type { AlunoResumo, TurmaDetalhe, HistoricoPresenca } from "@/types/api";
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -26,14 +27,14 @@ export default function HistoricoAlunoPage() {
             : params.alunoId
         : "";
 
-    const [aluno, setAluno] = useState<any>(null);
-    const [turma, setTurma] = useState<any>(null);
+    const [aluno, setAluno] = useState<AlunoResumo | null>(null);
+    const [turma, setTurma] = useState<TurmaDetalhe | null>(null);
     const [loading, setLoading] = useState(true);
 
     // Mock History Data
     // In a real implementation, we would fetch this from an API endpoint like /gestao-escolar/api/alunos/{id}/frequencia
     // Mock History Data - Generated deterministically based on ID to match the list page
-    const [historico, setHistorico] = useState<any[]>([]);
+    const [historico, setHistorico] = useState<HistoricoPresenca[]>([]);
 
     useEffect(() => {
         async function carregarDados() {

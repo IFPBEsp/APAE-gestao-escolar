@@ -1,4 +1,5 @@
 'use client'
+import { errorResponse } from "@/utils/apiError";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -45,9 +46,9 @@ export default function EsqueciSenhaPage() {
     try{
       await redefinirSenha(email, cpf);
       router.push(`/primeiro-acesso?&email=${email}`);
-    }catch (error: any){
+    }catch (error: unknown){
       const mensagemErro =
-      error.response?.data?.message || 'Erro ao validar os dados. Tente novamente.';
+      errorResponse(error)?.data?.message || 'Erro ao validar os dados. Tente novamente.';
       setErro(mensagemErro);
     } finally {
       setCarregando(false);

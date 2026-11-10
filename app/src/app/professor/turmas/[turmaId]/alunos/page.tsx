@@ -1,4 +1,6 @@
 'use client'
+import type { AlunoResumo, TurmaDetalhe, AvaliacaoData } from "@/types/api";
+import { apiError } from "@/utils/apiError";
 
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -54,8 +56,8 @@ export default function TurmaDetalhesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const [turma, setTurma] = useState<any>(null);
-  const [alunos, setAlunos] = useState<any[]>([]);
+  const [turma, setTurma] = useState<Pick<TurmaDetalhe, "id" | "nome" | "descricao" | "ativa"> | null>(null);
+  const [alunos, setAlunos] = useState<AlunoResumo[]>([]);
   const [loading, setLoading] = useState(true);
 
   async function carregarUltimaAvaliacao(alunoId: string) {
@@ -67,8 +69,8 @@ export default function TurmaDetalhesPage() {
       if (!avaliacoes || avaliacoes.length === 0) {
         return { ultimaAvaliacao: "—" };
       }
-      const ultima = avaliacoes.reduce((maisRecente: any, atual: any) =>
-        new Date(atual.dataAvaliacao) > new Date(maisRecente.dataAvaliacao) ? atual : maisRecente
+      const ultima = avaliacoes.reduce((maisRecente: AvaliacaoData, atual: AvaliacaoData) =>
+        new Date(atual.dataAvaliacao ?? 0) > new Date(maisRecente.dataAvaliacao ?? 0) ? atual : maisRecente
       );
       return { ultimaAvaliacao: format(new Date(ultima.dataAvaliacao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) };
     } catch {
@@ -94,8 +96,8 @@ export default function TurmaDetalhesPage() {
         const alunosResponse = await getAlunosDaTurma(turmaId);
 
         const alunosFormatados = await Promise.all(
-          alunosResponse.map(async (aluno: any) => {
-            const alunoId = aluno.alunoId;
+          alunosResponse.map(async (aluno: AlunoResumo) => {
+            const alunoId = aluno.alunoId ?? aluno.id;
             const avaliacao = await carregarUltimaAvaliacao(alunoId);
 
             return {
@@ -106,13 +108,13 @@ export default function TurmaDetalhesPage() {
           })
         );
 
-        const alunosOrdenados = [...alunosFormatados].sort((a: any, b: any) =>
+        const alunosOrdenados = [...alunosFormatados].sort((a, b) =>
           (a?.nome ?? "").localeCompare((b?.nome ?? ""), "pt-BR", { sensitivity: "base" })
         );
 
         setAlunos(alunosOrdenados);
-      } catch (error: any) {
-        toast.error(error.message || "Erro ao carregar dados da turma");
+      } catch (error: unknown) {
+        toast.error(apiError(error).message || "Erro ao carregar dados da turma");
       } finally {
         setLoading(false);
       }
@@ -121,7 +123,7 @@ export default function TurmaDetalhesPage() {
     carregarDados();
   }, [turmaId]);
 
-  const filteredAlunos = alunos.filter((aluno: any) =>
+  const filteredAlunos = alunos.filter((aluno: AlunoResumo) =>
     aluno.nome?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -247,7 +249,7 @@ export default function TurmaDetalhesPage() {
 
           {viewMode === "grid" && (
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
-              {filteredAlunos.map((aluno: any) => (
+              {filteredAlunos.map((aluno: AlunoResumo) => (
                 <Card
                   key={aluno.id}
                   className="rounded-xl border-2 border-[#B2D7EC] shadow-md transition-all hover:border-[#0D4F97] hover:shadow-lg"
@@ -305,7 +307,7 @@ export default function TurmaDetalhesPage() {
 
                 <div className="divide-y-2 divide-[#B2D7EC]">
                   {filteredAlunos.length > 0 ? (
-                    filteredAlunos.map((aluno: any) => (
+                    filteredAlunos.map((aluno: AlunoResumo) => (
                       <div key={aluno.id} className="p-6 hover:bg-[#B2D7EC]/10 transition-colors">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                           <div className="flex items-center gap-4">

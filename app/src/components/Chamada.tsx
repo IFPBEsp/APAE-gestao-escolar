@@ -1,4 +1,6 @@
 'use client'
+import type { AlunoResumo, ChamadaData } from "@/types/api";
+import { apiError, errorResponse } from "@/utils/apiError";
 
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
@@ -51,7 +53,7 @@ export default function Chamada({
 }: ChamadaProps) {
   
   const [students, setStudents] = useState<StudentAttendance[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loadedRequest, setLoadedRequest] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   
   const [selectedDate, setSelectedDate] = useState<Date>(selectedDateProp || new Date());
@@ -88,23 +90,21 @@ export default function Chamada({
   }, [turmaIdProp, turmaNomeProp, initialClass]);
 
 
-  const dateFormatted = format(selectedDate, "yyyy-MM-dd"); 
+  const dateFormatted = format(selectedDate, "yyyy-MM-dd");
+  const requestKey = `${turmaId}:${dateFormatted}`;
+  const isLoading = loadedRequest !== requestKey;
 
 
   const loadAttendanceData = async () => {
-    if (!turmaId) {
-      setIsLoading(false);
-      return; 
-    }
-
-    setIsLoading(true);
+    if (!turmaId) return;
     let isFound = false;
     let studentsFromApi: StudentAttendance[] = [];
+    let description = initialDescription || "";
     
     try {
-      const chamadaResponse: any = await getChamadaPorTurmaEData(turmaId, dateFormatted);
+      const chamadaResponse: ChamadaData = await getChamadaPorTurmaEData(turmaId, dateFormatted);
       
-      studentsFromApi = chamadaResponse.listaPresencas.map((p: any) => ({
+      studentsFromApi = chamadaResponse.listaPresencas.map((p) => ({
         id: p.alunoId,
         name: p.alunoNome,
         // isAbsent é TRUE se o status for 'FALTA' (ou qualquer coisa que não seja 'PRESENTE')
@@ -112,44 +112,51 @@ export default function Chamada({
       }));
       isFound = true;
 
-      setDescricaoAula(chamadaResponse.descricao || initialDescription || "");
+      description = chamadaResponse.descricao || initialDescription || "";
 
-    } catch (error: any) {
-      if (error.response?.status === 404 || error.response?.status === 204 || error.message?.includes("404")) {
+    } catch (error: unknown) {
+      if (errorResponse(error)?.status === 404 || errorResponse(error)?.status === 204 || apiError(error).message?.includes("404")) {
           console.log("Chamada não encontrada. Carregando lista de alunos da turma.");
           isFound = false;
-          setDescricaoAula(initialDescription || ""); 
+          description = initialDescription || "";
       } else {
         console.error("Erro ao carregar chamada existente:", error);
-        toast.error("Erro ao carregar a chamada: " + (error.message || "Verifique a conexão."));
-        setIsLoading(false);
-        return; 
+        toast.error("Erro ao carregar a chamada: " + (apiError(error).message || "Verifique a conexão."));
+        return { students: studentsFromApi, description };
       }
     }
 
     if (!isFound) {
         try {
-            const alunosResponse: any[] = await getAlunosDaTurma(turmaId);
+            const alunosResponse: AlunoResumo[] = await getAlunosDaTurma(turmaId);
             
-            studentsFromApi = alunosResponse.map((aluno: any) => ({
+            studentsFromApi = alunosResponse.map((aluno: AlunoResumo) => ({
               id: aluno.id,
-              name: aluno.nome || aluno.name, 
+              name: aluno.nome || aluno.name || "Aluno",
               isAbsent: false, // Define como PRESENTE por padrão (Switch ON)
             }));
             
-        } catch (listError: any) {
+        } catch (listError: unknown) {
             console.error("Erro ao buscar lista de alunos:", listError);
-            toast.error("Erro ao carregar a lista de alunos: " + (listError.message || "Verifique a Turma."));
+            toast.error("Erro ao carregar a lista de alunos: " + (apiError(listError).message || "Verifique a Turma."));
             studentsFromApi = [];
         }
     }
 
-    setStudents(studentsFromApi);
-    setIsLoading(false);
+    return { students: studentsFromApi, description };
   };
 
   useEffect(() => {
-    loadAttendanceData();
+    let active = true;
+    loadAttendanceData().then(result => {
+      if (!active) return;
+      if (result) {
+        setStudents(result.students);
+        setDescricaoAula(result.description);
+      }
+      setLoadedRequest(requestKey);
+    });
+    return () => { active = false; };
   }, [turmaId, dateFormatted]);
 
 
@@ -194,9 +201,9 @@ export default function Chamada({
         }, 1500);
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro ao salvar chamada:", error);
-      toast.error(error.message || "Falha ao salvar a chamada. Tente novamente.");
+      toast.error(apiError(error).message || "Falha ao salvar a chamada. Tente novamente.");
     } finally {
       setIsSaving(false);
     }
@@ -213,7 +220,7 @@ export default function Chamada({
         <div className="text-red-500 p-6 rounded-xl bg-white shadow-lg border border-red-200">
             <AlertCircle className="h-6 w-6 text-red-500 mx-auto mb-2" />
             <p>Erro Crítico: ID da Turma não encontrado.</p>
-            <p className="text-sm text-gray-500 mt-1">Verifique a rota ou a prop 'initialClass'/'turmaIdProp'.</p>
+            <p className="text-sm text-gray-500 mt-1">Verifique a rota ou a prop &apos;initialClass&apos;/&apos;turmaIdProp&apos;.</p>
         </div>
       </div>
     );

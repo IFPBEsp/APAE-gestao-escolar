@@ -1,9 +1,10 @@
+import type { AvaliacaoData } from "@/types/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Printer, FileText } from "lucide-react";
 
 interface VisualizarAvaliacaoAdminProps {
-    avaliacao: any;
+    avaliacao: AvaliacaoData;
     onBack: () => void;
 }
 

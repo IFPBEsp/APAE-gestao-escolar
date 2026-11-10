@@ -1,4 +1,5 @@
 'use client'
+import { apiError } from "@/utils/apiError";
 
 import { useState, useEffect } from "react";
 import {
@@ -87,14 +88,14 @@ export default function CadastrarTurmaPage() {
 
   useEffect(() => {
     const termo = buscaProfessor.trim();
-    if (termo.length > 0) {
-      const delayDebounceFn = setTimeout(() => {
-        fetchProfessores(termo);
-      }, 300);
-      return () => clearTimeout(delayDebounceFn);
-    } else {
-      setProfessoresEncontrados([]);
-    }
+    const delay = setTimeout(() => {
+      if (termo) {
+        void fetchProfessores(termo);
+      } else {
+        setProfessoresEncontrados([]);
+      }
+    }, 300);
+    return () => clearTimeout(delay);
   }, [buscaProfessor]);
 
   async function fetchProfessores(nome: string) {
@@ -121,14 +122,15 @@ export default function CadastrarTurmaPage() {
   }
 
   useEffect(() => {
-    if (buscaAluno.length > 0) {
-      const delayDebounceFn = setTimeout(() => {
-        fetchAlunos(buscaAluno);
-      }, 300);
-      return () => clearTimeout(delayDebounceFn);
-    } else {
-      setAlunosEncontrados([]);
-    }
+    const termo = buscaAluno.trim();
+    const delay = setTimeout(() => {
+      if (termo) {
+        void fetchAlunos(termo);
+      } else {
+        setAlunosEncontrados([]);
+      }
+    }, 300);
+    return () => clearTimeout(delay);
   }, [buscaAluno]);
 
   async function fetchAlunos(nome: string) {
@@ -173,7 +175,7 @@ export default function CadastrarTurmaPage() {
       if (professorSelecionado && novaTurma?.id) {
         try {
           await adicionarProfessor(novaTurma.id, professorSelecionado.id);
-        } catch (profError: any) {
+        } catch (profError: unknown) {
           console.error("Erro ao vincular professor:", profError);
           toast.warning("Turma criada, mas ocorreu um erro ao vincular o professor.");
           router.push("/admin/turmas");
@@ -183,8 +185,8 @@ export default function CadastrarTurmaPage() {
 
       toast.success("Turma criada com sucesso!");
       router.push("/admin/turmas");
-    } catch (error: any) {
-      toast.error(error.message || "Erro ao criar turma");
+    } catch (error: unknown) {
+      toast.error(apiError(error).message || "Erro ao criar turma");
     } finally {
       setIsSubmitting(false);
     }

@@ -1,4 +1,5 @@
 'use client'
+import { apiError } from "@/utils/apiError";
 
 import { useState, useEffect, useRef } from "react";
 import {
@@ -161,10 +162,10 @@ export default function CadastrarProfessorPage() {
         }));
         
         if (errors.cep) setErrors((prev) => ({ ...prev, cep: "" }));
-      } catch (error: any) {
-        if (error.name === "CanceledError" || error.code === "ERR_CANCELED") return;
+      } catch (error: unknown) {
+        if (apiError(error).name === "CanceledError" || (apiError(error) as { code?: string }).code === "ERR_CANCELED") return;
 
-        if (error.message === "CEP não encontrado.") {
+        if (apiError(error).message === "CEP não encontrado.") {
           toast.error("CEP inexistente. Preencha o endereço manualmente.");
         } else {
           toast.error("Serviço de CEP indisponível. Preencha manualmente.");
@@ -226,8 +227,8 @@ export default function CadastrarProfessorPage() {
       
       toast.success("Professor cadastrado com sucesso!");
       router.push("/admin/professores");
-    } catch (error: any) {
-      toast.error(error.message || "Erro ao cadastrar o professor.");
+    } catch (error: unknown) {
+      toast.error(apiError(error).message || "Erro ao cadastrar o professor.");
     } finally {
       setIsSubmitting(false);
     }

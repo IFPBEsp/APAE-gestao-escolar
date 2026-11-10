@@ -1,4 +1,5 @@
 'use client'
+import type { AlunoResumo, TurmaDetalhe, EstatisticaFrequencia } from "@/types/api";
 
 import {
   ArrowLeft,
@@ -50,10 +51,10 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
   const router = useRouter();
   const turmaId = params.id;
 
-  const [turma, setTurma] = useState<any>(null);
-  const [alunos, setAlunos] = useState<any[]>([]);
-  const [alunosFrequencia, setAlunosFrequencia] = useState<any[]>([]);
-  const [estatisticas, setEstatisticas] = useState<any[]>([]);
+  const [turma, setTurma] = useState<TurmaDetalhe | null>(null);
+  const [alunos, setAlunos] = useState<AlunoResumo[]>([]);
+  const [alunosFrequencia, setAlunosFrequencia] = useState<AlunoResumo[]>([]);
+  const [estatisticas, setEstatisticas] = useState<EstatisticaFrequencia[]>([]);
   const [totalAulasRealizadas, setTotalAulasRealizadas] = useState(0);
   const [alunosAtivosCount, setAlunosAtivosCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -268,8 +269,8 @@ export default function VerInformacoesTurmaPage({ params }: VerInformacoesTurmaP
 }
 
 interface HistoricoFrequenciaAdminProps {
-  alunos: any[];
-  estatisticas?: any[];
+  alunos: AlunoResumo[];
+  estatisticas?: EstatisticaFrequencia[];
   totalAulasRealizadas?: number;
 }
 
@@ -283,7 +284,7 @@ function HistoricoFrequenciaAdmin({
 
   const alunosComFrequencia = alunos.map((aluno) => {
     const stat = estatisticas.find(
-      (s: any) => String(s.alunoId) === String(aluno.id)
+      (s: EstatisticaFrequencia) => String(s.alunoId) === String(aluno.id)
     );
 
     return {
