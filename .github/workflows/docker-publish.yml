@@ -6,17 +6,76 @@ on:
       - main
 
   workflow_dispatch:
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - '.github/workflows/docker-publish.yml'
 
 permissions:
   contents: read
-  packages: write
-  id-token: write
-  attestations: write
 
 jobs:
+  validate-frontend:
+    name: Validate frontend before publication
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: app
+    env:
+      CI: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      NEXT_PUBLIC_API_URL: /gestao-escolar/api
+      BACKEND_URL: http://gestao-escolar-backend:8080
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Install locked dependencies
+        working-directory: app
+        run: npm ci
+      - name: Lint frontend
+        run: npx --no-install eslint .
+      - name: Build frontend
+        run: npm run build
+      - name: Typecheck frontend
+        run: npx --no-install tsc --noEmit
+
+  validate-backend:
+    name: Validate backend before publication
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Java
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+          cache-dependency-path: api/pom.xml
+      - name: Test and verify backend
+        working-directory: api
+        run: bash ./mvnw --batch-mode --no-transfer-progress verify
+
   publish-backend:
+    needs: [validate-frontend, validate-backend]
     name: Build & publish backend
-    uses: IFPBEsp/APAE-INFRA/.github/workflows/docker-build-publish-image.yml@106-ci-padronizar-publicacao-pela-main-e-promocao-de-imagens-entre-homologacao-e-producao
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    uses: IFPBEsp/APAE-INFRA/.github/workflows/docker-build-publish-image.yml@main
     with:
       context: ./api
       dockerfile: ./api/Dockerfile
@@ -25,15 +84,22 @@ jobs:
       scan-severity: "HIGH,CRITICAL"
 
   publish-frontend:
+    needs: [validate-frontend, validate-backend]
     name: Build & publish frontend
-    uses: IFPBEsp/APAE-INFRA/.github/workflows/docker-build-publish-image.yml@106-ci-padronizar-publicacao-pela-main-e-promocao-de-imagens-entre-homologacao-e-producao
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    uses: IFPBEsp/APAE-INFRA/.github/workflows/docker-build-publish-image.yml@main
     with:
       context: ./app
       dockerfile: ./app/Dockerfile
       image-name: apae-gestao-escolar-frontend
       build-args: |
         NEXT_PUBLIC_API_URL=/gestao-escolar/api
-        BACKEND_URL=${{ vars.BACKEND_URL || 'http://apae-gestao-escolar-backend:8080' }}
+        BACKEND_URL=http://gestao-escolar-backend:8080
       platforms: '["linux/amd64"]'
       scan-severity: "HIGH,CRITICAL"
 
@@ -42,7 +108,7 @@ jobs:
     needs:
       - publish-backend
       - publish-frontend
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -158,7 +224,7 @@ jobs:
   notify-release:
     name: Notify APAE-INFRA - complete release
     needs: prepare-release
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     environment: gitops-dispatch
