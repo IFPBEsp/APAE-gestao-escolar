@@ -158,18 +158,24 @@ class AvaliacaoControllerTest {
         }
 
         @Test
-        @DisplayName("Deve retornar 400 Bad Request quando o professorId for nulo")
-        void deveRetornar400QuandoProfessorIdNulo() throws Exception {
+        @DisplayName("Deve retornar 201 Created quando o professorId for nulo pois a autoria vem do token")
+        void deveRetornar201QuandoProfessorIdNulo() throws Exception {
+            UUID id = UUID.randomUUID();
             AvaliacaoRequestDTO request = requestValido();
+            UUID professorAutenticadoId = UUID.randomUUID();
             request.setProfessorId(null);
+            AvaliacaoResponseDTO response = responseValido(id, request.getAlunoId(), professorAutenticadoId);
+
+            when(avaliacaoService.criar(any(AvaliacaoRequestDTO.class))).thenReturn(response);
 
             mockMvc.perform(post(BASE_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json(request)))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errors.professorId").exists());
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.id").value(id.toString()))
+                    .andExpect(jsonPath("$.professorId").value(professorAutenticadoId.toString()));
 
-            verifyNoInteractions(avaliacaoService);
+            verify(avaliacaoService).criar(any(AvaliacaoRequestDTO.class));
         }
 
         @Test
@@ -195,8 +201,7 @@ class AvaliacaoControllerTest {
                             .content("{}"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.descricao").exists())
-                    .andExpect(jsonPath("$.errors.alunoId").exists())
-                    .andExpect(jsonPath("$.errors.professorId").exists());
+                    .andExpect(jsonPath("$.errors.alunoId").exists());
 
             verifyNoInteractions(avaliacaoService);
         }
@@ -444,8 +449,7 @@ class AvaliacaoControllerTest {
                             .content(json(request)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.descricao").exists())
-                    .andExpect(jsonPath("$.errors.alunoId").exists())
-                    .andExpect(jsonPath("$.errors.professorId").exists());
+                    .andExpect(jsonPath("$.errors.alunoId").exists());
 
             verifyNoInteractions(avaliacaoService);
         }

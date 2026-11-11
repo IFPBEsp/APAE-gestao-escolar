@@ -14,6 +14,7 @@ import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -23,6 +24,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -88,12 +94,15 @@ class AvaliacaoServiceTest {
         professor.setUsuarioId(usuarioId);
 
         usuario = new Usuario();
+        usuario.setId(usuarioId);
+        usuario.setEmail("joao@apae.org.br");
         usuario.setNomeCompleto("João da Silva");
 
         turma = new Turma();
         turma.setId(UUID.randomUUID());
         turma.setNome("Turma A");
         turma.setTurno("MANHA");
+        turma.setProfessor(professor);
 
         turmaAluno = new TurmaAluno();
         turmaAluno.setId(UUID.randomUUID());
@@ -114,6 +123,23 @@ class AvaliacaoServiceTest {
                 .alunoId(alunoId)
                 .professorId(professorId)
                 .build();
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "joao@apae.org.br",
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_TEACHER"))
+                )
+        );
+        lenient().when(usuarioRepository.findByEmail("joao@apae.org.br")).thenReturn(Optional.of(usuario));
+        lenient().when(professorRepository.findByUsuarioId(usuarioId)).thenReturn(Optional.of(professor));
+        lenient().when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId))
+                .thenReturn(List.of(turmaAluno));
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     private void configurarRelacionamentos() {
@@ -141,7 +167,6 @@ class AvaliacaoServiceTest {
         void deveCriarAvaliacao() {
             configurarRelacionamentos();
             configurarSave();
-            when(professorRepository.findById(professorId)).thenReturn(Optional.of(professor));
 
             AvaliacaoResponseDTO resposta = avaliacaoService.criar(request);
 
@@ -170,7 +195,6 @@ class AvaliacaoServiceTest {
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessage("Aluno não encontrado");
 
-            verify(professorRepository, never()).findById(any());
             verify(avaliacaoRepository, never()).save(any());
         }
 
@@ -178,11 +202,26 @@ class AvaliacaoServiceTest {
         @DisplayName("Deve lançar exceção quando o professor não existe")
         void deveFalharQuandoProfessorNaoExiste() {
             when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
-            when(professorRepository.findById(professorId)).thenReturn(Optional.empty());
+            when(professorRepository.findByUsuarioId(usuarioId)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> avaliacaoService.criar(request))
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessage("Professor não encontrado");
+
+            verify(avaliacaoRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Deve lançar 403 quando o professor não possui vínculo com o aluno")
+        void deveFalharQuandoProfessorSemVinculoComAluno() {
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            turma.setProfessor(outroProfessor);
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
+
+            assertThatThrownBy(() -> avaliacaoService.criar(request))
+                    .isInstanceOf(ResponseStatusException.class)
+                    .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN));
 
             verify(avaliacaoRepository, never()).save(any());
         }
@@ -338,7 +377,6 @@ class AvaliacaoServiceTest {
             configurarRelacionamentos();
             configurarSave();
             when(avaliacaoRepository.findById(avaliacaoId)).thenReturn(Optional.of(avaliacao));
-            when(professorRepository.findById(professorId)).thenReturn(Optional.of(professor));
 
             AvaliacaoRequestDTO novoRequest = AvaliacaoRequestDTO.builder()
                     .descricao("Avaliação atualizada")
@@ -383,8 +421,7 @@ class AvaliacaoServiceTest {
         @DisplayName("Deve lançar exceção quando o professor informado não existe")
         void deveFalharQuandoProfessorNaoExiste() {
             when(avaliacaoRepository.findById(avaliacaoId)).thenReturn(Optional.of(avaliacao));
-            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
-            when(professorRepository.findById(professorId)).thenReturn(Optional.empty());
+            when(professorRepository.findByUsuarioId(usuarioId)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> avaliacaoService.atualizar(avaliacaoId, request))
                     .isInstanceOf(EntityNotFoundException.class)
@@ -401,7 +438,7 @@ class AvaliacaoServiceTest {
         @Test
         @DisplayName("Deve excluir avaliação existente")
         void deveDeletarAvaliacao() {
-            when(avaliacaoRepository.existsById(avaliacaoId)).thenReturn(true);
+            when(avaliacaoRepository.findById(avaliacaoId)).thenReturn(Optional.of(avaliacao));
 
             avaliacaoService.deletar(avaliacaoId);
 
@@ -411,7 +448,7 @@ class AvaliacaoServiceTest {
         @Test
         @DisplayName("Deve lançar exceção quando a avaliação não existe")
         void deveFalharQuandoAvaliacaoNaoExiste() {
-            when(avaliacaoRepository.existsById(avaliacaoId)).thenReturn(false);
+            when(avaliacaoRepository.findById(avaliacaoId)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> avaliacaoService.deletar(avaliacaoId))
                     .isInstanceOf(EntityNotFoundException.class)
