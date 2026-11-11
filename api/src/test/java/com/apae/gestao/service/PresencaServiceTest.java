@@ -6,13 +6,18 @@ import com.apae.gestao.dto.aula.chamada.RegistrarChamadaRequestDTO;
 import com.apae.gestao.entity.AlunoView;
 import com.apae.gestao.entity.Aula;
 import com.apae.gestao.entity.Presenca;
+import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Turma;
 import com.apae.gestao.entity.TurmaAluno;
+import com.apae.gestao.entity.Usuario;
 import com.apae.gestao.repository.AlunoViewRepository;
 import com.apae.gestao.repository.AulaRepository;
 import com.apae.gestao.repository.PresencaRepository;
+import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.TurmaRepository;
+import com.apae.gestao.repository.UsuarioRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -23,6 +28,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -55,28 +63,49 @@ class PresencaServiceTest {
     @Mock
     private TurmaAlunoRepository turmaAlunoRepository;
 
+    @Mock
+    private ProfessorRepository professorRepository;
+
+    @Mock
+    private UsuarioRepository usuarioRepository;
+
     @InjectMocks
     private PresencaService presencaService;
 
     private UUID turmaId;
     private UUID alunoId;
     private UUID presencaId;
+    private UUID professorId;
+    private UUID usuarioId;
     private LocalDate data;
     private Turma turma;
     private Aula aula;
     private AlunoView aluno;
     private TurmaAluno vinculo;
+    private Professor professor;
+    private Usuario usuario;
 
     @BeforeEach
     void setUp() {
         turmaId = UUID.randomUUID();
         alunoId = UUID.randomUUID();
         presencaId = UUID.randomUUID();
+        professorId = UUID.randomUUID();
+        usuarioId = UUID.randomUUID();
         data = LocalDate.of(2026, 10, 19);
+
+        professor = new Professor();
+        professor.setId(professorId);
+        professor.setUsuarioId(usuarioId);
+
+        usuario = new Usuario();
+        usuario.setId(usuarioId);
+        usuario.setEmail("professor@teste.local");
 
         turma = new Turma();
         turma.setId(turmaId);
         turma.setNome("Turma de Teste");
+        turma.setProfessor(professor);
 
         aula = Aula.builder()
                 .id(UUID.randomUUID())
@@ -87,6 +116,22 @@ class PresencaServiceTest {
 
         aluno = criarAluno(alunoId, "Aluno de Teste");
         vinculo = criarVinculo(alunoId);
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "professor@teste.local",
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_TEACHER"))
+                )
+        );
+        lenient().when(usuarioRepository.findByEmail("professor@teste.local")).thenReturn(Optional.of(usuario));
+        lenient().when(professorRepository.findByUsuarioId(usuarioId)).thenReturn(Optional.of(professor));
+        lenient().when(turmaAlunoRepository.findByTurmaAndPacienteId(turma, alunoId)).thenReturn(Optional.of(vinculo));
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     private AlunoView criarAluno(UUID id, String nome) {
@@ -578,6 +623,25 @@ class PresencaServiceTest {
             verify(presencaRepository, never()).save(any(Presenca.class));
             verify(aulaRepository, never()).save(any(Aula.class));
         }
+
+        @Test
+        @DisplayName("Deve retornar 403 Forbidden quando o professor autenticado não possui vínculo com a turma")
+        void deveRejeitarChamadaQuandoProfessorSemVinculoComTurma() {
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            turma.setProfessor(outroProfessor);
+
+            when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
+
+            assertThatThrownBy(
+                    () -> presencaService.registrarChamada(turmaId, data, requestSemPresencas("Aula")))
+                    .isInstanceOf(ResponseStatusException.class)
+                    .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode())
+                            .isEqualTo(HttpStatus.FORBIDDEN));
+
+            verify(aulaRepository, never()).save(any(Aula.class));
+            verify(presencaRepository, never()).save(any(Presenca.class));
+        }
     }
 
     @Nested
@@ -587,7 +651,8 @@ class PresencaServiceTest {
         @Test
         @DisplayName("Deve excluir a presença quando ela existe")
         void deveExcluirPresencaExistente() {
-            when(presencaRepository.existsById(presencaId)).thenReturn(true);
+            when(presencaRepository.findById(presencaId))
+                    .thenReturn(Optional.of(criarPresenca(presencaId, alunoId, true)));
 
             presencaService.deletar(presencaId);
 
@@ -597,7 +662,7 @@ class PresencaServiceTest {
         @Test
         @DisplayName("Deve lançar exceção quando a presença não existe")
         void deveLancarExcecaoQuandoPresencaNaoExiste() {
-            when(presencaRepository.existsById(presencaId)).thenReturn(false);
+            when(presencaRepository.findById(presencaId)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> presencaService.deletar(presencaId))
                     .isInstanceOf(RuntimeException.class)
