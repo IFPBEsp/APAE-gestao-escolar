@@ -12,6 +12,8 @@ import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.repository.UsuarioRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,9 +63,29 @@ public class ProfessorService {
 
     @Transactional(readOnly = true)
     public ProfessorResumoDTO buscarPorIdResumido(UUID id) {
+        validarAcessoProfessor(id);
         Professor professor = buscarProfessor(id);
         Usuario usuario = buscarUsuario(professor);
         return toResumo(professor, usuario, buscarEndereco(usuario));
+    }
+
+    private void validarAcessoProfessor(UUID professorId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getAuthorities() == null) {
+            return;
+        }
+        boolean isTeacher = authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_TEACHER".equals(a.getAuthority()));
+        if (!isTeacher) {
+            return;
+        }
+        Usuario usuario = usuarioRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário autenticado não encontrado"));
+        Professor professorAutenticado = professorRepository.findByUsuarioId(usuario.getId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Professor autenticado não encontrado"));
+        if (!professorAutenticado.getId().equals(professorId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para acessar os dados de outro professor");
+        }
     }
 
     @Transactional(readOnly = true)
