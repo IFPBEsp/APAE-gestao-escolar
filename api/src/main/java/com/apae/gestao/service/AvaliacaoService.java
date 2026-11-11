@@ -15,8 +15,12 @@ import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,8 +39,8 @@ public class AvaliacaoService {
     public AvaliacaoResponseDTO criar(AvaliacaoRequestDTO dto) {
         alunoRepository.findById(dto.getAlunoId())
                 .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado"));
-        Professor professor = professorRepository.findById(dto.getProfessorId())
-                .orElseThrow(() -> new EntityNotFoundException("Professor não encontrado"));
+        Professor professor = obterProfessorAutenticado();
+        validarVinculoProfessorComAluno(professor, dto.getAlunoId());
 
         Avaliacao avaliacao = Avaliacao.builder()
                 .descricao(dto.getDescricao())
@@ -49,22 +53,42 @@ public class AvaliacaoService {
 
     @Transactional(readOnly = true)
     public List<AvaliacaoResponseDTO> listarTodas() {
-        return avaliacaoRepository.findAllByOrderByDataAvaliacaoDesc()
-                .stream()
+        List<Avaliacao> avaliacoes = avaliacaoRepository.findAllByOrderByDataAvaliacaoDesc();
+        if (isProfessorAutenticado()) {
+            Professor professor = obterProfessorAutenticado();
+            return avaliacoes.stream()
+                    .filter(av -> isAlunoVinculadoAoProfessor(av.getPacienteId(), professor.getId())
+                            || (av.getProfessor() != null && professor.getId().equals(av.getProfessor().getId())))
+                    .map(this::toResponse)
+                    .toList();
+        }
+        return avaliacoes.stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public AvaliacaoResponseDTO buscarPorId(UUID id) {
-        return toResponse(avaliacaoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Avaliação não encontrada")));
+        Avaliacao avaliacao = avaliacaoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Avaliação não encontrada"));
+        if (isProfessorAutenticado()) {
+            Professor professor = obterProfessorAutenticado();
+            if (!isAlunoVinculadoAoProfessor(avaliacao.getPacienteId(), professor.getId())
+                    && (avaliacao.getProfessor() == null || !professor.getId().equals(avaliacao.getProfessor().getId()))) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado a esta avaliação");
+            }
+        }
+        return toResponse(avaliacao);
     }
 
     @Transactional(readOnly = true)
     public List<AvaliacaoResponseDTO> listarPorAluno(UUID alunoId) {
         alunoRepository.findById(alunoId)
                 .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado"));
+        if (isProfessorAutenticado()) {
+            Professor professor = obterProfessorAutenticado();
+            validarVinculoProfessorComAluno(professor, alunoId);
+        }
         return avaliacaoRepository.findByPacienteIdOrderByDataAvaliacaoDesc(alunoId)
                 .stream()
                 .map(this::toResponse)
@@ -73,6 +97,12 @@ public class AvaliacaoService {
 
     @Transactional(readOnly = true)
     public List<AvaliacaoResponseDTO> listarPorProfessor(UUID professorId) {
+        if (isProfessorAutenticado()) {
+            Professor professorAutenticado = obterProfessorAutenticado();
+            if (!professorAutenticado.getId().equals(professorId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Não é permitido consultar avaliações de outro professor");
+            }
+        }
         Professor professor = professorRepository.findById(professorId)
                 .orElseThrow(() -> new EntityNotFoundException("Professor não encontrado"));
         return avaliacaoRepository.findByProfessorOrderByDataAvaliacaoDesc(professor)
@@ -86,10 +116,12 @@ public class AvaliacaoService {
         Avaliacao avaliacao = avaliacaoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Avaliação não encontrada"));
 
+        Professor professor = obterProfessorAutenticado();
+        validarAutoriaAvaliacao(avaliacao, professor);
+
         alunoRepository.findById(dto.getAlunoId())
                 .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado"));
-        Professor professor = professorRepository.findById(dto.getProfessorId())
-                .orElseThrow(() -> new EntityNotFoundException("Professor não encontrado"));
+        validarVinculoProfessorComAluno(professor, dto.getAlunoId());
 
         avaliacao.setDescricao(dto.getDescricao());
         avaliacao.setPacienteId(dto.getAlunoId());
@@ -100,10 +132,52 @@ public class AvaliacaoService {
 
     @Transactional
     public void deletar(UUID id) {
-        if (!avaliacaoRepository.existsById(id)) {
-            throw new EntityNotFoundException("Avaliação não encontrada");
-        }
+        Avaliacao avaliacao = avaliacaoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Avaliação não encontrada"));
+        Professor professor = obterProfessorAutenticado();
+        validarAutoriaAvaliacao(avaliacao, professor);
         avaliacaoRepository.deleteById(id);
+    }
+
+    private Professor obterProfessorAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getName() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não autenticado");
+        }
+        Usuario usuario = usuarioRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new EntityNotFoundException("Professor não encontrado"));
+        return professorRepository.findByUsuarioId(usuario.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Professor não encontrado"));
+    }
+
+    private boolean isProfessorAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getAuthorities() == null) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_TEACHER".equals(a.getAuthority()));
+    }
+
+    private void validarVinculoProfessorComAluno(Professor professor, UUID alunoId) {
+        if (!isAlunoVinculadoAoProfessor(alunoId, professor.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Professor não possui vínculo com o aluno informado");
+        }
+    }
+
+    private boolean isAlunoVinculadoAoProfessor(UUID alunoId, UUID professorId) {
+        return turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)
+                .stream()
+                .map(TurmaAluno::getTurma)
+                .anyMatch(turma -> turma != null
+                        && turma.getProfessor() != null
+                        && professorId.equals(turma.getProfessor().getId()));
+    }
+
+    private void validarAutoriaAvaliacao(Avaliacao avaliacao, Professor professor) {
+        if (avaliacao.getProfessor() == null || !professor.getId().equals(avaliacao.getProfessor().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para alterar ou excluir esta avaliação");
+        }
     }
 
     private AvaliacaoResponseDTO toResponse(Avaliacao avaliacao) {
