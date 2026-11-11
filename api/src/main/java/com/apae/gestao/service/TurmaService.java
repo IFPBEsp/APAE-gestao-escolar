@@ -17,6 +17,8 @@ import com.apae.gestao.entity.Usuario;
 import com.apae.gestao.dto.professor.ProfessorResumoDTO;
 import com.apae.gestao.dto.professor.ProfessorSimplesDTO;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -48,8 +50,11 @@ public class TurmaService {
 
     @Transactional(readOnly = true)
     public List<TurmaResumoDTO> listarTurmas(UUID id, String nome, Integer anoCriacao, String turno, String tipo, Boolean ativa) {
+        Professor professorAutenticado = isProfessorAutenticado() ? obterProfessorAutenticado() : null;
         return turmaRepository.findAll()
                 .stream()
+                .filter(turma -> professorAutenticado == null
+                        || (turma.getProfessor() != null && professorAutenticado.getId().equals(turma.getProfessor().getId())))
                 .filter(turma -> id == null || id.equals(turma.getId()))
                 .filter(turma -> nome == null || turma.getNome().toLowerCase().contains(nome.toLowerCase()))
                 .filter(turma -> anoCriacao == null || anoCriacao.equals(turma.getAnoCriacao()))
@@ -62,7 +67,9 @@ public class TurmaService {
 
     @Transactional(readOnly = true)
     public TurmaResumoDTO buscarTurmaResumidaPorId(UUID id) {
-        return toResumo(buscarTurma(id));
+        Turma turma = buscarTurma(id);
+        validarAcessoProfessorNaTurma(turma);
+        return toResumo(turma);
     }
 
     @Transactional
@@ -162,6 +169,9 @@ public class TurmaService {
 
     @Transactional(readOnly = true)
     public List<TurmaAlunoResponseDTO> listarAlunos(UUID turmaId) {
+        if (isProfessorAutenticado()) {
+            validarAcessoProfessorNaTurma(buscarTurma(turmaId));
+        }
         return turmaAlunoRepository.findByTurmaIdOrderByPacienteNomeAsc(turmaId)
                 .stream()
                 .map(this::toTurmaAlunoResponse)
@@ -171,6 +181,7 @@ public class TurmaService {
     @Transactional(readOnly = true)
     public List<TurmaAlunoResponseDTO> listarAlunosAtivos(UUID turmaId) {
         Turma turma = buscarTurma(turmaId);
+        validarAcessoProfessorNaTurma(turma);
         return turmaAlunoRepository.findByTurmaAndAtivoOrderByPacienteNomeAsc(turma, true)
                 .stream()
                 .map(this::toTurmaAlunoResponse)
@@ -180,6 +191,7 @@ public class TurmaService {
     @Transactional(readOnly = true)
     public List<TurmaAlunoResponseDTO> listarAlunosInativos(UUID turmaId) {
         Turma turma = buscarTurma(turmaId);
+        validarAcessoProfessorNaTurma(turma);
         return turmaAlunoRepository.findByTurmaAndAtivoOrderByPacienteNomeAsc(turma, false)
                 .stream()
                 .map(this::toTurmaAlunoResponse)
@@ -295,6 +307,36 @@ public class TurmaService {
     private Turma buscarTurma(UUID turmaId) {
         return turmaRepository.findById(turmaId)
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada com ID: " + turmaId));
+    }
+
+    private Professor obterProfessorAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getName() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não autenticado");
+        }
+        Usuario usuario = usuarioRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Professor autenticado não encontrado"));
+        return professorRepository.findByUsuarioId(usuario.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Professor autenticado não encontrado"));
+    }
+
+    private boolean isProfessorAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getAuthorities() == null) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_TEACHER".equals(a.getAuthority()));
+    }
+
+    private void validarAcessoProfessorNaTurma(Turma turma) {
+        if (!isProfessorAutenticado()) {
+            return;
+        }
+        Professor professor = obterProfessorAutenticado();
+        if (turma.getProfessor() == null || !professor.getId().equals(turma.getProfessor().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Professor não possui vínculo com esta turma");
+        }
     }
 
     private String obterNomeUnicoParaTurma(String nomeBase, UUID excludeId) {
