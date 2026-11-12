@@ -12,7 +12,10 @@ on:
 
 jobs:
   call-stale-branches:
+    permissions:
+      contents: write
+      pull-requests: read
     uses: IFPBEsp/APAE-INFRA/.github/workflows/stale-branches-reusable.yml@dev
     with:
-      protected-branches: "main,dev,dev-database"
+      protected-branches: "main,dev"
       dry-run: ${{ inputs.dry-run != false }}
