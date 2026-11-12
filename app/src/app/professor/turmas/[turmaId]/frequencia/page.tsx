@@ -239,7 +239,7 @@ function ChamadaContent({
                     setAttendance(novaAttendance);
                     setIsEditing(true);
                     
-                    toast.info("Chamada existente carregada.");
+                    toast.info("Chamada existente carregada.", { id: `chamada-carregada-${dataFormatada}` });
                 } else {
                     const novaAttendance: Record<string, boolean> = {};
                     alunos.forEach(aluno => {
