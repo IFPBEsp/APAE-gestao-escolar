@@ -9,6 +9,7 @@ import com.apae.gestao.exception.RecursoNaoEncontradoException;
 import com.apae.gestao.repository.EnderecoRepository;
 import com.apae.gestao.repository.ProfessorDashboardRepository;
 import com.apae.gestao.repository.ProfessorRepository;
+import com.apae.gestao.repository.TurmaRepository;
 import com.apae.gestao.repository.UsuarioRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -29,18 +30,21 @@ public class ProfessorService {
     private final ProfessorDashboardRepository professorDashboardRepository;
     private final UsuarioRepository usuarioRepository;
     private final EnderecoRepository enderecoRepository;
+    private final TurmaRepository turmaRepository;
     private final PasswordEncoder passwordEncoder;
 
     public ProfessorService(ProfessorRepository professorRepository,
                             ProfessorDashboardRepository professorDashboardRepository,
                             UsuarioRepository usuarioRepository,
                             EnderecoRepository enderecoRepository,
-                            PasswordEncoder passwordEncoder) {
+                            PasswordEncoder passwordEncoder,
+                            TurmaRepository turmaRepository) {
         this.professorRepository = professorRepository;
         this.professorDashboardRepository = professorDashboardRepository;
         this.usuarioRepository = usuarioRepository;
         this.enderecoRepository = enderecoRepository;
         this.passwordEncoder = passwordEncoder;
+        this.turmaRepository = turmaRepository;
     }
 
     @Transactional(readOnly = true)
@@ -132,6 +136,7 @@ public class ProfessorService {
         Usuario usuario = buscarUsuario(professor);
         usuario.setAtivo(false);
         salvarUsuarioComErroClaro(usuario);
+        turmaRepository.desvincularProfessorDeTurmas(id);
         return new ProfessorResponseDTO(professor, usuario, buscarEndereco(usuario));
     }
 
