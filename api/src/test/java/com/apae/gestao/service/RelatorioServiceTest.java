@@ -6,12 +6,15 @@ import com.apae.gestao.entity.AlunoView;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Relatorio;
 import com.apae.gestao.entity.Turma;
+import com.apae.gestao.entity.TurmaAluno;
 import com.apae.gestao.entity.Usuario;
 import com.apae.gestao.repository.AlunoViewRepository;
 import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.repository.RelatorioRepository;
+import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.TurmaRepository;
 import com.apae.gestao.repository.UsuarioRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,6 +24,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -50,6 +56,9 @@ class RelatorioServiceTest {
     private TurmaRepository turmaRepository;
 
     @Mock
+    private TurmaAlunoRepository turmaAlunoRepository;
+
+    @Mock
     private UsuarioRepository usuarioRepository;
 
     @InjectMocks
@@ -64,6 +73,7 @@ class RelatorioServiceTest {
     private AlunoView aluno;
     private Professor professor;
     private Turma turma;
+    private TurmaAluno vinculo;
     private Usuario usuarioProfessor;
     private Relatorio relatorio;
     private RelatorioRequestDTO request;
@@ -94,9 +104,17 @@ class RelatorioServiceTest {
         turma = new Turma();
         turma.setId(turmaId);
         turma.setNome("Turma A");
+        turma.setProfessor(professor);
+
+        vinculo = new TurmaAluno();
+        vinculo.setId(UUID.randomUUID());
+        vinculo.setTurma(turma);
+        vinculo.setPacienteId(alunoId);
+        vinculo.setAtivo(true);
 
         usuarioProfessor = new Usuario();
         usuarioProfessor.setId(professorUsuarioId);
+        usuarioProfessor.setEmail("maria@apae.org.br");
         usuarioProfessor.setNomeCompleto("Maria Silva");
 
         relatorio = new Relatorio();
@@ -119,6 +137,23 @@ class RelatorioServiceTest {
                 turmaId,
                 professorId
         );
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "maria@apae.org.br",
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_TEACHER"))
+                )
+        );
+        lenient().when(usuarioRepository.findByEmail("maria@apae.org.br")).thenReturn(Optional.of(usuarioProfessor));
+        lenient().when(professorRepository.findByUsuarioId(professorUsuarioId)).thenReturn(Optional.of(professor));
+        lenient().when(turmaAlunoRepository.findByTurmaAndPacienteId(turma, alunoId)).thenReturn(Optional.of(vinculo));
+        lenient().when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)).thenReturn(List.of(vinculo));
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     private void configurarMapeamentoDoRelatorio() {
@@ -205,8 +240,6 @@ class RelatorioServiceTest {
         @DisplayName("Deve criar relatório com os dados e associações informados")
         void deveCriarRelatorioComDadosCorretos() {
             when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
-            when(professorRepository.findById(professorId))
-                    .thenReturn(Optional.of(professor));
             when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
             when(usuarioRepository.findById(professorUsuarioId))
                     .thenReturn(Optional.of(usuarioProfessor));
@@ -258,7 +291,7 @@ class RelatorioServiceTest {
         @DisplayName("Deve lançar exceção quando o professor não existir")
         void deveLancarExcecaoQuandoProfessorNaoExistir() {
             when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
-            when(professorRepository.findById(professorId))
+            when(professorRepository.findByUsuarioId(professorUsuarioId))
                     .thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> relatorioService.criar(request))
@@ -272,13 +305,29 @@ class RelatorioServiceTest {
         @DisplayName("Deve lançar exceção quando a turma não existir")
         void deveLancarExcecaoQuandoTurmaNaoExistir() {
             when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
-            when(professorRepository.findById(professorId))
-                    .thenReturn(Optional.of(professor));
             when(turmaRepository.findById(turmaId)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> relatorioService.criar(request))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Turma não encontrada");
+
+            verify(relatorioRepository, never()).save(any(Relatorio.class));
+        }
+
+        @Test
+        @DisplayName("Deve lançar 403 quando o professor não possui vínculo com a turma")
+        void deveLancar403QuandoProfessorSemVinculoComTurma() {
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            turma.setProfessor(outroProfessor);
+
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
+            when(turmaRepository.findById(turmaId)).thenReturn(Optional.of(turma));
+
+            assertThatThrownBy(() -> relatorioService.criar(request))
+                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                    .satisfies(ex -> assertThat(((org.springframework.web.server.ResponseStatusException) ex).getStatusCode())
+                            .isEqualTo(org.springframework.http.HttpStatus.FORBIDDEN));
 
             verify(relatorioRepository, never()).save(any(Relatorio.class));
         }
@@ -294,7 +343,6 @@ class RelatorioServiceTest {
             // O relatório do setUp tem aluno, professor, turma e textos diferentes destes novos valores
             UUID novoAlunoId = UUID.randomUUID();
             UUID novoProfessorId = UUID.randomUUID();
-            UUID novoProfessorUsuarioId = UUID.randomUUID();
             UUID novaTurmaId = UUID.randomUUID();
 
             AlunoView novoAluno = new AlunoView(
@@ -308,17 +356,16 @@ class RelatorioServiceTest {
                     false
             );
 
-            Professor novoProfessor = new Professor();
-            novoProfessor.setId(novoProfessorId);
-            novoProfessor.setUsuarioId(novoProfessorUsuarioId);
-
             Turma novaTurma = new Turma();
             novaTurma.setId(novaTurmaId);
             novaTurma.setNome("Turma B");
+            novaTurma.setProfessor(professor);
 
-            Usuario novoUsuarioProfessor = new Usuario();
-            novoUsuarioProfessor.setId(novoProfessorUsuarioId);
-            novoUsuarioProfessor.setNomeCompleto("Joana Lima");
+            TurmaAluno novoVinculo = new TurmaAluno();
+            novoVinculo.setId(UUID.randomUUID());
+            novoVinculo.setTurma(novaTurma);
+            novoVinculo.setPacienteId(novoAlunoId);
+            novoVinculo.setAtivo(true);
 
             RelatorioRequestDTO novoRequest = new RelatorioRequestDTO(
                     "Atividades atualizadas",
@@ -333,11 +380,11 @@ class RelatorioServiceTest {
             when(relatorioRepository.findById(relatorioId))
                     .thenReturn(Optional.of(relatorio));
             when(alunoRepository.findById(novoAlunoId)).thenReturn(Optional.of(novoAluno));
-            when(professorRepository.findById(novoProfessorId))
-                    .thenReturn(Optional.of(novoProfessor));
             when(turmaRepository.findById(novaTurmaId)).thenReturn(Optional.of(novaTurma));
-            when(usuarioRepository.findById(novoProfessorUsuarioId))
-                    .thenReturn(Optional.of(novoUsuarioProfessor));
+            when(turmaAlunoRepository.findByTurmaAndPacienteId(novaTurma, novoAlunoId))
+                    .thenReturn(Optional.of(novoVinculo));
+            when(usuarioRepository.findById(professorUsuarioId))
+                    .thenReturn(Optional.of(usuarioProfessor));
             when(relatorioRepository.save(any(Relatorio.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -351,7 +398,7 @@ class RelatorioServiceTest {
             assertThat(enviado.getId()).isEqualTo(relatorioId);
             assertThat(enviado.getCreatedAt()).isEqualTo(LocalDateTime.of(2026, 10, 17, 10, 0));
             assertThat(enviado.getPacienteId()).isEqualTo(novoAlunoId);
-            assertThat(enviado.getProfessor()).isSameAs(novoProfessor);
+            assertThat(enviado.getProfessor()).isSameAs(professor);
             assertThat(enviado.getTurma()).isSameAs(novaTurma);
             assertThat(enviado.getAtividades()).isEqualTo("Atividades atualizadas");
             assertThat(enviado.getHabilidades()).isEqualTo("Habilidades atualizadas");
@@ -363,7 +410,7 @@ class RelatorioServiceTest {
             assertThat(resultado.getAlunoNome()).isEqualTo("Pedro Souza");
             assertThat(resultado.getAlunoDataNascimento()).isEqualTo(LocalDate.of(2014, 3, 10));
             assertThat(resultado.getTurmaNome()).isEqualTo("Turma B");
-            assertThat(resultado.getProfessorNome()).isEqualTo("Joana Lima");
+            assertThat(resultado.getProfessorNome()).isEqualTo("Maria Silva");
             assertThat(resultado.getAtividades()).isEqualTo("Atividades atualizadas");
             assertThat(resultado.getHabilidades()).isEqualTo("Habilidades atualizadas");
             assertThat(resultado.getEstrategias()).isEqualTo("Estratégias atualizadas");
@@ -403,8 +450,7 @@ class RelatorioServiceTest {
         void deveLancarExcecaoAoAtualizarQuandoProfessorNaoExistir() {
             when(relatorioRepository.findById(relatorioId))
                     .thenReturn(Optional.of(relatorio));
-            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
-            when(professorRepository.findById(professorId))
+            when(professorRepository.findByUsuarioId(professorUsuarioId))
                     .thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> relatorioService.atualizar(relatorioId, request))
@@ -420,8 +466,6 @@ class RelatorioServiceTest {
             when(relatorioRepository.findById(relatorioId))
                     .thenReturn(Optional.of(relatorio));
             when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
-            when(professorRepository.findById(professorId))
-                    .thenReturn(Optional.of(professor));
             when(turmaRepository.findById(turmaId)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> relatorioService.atualizar(relatorioId, request))
@@ -439,18 +483,18 @@ class RelatorioServiceTest {
         @Test
         @DisplayName("Deve excluir relatório quando o ID existir")
         void deveExcluirRelatorioExistente() {
-            when(relatorioRepository.existsById(relatorioId)).thenReturn(true);
+            when(relatorioRepository.findById(relatorioId)).thenReturn(Optional.of(relatorio));
 
             relatorioService.deletar(relatorioId);
 
-            verify(relatorioRepository).existsById(relatorioId);
+            verify(relatorioRepository).findById(relatorioId);
             verify(relatorioRepository).deleteById(relatorioId);
         }
 
         @Test
         @DisplayName("Deve lançar exceção quando tentar excluir relatório inexistente")
         void deveLancarExcecaoAoExcluirRelatorioInexistente() {
-            when(relatorioRepository.existsById(relatorioId)).thenReturn(false);
+            when(relatorioRepository.findById(relatorioId)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> relatorioService.deletar(relatorioId))
                     .isInstanceOf(RuntimeException.class)
@@ -500,6 +544,7 @@ class RelatorioServiceTest {
         @Test
         @DisplayName("Deve permitir dados opcionais quando aluno ou professor não forem encontrados")
         void devePermitirDadosOpcionaisAusentes() {
+            SecurityContextHolder.clearContext();
             relatorio.setProfessor(null);
             relatorio.setTurma(null);
 
