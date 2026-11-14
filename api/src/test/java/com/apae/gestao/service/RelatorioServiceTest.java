@@ -196,6 +196,20 @@ class RelatorioServiceTest {
 
             assertThat(resultado).isEmpty();
         }
+
+        @Test
+        @DisplayName("Não deve listar relatório de outro professor apenas pelo vínculo com a turma antiga após transferência")
+        void naoDeveListarRelatorioDeOutroProfessorApenasPorTurmaAntiga() {
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            relatorio.setProfessor(outroProfessor);
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)).thenReturn(List.of());
+            when(relatorioRepository.findAll()).thenReturn(List.of(relatorio));
+
+            List<RelatorioResponseDTO> resultado = relatorioService.listarTodos();
+
+            assertThat(resultado).isEmpty();
+        }
     }
 
     @Nested
@@ -229,6 +243,47 @@ class RelatorioServiceTest {
             assertThatThrownBy(() -> relatorioService.buscarPorId(idInexistente))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Relatório não encontrado");
+        }
+
+        @Test
+        @DisplayName("Deve negar acesso quando professor da turma antiga tenta buscar relatório de outro professor sem vínculo ativo")
+        void deveNegarAcessoPorTurmaAntigaSemVinculoAtivo() {
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            relatorio.setProfessor(outroProfessor);
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)).thenReturn(List.of());
+            when(relatorioRepository.findById(relatorioId)).thenReturn(Optional.of(relatorio));
+
+            assertThatThrownBy(() -> relatorioService.buscarPorId(relatorioId))
+                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                    .satisfies(ex -> assertThat(((org.springframework.web.server.ResponseStatusException) ex).getStatusCode())
+                            .isEqualTo(org.springframework.http.HttpStatus.FORBIDDEN));
+        }
+
+        @Test
+        @DisplayName("Deve permitir leitura de relatório de outro professor quando houver vínculo ativo com o aluno")
+        void devePermitirLeituraDeOutroProfessorComVinculoAtivo() {
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            outroProfessor.setUsuarioId(UUID.randomUUID());
+            relatorio.setProfessor(outroProfessor);
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
+            when(relatorioRepository.findById(relatorioId)).thenReturn(Optional.of(relatorio));
+
+            RelatorioResponseDTO resultado = relatorioService.buscarPorId(relatorioId);
+
+            assertThat(resultado.getId()).isEqualTo(relatorioId);
+        }
+
+        @Test
+        @DisplayName("Deve permitir leitura de relatório próprio mesmo sem vínculo ativo com o aluno")
+        void devePermitirLeituraPropriaSemVinculoAtivo() {
+            configurarMapeamentoDoRelatorio();
+            when(relatorioRepository.findById(relatorioId)).thenReturn(Optional.of(relatorio));
+
+            RelatorioResponseDTO resultado = relatorioService.buscarPorId(relatorioId);
+
+            assertThat(resultado.getId()).isEqualTo(relatorioId);
         }
     }
 
@@ -474,6 +529,36 @@ class RelatorioServiceTest {
 
             verify(relatorioRepository, never()).save(any(Relatorio.class));
         }
+
+        @Test
+        @DisplayName("Deve lançar 403 ao atualizar quando o aluno perdeu vínculo ativo com a turma original")
+        void deveLancar403AoAtualizarQuandoPerdeuVinculoOriginal() {
+            vinculo.setAtivo(false);
+            when(relatorioRepository.findById(relatorioId)).thenReturn(Optional.of(relatorio));
+
+            assertThatThrownBy(() -> relatorioService.atualizar(relatorioId, request))
+                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                    .satisfies(ex -> assertThat(((org.springframework.web.server.ResponseStatusException) ex).getStatusCode())
+                            .isEqualTo(org.springframework.http.HttpStatus.FORBIDDEN));
+
+            verify(relatorioRepository, never()).save(any(Relatorio.class));
+        }
+
+        @Test
+        @DisplayName("Deve lançar 403 ao atualizar relatório de outro professor mesmo com vínculo ativo com o aluno")
+        void deveLancar403AoAtualizarQuandoNaoAutor() {
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            relatorio.setProfessor(outroProfessor);
+            when(relatorioRepository.findById(relatorioId)).thenReturn(Optional.of(relatorio));
+
+            assertThatThrownBy(() -> relatorioService.atualizar(relatorioId, request))
+                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                    .satisfies(ex -> assertThat(((org.springframework.web.server.ResponseStatusException) ex).getStatusCode())
+                            .isEqualTo(org.springframework.http.HttpStatus.FORBIDDEN));
+
+            verify(relatorioRepository, never()).save(any(Relatorio.class));
+        }
     }
 
     @Nested
@@ -499,6 +584,36 @@ class RelatorioServiceTest {
             assertThatThrownBy(() -> relatorioService.deletar(relatorioId))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Relatório não encontrado");
+
+            verify(relatorioRepository, never()).deleteById(any(UUID.class));
+        }
+
+        @Test
+        @DisplayName("Deve lançar 403 ao deletar quando o aluno perdeu vínculo ativo com a turma original")
+        void deveLancar403AoDeletarQuandoPerdeuVinculoOriginal() {
+            vinculo.setAtivo(false);
+            when(relatorioRepository.findById(relatorioId)).thenReturn(Optional.of(relatorio));
+
+            assertThatThrownBy(() -> relatorioService.deletar(relatorioId))
+                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                    .satisfies(ex -> assertThat(((org.springframework.web.server.ResponseStatusException) ex).getStatusCode())
+                            .isEqualTo(org.springframework.http.HttpStatus.FORBIDDEN));
+
+            verify(relatorioRepository, never()).deleteById(any(UUID.class));
+        }
+
+        @Test
+        @DisplayName("Deve lançar 403 ao deletar relatório de outro professor mesmo com vínculo ativo com o aluno")
+        void deveLancar403AoDeletarQuandoNaoAutor() {
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            relatorio.setProfessor(outroProfessor);
+            when(relatorioRepository.findById(relatorioId)).thenReturn(Optional.of(relatorio));
+
+            assertThatThrownBy(() -> relatorioService.deletar(relatorioId))
+                    .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+                    .satisfies(ex -> assertThat(((org.springframework.web.server.ResponseStatusException) ex).getStatusCode())
+                            .isEqualTo(org.springframework.http.HttpStatus.FORBIDDEN));
 
             verify(relatorioRepository, never()).deleteById(any(UUID.class));
         }
@@ -534,6 +649,22 @@ class RelatorioServiceTest {
                     relatorioService.buscarPorAluno(alunoId);
 
             assertThat(resultado).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Deve retornar apenas relatórios de autoria do professor quando não houver vínculo ativo com o aluno")
+        void deveRetornarApenasAutoriaQuandoSemVinculoAtivo() {
+            configurarMapeamentoDoRelatorio();
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)).thenReturn(List.of());
+            when(relatorioRepository.findByPacienteIdAndProfessor(alunoId, professor))
+                    .thenReturn(List.of(relatorio));
+
+            List<RelatorioResponseDTO> resultado = relatorioService.buscarPorAluno(alunoId);
+
+            assertThat(resultado).hasSize(1);
+            assertThat(resultado.get(0).getId()).isEqualTo(relatorioId);
+            verify(relatorioRepository).findByPacienteIdAndProfessor(alunoId, professor);
+            verify(relatorioRepository, never()).findByPacienteId(any());
         }
     }
 
