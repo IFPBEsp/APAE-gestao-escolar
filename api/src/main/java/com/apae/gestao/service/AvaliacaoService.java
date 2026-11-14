@@ -57,8 +57,7 @@ public class AvaliacaoService {
         if (isProfessorAutenticado()) {
             Professor professor = obterProfessorAutenticado();
             return avaliacoes.stream()
-                    .filter(av -> isAlunoVinculadoAoProfessor(av.getPacienteId(), professor.getId())
-                            || (av.getProfessor() != null && professor.getId().equals(av.getProfessor().getId())))
+                    .filter(av -> isAvaliacaoAcessivelPeloProfessor(av, professor))
                     .map(this::toResponse)
                     .toList();
         }
@@ -73,8 +72,7 @@ public class AvaliacaoService {
                 .orElseThrow(() -> new EntityNotFoundException("Avaliação não encontrada"));
         if (isProfessorAutenticado()) {
             Professor professor = obterProfessorAutenticado();
-            if (!isAlunoVinculadoAoProfessor(avaliacao.getPacienteId(), professor.getId())
-                    && (avaliacao.getProfessor() == null || !professor.getId().equals(avaliacao.getProfessor().getId()))) {
+            if (!isAvaliacaoAcessivelPeloProfessor(avaliacao, professor)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado a esta avaliação");
             }
         }
@@ -87,7 +85,12 @@ public class AvaliacaoService {
                 .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado"));
         if (isProfessorAutenticado()) {
             Professor professor = obterProfessorAutenticado();
-            validarVinculoProfessorComAluno(professor, alunoId);
+            List<Avaliacao> avaliacoes = isAlunoVinculadoAoProfessor(alunoId, professor.getId())
+                    ? avaliacaoRepository.findByPacienteIdOrderByDataAvaliacaoDesc(alunoId)
+                    : avaliacaoRepository.findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(alunoId, professor);
+            return avaliacoes.stream()
+                    .map(this::toResponse)
+                    .toList();
         }
         return avaliacaoRepository.findByPacienteIdOrderByDataAvaliacaoDesc(alunoId)
                 .stream()
@@ -118,6 +121,7 @@ public class AvaliacaoService {
 
         Professor professor = obterProfessorAutenticado();
         validarAutoriaAvaliacao(avaliacao, professor);
+        validarVinculoProfessorComAluno(professor, avaliacao.getPacienteId());
 
         alunoRepository.findById(dto.getAlunoId())
                 .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado"));
@@ -136,6 +140,7 @@ public class AvaliacaoService {
                 .orElseThrow(() -> new EntityNotFoundException("Avaliação não encontrada"));
         Professor professor = obterProfessorAutenticado();
         validarAutoriaAvaliacao(avaliacao, professor);
+        validarVinculoProfessorComAluno(professor, avaliacao.getPacienteId());
         avaliacaoRepository.deleteById(id);
     }
 
@@ -172,6 +177,11 @@ public class AvaliacaoService {
                 .anyMatch(turma -> turma != null
                         && turma.getProfessor() != null
                         && professorId.equals(turma.getProfessor().getId()));
+    }
+
+    private boolean isAvaliacaoAcessivelPeloProfessor(Avaliacao avaliacao, Professor professor) {
+        return isAlunoVinculadoAoProfessor(avaliacao.getPacienteId(), professor.getId())
+                || (avaliacao.getProfessor() != null && professor.getId().equals(avaliacao.getProfessor().getId()));
     }
 
     private void validarAutoriaAvaliacao(Avaliacao avaliacao, Professor professor) {
