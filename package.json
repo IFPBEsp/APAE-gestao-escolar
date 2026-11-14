@@ -12,10 +12,14 @@
     "db:seed": "docker compose --env-file .env -f api/docker-compose.yml --profile tools run --rm db-seed",
     "db:prepare": "bash ./.scripts/setup.sh",
     "docker:down": "docker compose --env-file .env -f api/docker-compose.yml down",
-    "docker:drop": "docker compose --env-file .env -f api/docker-compose.yml down -v"
+    "docker:drop": "docker compose --env-file .env -f api/docker-compose.yml down -v",
+    "prepare": "husky"
   },
   "dependencies": {
     "react-to-print": "^3.2.0",
     "recharts": "^3.8.1"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
   }
 }

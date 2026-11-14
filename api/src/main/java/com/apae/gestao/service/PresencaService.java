@@ -37,29 +37,7 @@ public class PresencaService {
 
     @Transactional(readOnly = true)
     public ChamadaResponseDTO getChamadaPorTurmaEData(UUID turmaId, LocalDate data) {
-        Turma turma = turmaRepository.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada com id: " + turmaId));
-        Aula aula = aulaRepository.findByTurmaAndData(turma, data).orElse(null);
-
-        Map<UUID, Presenca> presencasPorPaciente = aula == null
-                ? Map.of()
-                : presencaRepository.findByAula(aula)
-                        .stream()
-                        .collect(Collectors.toMap(Presenca::getPacienteId, presenca -> presenca));
-
-        ChamadaResponseDTO response = ChamadaResponseDTO.builder()
-                .turmaId(turma.getId())
-                .turmaNome(turma.getNome())
-                .dataChamada(data)
-                .descricao(aula != null ? aula.getDescricao() : null)
-                .listaPresencas(turmaAlunoRepository.findByTurmaAndAtivoOrderByPacienteNomeAsc(turma, true)
-                        .stream()
-                        .map(turmaAluno -> toPresencaAluno(turmaAluno, presencasPorPaciente.get(turmaAluno.getPacienteId())))
-                        .toList())
-                .build();
-        response.setTotalAlunosNaTurma(response.getListaPresencas().size());
-        response.calcularTotalPresentes();
-        return response;
+        return montarChamada(turmaId, data);
     }
 
     @Transactional
@@ -83,7 +61,7 @@ public class PresencaService {
             registrarOuAtualizarPresencaIndividual(aula, item);
         }
 
-        return getChamadaPorTurmaEData(turmaId, data);
+        return montarChamada(turmaId, data);
     }
 
     @Transactional
@@ -92,6 +70,32 @@ public class PresencaService {
             throw new RuntimeException("Presença não encontrada com id: " + id);
         }
         presencaRepository.deleteById(id);
+    }
+
+    private ChamadaResponseDTO montarChamada(UUID turmaId, LocalDate data) {
+        Turma turma = turmaRepository.findById(turmaId)
+                .orElseThrow(() -> new RuntimeException("Turma não encontrada com id: " + turmaId));
+        Aula aula = aulaRepository.findByTurmaAndData(turma, data).orElse(null);
+
+        Map<UUID, Presenca> presencasPorPaciente = aula == null
+                ? Map.of()
+                : presencaRepository.findByAula(aula)
+                        .stream()
+                        .collect(Collectors.toMap(Presenca::getPacienteId, presenca -> presenca));
+
+        ChamadaResponseDTO response = ChamadaResponseDTO.builder()
+                .turmaId(turma.getId())
+                .turmaNome(turma.getNome())
+                .dataChamada(data)
+                .descricao(aula != null ? aula.getDescricao() : null)
+                .listaPresencas(turmaAlunoRepository.findByTurmaAndAtivoOrderByPacienteNomeAsc(turma, true)
+                        .stream()
+                        .map(turmaAluno -> toPresencaAluno(turmaAluno, presencasPorPaciente.get(turmaAluno.getPacienteId())))
+                        .toList())
+                .build();
+        response.setTotalAlunosNaTurma(response.getListaPresencas().size());
+        response.calcularTotalPresentes();
+        return response;
     }
 
     private Aula criarNovaAula(Turma turma, LocalDate data, String descricao) {

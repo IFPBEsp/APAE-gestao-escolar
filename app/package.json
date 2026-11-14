@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -35,12 +37,18 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/jest": "^30.0.0",
     "@types/node": "24.7.0",
     "@types/react": "19.2.2",
     "autoprefixer": "10.4.19",
     "eslint": "^9.37.0",
     "eslint-plugin-next": "^0.0.0",
     "postcss": "^8.5.18",
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2",
     "prettier": "^3.6.2",
     "tailwind-merge": "^2.2.0",
     "tailwindcss": "3.4.4",
@@ -62,7 +70,6 @@
     "nanoid": "^3.3.18",
     "next": "^16.4.1",
     "picomatch": "^2.3.2",
-    "postcss": "^8.5.18",
     "sharp": "^0.35.5",
     "source-map-js": "^1.2.2"
   }
