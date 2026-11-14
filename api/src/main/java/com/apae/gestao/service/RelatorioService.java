@@ -100,6 +100,7 @@ public class RelatorioService {
 
         Professor professor = obterProfessorAutenticado();
         validarAutoriaRelatorio(relatorio, professor);
+        validarVinculoProfessorTurmaEAluno(professor, relatorio.getTurma(), relatorio.getPacienteId());
 
         alunoRepository.findById(request.getAlunoId())
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado com ID: " + request.getAlunoId()));
@@ -122,6 +123,7 @@ public class RelatorioService {
                 .orElseThrow(() -> new RuntimeException("Relatório não encontrado com ID: " + id));
         Professor professor = obterProfessorAutenticado();
         validarAutoriaRelatorio(relatorio, professor);
+        validarVinculoProfessorTurmaEAluno(professor, relatorio.getTurma(), relatorio.getPacienteId());
         relatorioRepository.deleteById(id);
     }
 
@@ -129,9 +131,12 @@ public class RelatorioService {
     public List<RelatorioResponseDTO> buscarPorAluno(UUID alunoId) {
         if (isProfessorAutenticado()) {
             Professor professor = obterProfessorAutenticado();
-            if (!isAlunoVinculadoAoProfessor(alunoId, professor.getId())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Professor não possui vínculo com o aluno informado");
-            }
+            List<Relatorio> relatorios = isAlunoVinculadoAoProfessor(alunoId, professor.getId())
+                    ? relatorioRepository.findByPacienteId(alunoId)
+                    : relatorioRepository.findByPacienteIdAndProfessor(alunoId, professor);
+            return relatorios.stream()
+                    .map(this::toResponseDTO)
+                    .toList();
         }
         return relatorioRepository.findByPacienteId(alunoId)
                 .stream()
@@ -160,7 +165,7 @@ public class RelatorioService {
     }
 
     private void validarVinculoProfessorTurmaEAluno(Professor professor, Turma turma, UUID alunoId) {
-        if (turma.getProfessor() == null || !professor.getId().equals(turma.getProfessor().getId())) {
+        if (turma == null || turma.getProfessor() == null || !professor.getId().equals(turma.getProfessor().getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Professor não possui vínculo com a turma informada");
         }
         TurmaAluno vinculo = turmaAlunoRepository.findByTurmaAndPacienteId(turma, alunoId).orElse(null);
@@ -177,10 +182,6 @@ public class RelatorioService {
 
     private boolean isRelatorioAcessivelPeloProfessor(Relatorio relatorio, Professor professor) {
         if (relatorio.getProfessor() != null && professor.getId().equals(relatorio.getProfessor().getId())) {
-            return true;
-        }
-        if (relatorio.getTurma() != null && relatorio.getTurma().getProfessor() != null
-                && professor.getId().equals(relatorio.getTurma().getProfessor().getId())) {
             return true;
         }
         return isAlunoVinculadoAoProfessor(relatorio.getPacienteId(), professor.getId());
