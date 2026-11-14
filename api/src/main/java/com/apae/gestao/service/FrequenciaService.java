@@ -58,8 +58,12 @@ public class FrequenciaService {
 
     @Transactional
     public Page<AulaPresencaAlunoResponseDTO> getHistoricoIndividualAluno(UUID alunoId, Pageable pageable) {
-        validarAcessoProfessorAoAluno(alunoId);
-        return alunoRepository.listarHistoricoAluno(alunoId, pageable);
+        if (!isProfessorAutenticado()) {
+            return alunoRepository.listarHistoricoAluno(alunoId, pageable);
+        }
+        Professor professor = obterProfessorAutenticado();
+        validarAcessoProfessorAoAluno(professor, alunoId);
+        return alunoRepository.listarHistoricoAlunoPorProfessor(alunoId, professor.getId(), pageable);
     }
 
     private void validarAcessoProfessorNaTurma(UUID turmaId) {
@@ -74,11 +78,7 @@ public class FrequenciaService {
         }
     }
 
-    private void validarAcessoProfessorAoAluno(UUID alunoId) {
-        if (!isProfessorAutenticado()) {
-            return;
-        }
-        Professor professor = obterProfessorAutenticado();
+    private void validarAcessoProfessorAoAluno(Professor professor, UUID alunoId) {
         boolean vinculado = turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)
                 .stream()
                 .map(TurmaAluno::getTurma)
