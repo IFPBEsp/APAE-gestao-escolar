@@ -299,6 +299,50 @@ class AvaliacaoServiceTest {
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessage("Avaliação não encontrada");
         }
+
+        @Test
+        @DisplayName("Deve permitir leitura de avaliação de outro professor quando houver vínculo ativo com o aluno")
+        void devePermitirLeituraDeOutroProfessorQuandoVinculadoAoAluno() {
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            outroProfessor.setUsuarioId(UUID.randomUUID());
+            avaliacao.setProfessor(outroProfessor);
+
+            when(avaliacaoRepository.findById(avaliacaoId)).thenReturn(Optional.of(avaliacao));
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
+
+            AvaliacaoResponseDTO resposta = avaliacaoService.buscarPorId(avaliacaoId);
+
+            assertThat(resposta.getId()).isEqualTo(avaliacaoId);
+        }
+
+        @Test
+        @DisplayName("Deve permitir leitura de avaliação própria mesmo após transferência do aluno")
+        void devePermitirLeituraPropriaSemVinculoAtivo() {
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)).thenReturn(List.of());
+            when(avaliacaoRepository.findById(avaliacaoId)).thenReturn(Optional.of(avaliacao));
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
+            when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuario));
+
+            AvaliacaoResponseDTO resposta = avaliacaoService.buscarPorId(avaliacaoId);
+
+            assertThat(resposta.getId()).isEqualTo(avaliacaoId);
+        }
+
+        @Test
+        @DisplayName("Deve lançar 403 ao buscar avaliação de outro professor sem vínculo ativo com o aluno")
+        void deveNegarLeituraDeOutroProfessorSemVinculoAtivo() {
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            avaliacao.setProfessor(outroProfessor);
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)).thenReturn(List.of());
+            when(avaliacaoRepository.findById(avaliacaoId)).thenReturn(Optional.of(avaliacao));
+
+            assertThatThrownBy(() -> avaliacaoService.buscarPorId(avaliacaoId))
+                    .isInstanceOf(ResponseStatusException.class)
+                    .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode())
+                            .isEqualTo(HttpStatus.FORBIDDEN));
+        }
     }
 
     @Nested
@@ -331,6 +375,23 @@ class AvaliacaoServiceTest {
 
             verify(avaliacaoRepository, never())
                     .findByPacienteIdOrderByDataAvaliacaoDesc(any());
+        }
+
+        @Test
+        @DisplayName("Deve listar apenas avaliações de autoria do professor quando não houver vínculo ativo com o aluno")
+        void deveListarApenasAutoriaQuandoSemVinculoAtivo() {
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(aluno));
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)).thenReturn(List.of());
+            when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuario));
+            when(avaliacaoRepository.findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(alunoId, professor))
+                    .thenReturn(List.of(avaliacao));
+
+            List<AvaliacaoResponseDTO> resposta = avaliacaoService.listarPorAluno(alunoId);
+
+            assertThat(resposta).hasSize(1);
+            assertThat(resposta.get(0).getId()).isEqualTo(avaliacaoId);
+            verify(avaliacaoRepository).findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(alunoId, professor);
+            verify(avaliacaoRepository, never()).findByPacienteIdOrderByDataAvaliacaoDesc(any());
         }
     }
 
@@ -429,6 +490,36 @@ class AvaliacaoServiceTest {
 
             verify(avaliacaoRepository, never()).save(any());
         }
+
+        @Test
+        @DisplayName("Deve lançar 403 ao atualizar quando o professor perdeu o vínculo com o aluno original")
+        void deveFalharQuandoPerdeuVinculoComAlunoOriginal() {
+            when(avaliacaoRepository.findById(avaliacaoId)).thenReturn(Optional.of(avaliacao));
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)).thenReturn(List.of());
+
+            assertThatThrownBy(() -> avaliacaoService.atualizar(avaliacaoId, request))
+                    .isInstanceOf(ResponseStatusException.class)
+                    .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode())
+                            .isEqualTo(HttpStatus.FORBIDDEN));
+
+            verify(avaliacaoRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Deve lançar 403 ao atualizar avaliação de outro professor mesmo com vínculo ativo com o aluno")
+        void deveFalharQuandoNaoAutorComVinculoAtivo() {
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            avaliacao.setProfessor(outroProfessor);
+            when(avaliacaoRepository.findById(avaliacaoId)).thenReturn(Optional.of(avaliacao));
+
+            assertThatThrownBy(() -> avaliacaoService.atualizar(avaliacaoId, request))
+                    .isInstanceOf(ResponseStatusException.class)
+                    .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode())
+                            .isEqualTo(HttpStatus.FORBIDDEN));
+
+            verify(avaliacaoRepository, never()).save(any());
+        }
     }
 
     @Nested
@@ -453,6 +544,36 @@ class AvaliacaoServiceTest {
             assertThatThrownBy(() -> avaliacaoService.deletar(avaliacaoId))
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessage("Avaliação não encontrada");
+
+            verify(avaliacaoRepository, never()).deleteById(any());
+        }
+
+        @Test
+        @DisplayName("Deve lançar 403 ao deletar quando o professor perdeu o vínculo com o aluno original")
+        void deveFalharAoDeletarQuandoPerdeuVinculoComAlunoOriginal() {
+            when(avaliacaoRepository.findById(avaliacaoId)).thenReturn(Optional.of(avaliacao));
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)).thenReturn(List.of());
+
+            assertThatThrownBy(() -> avaliacaoService.deletar(avaliacaoId))
+                    .isInstanceOf(ResponseStatusException.class)
+                    .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode())
+                            .isEqualTo(HttpStatus.FORBIDDEN));
+
+            verify(avaliacaoRepository, never()).deleteById(any());
+        }
+
+        @Test
+        @DisplayName("Deve lançar 403 ao deletar avaliação de outro professor mesmo com vínculo ativo com o aluno")
+        void deveFalharAoDeletarQuandoNaoAutorComVinculoAtivo() {
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            avaliacao.setProfessor(outroProfessor);
+            when(avaliacaoRepository.findById(avaliacaoId)).thenReturn(Optional.of(avaliacao));
+
+            assertThatThrownBy(() -> avaliacaoService.deletar(avaliacaoId))
+                    .isInstanceOf(ResponseStatusException.class)
+                    .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode())
+                            .isEqualTo(HttpStatus.FORBIDDEN));
 
             verify(avaliacaoRepository, never()).deleteById(any());
         }
