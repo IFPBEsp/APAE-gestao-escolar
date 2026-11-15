@@ -97,5 +97,25 @@ public interface AlunoViewRepository extends JpaRepository<AlunoView, UUID> {
             @Param("pacienteId") UUID pacienteId,
             Pageable pageable);
 
+    @Query("""
+                SELECT new com.apae.gestao.dto.aula.AulaPresencaAlunoResponseDTO(
+                    au.id,
+                    a.id,
+                    au.descricao,
+                    CASE WHEN p.faltou = false THEN true ELSE false END
+                )
+                FROM Presenca p
+                JOIN Aula au ON p.aula.id = au.id
+                JOIN au.turma t
+                JOIN AlunoView a ON p.pacienteId = a.id
+                WHERE a.id = :pacienteId
+                AND t.professor.id = :professorId
+                ORDER BY au.data DESC
+            """)
+    Page<AulaPresencaAlunoResponseDTO> listarHistoricoAlunoPorProfessor(
+            @Param("pacienteId") UUID pacienteId,
+            @Param("professorId") UUID professorId,
+            Pageable pageable);
+
     List<AlunoView> findByNomeCompletoContainingIgnoreCase(String nomeCompleto);
 }
