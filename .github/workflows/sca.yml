@@ -1,0 +1,36 @@
+name: Dependency Vulnerability Check (SCA)
+
+on:
+  pull_request:
+    paths:
+      - "api/pom.xml"
+      - "app/package.json"
+      - "app/package-lock.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".trivyignore"
+      - ".github/workflows/sca.yml"
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  sca-api:
+    name: SCA Maven (api)
+    uses: IFPBEsp/APAE-INFRA/.github/workflows/sca-reusable.yml@291d01c4e8c573e6862f5b3c655a4622889b09b5
+    with:
+      scan-path: "api"
+      severity: "HIGH,CRITICAL"
+      ignore-unfixed: true
+      fail-on-vulnerabilities: true
+
+  sca-frontend:
+    name: SCA npm (raiz e app)
+    uses: IFPBEsp/APAE-INFRA/.github/workflows/sca-reusable.yml@291d01c4e8c573e6862f5b3c655a4622889b09b5
+    with:
+      scan-path: "."
+      skip-dirs: "api"
+      severity: "HIGH,CRITICAL"
+      ignore-unfixed: true
+      fail-on-vulnerabilities: true
