@@ -22,6 +22,5 @@ public class AvaliacaoRequestDTO {
     @NotNull(message = "O ID do aluno é obrigatório")
     private UUID alunoId;
 
-    @NotNull(message = "O ID do professor é obrigatório")
     private UUID professorId;
 }

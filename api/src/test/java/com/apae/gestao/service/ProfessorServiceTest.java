@@ -9,6 +9,7 @@ import com.apae.gestao.exception.RecursoNaoEncontradoException;
 import com.apae.gestao.repository.EnderecoRepository;
 import com.apae.gestao.repository.ProfessorDashboardRepository;
 import com.apae.gestao.repository.ProfessorRepository;
+import com.apae.gestao.repository.TurmaRepository;
 import com.apae.gestao.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,6 +51,9 @@ class ProfessorServiceTest {
 
     @Mock
     private EnderecoRepository enderecoRepository;
+
+    @Mock
+    private TurmaRepository turmaRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -330,6 +334,7 @@ class ProfessorServiceTest {
         assertNotNull(response);
         assertFalse(response.getAtivo());
         verify(usuarioRepository, times(1)).save(usuario);
+        verify(turmaRepository, times(1)).desvincularProfessorDeTurmas(professorId);
     }
 
     @Test
@@ -358,6 +363,7 @@ class ProfessorServiceTest {
                 () -> professorService.inativar(idInexistente));
 
         assertTrue(exception.getMessage().contains("Professor não encontrado com ID: " + idInexistente));
+        verify(turmaRepository, never()).desvincularProfessorDeTurmas(any());
     }
 
     // =========================================================================

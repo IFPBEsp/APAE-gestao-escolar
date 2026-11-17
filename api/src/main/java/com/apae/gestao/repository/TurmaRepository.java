@@ -1,5 +1,6 @@
 package com.apae.gestao.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -45,4 +46,8 @@ public interface TurmaRepository extends JpaRepository<Turma, UUID> {
 
     @Query("SELECT t FROM Turma t LEFT JOIN FETCH t.turmaAlunos WHERE t.id = :id")
     Optional<Turma> findByIdWithDetails(@Param("id") UUID id);
+
+    @Modifying
+    @Query("UPDATE Turma t SET t.professor = null WHERE t.professor.id = :professorId")
+    void desvincularProfessorDeTurmas(@Param("professorId") UUID professorId);
 }

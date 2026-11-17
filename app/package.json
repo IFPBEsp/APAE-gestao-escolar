@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -35,11 +37,17 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/jest": "^30.0.0",
     "@types/node": "24.7.0",
     "@types/react": "19.2.2",
     "autoprefixer": "10.4.19",
     "eslint": "^9.37.0",
     "eslint-plugin-next": "^0.0.0",
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2",
     "postcss": "8.4.38",
     "prettier": "^3.6.2",
     "tailwind-merge": "^2.2.0",
