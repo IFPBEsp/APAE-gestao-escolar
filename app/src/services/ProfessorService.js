@@ -31,7 +31,7 @@ export async function registerProfessor(professorData) {
 
 /**
  * Busca professores com filtros opcionais.
- * 
+ *
  * @param {string} nome - Nome para busca (opcional)
  * @param {boolean} ativo - Status do professor (opcional)
  * @returns {Promise<Array>} Lista de professores
@@ -52,7 +52,7 @@ export async function listarProfessores(nome = "", ativo = undefined) {
 
 /**
  * Busca um professor por ID.
- * 
+ *
  * @param {string} id - ID UUID do professor
  * @returns {Promise<object>} Dados do professor
  */
@@ -68,7 +68,7 @@ export async function buscarProfessorPorId(id) {
 
 /**
  * Atualiza um professor existente.
- * 
+ *
  * @param {string} id - ID UUID do professor
  * @param {object} professorData - Dados atualizados
  * @returns {Promise<object>} Professor atualizado
@@ -121,6 +121,26 @@ export async function inativarProfessorporId(id) {
             || "Erro ao tentar inativar o professor.";
 
         console.error("Professor Error (Inativar):", error.response || error);
+        throw new Error(errorMessage);
+    }
+}
+
+/**
+ * Busca os indicadores do dashboard do professor autenticado.
+ *
+ * @returns {Promise<object>} Dados consolidados do dashboard.
+ */
+export async function buscarDashboardProfessor() {
+    try {
+        const response = await api.get('/professores/me/dashboard');
+        return response.data;
+    } catch (error) {
+        const apiMessage = error.response?.data?.message;
+        const errorMessage = apiMessage
+            || error.message
+            || "Erro ao carregar os indicadores do dashboard do professor.";
+
+        console.error("Erro ao buscar dashboard do professor:", error.response || error);
         throw new Error(errorMessage);
     }
 }
