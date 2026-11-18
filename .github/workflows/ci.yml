@@ -1,0 +1,15 @@
+name: Teste CI Reutilizável Gestao Escolar
+
+on:
+  push:
+    branches:
+      - teste-novo-ci
+
+jobs:
+  frontend-ci:
+    uses: IFPBEsp/APAE-INFRA/.github/workflows/frontend-ci.yml@67-ci-criar-workflow-reutilizavel-de-ci-para-frontends-nodejs
+    with:
+      working-directory: 'app'
+      run-lint: false
+      run-tests: false
+      run-build: true
