@@ -42,6 +42,8 @@ jobs:
         run: npm ci
       - name: Lint frontend
         run: npx --no-install eslint .
+      - name: Test frontend
+        run: npm test -- --runInBand
       - name: Build frontend
         run: npm run build
       - name: Typecheck frontend

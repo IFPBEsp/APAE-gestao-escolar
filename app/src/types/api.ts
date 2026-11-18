@@ -24,6 +24,7 @@ export interface AlunoResumo {
   dataUltimaAvaliacao?: string;
   ultimaAvaliacao?: string;
   frequencia?: number;
+  frequenciaGeral?: number;
   percentualFrequencia?: number;
   totalAulas?: number;
   totalPresencas?: number;

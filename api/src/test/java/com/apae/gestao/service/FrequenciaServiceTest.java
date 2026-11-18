@@ -3,8 +3,16 @@ package com.apae.gestao.service;
 import com.apae.gestao.dto.aluno.AlunoFrequenciaResumoDTO;
 import com.apae.gestao.dto.aula.AulaPresencaAlunoResponseDTO;
 import com.apae.gestao.dto.turma.TurmaResumoFrequenciaDTO;
+import com.apae.gestao.entity.Professor;
+import com.apae.gestao.entity.Turma;
+import com.apae.gestao.entity.TurmaAluno;
+import com.apae.gestao.entity.Usuario;
 import com.apae.gestao.repository.AlunoViewRepository;
+import com.apae.gestao.repository.ProfessorRepository;
+import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.TurmaRepository;
+import com.apae.gestao.repository.UsuarioRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,8 +26,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,6 +52,15 @@ class FrequenciaServiceTest {
     @Mock
     private AlunoViewRepository alunoRepository;
 
+    @Mock
+    private TurmaAlunoRepository turmaAlunoRepository;
+
+    @Mock
+    private ProfessorRepository professorRepository;
+
+    @Mock
+    private UsuarioRepository usuarioRepository;
+
     @InjectMocks
     private FrequenciaService frequenciaService;
 
@@ -50,6 +73,11 @@ class FrequenciaServiceTest {
         turmaId = UUID.randomUUID();
         alunoId = UUID.randomUUID();
         pageable = PageRequest.of(2, 5, Sort.by("nome"));
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     @Nested
@@ -210,6 +238,86 @@ class FrequenciaServiceTest {
             verify(alunoRepository).listarHistoricoAluno(eq(alunoId), same(pageable));
             verifyNoMoreInteractions(alunoRepository);
             verifyNoInteractions(turmaRepository);
+        }
+
+        @Test
+        @DisplayName("Deve filtrar histórico por professor quando usuário autenticado for ROLE_TEACHER")
+        void deveFiltrarHistoricoPorProfessorQuandoTeacher() {
+            UUID usuarioId = UUID.randomUUID();
+            UUID professorId = UUID.randomUUID();
+
+            Usuario usuario = new Usuario();
+            usuario.setId(usuarioId);
+            usuario.setEmail("prof@apae.org.br");
+
+            Professor professor = new Professor();
+            professor.setId(professorId);
+            professor.setUsuarioId(usuarioId);
+
+            Turma turma = new Turma();
+            turma.setId(turmaId);
+            turma.setProfessor(professor);
+
+            TurmaAluno vinculo = new TurmaAluno();
+            vinculo.setTurma(turma);
+            vinculo.setPacienteId(alunoId);
+            vinculo.setAtivo(true);
+
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken(
+                            "prof@apae.org.br",
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_TEACHER"))
+                    )
+            );
+            when(usuarioRepository.findByEmail("prof@apae.org.br")).thenReturn(Optional.of(usuario));
+            when(professorRepository.findByUsuarioId(usuarioId)).thenReturn(Optional.of(professor));
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)).thenReturn(List.of(vinculo));
+
+            Page<AulaPresencaAlunoResponseDTO> pagina =
+                    new PageImpl<>(List.of(mock(AulaPresencaAlunoResponseDTO.class)), pageable, 1);
+            when(alunoRepository.listarHistoricoAlunoPorProfessor(alunoId, professorId, pageable))
+                    .thenReturn(pagina);
+
+            Page<AulaPresencaAlunoResponseDTO> resultado =
+                    frequenciaService.getHistoricoIndividualAluno(alunoId, pageable);
+
+            assertThat(resultado).isSameAs(pagina);
+            verify(alunoRepository).listarHistoricoAlunoPorProfessor(eq(alunoId), eq(professorId), same(pageable));
+            verify(alunoRepository, never()).listarHistoricoAluno(any(), any());
+        }
+
+        @Test
+        @DisplayName("Deve lançar 403 quando ROLE_TEACHER não possui vínculo ativo com o aluno")
+        void deveLancar403QuandoTeacherSemVinculoComAluno() {
+            UUID usuarioId = UUID.randomUUID();
+            UUID professorId = UUID.randomUUID();
+
+            Usuario usuario = new Usuario();
+            usuario.setId(usuarioId);
+            usuario.setEmail("prof@apae.org.br");
+
+            Professor professor = new Professor();
+            professor.setId(professorId);
+            professor.setUsuarioId(usuarioId);
+
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken(
+                            "prof@apae.org.br",
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_TEACHER"))
+                    )
+            );
+            when(usuarioRepository.findByEmail("prof@apae.org.br")).thenReturn(Optional.of(usuario));
+            when(professorRepository.findByUsuarioId(usuarioId)).thenReturn(Optional.of(professor));
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)).thenReturn(List.of());
+
+            assertThatThrownBy(() -> frequenciaService.getHistoricoIndividualAluno(alunoId, pageable))
+                    .isInstanceOf(ResponseStatusException.class)
+                    .satisfies(ex -> assertThat(((ResponseStatusException) ex).getStatusCode())
+                            .isEqualTo(HttpStatus.FORBIDDEN));
+
+            verifyNoInteractions(alunoRepository);
         }
     }
 }

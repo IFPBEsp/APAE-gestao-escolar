@@ -9,9 +9,12 @@ import com.apae.gestao.exception.RecursoNaoEncontradoException;
 import com.apae.gestao.repository.EnderecoRepository;
 import com.apae.gestao.repository.ProfessorDashboardRepository;
 import com.apae.gestao.repository.ProfessorRepository;
+import com.apae.gestao.repository.TurmaRepository;
 import com.apae.gestao.repository.UsuarioRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,18 +32,21 @@ public class ProfessorService {
     private final ProfessorDashboardRepository professorDashboardRepository;
     private final UsuarioRepository usuarioRepository;
     private final EnderecoRepository enderecoRepository;
+    private final TurmaRepository turmaRepository;
     private final PasswordEncoder passwordEncoder;
 
     public ProfessorService(ProfessorRepository professorRepository,
                             ProfessorDashboardRepository professorDashboardRepository,
                             UsuarioRepository usuarioRepository,
                             EnderecoRepository enderecoRepository,
-                            PasswordEncoder passwordEncoder) {
+                            PasswordEncoder passwordEncoder,
+                            TurmaRepository turmaRepository) {
         this.professorRepository = professorRepository;
         this.professorDashboardRepository = professorDashboardRepository;
         this.usuarioRepository = usuarioRepository;
         this.enderecoRepository = enderecoRepository;
         this.passwordEncoder = passwordEncoder;
+        this.turmaRepository = turmaRepository;
     }
 
     @Transactional(readOnly = true)
@@ -61,9 +67,29 @@ public class ProfessorService {
 
     @Transactional(readOnly = true)
     public ProfessorResumoDTO buscarPorIdResumido(UUID id) {
+        validarAcessoProfessor(id);
         Professor professor = buscarProfessor(id);
         Usuario usuario = buscarUsuario(professor);
         return toResumo(professor, usuario, buscarEndereco(usuario));
+    }
+
+    private void validarAcessoProfessor(UUID professorId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getAuthorities() == null) {
+            return;
+        }
+        boolean isTeacher = authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_TEACHER".equals(a.getAuthority()));
+        if (!isTeacher) {
+            return;
+        }
+        Usuario usuario = usuarioRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário autenticado não encontrado"));
+        Professor professorAutenticado = professorRepository.findByUsuarioId(usuario.getId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Professor autenticado não encontrado"));
+        if (!professorAutenticado.getId().equals(professorId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para acessar os dados de outro professor");
+        }
     }
 
     @Transactional(readOnly = true)
@@ -132,6 +158,7 @@ public class ProfessorService {
         Usuario usuario = buscarUsuario(professor);
         usuario.setAtivo(false);
         salvarUsuarioComErroClaro(usuario);
+        turmaRepository.desvincularProfessorDeTurmas(id);
         return new ProfessorResponseDTO(professor, usuario, buscarEndereco(usuario));
     }
 
