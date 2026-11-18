@@ -1,4 +1,5 @@
 'use client'
+import type { AlunoResumo, TurmaDetalhe } from "@/types/api";
 
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -51,9 +52,22 @@ export default function AvaliacoesAlunoPage() {
 
   const [descricaoAvaliacao, setDescricaoAvaliacao] = useState("");
 
-  const [alunoData, setAlunoData] = useState<any>(null);
+  const [alunoData, setAlunoData] = useState<AlunoResumo | null>(null);
   const [loadingAluno, setLoadingAluno] = useState(true);
-  const [turmaData, setTurmaData] = useState<any>(null);
+  const [turmaData, setTurmaData] = useState<TurmaDetalhe | null>(null);
+
+  const carregarAvaliacoes = async () => {
+    try {
+      setLoading(true);
+      const data = await AvaliacaoService.listarAvaliacoesPorAluno(alunoId);
+      setAvaliacoes(data);
+    } catch (error: unknown) {
+      toast.error("Erro ao carregar avaliações");
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   useEffect(() => {
     const carregarDadosIniciais = async () => {
@@ -78,18 +92,6 @@ export default function AvaliacoesAlunoPage() {
 
     carregarDadosIniciais();
   }, [alunoId, turmaId]);
-
-  const carregarAvaliacoes = async () => {
-    try {
-      setLoading(true);
-      const data = await AvaliacaoService.listarAvaliacoesPorAluno(alunoId);
-      setAvaliacoes(data);
-    } catch (error: any) {
-      toast.error("Erro ao carregar avaliações");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleOpenAdicionarDialog = () => {
     setDescricaoAvaliacao("");

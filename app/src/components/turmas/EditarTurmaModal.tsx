@@ -1,4 +1,6 @@
 'use client';
+import type { AlunoResumo } from "@/types/api";
+import { apiError } from "@/utils/apiError";
 
 import {
   atualizarTurma,
@@ -111,6 +113,37 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
         return val;
     }
 
+    async function fetchProfessores(nome: string) {
+        setIsBuscandoProfessores(true);
+        try {
+            const data = await listarProfessores(nome, true);
+            setProfessoresEncontrados(Array.isArray(data) ? data : []);
+        } catch (error: unknown) {
+            console.error("Erro ao buscar professores:", error);
+            setProfessoresEncontrados([]);
+        } finally {
+            setIsBuscandoProfessores(false);
+        }
+    }
+
+
+    async function fetchAlunos(nome: string) {
+        try {
+            const response = await listarAlunos(nome);
+            const alunosArray = response.content || [];
+
+            setAlunosEncontrados(
+                alunosArray
+                    .filter(a => !alunosNaTurma.some(aluno => aluno.pacienteId === a.id))
+                    .map(a => ({ id: a.id, nome: a.nome }))
+            );
+        } catch (error: unknown) {
+            toast.error("Erro ao buscar alunos: " + (apiError(error).message || ""));
+            setAlunosEncontrados([]);
+        }
+    }
+
+
     useEffect(() => {
         async function carregarDadosIniciais() {
             if (!turmaData || !isOpen) return;
@@ -139,26 +172,26 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
                 try {
                     const alunosDaTurma = await listarAlunosDaTurma(turmaBackend.id);
                     setAlunosNaTurma(
-                        (alunosDaTurma || []).map((a: any) => ({
-                            pacienteId: a.pacienteId || a.id || a.alunoId,
+                        (alunosDaTurma || []).map((a: Partial<AlunoResumo>) => ({
+                            pacienteId: a.pacienteId || a.id || a.alunoId || "",
                             nome: a.nome,
                             ativo: a.ativo ?? true,
                         }))
                     );
-                } catch (error: any) {
+                } catch (error: unknown) {
                     console.error("Erro ao carregar alunos da turma:", error);
-                    toast.error(error.message || "Erro ao carregar alunos da turma.");
-                    setAlunosNaTurma((turmaBackend.alunos || []).map((a: any) => ({
-                        pacienteId: a.pacienteId || a.id || a.alunoId,
+                    toast.error(apiError(error).message || "Erro ao carregar alunos da turma.");
+                    setAlunosNaTurma((turmaBackend.alunos || []).map((a: Partial<AlunoResumo>) => ({
+                        pacienteId: a.pacienteId || a.id || a.alunoId || "",
                         nome: a.nome,
                         ativo: a.ativo ?? true,
                     })));
                 }
 
                 setBuscaAluno("");
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error("Erro ao carregar dados da turma para edição:", error);
-                toast.error(error.message || "Erro ao carregar dados da turma para edição.");
+                toast.error(apiError(error).message || "Erro ao carregar dados da turma para edição.");
             }
         }
 
@@ -166,27 +199,16 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     }, [turmaData, isOpen]);
 
     useEffect(() => {
-        const termo = buscaProfessor.trim();
-        if (termo.length > 0) {
-            const delay = setTimeout(() => fetchProfessores(termo), 300);
-            return () => clearTimeout(delay);
-        } else {
-            setProfessoresEncontrados([]);
-        }
-    }, [buscaProfessor]);
-
-    async function fetchProfessores(nome: string) {
-        setIsBuscandoProfessores(true);
-        try {
-            const data = await listarProfessores(nome, true);
-            setProfessoresEncontrados(Array.isArray(data) ? data : []);
-        } catch (error: any) {
-            console.error("Erro ao buscar professores:", error);
-            setProfessoresEncontrados([]);
-        } finally {
-            setIsBuscandoProfessores(false);
-        }
-    }
+    const termo = buscaProfessor.trim();
+    const delay = setTimeout(() => {
+      if (termo) {
+        void fetchProfessores(termo);
+      } else {
+        setProfessoresEncontrados([]);
+      }
+    }, 300);
+    return () => clearTimeout(delay);
+  }, [buscaProfessor]);
 
     function selecionarProfessor(prof: Professor) {
         setProfessorAtual(prof);
@@ -199,29 +221,16 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
     }
 
     useEffect(() => {
-        if (buscaAluno.length > 0) {
-            const delay = setTimeout(() => fetchAlunos(buscaAluno), 300);
-            return () => clearTimeout(delay);
-        } else {
-            setAlunosEncontrados([]);
-        }
-    }, [buscaAluno, alunosNaTurma]);
-    
-    async function fetchAlunos(nome: string) {
-        try {
-            const response = await listarAlunos(nome);
-            const alunosArray = response.content || []; 
-
-            setAlunosEncontrados(
-                alunosArray
-                    .filter(a => !alunosNaTurma.some(aluno => aluno.pacienteId === a.id))
-                    .map(a => ({ id: a.id, nome: a.nome }))
-            );
-        } catch (error: any) {
-            toast.error("Erro ao buscar alunos: " + (error.message || ""));
-            setAlunosEncontrados([]);
-        }
-    }
+    const termo = buscaAluno.trim();
+    const delay = setTimeout(() => {
+      if (termo) {
+        void fetchAlunos(termo);
+      } else {
+        setAlunosEncontrados([]);
+      }
+    }, 300);
+    return () => clearTimeout(delay);
+  }, [buscaAluno, alunosNaTurma]);
     
     function adicionarAluno(aluno: AlunoAPI) {
         const alunoParaTurma: AlunoNaTurma = {
@@ -255,7 +264,7 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
 
         const idTurma = turmaData.id;
 
-        const dadosAtualizados: any = {
+        const dadosAtualizados: Partial<TurmaAPIData> & { alunosIds?: string[]; professorId?: string | null } = {
             tipo: formatTipo(tipo),
             turno: formatTurno(turno),
             ativa: turmaData.ativa,
@@ -290,8 +299,8 @@ export function EditarTurmaModal({ isOpen, onClose, turmaData, onSave }: EditarT
 
             onClose();
 
-        } catch (error: any) {
-            toast.error(error.message || "Erro ao salvar alterações da turma");
+        } catch (error: unknown) {
+            toast.error(apiError(error).message || "Erro ao salvar alterações da turma");
         }
     }
 

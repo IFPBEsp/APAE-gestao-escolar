@@ -1,4 +1,5 @@
 'use client';
+import type { HistoricoPresenca } from "@/types/api";
 
 import {
   Dialog,
@@ -14,9 +15,9 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   alunoNome: string;
-  historico: any[];
+  historico: HistoricoPresenca[];
   loading: boolean;
-  turma?: any;
+  turma?: { tipo?: string | null; ano?: number; anoCriacao?: number; turno?: string; nome?: string } | null;
 }
 
 export default function ModalHistoricoFrequencia({

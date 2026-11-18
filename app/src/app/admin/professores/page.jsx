@@ -15,10 +15,6 @@ export default function Professores() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    loadProfessores();
-  }, []);
-
   const loadProfessores = async () => {
     try {
       setLoading(true);
@@ -64,6 +60,7 @@ export default function Professores() {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {

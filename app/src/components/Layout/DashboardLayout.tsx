@@ -56,7 +56,7 @@ export default function DashboardLayout({
     };
 
     // Shared Menu Content
-    const MenuContent = ({ collapsed = false }: { collapsed?: boolean }) => (
+    const renderMenuContent = ({ collapsed = false }: { collapsed?: boolean }) => (
         <div className="flex h-full flex-col">
             {/* Header */}
             <div className={`
@@ -158,7 +158,7 @@ export default function DashboardLayout({
         fixed inset-y-0 left-0 z-50 w-64 bg-[#B2D7EC] rounded-r-3xl md:hidden overflow-hidden shadow-2xl transition-transform duration-300
         ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-                <MenuContent collapsed={false} />
+                {renderMenuContent({ collapsed: false })}
             </aside>
 
             {/* Desktop Sidebar (Static/Collapsible) */}
@@ -178,7 +178,7 @@ export default function DashboardLayout({
 
                 {/* Adjust margin to account for the toggle button being absolute */}
                 <div className="mt-8 flex-1 flex flex-col overflow-hidden">
-                    <MenuContent collapsed={isDesktopCollapsed} />
+                    {renderMenuContent({ collapsed: isDesktopCollapsed })}
                 </div>
             </aside>
 

@@ -1,4 +1,5 @@
 'use client'
+import { apiError } from "@/utils/apiError";
 
 import { useEffect, useState } from "react";
 import {
@@ -23,40 +24,16 @@ interface ModalEditarProfessorProps {
   onUpdate?: () => void;
 }
 
-export default function ModalEditarProfessor({
+function ProfessorEditor({
   isOpen,
   onClose,
   professor,
   onUpdate,
-}: ModalEditarProfessorProps) {
-  const enderecoVazio: Endereco = {
-    cidade: "",
-    cep: "",
-    estado: "",
-    bairro: "",
-    rua: "",
-    numero: "",
-    complemento: "",
-  };
-
-  const [formData, setFormData] = useState({
-    nome: "",
-    cpf: "",
-    email: "",
-    telefone: "",
-    endereco: enderecoVazio,
-    dataNascimento: "",
-    formacao: "",
-    dataContratacao: "",
-    ativo: true,
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+}: Omit<ModalEditarProfessorProps, "professor"> & { professor: Professor }) {
 
   const extrairData = (dataString?: string) => dataString ? dataString.split("T")[0] : "";
 
-  useEffect(() => {
-    if (!professor || !isOpen) return;
-    setFormData({
+  const [formData, setFormData] = useState({
       nome: professor.nome || "",
       cpf: professor.cpf || "",
       email: professor.email || "",
@@ -75,7 +52,8 @@ export default function ModalEditarProfessor({
       dataContratacao: extrairData(professor.dataContratacao),
       ativo: professor.ativo,
     });
-  }, [professor, isOpen]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   const applyCPFMask = (value: string) => {
     const numbers = value.replace(/\D/g, "");
@@ -122,8 +100,8 @@ export default function ModalEditarProfessor({
       toast.success("Professor atualizado com sucesso!");
       onUpdate?.();
       onClose();
-    } catch (error: any) {
-      toast.error(error.message || "Erro ao atualizar professor");
+    } catch (error: unknown) {
+      toast.error(apiError(error).message || "Erro ao atualizar professor");
     } finally {
       setIsSubmitting(false);
     }
@@ -136,8 +114,8 @@ export default function ModalEditarProfessor({
       toast.success("Professor reativado com sucesso!");
       onUpdate?.();
       onClose();
-    } catch (error: any) {
-      toast.error(error.message || "Erro ao reativar professor");
+    } catch (error: unknown) {
+      toast.error(apiError(error).message || "Erro ao reativar professor");
     } finally {
       setIsSubmitting(false);
     }
@@ -406,4 +384,9 @@ export default function ModalEditarProfessor({
       </DialogContent>
     </Dialog>
   );
+}
+
+export default function ModalEditarProfessor(props: ModalEditarProfessorProps) {
+  if (!props.isOpen || !props.professor) return null;
+  return <ProfessorEditor {...props} professor={props.professor} key={props.professor.id ?? "novo"} />;
 }

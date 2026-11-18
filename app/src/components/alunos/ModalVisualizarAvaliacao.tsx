@@ -1,3 +1,4 @@
+import type { AvaliacaoData } from "@/types/api";
 import {
     Dialog,
     DialogContent,
@@ -15,7 +16,7 @@ interface ModalVisualizarAvaliacaoProps {
     onClose: () => void;
     // O tipo 'any' foi mantido, mas as propriedades usadas agora são: 
     // dataAvaliacao, professorNome, turmaNomeCompleto
-    avaliacao: any; 
+    avaliacao: AvaliacaoData | null;
     alunoNome: string;
 }
 

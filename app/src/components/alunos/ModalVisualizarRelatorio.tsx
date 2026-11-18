@@ -1,4 +1,5 @@
 'use client'
+import type { RelatorioData } from "@/types/api";
 
 import {
   Dialog,
@@ -19,7 +20,7 @@ import { useImpressaoDocumento } from "@/components/impressao/useImpressaoDocume
 interface ModalVisualizarRelatorioProps {
   isOpen: boolean;
   onClose: () => void;
-  relatorio: any;
+  relatorio: RelatorioData | null;
   alunoNome?: string;
   alunoDataNascimento?: string;
   alunoTurma?: string;
@@ -33,12 +34,12 @@ export default function ModalVisualizarRelatorio({
   alunoDataNascimento,
   alunoTurma,
 }: ModalVisualizarRelatorioProps) {
-  if (!relatorio) return null;
-
   const { refImpressao, imprimir } = useImpressaoDocumento();
 
+  if (!relatorio) return null;
+
   const dataRelatorio = relatorio?.data
-    ? new Date(relatorio.data.split('/').reverse().join('-'))
+    ? relatorio.data instanceof Date ? relatorio.data : new Date(relatorio.data.split('/').reverse().join('-'))
     : new Date();
 
   const nomeAluno = alunoNome || relatorio.aluno || "Aluno";
@@ -130,10 +131,10 @@ export default function ModalVisualizarRelatorio({
             />
 
             <RelatorioIndividualConteudo
-              atividades={relatorio.atividades || relatorio.atividade}
-              habilidades={relatorio.habilidades}
-              estrategias={relatorio.estrategias}
-              recursos={relatorio.recursos}
+              atividades={relatorio.atividades || relatorio.atividade || ""}
+              habilidades={relatorio.habilidades ?? ""}
+              estrategias={relatorio.estrategias ?? ""}
+              recursos={relatorio.recursos ?? ""}
             />
           </TemplateImpressao>
         </div>

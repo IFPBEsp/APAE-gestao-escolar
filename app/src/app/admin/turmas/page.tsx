@@ -1,4 +1,6 @@
 "use client";
+import type { TurmaDetalhe } from "@/types/api";
+import { apiError } from "@/utils/apiError";
 
 import { useState, useEffect } from "react";
 import { Plus, Search, BookOpen} from "lucide-react";
@@ -12,13 +14,13 @@ import { useRouter } from "next/navigation";
 
 export default function GerenciarTurmasPage() {
   const router = useRouter();
-  const [turmas, setTurmas] = useState<any[]>([]);
+  const [turmas, setTurmas] = useState<TurmaDetalhe[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState<"listar-turmas" | "detalhes-turma">("listar-turmas");
-  const [selectedTurma, setSelectedTurma] = useState<any>(null);
+  const [selectedTurma, setSelectedTurma] = useState<TurmaDetalhe | null>(null);
   const [isEditarTurmaOpen, setIsEditarTurmaOpen] = useState(false);
-  const [turmaParaEditar, setTurmaParaEditar] = useState<any | null>(null);
+  const [turmaParaEditar, setTurmaParaEditar] = useState<TurmaDetalhe | null>(null);
 
   useEffect(() => {
     async function carregarTurmasComAlunos() {
@@ -28,8 +30,8 @@ export default function GerenciarTurmasPage() {
               const turmasData = await listarTurmas();
 
               setTurmas(turmasData);
-            } catch (error: any) {
-              toast.error(error.message || "Erro ao carregar turmas");
+            } catch (error: unknown) {
+              toast.error(apiError(error).message || "Erro ao carregar turmas");
             } finally {
               setLoading(false);
             }
@@ -47,7 +49,7 @@ export default function GerenciarTurmasPage() {
       return a.nome.localeCompare(b.nome);
     });
 
-  const handleCardClick = (turma: any) => {
+  const handleCardClick = (turma: TurmaDetalhe) => {
     setSelectedTurma(turma);
     setCurrentPage("detalhes-turma");
   };
@@ -68,13 +70,13 @@ export default function GerenciarTurmasPage() {
       const turmaCompleta = await buscarTurmaPorId(selectedTurma.id);
       setTurmaParaEditar(turmaCompleta);
       setIsEditarTurmaOpen(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro ao carregar dados da turma para edição:", error);
-      toast.error(error.message || "Erro ao carregar dados completos da turma.");
+      toast.error(apiError(error).message || "Erro ao carregar dados completos da turma.");
     }
   };
 
-  const handleUpdateTurma = async (updatedTurma: any) => {
+  const handleUpdateTurma = async (updatedTurma: TurmaDetalhe) => {
     try {
       // Recarrega todas as turmas para garantir contadores e dados agregados atualizados
       const todasTurmas = await listarTurmas();
@@ -83,13 +85,13 @@ export default function GerenciarTurmasPage() {
       const turmaAtualizadaLista = todasTurmas.find(t => t.id === updatedTurma.id) || updatedTurma;
       setSelectedTurma(turmaAtualizadaLista);
       setTurmaParaEditar(turmaAtualizadaLista);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro ao atualizar lista de turmas após edição:", error);
-      toast.error(error.message || "Erro ao atualizar lista de turmas.");
+      toast.error(apiError(error).message || "Erro ao atualizar lista de turmas.");
     }
   };
 
-  const handleInactivateTurma = async (turmaAtualizada?: any) => {
+  const handleInactivateTurma = async (turmaAtualizada?: TurmaDetalhe) => {
     if (turmaAtualizada) {
       setSelectedTurma(turmaAtualizada);
       const updatedList = turmas.map(t => t.id === turmaAtualizada.id ? turmaAtualizada : t);
