@@ -1,0 +1,5 @@
+# CVE-2026-47884: Falha em XsltView no spring-webmvc. A aplicacao e uma API REST JSON e nao utiliza renderizacao de templates via XsltView. Correcao disponivel apenas na linha 7.x (Spring Boot 4.x).
+CVE-2026-47884
+
+# CVE-2026-47890: Falha em Server-Sent Events (SSE) com view rendering no spring-webmvc. A aplicacao nao utiliza SSE associado a views. Correcao disponivel apenas na linha 7.x (Spring Boot 4.x).
+CVE-2026-47890
