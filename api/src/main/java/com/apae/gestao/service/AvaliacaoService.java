@@ -29,6 +29,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AvaliacaoService {
 
+    private static final String ALUNO_NAO_ENCONTRADO = "Aluno não encontrado";
+    private static final String PROFESSOR_NAO_ENCONTRADO = "Professor não encontrado";
+
     private final AvaliacaoRepository avaliacaoRepository;
     private final AlunoViewRepository alunoRepository;
     private final ProfessorRepository professorRepository;
@@ -38,7 +41,7 @@ public class AvaliacaoService {
     @Transactional
     public AvaliacaoResponseDTO criar(AvaliacaoRequestDTO dto) {
         alunoRepository.findById(dto.getAlunoId())
-                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException(ALUNO_NAO_ENCONTRADO));
         Professor professor = obterProfessorAutenticado();
         validarVinculoProfessorComAluno(professor, dto.getAlunoId());
 
@@ -82,7 +85,7 @@ public class AvaliacaoService {
     @Transactional(readOnly = true)
     public List<AvaliacaoResponseDTO> listarPorAluno(UUID alunoId) {
         alunoRepository.findById(alunoId)
-                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException(ALUNO_NAO_ENCONTRADO));
         if (isProfessorAutenticado()) {
             Professor professor = obterProfessorAutenticado();
             List<Avaliacao> avaliacoes = isAlunoVinculadoAoProfessor(alunoId, professor.getId())
@@ -107,7 +110,7 @@ public class AvaliacaoService {
             }
         }
         Professor professor = professorRepository.findById(professorId)
-                .orElseThrow(() -> new EntityNotFoundException("Professor não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException(PROFESSOR_NAO_ENCONTRADO));
         return avaliacaoRepository.findByProfessorOrderByDataAvaliacaoDesc(professor)
                 .stream()
                 .map(this::toResponse)
@@ -124,7 +127,7 @@ public class AvaliacaoService {
         validarVinculoProfessorComAluno(professor, avaliacao.getPacienteId());
 
         alunoRepository.findById(dto.getAlunoId())
-                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException(ALUNO_NAO_ENCONTRADO));
         validarVinculoProfessorComAluno(professor, dto.getAlunoId());
 
         avaliacao.setDescricao(dto.getDescricao());
@@ -150,9 +153,9 @@ public class AvaliacaoService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não autenticado");
         }
         Usuario usuario = usuarioRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new EntityNotFoundException("Professor não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException(PROFESSOR_NAO_ENCONTRADO));
         return professorRepository.findByUsuarioId(usuario.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Professor não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException(PROFESSOR_NAO_ENCONTRADO));
     }
 
     private boolean isProfessorAutenticado() {
