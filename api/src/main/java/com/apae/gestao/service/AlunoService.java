@@ -143,15 +143,19 @@ public class AlunoService {
             return;
         }
         Professor professor = obterProfessorAutenticado();
-        boolean vinculado = turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)
+        boolean vinculado = isAlunoVinculadoAoProfessor(alunoId, professor.getId());
+        if (!vinculado) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Professor não possui vínculo com este aluno");
+        }
+    }
+
+    private boolean isAlunoVinculadoAoProfessor(UUID alunoId, UUID professorId) {
+        return turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)
                 .stream()
                 .map(TurmaAluno::getTurma)
                 .anyMatch(turma -> turma != null
                         && turma.getProfessor() != null
-                        && professor.getId().equals(turma.getProfessor().getId()));
-        if (!vinculado) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Professor não possui vínculo com este aluno");
-        }
+                        && professorId.equals(turma.getProfessor().getId()));
     }
 
     private Professor obterProfessorAutenticado() {
