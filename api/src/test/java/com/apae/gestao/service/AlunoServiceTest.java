@@ -14,9 +14,11 @@ import com.apae.gestao.entity.TurmaAluno;
 import com.apae.gestao.entity.Usuario;
 import com.apae.gestao.repository.AlunoViewRepository;
 import com.apae.gestao.repository.AvaliacaoRepository;
+import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.TurmaRepository;
 import com.apae.gestao.repository.UsuarioRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,6 +33,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -62,6 +67,9 @@ class AlunoServiceTest {
 
     @Mock
     private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private ProfessorRepository professorRepository;
 
     @InjectMocks
     private AlunoService alunoService;
@@ -135,6 +143,25 @@ class AlunoServiceTest {
                 .descricao("Avaliação pedagógica semestral")
                 .dataAvaliacao(LocalDateTime.now())
                 .build();
+    }
+
+    @AfterEach
+    void limparContextoDeSeguranca() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private void autenticarComoProfessor() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "professor@teste.local",
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_TEACHER"))
+                )
+        );
+        when(usuarioRepository.findByEmail("professor@teste.local"))
+                .thenReturn(Optional.of(usuarioProfessor));
+        when(professorRepository.findByUsuarioId(any()))
+                .thenReturn(Optional.of(professor));
     }
 
     @Nested
