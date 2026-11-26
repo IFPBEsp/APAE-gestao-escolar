@@ -615,6 +615,34 @@ class AlunoServiceTest {
 
             assertThat(resultado).isEmpty();
         }
+
+        @Test
+        @DisplayName("Deve retornar todas as avaliações quando o usuário autenticado é administrador")
+        void deveRetornarTodasAvaliacoesQuandoAdministrador() {
+
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken(
+                            "admin@teste.local",
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                    )
+            );
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId))
+                    .thenReturn(List.of(vinculoAtivo));
+            when(avaliacaoRepository.findByPacienteIdOrderByDataAvaliacaoDesc(alunoId))
+                    .thenReturn(List.of(avaliacao));
+            when(usuarioRepository.findById(professorUsuarioId))
+                    .thenReturn(Optional.of(usuarioProfessor));
+
+            List<AvaliacaoHistoricoResponseDTO> resultado =
+                    alunoService.buscarAvaliacoesPorAlunoId(alunoId);
+
+            assertThat(resultado).hasSize(1);
+            verify(avaliacaoRepository, never())
+                    .findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(any(), any());
+            verifyNoInteractions(professorRepository);
+        }
     }
 
     @Nested
