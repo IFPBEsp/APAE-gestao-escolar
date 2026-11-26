@@ -569,6 +569,32 @@ class AlunoServiceTest {
             verify(avaliacaoRepository, never())
                     .findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(any(), any());
         }
+
+        @Test
+        @DisplayName("Deve retornar somente as avaliações do próprio professor quando ele não possui vínculo ativo com o aluno")
+        void deveRetornarSomenteAvaliacoesDoProfessorQuandoSemVinculo() {
+
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            turmaAtiva.setProfessor(outroProfessor);
+            autenticarComoProfessor();
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId))
+                    .thenReturn(List.of(vinculoAtivo));
+            when(avaliacaoRepository.findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(alunoId, professor))
+                    .thenReturn(List.of(avaliacao));
+            when(usuarioRepository.findById(professorUsuarioId))
+                    .thenReturn(Optional.of(usuarioProfessor));
+
+            List<AvaliacaoHistoricoResponseDTO> resultado =
+                    alunoService.buscarAvaliacoesPorAlunoId(alunoId);
+
+            assertThat(resultado).hasSize(1);
+            assertThat(resultado.get(0).getProfessorNome()).isEqualTo("Prof. João Silva");
+            verify(avaliacaoRepository)
+                    .findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(alunoId, professor);
+            verify(avaliacaoRepository, never()).findByPacienteIdOrderByDataAvaliacaoDesc(alunoId);
+        }
     }
 
     @Nested
