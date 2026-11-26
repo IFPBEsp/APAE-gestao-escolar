@@ -595,6 +595,26 @@ class AlunoServiceTest {
                     .findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(alunoId, professor);
             verify(avaliacaoRepository, never()).findByPacienteIdOrderByDataAvaliacaoDesc(alunoId);
         }
+
+        @Test
+        @DisplayName("Deve retornar lista vazia quando professor sem vínculo ativo não possui avaliações do aluno")
+        void deveRetornarListaVaziaQuandoProfessorSemVinculoESemAvaliacoes() {
+
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            turmaAtiva.setProfessor(outroProfessor);
+            autenticarComoProfessor();
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId))
+                    .thenReturn(List.of(vinculoAtivo));
+            when(avaliacaoRepository.findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(alunoId, professor))
+                    .thenReturn(List.of());
+
+            List<AvaliacaoHistoricoResponseDTO> resultado =
+                    alunoService.buscarAvaliacoesPorAlunoId(alunoId);
+
+            assertThat(resultado).isEmpty();
+        }
     }
 
     @Nested
