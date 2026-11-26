@@ -546,6 +546,29 @@ class AlunoServiceTest {
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Aluno não encontrado");
         }
+
+        @Test
+        @DisplayName("Deve retornar todas as avaliações quando professor autenticado possui vínculo ativo com o aluno")
+        void deveRetornarTodasAvaliacoesQuandoProfessorVinculado() {
+
+            turmaAtiva.setProfessor(professor);
+            autenticarComoProfessor();
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId))
+                    .thenReturn(List.of(vinculoAtivo));
+            when(avaliacaoRepository.findByPacienteIdOrderByDataAvaliacaoDesc(alunoId))
+                    .thenReturn(List.of(avaliacao));
+            when(usuarioRepository.findById(professorUsuarioId))
+                    .thenReturn(Optional.of(usuarioProfessor));
+
+            List<AvaliacaoHistoricoResponseDTO> resultado =
+                    alunoService.buscarAvaliacoesPorAlunoId(alunoId);
+
+            assertThat(resultado).hasSize(1);
+            verify(avaliacaoRepository).findByPacienteIdOrderByDataAvaliacaoDesc(alunoId);
+            verify(avaliacaoRepository, never())
+                    .findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(any(), any());
+        }
     }
 
     @Nested
