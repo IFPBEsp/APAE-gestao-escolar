@@ -33,6 +33,7 @@
 		<sonar.host.url>http://localhost:9500</sonar.host.url>
 		<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 		<sonar.coverage.exclusions>**/dto/**,**/entity/**,**/config/**,**/openapi/**,**/*Application.java</sonar.coverage.exclusions>
+                <testcontainers.version>1.21.4</testcontainers.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -122,6 +123,11 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
+                <dependency>
+                        <groupId>org.testcontainers</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <scope>test</scope>
+                </dependency>
 	</dependencies>
 
 	<build>
