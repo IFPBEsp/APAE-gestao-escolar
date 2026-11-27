@@ -14,9 +14,11 @@ import com.apae.gestao.entity.TurmaAluno;
 import com.apae.gestao.entity.Usuario;
 import com.apae.gestao.repository.AlunoViewRepository;
 import com.apae.gestao.repository.AvaliacaoRepository;
+import com.apae.gestao.repository.ProfessorRepository;
 import com.apae.gestao.repository.TurmaAlunoRepository;
 import com.apae.gestao.repository.TurmaRepository;
 import com.apae.gestao.repository.UsuarioRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,6 +33,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -62,6 +67,9 @@ class AlunoServiceTest {
 
     @Mock
     private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private ProfessorRepository professorRepository;
 
     @InjectMocks
     private AlunoService alunoService;
@@ -135,6 +143,25 @@ class AlunoServiceTest {
                 .descricao("Avaliação pedagógica semestral")
                 .dataAvaliacao(LocalDateTime.now())
                 .build();
+    }
+
+    @AfterEach
+    void limparContextoDeSeguranca() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private void autenticarComoProfessor() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "professor@teste.local",
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_TEACHER"))
+                )
+        );
+        when(usuarioRepository.findByEmail("professor@teste.local"))
+                .thenReturn(Optional.of(usuarioProfessor));
+        when(professorRepository.findByUsuarioId(any()))
+                .thenReturn(Optional.of(professor));
     }
 
     @Nested
@@ -518,6 +545,103 @@ class AlunoServiceTest {
             assertThatThrownBy(() -> alunoService.buscarAvaliacoesPorAlunoId(idInexistente))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Aluno não encontrado");
+        }
+
+        @Test
+        @DisplayName("Deve retornar todas as avaliações quando professor autenticado possui vínculo ativo com o aluno")
+        void deveRetornarTodasAvaliacoesQuandoProfessorVinculado() {
+
+            turmaAtiva.setProfessor(professor);
+            autenticarComoProfessor();
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId))
+                    .thenReturn(List.of(vinculoAtivo));
+            when(avaliacaoRepository.findByPacienteIdOrderByDataAvaliacaoDesc(alunoId))
+                    .thenReturn(List.of(avaliacao));
+            when(usuarioRepository.findById(professorUsuarioId))
+                    .thenReturn(Optional.of(usuarioProfessor));
+
+            List<AvaliacaoHistoricoResponseDTO> resultado =
+                    alunoService.buscarAvaliacoesPorAlunoId(alunoId);
+
+            assertThat(resultado).hasSize(1);
+            verify(avaliacaoRepository).findByPacienteIdOrderByDataAvaliacaoDesc(alunoId);
+            verify(avaliacaoRepository, never())
+                    .findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(any(), any());
+        }
+
+        @Test
+        @DisplayName("Deve retornar somente as avaliações do próprio professor quando ele não possui vínculo ativo com o aluno")
+        void deveRetornarSomenteAvaliacoesDoProfessorQuandoSemVinculo() {
+
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            turmaAtiva.setProfessor(outroProfessor);
+            autenticarComoProfessor();
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId))
+                    .thenReturn(List.of(vinculoAtivo));
+            when(avaliacaoRepository.findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(alunoId, professor))
+                    .thenReturn(List.of(avaliacao));
+            when(usuarioRepository.findById(professorUsuarioId))
+                    .thenReturn(Optional.of(usuarioProfessor));
+
+            List<AvaliacaoHistoricoResponseDTO> resultado =
+                    alunoService.buscarAvaliacoesPorAlunoId(alunoId);
+
+            assertThat(resultado).hasSize(1);
+            assertThat(resultado.get(0).getProfessorNome()).isEqualTo("Prof. João Silva");
+            verify(avaliacaoRepository)
+                    .findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(alunoId, professor);
+            verify(avaliacaoRepository, never()).findByPacienteIdOrderByDataAvaliacaoDesc(alunoId);
+        }
+
+        @Test
+        @DisplayName("Deve retornar lista vazia quando professor sem vínculo ativo não possui avaliações do aluno")
+        void deveRetornarListaVaziaQuandoProfessorSemVinculoESemAvaliacoes() {
+
+            Professor outroProfessor = new Professor();
+            outroProfessor.setId(UUID.randomUUID());
+            turmaAtiva.setProfessor(outroProfessor);
+            autenticarComoProfessor();
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId))
+                    .thenReturn(List.of(vinculoAtivo));
+            when(avaliacaoRepository.findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(alunoId, professor))
+                    .thenReturn(List.of());
+
+            List<AvaliacaoHistoricoResponseDTO> resultado =
+                    alunoService.buscarAvaliacoesPorAlunoId(alunoId);
+
+            assertThat(resultado).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Deve retornar todas as avaliações quando o usuário autenticado é administrador")
+        void deveRetornarTodasAvaliacoesQuandoAdministrador() {
+
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken(
+                            "admin@teste.local",
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                    )
+            );
+            when(alunoRepository.findById(alunoId)).thenReturn(Optional.of(alunoView));
+            when(turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId))
+                    .thenReturn(List.of(vinculoAtivo));
+            when(avaliacaoRepository.findByPacienteIdOrderByDataAvaliacaoDesc(alunoId))
+                    .thenReturn(List.of(avaliacao));
+            when(usuarioRepository.findById(professorUsuarioId))
+                    .thenReturn(Optional.of(usuarioProfessor));
+
+            List<AvaliacaoHistoricoResponseDTO> resultado =
+                    alunoService.buscarAvaliacoesPorAlunoId(alunoId);
+
+            assertThat(resultado).hasSize(1);
+            verify(avaliacaoRepository, never())
+                    .findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(any(), any());
+            verifyNoInteractions(professorRepository);
         }
     }
 

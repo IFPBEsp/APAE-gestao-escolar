@@ -7,6 +7,7 @@ import com.apae.gestao.dto.aluno.AlunoTurmaHistoricoResponseDTO;
 import com.apae.gestao.dto.aluno.AlunoTurmaRequestDTO;
 import com.apae.gestao.dto.avaliacao.AvaliacaoHistoricoResponseDTO;
 import com.apae.gestao.entity.AlunoView;
+import com.apae.gestao.entity.Avaliacao;
 import com.apae.gestao.entity.Professor;
 import com.apae.gestao.entity.Turma;
 import com.apae.gestao.entity.TurmaAluno;
@@ -110,10 +111,9 @@ public class AlunoService {
     @Transactional(readOnly = true)
     public List<AvaliacaoHistoricoResponseDTO> buscarAvaliacoesPorAlunoId(UUID id) {
         buscarAluno(id);
-        validarAcessoProfessorAoAluno(id);
         String turmaAtual = turmaAtual(id) != null ? turmaAtual(id).getNome() : "Sem turma ativa";
 
-        return avaliacaoRepository.findByPacienteIdOrderByDataAvaliacaoDesc(id)
+        return buscarAvaliacoesVisiveis(id)
                 .stream()
                 .map(avaliacao -> AvaliacaoHistoricoResponseDTO.fromEntity(
                         avaliacao,
@@ -143,15 +143,29 @@ public class AlunoService {
             return;
         }
         Professor professor = obterProfessorAutenticado();
-        boolean vinculado = turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)
+        boolean vinculado = isAlunoVinculadoAoProfessor(alunoId, professor.getId());
+        if (!vinculado) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Professor não possui vínculo com este aluno");
+        }
+    }
+
+    private boolean isAlunoVinculadoAoProfessor(UUID alunoId, UUID professorId) {
+        return turmaAlunoRepository.findAllByPacienteIdAndAtivoTrue(alunoId)
                 .stream()
                 .map(TurmaAluno::getTurma)
                 .anyMatch(turma -> turma != null
                         && turma.getProfessor() != null
-                        && professor.getId().equals(turma.getProfessor().getId()));
-        if (!vinculado) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Professor não possui vínculo com este aluno");
+                        && professorId.equals(turma.getProfessor().getId()));
+    }
+
+    private List<Avaliacao> buscarAvaliacoesVisiveis(UUID alunoId) {
+        if (isProfessorAutenticado()) {
+            Professor professor = obterProfessorAutenticado();
+            return isAlunoVinculadoAoProfessor(alunoId, professor.getId())
+                    ? avaliacaoRepository.findByPacienteIdOrderByDataAvaliacaoDesc(alunoId)
+                    : avaliacaoRepository.findByPacienteIdAndProfessorOrderByDataAvaliacaoDesc(alunoId, professor);
         }
+        return avaliacaoRepository.findByPacienteIdOrderByDataAvaliacaoDesc(alunoId);
     }
 
     private Professor obterProfessorAutenticado() {
